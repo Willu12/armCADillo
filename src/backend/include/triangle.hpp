@@ -23,12 +23,8 @@ public:
   }
 
   Triangle()
-      : shader("/home/borys/CadCam/mkwmg/armCADillo/src/backend/include/"
-               "vertexShader.hlsl",
-               "/home/borys/CadCam/mkwmg/armCADillo/src/backend/include/"
-               "fragmentShader.hlsl") {
-    // createSharders();
-    // shaderProgram =
+      : shader("../shaders/vertexShader.hlsl",
+               "../shaders/fragmentShader.hlsl") {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
