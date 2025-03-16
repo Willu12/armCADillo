@@ -10,6 +10,7 @@ add_library(imgui
 
 add_subdirectory(glfw)
 add_subdirectory(algebra)
+add_subdirectory(glad)
 
 target_include_directories(imgui PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/imgui

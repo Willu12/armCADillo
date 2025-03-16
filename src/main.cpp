@@ -1,6 +1,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "triangle.hpp"
+#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
@@ -27,6 +30,13 @@ int main(int, char **) {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
 
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    fprintf(stderr, "Failed to initialize GLAD\n");
+    return 1;
+  }
+
+  Triangle sampleTriangle;
+
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -41,9 +51,6 @@ int main(int, char **) {
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __EMSCRIPTEN__
-  ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
-#endif
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   bool show_demo_window = false;
@@ -72,6 +79,8 @@ int main(int, char **) {
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
+    sampleTriangle.draw();
+
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
