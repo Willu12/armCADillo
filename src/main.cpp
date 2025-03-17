@@ -5,6 +5,8 @@
 #include "triangle.hpp"
 #include <glad/glad.h>
 
+#include "torus.hpp"
+
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 

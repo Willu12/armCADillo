@@ -6,11 +6,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(external)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/frontend/src/mesh.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/backend/include/
     src/frontend/include/
+    src/backend/entities/
 )
 
 target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl )
