@@ -5,7 +5,9 @@
 #include "triangle.hpp"
 #include <glad/glad.h>
 
-#include "torus.hpp"
+#include "camera.hpp"
+
+#include "torusModel.hpp"
 
 #include <GLFW/glfw3.h>
 #include <stdio.h>
@@ -39,6 +41,16 @@ int main(int, char **) {
   }
 
   Triangle sampleTriangle;
+  TorusModel torusModel(0.4f, 0.1f);
+
+  Shader shader("../shaders/vertexShader.hlsl",
+                "../shaders/fragmentShader.hlsl");
+
+  Camera camera;
+
+  shader.setMat4f("viewMatrix", camera.viewMatrix());
+
+  auto torusMesh = torusModel.generateMesh(shader);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -83,6 +95,7 @@ int main(int, char **) {
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     sampleTriangle.draw();
+    // torusMesh.draw();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

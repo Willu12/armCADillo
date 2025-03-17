@@ -7,8 +7,10 @@ struct MeshDensity {
   unsigned int t = 10;
 };
 
-class Torus {
+class TorusModel {
 public:
+  TorusModel(float innerRadius, float tubeRadius)
+      : _torus(innerRadius, tubeRadius) {}
   Mesh generateMesh(const Shader &shader) {
     auto vertices = generateVertices();
     auto indices = generateIndices();
@@ -25,15 +27,16 @@ private:
   std::vector<float> generateVertices() {
     std::vector<float> vertices;
     for (int i = 0; i < _meshDensity.s; ++i) {
-      const float theta =
-          i * (2.0f * M_PI / static_cast<float>(_meshDensity.s));
+      float theta = i * (2.0f * M_PI / static_cast<float>(_meshDensity.s));
       for (int j = 0; j < _meshDensity.t; ++j) {
-        const float phi =
-            j * (2.0f * M_PI / static_cast<float>(_meshDensity.t));
+        float phi = j * (2.0f * M_PI / static_cast<float>(_meshDensity.t));
+
         const auto position = _torus.getPosition(theta, phi).toVector();
+
         vertices.insert(vertices.end(), position.begin(), position.end());
       }
     }
+    return vertices;
   }
   std::vector<unsigned int> generateIndices() {
     std::vector<unsigned int> indices;
@@ -49,5 +52,6 @@ private:
         indices.push_back(down);
       }
     }
+    return indices;
   }
 };

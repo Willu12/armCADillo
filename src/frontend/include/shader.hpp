@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad/glad.h"
+#include "matrix.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -19,6 +20,11 @@ public:
     auto fragmentShader =
         createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
     _id = createProgram({vertexShader, fragmentShader});
+  }
+
+  void setMat4f(const std::string &name, const algebra::Mat4f &mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE,
+                       &mat(0, 0));
   }
 
 private:

@@ -5,9 +5,13 @@
 
 class Triangle {
 public:
-  std::array<float, 9> vertices = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f,
-                                   0.0f,  0.0f,  0.5f, 0.0f};
-  std::array<unsigned int, 6> indices = {0, 1, 2, 1, 2, 3};
+  std::array<float, 12> vertices = {
+      0.5f,  0.5f,  0.0f, // top right
+      0.5f,  -0.5f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, // bottom left
+      -0.5f, 0.5f,  0.0f  // top left
+  };
+  std::array<unsigned int, 6> indices = {0, 1, 3, 1, 2, 3};
   unsigned int VAO, VBO, EBO;
   Shader shader;
 
