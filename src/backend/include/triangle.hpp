@@ -5,13 +5,27 @@
 
 class Triangle {
 public:
-  std::array<float, 12> vertices = {
-      0.5f,  0.5f,  0.0f, // top right
-      0.5f,  -0.5f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f  // top left
-  };
-  std::array<unsigned int, 6> indices = {0, 1, 3, 1, 2, 3};
+  std::array<float, 24> vertices = {
+      // Front face
+      -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
+      0.5f,
+
+      // Back face
+      -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f,
+      -0.5f};
+  std::array<unsigned int, 36> indices = {
+      // Front edges
+      0, 1, 2, 2, 3, 0,
+      // right
+      1, 5, 6, 6, 2, 1,
+
+      // up
+      2, 6, 7, 7, 3, 2,
+
+      // Left edges
+      7, 1, 5, 5, 4, 0,
+
+      0, 4, 7, 7, 3, 0, 4, 5, 6, 6, 7, 4};
   unsigned int VAO, VBO, EBO;
   Shader shader;
 
@@ -21,7 +35,7 @@ public:
         VAO); // seeing as we only have a single VAO there's no need to bind it
               // every time, but we'll do so to keep things a bit more organized
     // glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
   }
 
   Triangle()

@@ -1,7 +1,9 @@
 #pragma once
 
+#include "camera.hpp"
 #include "glad/glad.h"
 #include "matrix.hpp"
+#include "transformations.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +12,17 @@
 
 class Shader {
 public:
-  void use() { glUseProgram(_id); }
+  void use() {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glUseProgram(_id);
+    // auto rotationMatrix =
+    // algebra::transformations::rotationZMatrix<float>(0.3);
+    Camera camera;
+    //  auto scaleMatrix = algebra::transformations::scaleMatrix(2.f, 2.f, 2.f);
+    auto projectionMatrix =
+        algebra::transformations::projection(0.523599f, 1.f, 0.1f, 100.f);
+    this->setMat4f("viewMatrix", projectionMatrix * camera.viewMatrix());
+  }
   Shader(const std::string &vertexPath, const std::string &fragmentPath) {
 
     std::string vertexShaderSource = readShaderFromFile(vertexPath);

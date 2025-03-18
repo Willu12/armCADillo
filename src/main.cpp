@@ -47,8 +47,9 @@ int main(int, char **) {
                 "../shaders/fragmentShader.hlsl");
 
   Camera camera;
+  auto rotationMatrix = algebra::transformations::rotationZMatrix<float>(0.3);
 
-  shader.setMat4f("viewMatrix", camera.viewMatrix());
+  shader.setMat4f("viewMatrix", rotationMatrix);
 
   auto torusMesh = torusModel.generateMesh(shader);
 
