@@ -7,25 +7,32 @@ class Triangle {
 public:
   std::array<float, 24> vertices = {
       // Front face
-      -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
-      0.5f,
+      -0.2f, -0.3f, 0.5f,
+
+      0.2f, -0.3f, 0.5f,
+
+      0.2f, 0.3f, 0.5f,
+
+      -0.2f, 0.3f, 0.5f,
 
       // Back face
       -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f,
       -0.5f};
-  std::array<unsigned int, 36> indices = {
+  std::array<unsigned int, 48> indices = {
       // Front edges
-      0, 1, 2, 2, 3, 0,
+      0, 1, 1, 2, 2, 3, 3, 0,
       // right
-      1, 5, 6, 6, 2, 1,
+      1, 5, 5, 6, 6, 2, 2, 1,
 
       // up
-      2, 6, 7, 7, 3, 2,
+      2, 6, 6, 7, 7, 3, 3, 2,
 
       // Left edges
-      7, 1, 5, 5, 4, 0,
+      4, 5, 5, 6, 6, 7, 7, 4,
 
-      0, 4, 7, 7, 3, 0, 4, 5, 6, 6, 7, 4};
+      0, 4, 4, 7, 7, 3, 3, 0,
+
+      0, 1, 1, 5, 5, 4, 4, 0};
   unsigned int VAO, VBO, EBO;
   Shader shader;
 
@@ -35,7 +42,7 @@ public:
         VAO); // seeing as we only have a single VAO there's no need to bind it
               // every time, but we'll do so to keep things a bit more organized
     // glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
   }
 
   Triangle()

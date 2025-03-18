@@ -41,7 +41,7 @@ int main(int, char **) {
   }
 
   Triangle sampleTriangle;
-  TorusModel torusModel(0.4f, 0.1f);
+  TorusModel torusModel(2.f, 1.0f);
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");

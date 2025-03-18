@@ -13,15 +13,16 @@
 class Shader {
 public:
   void use() {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glUseProgram(_id);
-    // auto rotationMatrix =
-    // algebra::transformations::rotationZMatrix<float>(0.3);
+    auto rotationMatrix = algebra::Mat4f::Identity();
     Camera camera;
     //  auto scaleMatrix = algebra::transformations::scaleMatrix(2.f, 2.f, 2.f);
     auto projectionMatrix =
-        algebra::transformations::projection(0.523599f, 1.f, 0.1f, 100.f);
-    this->setMat4f("viewMatrix", projectionMatrix * camera.viewMatrix());
+        algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f);
+    this->setMat4f("view", camera.viewMatrix());
+    this->setMat4f("projection", projectionMatrix);
+    this->setMat4f("model", rotationMatrix);
   }
   Shader(const std::string &vertexPath, const std::string &fragmentPath) {
 
