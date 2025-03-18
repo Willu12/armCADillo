@@ -1,11 +1,12 @@
 #pragma once
+#include "mesh.hpp"
 #include "shader.hpp"
 #include <array>
 #include <glad/glad.h>
 
 class Triangle {
 public:
-  std::array<float, 24> vertices = {
+  std::vector<float> vertices = {
       // Front face
       -0.2f, -0.3f, 0.5f,
 
@@ -18,7 +19,7 @@ public:
       // Back face
       -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f,
       -0.5f};
-  std::array<unsigned int, 48> indices = {
+  std::vector<unsigned int> indices = {
       // Front edges
       0, 1, 1, 2, 2, 3, 3, 0,
       // right
@@ -34,9 +35,13 @@ public:
 
       0, 1, 1, 5, 5, 4, 4, 0};
   unsigned int VAO, VBO, EBO;
-  Shader shader;
+  // Shader shader;;
+  // Shader shader;
 
-  void draw() {
+  void draw(Shader &shader) {
+    // Mesh mesh = Mesh(vertices, indices, shader);
+    // mesh.draw();
+
     shader.use();
     glBindVertexArray(
         VAO); // seeing as we only have a single VAO there's no need to bind it
@@ -45,9 +50,7 @@ public:
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
   }
 
-  Triangle()
-      : shader("../shaders/vertexShader.hlsl",
-               "../shaders/fragmentShader.hlsl") {
+  Triangle() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -55,12 +58,12 @@ public:
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float),
+                 vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(float),
+                 indices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);

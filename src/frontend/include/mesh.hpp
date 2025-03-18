@@ -6,7 +6,7 @@
 class Mesh {
 public:
   Mesh(const std::vector<float> &vertices,
-       const std::vector<unsigned int> &_indices, const Shader &shader)
+       const std::vector<unsigned int> &_indices, Shader &shader)
       : _vertices(vertices), _indices(_indices), _shader(shader) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -15,11 +15,12 @@ public:
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), _vertices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(float),
+                 _vertices.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), _indices.data(),
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 _indices.size() * sizeof(unsigned int), _indices.data(),
                  GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),

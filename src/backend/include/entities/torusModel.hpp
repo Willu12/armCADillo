@@ -11,7 +11,7 @@ class TorusModel {
 public:
   TorusModel(float innerRadius, float tubeRadius)
       : _torus(innerRadius, tubeRadius) {}
-  Mesh generateMesh(const Shader &shader) {
+  Mesh generateMesh(Shader &shader) {
     auto vertices = generateVertices();
     auto indices = generateIndices(vertices);
 
@@ -51,15 +51,14 @@ private:
         int right = j + ((i + 1) % _meshDensity.s) * _meshDensity.t;
         int down = i * _meshDensity.t + (j + 1) % _meshDensity.t;
 
-        printf("([%f, %f, %f], [%f, %f, %f]),\n", vertices[current * 3],
-               vertices[current * 3 + 1], vertices[current * 3 + 2],
-               vertices[down * 3], vertices[down * 3 + 1],
-               vertices[down * 3 + 2]); //, current, down);
+        /* printf("([%f, %f, %f], [%f, %f, %f]),\n", vertices[current * 3],
+                vertices[current * 3 + 1], vertices[current * 3 + 2],
+                vertices[down * 3], vertices[down * 3 + 1],
+                vertices[down * 3 + 2]); //, current, down); */
         indices.push_back(current);
         indices.push_back(down);
-        // indices.push_back(current);
-
-        // indices.push_back(down);
+        indices.push_back(current);
+        indices.push_back(right);
       }
     }
     return indices;

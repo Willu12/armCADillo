@@ -15,7 +15,7 @@ public:
   void use() {
     //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glUseProgram(_id);
-    auto rotationMatrix = algebra::transformations::rotationXMatrix(1.5f);
+    auto rotationMatrix = algebra::transformations::rotationYMatrix(1.5f);
     Camera camera;
     //  auto scaleMatrix = algebra::transformations::scaleMatrix(2.f, 2.f, 2.f);
     auto projectionMatrix =
