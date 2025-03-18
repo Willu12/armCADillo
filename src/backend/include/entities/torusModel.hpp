@@ -3,8 +3,8 @@
 #include "mesh.hpp"
 
 struct MeshDensity {
-  unsigned int s = 8;
-  unsigned int t = 8;
+  int s = 20;
+  int t = 20;
 };
 
 class TorusModel {
@@ -17,6 +17,10 @@ public:
 
     return Mesh(vertices, indices, shader);
   }
+  float &getInnerRadius() { return _torus.getInnerRadius(); }
+  float &getTubeRadius() { return _torus.getTubeRadius(); }
+
+  MeshDensity &getMeshDensity() { return _meshDensity; }
 
 private:
   algebra::Torus<float> _torus;

@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 
 #include "camera.hpp"
+#include "imguiDisplay.hpp"
 
 #include "torusModel.hpp"
 
@@ -47,9 +48,6 @@ int main(int, char **) {
                 "../shaders/fragmentShader.hlsl");
 
   Camera camera;
-  auto rotationMatrix = algebra::transformations::rotationZMatrix<float>(0.3);
-
-  shader.setMat4f("viewMatrix", rotationMatrix);
 
   auto torusMesh = torusModel.generateMesh(shader);
 
