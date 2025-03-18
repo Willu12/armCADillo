@@ -15,12 +15,13 @@ public:
   void use() {
     //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glUseProgram(_id);
-    auto rotationMatrix = algebra::Mat4f::Identity();
+    auto rotationMatrix = algebra::transformations::rotationXMatrix(1.5f);
     Camera camera;
     //  auto scaleMatrix = algebra::transformations::scaleMatrix(2.f, 2.f, 2.f);
     auto projectionMatrix =
-        algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f);
-    this->setMat4f("view", camera.viewMatrix());
+        algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f)
+            .transpose();
+    this->setMat4f("view", camera.viewMatrix().transpose());
     this->setMat4f("projection", projectionMatrix);
     this->setMat4f("model", rotationMatrix);
   }
