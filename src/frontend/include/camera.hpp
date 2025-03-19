@@ -12,13 +12,16 @@ public:
   void rotateHorizontal(float angle) {
     if (abs(_position._phi + angle) < M_PI_2)
       _position._phi += angle;
-    return;
   }
 
   void rotateVertical(float angle) {
     if (abs(_position._theta + angle) < M_PI_2)
       _position._theta += angle;
-    return;
+  }
+
+  void changeZoom(float zoom) {
+    if (_position._r + zoom < 45.f && _position._r + zoom > 1.f)
+      _position._r += zoom;
   }
 
 private:

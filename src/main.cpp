@@ -19,6 +19,12 @@
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+  ImGuiIO &io = ImGui::GetIO();
+  io.MouseWheel += static_cast<float>(yoffset); // Update ImGui's mouse wheel
+}
+
+// Register the callback
 
 int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
@@ -40,6 +46,7 @@ int main(int, char **) {
     fprintf(stderr, "Failed to initialize GLAD\n");
     return 1;
   }
+  glfwSetScrollCallback(window, scrollCallback);
 
   TorusModel torusModel(2.f, 1.0f);
   TorusSettings torusSettings(&torusModel);
@@ -67,7 +74,6 @@ int main(int, char **) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  bool show_demo_window = false;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window)) {
@@ -82,8 +88,7 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    if (show_demo_window)
-      ImGui::ShowDemoWindow(&show_demo_window);
+    torusSettings._change |= (cameraController.processScroll());
 
     torusSettings.ShowSettingsWindow();
 

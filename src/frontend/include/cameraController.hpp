@@ -15,6 +15,14 @@ public:
 
   Camera *getCamera() const { return _camera; }
 
+  bool processScroll() {
+    float scroll = ImGui::GetIO().MouseWheel;
+    if (scroll == 0.0f)
+      return false;
+    _camera->changeZoom(scroll * zoomSpeed);
+    return true;
+  }
+
   bool processMouse() {
     if (!ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
       ImVec2 currentMousePosition = ImGui::GetMousePos();
@@ -49,4 +57,5 @@ private:
   Mouse _mouse;
 
   const float cameraSpeed = M_PI / 100.f;
+  const float zoomSpeed = 0.1f;
 };
