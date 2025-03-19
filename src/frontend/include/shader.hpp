@@ -13,17 +13,12 @@
 class Shader {
 public:
   void use() {
-    //  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glUseProgram(_id);
-    auto rotationMatrix = algebra::transformations::rotationYMatrix(1.5f);
-    Camera camera;
-    //  auto scaleMatrix = algebra::transformations::scaleMatrix(2.f, 2.f, 2.f);
+    auto rotationMatrix = algebra::Mat4f::Identity();
     auto projectionMatrix =
-        algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f)
-            .transpose();
-    this->setMat4f("view", camera.viewMatrix().transpose());
-    this->setMat4f("projection", projectionMatrix);
-    this->setMat4f("model", rotationMatrix);
+        algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f);
+    this->setMat4f("projection", projectionMatrix.transpose());
+    this->setMat4f("model", rotationMatrix.transpose());
   }
   Shader(const std::string &vertexPath, const std::string &fragmentPath) {
 
@@ -39,6 +34,10 @@ public:
   void setMat4f(const std::string &name, const algebra::Mat4f &mat) const {
     glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE,
                        &mat(0, 0));
+  }
+
+  void setViewMatrix(const algebra::Mat4f &view) const {
+    setMat4f("view", view.transpose());
   }
 
 private:

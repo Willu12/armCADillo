@@ -5,9 +5,13 @@
 
 class Mesh {
 public:
+  unsigned int VAO, VBO, EBO;
+  std::vector<float> _vertices;
+  std::vector<unsigned int> _indices;
+
   Mesh(const std::vector<float> &vertices,
        const std::vector<unsigned int> &_indices, Shader &shader)
-      : _vertices(vertices), _indices(_indices), _shader(shader) {
+      : _vertices(vertices), _indices(_indices) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -42,11 +46,5 @@ public:
     // VBOs) when it's not direct
   }
 
-  void draw();
-
 private:
-  std::vector<float> _vertices;
-  std::vector<unsigned int> _indices;
-  Shader _shader;
-  unsigned int VAO, VBO, EBO;
 };
