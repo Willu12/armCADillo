@@ -6,7 +6,7 @@
 #include <glad/glad.h>
 
 #include "camera.hpp"
-#include "imguiDisplay.hpp"
+#include "torusSettings.hpp"
 
 #include "torusModel.hpp"
 
@@ -43,6 +43,7 @@ int main(int, char **) {
 
   Triangle sampleTriangle;
   TorusModel torusModel(2.f, 1.0f);
+  TorusSettings torusSettings(&torusModel);
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
@@ -84,6 +85,8 @@ int main(int, char **) {
 
     if (show_demo_window)
       ImGui::ShowDemoWindow(&show_demo_window);
+
+    torusSettings.ShowSettingsWindow();
 
     // Rendering
     ImGui::Render();
