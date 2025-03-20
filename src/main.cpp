@@ -11,6 +11,7 @@
 #include "modelController.hpp"
 #include "torusModel.hpp"
 
+#include "grid.hpp"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
@@ -55,6 +56,8 @@ int main(int, char **) {
   ModelController torusController(&torusModel);
   CameraController cameraController;
   TorusSettings torusSettings(&torusModel, &torusController);
+
+  Grid grid(window);
 
   MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel, window);
   auto torusMesh = torusModel.generateMesh(shader);
@@ -113,6 +116,8 @@ int main(int, char **) {
       torusMesh = torusModel.generateMesh(shader);
       torusSettings._change = false;
     }
+    grid.render(cameraController.getCamera());
+
     MeshRenderer.renderMesh(torusMesh, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

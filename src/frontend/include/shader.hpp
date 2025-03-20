@@ -12,13 +12,7 @@
 
 class Shader {
 public:
-  void use() {
-    glUseProgram(_id);
-    // auto projectionMatrix =
-    algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f);
-    //  this->setMat4f("projection", projectionMatrix.transpose());
-    // this->setMat4f("model", rotationMatrix.transpose());
-  }
+  void use() { glUseProgram(_id); }
   Shader(const std::string &vertexPath, const std::string &fragmentPath) {
 
     std::string vertexShaderSource = readShaderFromFile(vertexPath);
