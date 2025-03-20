@@ -56,7 +56,7 @@ int main(int, char **) {
   CameraController cameraController;
   TorusSettings torusSettings(&torusModel, &torusController);
 
-  MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel);
+  MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel, window);
   auto torusMesh = torusModel.generateMesh(shader);
 
   // Setup Dear ImGui context
