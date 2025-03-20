@@ -9,6 +9,11 @@ public:
                                             _up);
   }
 
+  algebra::Mat4f inverseViewMatrix() const {
+    return algebra::transformations::inverseLookAt(
+        _target, _position.getCartesian(), _up);
+  }
+
   void rotateHorizontal(float angle) {
     if (abs(_position._phi + angle) < M_PI_2)
       _position._phi += angle;
@@ -22,6 +27,13 @@ public:
   void changeZoom(float zoom) {
     if (_position._r + zoom < 45.f && _position._r + zoom > 1.f)
       _position._r += zoom;
+  }
+
+  void updateTarget(float xShift, float yShift) {
+    algebra::Vec4f shiftVector(xShift, yShift, 0.0f, 0.0f);
+    auto shiftWorld = inverseViewMatrix() * shiftVector;
+    _target =
+        _target + algebra::Vec3f(shiftWorld[0], shiftWorld[1], shiftWorld[2]);
   }
 
 private:

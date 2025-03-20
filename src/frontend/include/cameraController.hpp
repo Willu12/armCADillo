@@ -7,6 +7,7 @@ class Mouse {
 public:
   algebra::Vec2f _position;
   bool _leftClicked = false;
+  bool _rightClicked = false;
 };
 
 class CameraController {
@@ -23,8 +24,18 @@ public:
     return true;
   }
 
-  bool processMouse() {
-    if (!ImGui::IsItemHovered() && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+  bool processMouse() { return processLeftButton() || processRightButton(); }
+
+private:
+  Camera *_camera;
+  Mouse _mouse;
+
+  const float cameraSpeed = M_PI / 200.f;
+  const float zoomSpeed = 0.1f;
+
+  bool processLeftButton() {
+    if (!ImGui::IsAnyItemActive() &&
+        ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
       ImVec2 currentMousePosition = ImGui::GetMousePos();
 
       if (!_mouse._leftClicked) {
@@ -35,7 +46,6 @@ public:
       if (_mouse._leftClicked) {
         float deltaY = _mouse._position[1] - currentMousePosition.y;
         float deltaX = _mouse._position[0] - currentMousePosition.x;
-
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
@@ -45,17 +55,37 @@ public:
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
       }
-    } else if (ImGui::IsItemHovered() &&
-               !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+    } else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
       _mouse._leftClicked = false;
     }
     return false;
   }
 
-private:
-  Camera *_camera;
-  Mouse _mouse;
+  bool processRightButton() {
+    if (!ImGui::IsAnyItemActive() &&
+        ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+      ImVec2 currentMousePosition = ImGui::GetMousePos();
 
-  const float cameraSpeed = M_PI / 100.f;
-  const float zoomSpeed = 0.1f;
+      if (!_mouse._rightClicked) {
+        _mouse._rightClicked = true;
+        _mouse._position =
+            algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
+      }
+      if (_mouse._rightClicked) {
+        float deltaY = _mouse._position[1] - currentMousePosition.y;
+        float deltaX = _mouse._position[0] - currentMousePosition.x;
+
+        if (deltaY == 0.f && deltaX == 0.f)
+          return false;
+
+        _camera->updateTarget(deltaX * cameraSpeed, deltaY * cameraSpeed);
+        _mouse._position =
+            algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
+        return true;
+      }
+    } else if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+      _mouse._rightClicked = false;
+    }
+    return false;
+  }
 };
