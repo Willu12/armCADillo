@@ -40,12 +40,14 @@ public:
         _controllerKind = static_cast<ControllerKind>(selectedIndex);
         //_change = true;
       }
-      const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
-      selectedIndex = static_cast<int>(_modelController->_transformationAxis);
-      if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
-                       IM_ARRAYSIZE(AxisOptions))) {
-        _modelController->_transformationAxis =
-            static_cast<Axis>(selectedIndex);
+      if (_controllerKind == TorusSettings::ControllerKind::Model) {
+        const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
+        selectedIndex = static_cast<int>(_modelController->_transformationAxis);
+        if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
+                         IM_ARRAYSIZE(AxisOptions))) {
+          _modelController->_transformationAxis =
+              static_cast<Axis>(selectedIndex);
+        }
       }
 
       ImGui::End();
