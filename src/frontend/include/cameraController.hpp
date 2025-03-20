@@ -1,14 +1,8 @@
 #pragma once
 #include "camera.hpp"
 #include "imgui.h"
+#include "mouse.hpp"
 #include "vec.hpp"
-
-class Mouse {
-public:
-  algebra::Vec2f _position;
-  bool _leftClicked = false;
-  bool _rightClicked = false;
-};
 
 class CameraController {
 public:

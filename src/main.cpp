@@ -25,8 +25,6 @@ static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
   io.MouseWheel += static_cast<float>(yoffset); // Update ImGui's mouse wheel
 }
 
-// Register the callback
-
 int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
@@ -55,6 +53,7 @@ int main(int, char **) {
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
 
+  ModelController torusController(&torusModel);
   CameraController cameraController;
   MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel);
   auto torusMesh = torusModel.generateMesh(shader);
@@ -89,7 +88,8 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    torusSettings._change |= (cameraController.processScroll());
+    // cameraController.processScroll();
+    torusController.processScroll();
 
     torusSettings.ShowSettingsWindow();
 
@@ -101,8 +101,8 @@ int main(int, char **) {
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
-    if (cameraController.processMouse())
-      torusSettings._change = true;
+    // cameraController.processMouse();
+    torusController.processMouse();
 
     if (torusSettings._change) {
       torusMesh = torusModel.generateMesh(shader);

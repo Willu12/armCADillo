@@ -20,6 +20,8 @@ public:
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
   float &getScale() { return _scale; }
+  algebra::Vec3f &getPosition() { return _position; }
+  algebra::EulerAngle<float> &getRotation() { return _rotation; }
 
   MeshDensity &getMeshDensity() { return _meshDensity; }
 
