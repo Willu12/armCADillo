@@ -19,13 +19,25 @@ public:
   }
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
+  float &getScale() { return _scale; }
 
   MeshDensity &getMeshDensity() { return _meshDensity; }
+
+  algebra::Mat4f getModelMatrix() {
+    auto scaleMatrix =
+        algebra::transformations::scaleMatrix(_scale, _scale, _scale);
+    auto rotationMatrix = _rotation.getRotationMatrix();
+    auto translationMatrix =
+        algebra::transformations::translationMatrix(_position);
+
+    return translationMatrix * rotationMatrix * scaleMatrix;
+  }
 
 private:
   algebra::Torus<float> _torus;
   algebra::Vec3f _position;
   algebra::EulerAngle<float> _rotation;
+  float _scale = 1.0;
   MeshDensity _meshDensity;
 
   std::vector<float> generateVertices() {

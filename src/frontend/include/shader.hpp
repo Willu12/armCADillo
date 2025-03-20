@@ -14,11 +14,10 @@ class Shader {
 public:
   void use() {
     glUseProgram(_id);
-    auto rotationMatrix = algebra::Mat4f::Identity();
     auto projectionMatrix =
         algebra::transformations::projection(1.3f, 1.f, 0.1f, 100.f);
     this->setMat4f("projection", projectionMatrix.transpose());
-    this->setMat4f("model", rotationMatrix.transpose());
+    // this->setMat4f("model", rotationMatrix.transpose());
   }
   Shader(const std::string &vertexPath, const std::string &fragmentPath) {
 
@@ -38,6 +37,10 @@ public:
 
   void setViewMatrix(const algebra::Mat4f &view) const {
     setMat4f("view", view.transpose());
+  }
+
+  void setModelMatrix(const algebra::Mat4f &model) const {
+    setMat4f("model", model.transpose());
   }
 
 private:

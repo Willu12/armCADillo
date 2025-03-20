@@ -8,6 +8,7 @@
 #include "renderer.hpp"
 #include "torusSettings.hpp"
 
+#include "modelController.hpp"
 #include "torusModel.hpp"
 
 #include <GLFW/glfw3.h>
@@ -55,7 +56,7 @@ int main(int, char **) {
                 "../shaders/fragmentShader.hlsl");
 
   CameraController cameraController;
-  MeshRenderer MeshRenderer(cameraController.getCamera());
+  MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel);
   auto torusMesh = torusModel.generateMesh(shader);
 
   // Setup Dear ImGui context

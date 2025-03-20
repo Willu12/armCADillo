@@ -1,12 +1,15 @@
 #pragma once
 #include "camera.hpp"
 #include "mesh.hpp"
+#include "torusModel.hpp"
 
 class MeshRenderer {
 public:
-  MeshRenderer(Camera *camera) : _camera(camera) {}
+  MeshRenderer(Camera *camera, TorusModel *torusModel)
+      : _camera(camera), _torusModel(torusModel) {}
   void renderMesh(const Mesh &mesh, Shader &shader) {
     shader.setViewMatrix(_camera->viewMatrix());
+    shader.setModelMatrix(_torusModel->getModelMatrix());
     shader.use();
     glBindVertexArray(mesh.VAO);
 
@@ -15,4 +18,5 @@ public:
 
 private:
   Camera *_camera;
+  TorusModel *_torusModel;
 };
