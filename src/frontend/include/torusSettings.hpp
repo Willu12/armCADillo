@@ -1,13 +1,19 @@
 #pragma once
 #include "imgui.h"
+#include "modelController.hpp"
 #include "torusModel.hpp"
+
+enum ControllerKind { Camera = 0, Model = 1 };
 
 class TorusSettings {
 public:
   TorusModel *_torusModel;
   bool _change;
+  ControllerKind _controllerKind = Model;
+  ModelController *_modelController;
 
-  TorusSettings(TorusModel *torusModel) : _torusModel(torusModel){};
+  TorusSettings(TorusModel *torusModel, ModelController *modelController)
+      : _torusModel(torusModel), _modelController(modelController) {}
 
   void ShowSettingsWindow() {
     ImGuiWindowFlags window_flags =
@@ -25,6 +31,23 @@ public:
                                   &_torusModel->getMeshDensity().s, 3, 100);
       _change |= ImGui::SliderInt("Vertical Density",
                                   &_torusModel->getMeshDensity().t, 3, 100);
+
+      const char *controllerOptions[] = {"Camera", "Model"};
+      int selectedIndex = static_cast<int>(_controllerKind);
+
+      if (ImGui::Combo("Controller", &selectedIndex, controllerOptions,
+                       IM_ARRAYSIZE(controllerOptions))) {
+        _controllerKind = static_cast<ControllerKind>(selectedIndex);
+        //_change = true;
+      }
+      const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
+      selectedIndex = static_cast<int>(_modelController->_transformationAxis);
+      if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
+                       IM_ARRAYSIZE(AxisOptions))) {
+        _modelController->_transformationAxis =
+            static_cast<Axis>(selectedIndex);
+      }
+
       ImGui::End();
     }
   }

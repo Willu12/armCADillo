@@ -48,13 +48,14 @@ int main(int, char **) {
   glfwSetScrollCallback(window, scrollCallback);
 
   TorusModel torusModel(2.f, 1.0f);
-  TorusSettings torusSettings(&torusModel);
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
 
   ModelController torusController(&torusModel);
   CameraController cameraController;
+  TorusSettings torusSettings(&torusModel, &torusController);
+
   MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel);
   auto torusMesh = torusModel.generateMesh(shader);
 
@@ -88,8 +89,10 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // cameraController.processScroll();
-    torusController.processScroll();
+    if (torusSettings._controllerKind == Camera)
+      cameraController.processScroll();
+    else
+      torusController.processScroll();
 
     torusSettings.ShowSettingsWindow();
 
@@ -101,8 +104,10 @@ int main(int, char **) {
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
-    // cameraController.processMouse();
-    torusController.processMouse();
+    if (torusSettings._controllerKind == Camera)
+      cameraController.processMouse();
+    else
+      torusController.processMouse();
 
     if (torusSettings._change) {
       torusMesh = torusModel.generateMesh(shader);

@@ -5,6 +5,8 @@ enum Axis { X = 0, Y = 1, Z = 2 };
 
 class ModelController {
 public:
+  Axis _transformationAxis = Axis::X;
+
   ModelController(TorusModel *torusModel) : _torusModel(torusModel) {}
 
   bool processScroll() {
@@ -19,7 +21,6 @@ public:
 
 private:
   TorusModel *_torusModel;
-  Axis _transformationAxis = Axis::X;
   const float _scrollSpeed = 0.01f;
   const float _moveSpeed = 0.01f;
   Mouse _mouse;
