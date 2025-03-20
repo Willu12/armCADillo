@@ -89,7 +89,7 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    if (torusSettings._controllerKind == Camera)
+    if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
       cameraController.processScroll();
     else
       torusController.processScroll();
@@ -104,7 +104,7 @@ int main(int, char **) {
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
-    if (torusSettings._controllerKind == Camera)
+    if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
       cameraController.processMouse();
     else
       torusController.processMouse();

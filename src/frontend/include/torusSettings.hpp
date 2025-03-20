@@ -3,10 +3,10 @@
 #include "modelController.hpp"
 #include "torusModel.hpp"
 
-enum ControllerKind { Camera = 0, Model = 1 };
-
 class TorusSettings {
 public:
+  enum ControllerKind { Camera = 0, Model = 1 };
+
   TorusModel *_torusModel;
   bool _change;
   ControllerKind _controllerKind = Model;

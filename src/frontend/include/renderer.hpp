@@ -1,7 +1,6 @@
 #pragma once
 #include "GLFW/glfw3.h"
 #include "camera.hpp"
-#include "mesh.hpp"
 #include "torusModel.hpp"
 
 class MeshRenderer {
