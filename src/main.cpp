@@ -78,7 +78,7 @@ int main(int, char **) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImVec4 clear_color = ImVec4(0.1, 0.1f, 0.1f, 1.00f);
 
   while (!glfwWindowShouldClose(window)) {
 

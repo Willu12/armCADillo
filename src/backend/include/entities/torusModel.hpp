@@ -39,7 +39,7 @@ private:
   algebra::Torus<float> _torus;
   algebra::Vec3f _position;
   algebra::EulerAngle<float> _rotation;
-  float _scale = 1.0;
+  float _scale = .1;
   MeshDensity _meshDensity;
 
   std::vector<float> generateVertices() {

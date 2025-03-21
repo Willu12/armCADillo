@@ -9,7 +9,7 @@ public:
 
   TorusModel *_torusModel;
   bool _change;
-  ControllerKind _controllerKind = Model;
+  ControllerKind _controllerKind = Camera;
   ModelController *_modelController;
 
   TorusSettings(TorusModel *torusModel, ModelController *modelController)

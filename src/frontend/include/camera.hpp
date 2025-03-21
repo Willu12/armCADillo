@@ -36,9 +36,11 @@ public:
         _target + algebra::Vec3f(shiftWorld[0], shiftWorld[1], shiftWorld[2]);
   }
 
+  algebra::Vec3f getPosition() const { return _position.getCartesian(); }
+
 private:
   algebra::SphericalPosition<float> _position =
-      algebra::SphericalPosition((algebra::Vec3f(0.0f, 5.0f, -5.f)));
+      algebra::SphericalPosition((algebra::Vec3f(0.0f, 0.1f, -1.f)));
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
   algebra::Vec3f _up = algebra::Vec3f(0.f, 1.0f, 0.f);
 };

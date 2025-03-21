@@ -13,6 +13,10 @@ public:
     _shader.use();
     _shader.setViewMatrix(camera->viewMatrix());
     _shader.setProjectionMatrix(getAspectRatio());
+    _shader.setVec3f("cameraWorldPos", camera->getPosition());
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
