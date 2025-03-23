@@ -15,8 +15,8 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-#define WIDTH 900
-#define HEIGHT 900
+#define WIDTH 1920
+#define HEIGHT 1080
 
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -35,8 +35,8 @@ int main(int, char **) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-  GLFWwindow *window = glfwCreateWindow(
-      WIDTH, HEIGHT, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+  GLFWwindow *window =
+      glfwCreateWindow(WIDTH, HEIGHT, "armCADillo", nullptr, nullptr);
   if (window == nullptr)
     return 1;
   glfwMakeContextCurrent(window);

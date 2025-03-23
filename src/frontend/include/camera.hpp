@@ -5,22 +5,32 @@
 class Camera {
 public:
   algebra::Mat4f viewMatrix() const {
-    return algebra::transformations::lookAt(_target, _position.getCartesian(),
-                                            _up);
+    auto Tx =
+        algebra::transformations::translationMatrix(0.f, 0.f, -_position._r);
+    auto R = _position.getRotationMatrix();
+    auto Tp = algebra::transformations::translationMatrix(
+        -_target[0], -_target[1], -_target[2]);
+
+    return Tx * R * Tp;
   }
 
   algebra::Mat4f inverseViewMatrix() const {
-    return algebra::transformations::inverseLookAt(
-        _target, _position.getCartesian(), _up);
+    auto Tx =
+        algebra::transformations::translationMatrix(0.f, 0.f, _position._r);
+    auto R = _position.getRotationMatrix();
+    auto Tp = algebra::transformations::translationMatrix(
+        _target[0], _target[1], _target[2]);
+
+    return Tp * R.transpose() * Tx;
   }
 
   void rotateHorizontal(float angle) {
-    if (abs(_position._phi + angle) < M_PI_2)
+    if (std::abs(_position._phi + angle) < M_PI_2)
       _position._phi += angle;
   }
 
   void rotateVertical(float angle) {
-    if (abs(_position._theta + angle) < M_PI_2)
+    if (std::abs(_position._theta + angle) < M_PI_2)
       _position._theta += angle;
   }
 

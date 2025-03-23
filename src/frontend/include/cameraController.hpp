@@ -24,7 +24,8 @@ private:
   Camera *_camera;
   Mouse _mouse;
 
-  const float cameraSpeed = M_PI / 200.f;
+  const float cameraSpeed = M_PI / 400.f;
+  const float cameraMoveSpeed = 0.002f;
   const float zoomSpeed = 0.1f;
 
   bool processLeftButton() {
@@ -72,7 +73,8 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _camera->updateTarget(deltaX * cameraSpeed, deltaY * cameraSpeed);
+        _camera->updateTarget(-deltaX * cameraMoveSpeed,
+                              deltaY * cameraMoveSpeed);
         _mouse._position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
