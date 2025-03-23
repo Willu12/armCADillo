@@ -14,7 +14,7 @@ public:
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
       return false;
-    _camera->changeZoom(scroll * zoomSpeed);
+    _camera->changeZoom(-scroll * zoomSpeed);
     return true;
   }
 
