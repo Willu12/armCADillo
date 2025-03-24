@@ -1,4 +1,5 @@
 #pragma once
+#include "gui.hpp"
 #include "imgui.h"
 #include "modelController.hpp"
 #include "torusModel.hpp"
@@ -11,6 +12,7 @@ public:
   bool _change;
   ControllerKind _controllerKind = Camera;
   ModelController *_modelController;
+  GUI gui;
 
   TorusSettings(TorusModel *torusModel, ModelController *modelController)
       : _torusModel(torusModel), _modelController(modelController) {}
@@ -23,6 +25,7 @@ public:
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Settings", nullptr, window_flags)) {
 
+      gui.showFPSCounter();
       _change |=
           ImGui::SliderFloat("R", &_torusModel->getInnerRadius(), 0.1f, 10.f);
       _change |=

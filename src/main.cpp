@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 
 #include "cameraController.hpp"
+#include "gui.hpp"
 #include "renderer.hpp"
 #include "torusSettings.hpp"
 
@@ -48,7 +49,8 @@ int main(int, char **) {
   }
   glfwSetScrollCallback(window, scrollCallback);
 
-  TorusModel torusModel(2.f, 1.0f);
+  TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
+  TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
@@ -59,7 +61,7 @@ int main(int, char **) {
 
   Grid grid(window);
 
-  MeshRenderer MeshRenderer(cameraController.getCamera(), &torusModel, window);
+  MeshRenderer MeshRenderer(cameraController.getCamera(), window);
   auto torusMesh = torusModel.generateMesh(shader);
 
   // Setup Dear ImGui context
@@ -81,7 +83,6 @@ int main(int, char **) {
   ImVec4 clear_color = ImVec4(0.1, 0.1f, 0.1f, 1.00f);
 
   while (!glfwWindowShouldClose(window)) {
-
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
       ImGui_ImplGlfw_Sleep(10);
@@ -118,7 +119,8 @@ int main(int, char **) {
     }
     grid.render(cameraController.getCamera());
 
-    MeshRenderer.renderMesh(torusMesh, shader);
+    MeshRenderer.renderMesh(torusMesh, torusModel, shader);
+    MeshRenderer.renderMesh(torusMesh, torusModel2, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

@@ -5,14 +5,14 @@
 
 class MeshRenderer {
 public:
-  MeshRenderer(Camera *camera, TorusModel *torusModel, GLFWwindow *window)
-      : _camera(camera), _torusModel(torusModel), _window(window) {}
+  MeshRenderer(Camera *camera, GLFWwindow *window)
+      : _camera(camera), _window(window) {}
 
-  void renderMesh(const Mesh &mesh, Shader &shader) {
+  void renderMesh(const Mesh &mesh, const TorusModel &model, Shader &shader) {
     shader.use();
 
     shader.setViewMatrix(_camera->viewMatrix());
-    shader.setModelMatrix(_torusModel->getModelMatrix());
+    shader.setModelMatrix(model.getModelMatrix());
     shader.setProjectionMatrix(getAspectRatio());
 
     glBindVertexArray(mesh.VAO);
@@ -21,7 +21,6 @@ public:
 
 private:
   Camera *_camera;
-  TorusModel *_torusModel;
   GLFWwindow *_window;
 
   float getAspectRatio() const {
