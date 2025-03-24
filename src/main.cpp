@@ -9,6 +9,7 @@
 #include "renderer.hpp"
 #include "torusSettings.hpp"
 
+#include "cursor.hpp"
 #include "modelController.hpp"
 #include "torusModel.hpp"
 
