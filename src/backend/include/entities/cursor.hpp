@@ -4,7 +4,17 @@
 
 class Cursor {
 public:
-  Mesh generateMesh(Shader &shader) {
+  Cursor() : _mesh(generateMesh()) {}
+  algebra::Mat4f getModelMatrix() const {
+    return algebra::transformations::translationMatrix(_position);
+  }
+
+private:
+  algebra::Vec3f _position;
+  float _radius = 0.05f;
+  Mesh _mesh;
+
+  Mesh generateMesh() {
     std::vector<float> vertices = {// center
                                    0.0f, 0.0f, 0.0f,
                                    // right
@@ -17,14 +27,6 @@ public:
                                    0.f, -_radius, 0.f};
     std::vector<unsigned int> indices = {0, 1, 0, 2, 0, 3, 0, 4};
 
-    return Mesh(vertices, indices, shader);
+    return Mesh(vertices, indices);
   }
-
-  algebra::Mat4f getModelMatrix() const {
-    return algebra::transformations::translationMatrix(_position);
-  }
-
-private:
-  algebra::Vec3f _position;
-  float _radius = 0.05f;
 };

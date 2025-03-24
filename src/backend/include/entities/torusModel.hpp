@@ -10,13 +10,9 @@ struct MeshDensity {
 class TorusModel {
 public:
   TorusModel(float innerRadius, float tubeRadius, algebra::Vec3f position)
-      : _torus(innerRadius, tubeRadius), _position(position) {}
-  Mesh generateMesh(Shader &shader) {
-    auto vertices = generateVertices();
-    auto indices = generateIndices(vertices);
+      : _torus(innerRadius, tubeRadius), _position(position),
+        _mesh(generateMesh()) {}
 
-    return Mesh(vertices, indices, shader);
-  }
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
   float &getScale() { return _scale; }
@@ -35,12 +31,24 @@ public:
     return translationMatrix * rotationMatrix * scaleMatrix;
   }
 
+  inline const Mesh &getMesh() const { return _mesh; }
+
+  void updateMesh() { _mesh = generateMesh(); }
+
 private:
   algebra::Torus<float> _torus;
   algebra::Vec3f _position;
   algebra::EulerAngle<float> _rotation;
   float _scale = .1;
   MeshDensity _meshDensity;
+  Mesh _mesh;
+
+  Mesh generateMesh() {
+    auto vertices = generateVertices();
+    auto indices = generateIndices(vertices);
+
+    return Mesh(vertices, indices);
+  }
 
   std::vector<float> generateVertices() {
     std::vector<float> vertices;

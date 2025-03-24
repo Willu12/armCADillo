@@ -63,7 +63,7 @@ int main(int, char **) {
   Grid grid(window);
 
   MeshRenderer MeshRenderer(cameraController.getCamera(), window);
-  auto torusMesh = torusModel.generateMesh(shader);
+  // auto torusMesh = torusModel.generateMesh();
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -115,13 +115,13 @@ int main(int, char **) {
       torusController.processMouse();
 
     if (torusSettings._change) {
-      torusMesh = torusModel.generateMesh(shader);
+      torusModel.updateMesh();
       torusSettings._change = false;
     }
     grid.render(cameraController.getCamera());
 
-    MeshRenderer.renderMesh(torusMesh, torusModel, shader);
-    MeshRenderer.renderMesh(torusMesh, torusModel2, shader);
+    MeshRenderer.renderMesh(torusModel, shader);
+    // MeshRenderer.renderMesh(torusMesh, torusModel2, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

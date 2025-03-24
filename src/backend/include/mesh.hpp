@@ -10,7 +10,7 @@ public:
   std::vector<unsigned int> _indices;
 
   Mesh(const std::vector<float> &vertices,
-       const std::vector<unsigned int> &_indices, Shader &shader)
+       const std::vector<unsigned int> &_indices)
       : _vertices(vertices), _indices(_indices) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -67,6 +67,9 @@ public:
     }
     return *this;
   }
+
+  Mesh(const Mesh &) = delete;
+  Mesh &operator=(const Mesh &) = delete;
 
 private:
 };
