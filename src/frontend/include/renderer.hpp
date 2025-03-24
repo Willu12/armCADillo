@@ -8,14 +8,14 @@ public:
   MeshRenderer(Camera *camera, GLFWwindow *window)
       : _camera(camera), _window(window) {}
 
-  void renderMesh(const TorusModel &model, Shader &shader) {
+  void renderMesh(const IEntity &entity, Shader &shader) {
     shader.use();
 
     shader.setViewMatrix(_camera->viewMatrix());
-    shader.setModelMatrix(model.getModelMatrix());
+    shader.setModelMatrix(entity.getModelMatrix());
     shader.setProjectionMatrix(getAspectRatio());
 
-    const Mesh &mesh = model.getMesh();
+    const Mesh &mesh = entity.getMesh();
 
     glBindVertexArray(mesh.VAO);
     glDrawElements(GL_LINES, mesh._indices.size(), GL_UNSIGNED_INT, 0);

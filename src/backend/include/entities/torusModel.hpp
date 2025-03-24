@@ -1,4 +1,5 @@
 #pragma once
+#include "IEntity.hpp"
 #include "algebra.hpp"
 #include "mesh.hpp"
 
@@ -7,7 +8,7 @@ struct MeshDensity {
   int t = 20;
 };
 
-class TorusModel {
+class TorusModel : public IEntity {
 public:
   TorusModel(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _position(position),
@@ -21,7 +22,7 @@ public:
 
   MeshDensity &getMeshDensity() { return _meshDensity; }
 
-  algebra::Mat4f getModelMatrix() const {
+  algebra::Mat4f getModelMatrix() const override {
     auto scaleMatrix =
         algebra::transformations::scaleMatrix(_scale, _scale, _scale);
     auto rotationMatrix = _rotation.getRotationMatrix();
@@ -31,7 +32,7 @@ public:
     return translationMatrix * rotationMatrix * scaleMatrix;
   }
 
-  inline const Mesh &getMesh() const { return _mesh; }
+  inline const Mesh &getMesh() const override { return _mesh; }
 
   void updateMesh() { _mesh = generateMesh(); }
 

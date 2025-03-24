@@ -52,6 +52,7 @@ int main(int, char **) {
 
   TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
   TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
+  Cursor cursor;
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
@@ -63,9 +64,7 @@ int main(int, char **) {
   Grid grid(window);
 
   MeshRenderer MeshRenderer(cameraController.getCamera(), window);
-  // auto torusMesh = torusModel.generateMesh();
 
-  // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
@@ -118,10 +117,9 @@ int main(int, char **) {
       torusModel.updateMesh();
       torusSettings._change = false;
     }
-    grid.render(cameraController.getCamera());
 
+    grid.render(cameraController.getCamera());
     MeshRenderer.renderMesh(torusModel, shader);
-    // MeshRenderer.renderMesh(torusMesh, torusModel2, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
