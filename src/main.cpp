@@ -120,6 +120,7 @@ int main(int, char **) {
 
     grid.render(cameraController.getCamera());
     MeshRenderer.renderMesh(torusModel, shader);
+    MeshRenderer.renderBillboard(cursor, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

@@ -47,6 +47,9 @@ public:
   }
 
   algebra::Vec3f getPosition() const { return _position.getCartesian(); }
+  algebra::SphericalPosition<float> getSphericalPosition() const {
+    return _position;
+  }
 
 private:
   algebra::SphericalPosition<float> _position =
