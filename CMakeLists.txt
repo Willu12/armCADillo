@@ -12,7 +12,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/backend/include/
     src/frontend/include/
     src/frontend/include/gui/
+    src/frontend/include/textures/
     src/backend/include/entities/
+
 )
 
 target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image)

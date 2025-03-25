@@ -1,0 +1,40 @@
+#pragma once
+#include "stb_image.h"
+#include <string>
+
+class Image {
+public:
+  explicit Image(const std::string &path) : _path(path) {
+
+    int width, height, bpp;
+    auto buff = reinterpret_cast<uint32_t *>(
+        stbi_load(path.c_str(), &width, &height, &bpp, 4));
+
+    for (int i = 0; i < width * height; ++i) {
+      swap_endianess(&buff[i]);
+    }
+    _width = width;
+    _height = height;
+    _bpp = bpp;
+
+    if (!buff)
+      throw std::runtime_error("could load texture from " + path + '\n');
+
+    _data.insert(_data.end(), &buff[0], &buff[_width * _height]);
+    stbi_image_free(buff);
+  }
+
+  uint32_t getHeight() const { return _height; }
+  uint32_t getWidth() const { return _width; }
+  const uint32_t *raw() const { return _data.data(); }
+
+private:
+  uint32_t _width, _height, _bpp;
+  std::vector<uint32_t> _data;
+  std::string _path;
+
+  void swap_endianess(uint32_t *pixel) {
+    *pixel = ((*pixel & 0xFF000000) >> 24) | ((*pixel & 0x00FF0000) >> 8) |
+             ((*pixel & 0x0000FF00) << 8) | ((*pixel & 0x000000FF) << 24);
+  }
+};

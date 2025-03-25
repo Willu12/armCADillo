@@ -13,6 +13,9 @@
 #include "modelController.hpp"
 #include "torusModel.hpp"
 
+#include "image.hpp"
+#include "textureResource.hpp"
+
 #include "grid.hpp"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
