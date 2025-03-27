@@ -73,5 +73,5 @@ private:
       algebra::SphericalPosition((algebra::Vec3f(0.0f, 0.1f, -1.f)));
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
   algebra::Vec3f _up = algebra::Vec3f(0.f, 1.0f, 0.f);
-  float _zoom = 30.f;
+  float _zoom = 45.f;
 };

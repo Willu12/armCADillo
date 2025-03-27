@@ -23,38 +23,19 @@ private:
 
   bool processLeftMouseButton() {
     if (!ImGui::IsAnyItemActive() &&
-        ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+        (ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
+         ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
       ImVec2 currentMousePosition = ImGui::GetMousePos();
 
-      if (!_mouse.get()->_leftClicked) {
-        _mouse.get()->_leftClicked = true;
-        _mouse.get()->_position =
-            algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-      }
-      if (_mouse.get()->_leftClicked) {
-        float deltaY = _mouse.get()->_position[1] - currentMousePosition.y;
-        float deltaX = _mouse.get()->_position[0] - currentMousePosition.x;
-        if (deltaY == 0.f && deltaX == 0.f)
-          return false;
+      float x =
+          (2.f * currentMousePosition.x) / GLFWHelper::getWidth(_window) - 1.f;
+      float y =
+          1.f - (2.f * currentMousePosition.y) / GLFWHelper::getHeight(_window);
 
-        //   _camera->rotateHorizontal(deltaX * cameraSpeed);
-        //   _camera->rotateVertical(deltaY * cameraSpeed);
-
-        float x =
-            (2.f * currentMousePosition.x) / GLFWHelper::getWidth(_window) -
-            1.f;
-        float y = 1.f - (2.f * currentMousePosition.y) /
-                            GLFWHelper::getHeight(_window);
-
-        printf("SCREEN X{%f} Y{%f}\n", x, y);
-        _cursor.get()->updatePosition(x, y, GLFWHelper::getAspectRatio(_window),
-                                      *_camera);
-        _mouse.get()->_position =
-            algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-        return true;
-      }
-    } else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-      _mouse.get()->_leftClicked = false;
+      _cursor.get()->updatePosition(x, y, *_camera);
+      _mouse.get()->_position =
+          algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
+      return true;
     }
     return false;
   }

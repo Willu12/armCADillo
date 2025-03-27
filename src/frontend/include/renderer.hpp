@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "glfwHelper.hpp"
 #include "torusModel.hpp"
+#include "transformations.hpp"
 
 class MeshRenderer {
 public:
@@ -14,7 +15,6 @@ public:
 
     shader.setViewMatrix(_camera->viewMatrix());
     shader.setModelMatrix(entity.getModelMatrix());
-    // shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
     shader.setProjectionMatrix(_camera->projectionMatrix());
 
     const Mesh &mesh = entity.getMesh();
@@ -32,11 +32,26 @@ public:
     auto scaleMatrix = algebra::transformations::scaleMatrix(
         distanceFromCamera, distanceFromCamera, distanceFromCamera);
 
+    /*
+auto projection = algebra::transformations::projection(
+ GLFWHelper::getAspectRatio(_window));
+auto sceneCursorPosition =
+ projection *
+ (_camera->viewMatrix() * entity.getPosition().toHomogenous());
+
+sceneCursorPosition = sceneCursorPosition * (1.0f / sceneCursorPosition[3]);
+float z_ndc = sceneCursorPosition[2];
+float z_screen =
+ (z_ndc + 1.0f) * 0.5f; // Convert NDC [-1,1] to depth range [0,1]
+auto scaleMatrix = algebra::transformations::scaleMatrix(
+ 1.f / z_ndc, 1.f / z_ndc, 1.f / z_ndc);
+ */
+
     shader.setViewMatrix(_camera->viewMatrix());
     shader.setModelMatrix(
-        _camera->getSphericalPosition().getRotationMatrix().transpose() *
-        entity.getModelMatrix() * scaleMatrix);
-    shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
+        entity.getModelMatrix() * scaleMatrix *
+        _camera->getSphericalPosition().getRotationMatrix().transpose());
+    shader.setProjectionMatrix(_camera->projectionMatrix());
 
     const Mesh &mesh = entity.getMesh();
     glBindVertexArray(mesh._vao);
