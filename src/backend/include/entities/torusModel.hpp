@@ -33,7 +33,7 @@ public:
     return translationMatrix * rotationMatrix * scaleMatrix;
   }
 
-  inline const Mesh &getMesh() const override { return _mesh; }
+  inline const Mesh &getMesh() const override { return *_mesh; }
 
   void updateMesh() { _mesh = generateMesh(); }
 
@@ -43,13 +43,13 @@ private:
   algebra::EulerAngle<float> _rotation;
   float _scale = .1;
   MeshDensity _meshDensity;
-  Mesh _mesh;
+  std::shared_ptr<Mesh> _mesh;
 
-  Mesh generateMesh() {
+  std::shared_ptr<Mesh> generateMesh() {
     auto vertices = generateVertices();
     auto indices = generateIndices(vertices);
 
-    return Mesh(vertices, indices);
+    return Mesh::create(vertices, indices);
   }
 
   std::vector<float> generateVertices() {
