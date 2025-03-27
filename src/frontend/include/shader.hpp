@@ -47,6 +47,10 @@ public:
     setMat4f("projection", projectionMatrix.transpose());
   }
 
+  void setInt(const std::string &name, int value) const {
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
+  }
+
 private:
   unsigned int _id;
   static void checkCompileErrors(unsigned int shader, const std::string &type) {

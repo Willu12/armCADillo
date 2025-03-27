@@ -66,6 +66,9 @@ int main(int, char **) {
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
 
+  Shader textureShader("../shaders/textureShader.vert",
+                       "../shaders/texturedBillboardShader.frag");
+
   ModelController torusController(&torusModel);
   CameraController cameraController;
   TorusSettings torusSettings(&torusModel, &torusController);
@@ -129,7 +132,7 @@ int main(int, char **) {
 
     grid.render(cameraController.getCamera());
     MeshRenderer.renderMesh(torusModel, shader);
-    MeshRenderer.renderBillboard(cursor, shader);
+    MeshRenderer.renderBillboard(cursor, textureShader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

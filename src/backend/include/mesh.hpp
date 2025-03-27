@@ -12,6 +12,15 @@ public:
   static std::shared_ptr<Mesh> create(const std::vector<float> &vertices,
                                       const std::vector<uint32_t> &indices) {
     auto *mesh = new Mesh(vertices, indices);
+    mesh->addSimpleVertexLayout();
+    return std::shared_ptr<Mesh>(mesh);
+  }
+
+  static std::shared_ptr<Mesh>
+  createTexturedMesh(const std::vector<float> &vertices,
+                     const std::vector<uint32_t> &indices) {
+    auto *mesh = new Mesh(vertices, indices);
+    mesh->addTextureLayout();
     return std::shared_ptr<Mesh>(mesh);
   }
 
@@ -62,19 +71,26 @@ protected:
        const std::vector<uint32_t> &_indices)
       : _vertices(vertices), _indices(_indices) {
     initBuffers();
+  }
 
+private:
+  void addSimpleVertexLayout() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
-
-private:
   void addTextureLayout() {
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                           (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
   void initBuffers() {
