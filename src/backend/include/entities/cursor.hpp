@@ -20,13 +20,13 @@ private:
 
   Mesh generateMesh() {
     std::vector<float> vertices = {// left down
-                                   -_radius, -_radius, 0.0f,
+                                   -_radius, -_radius, 0.f, 0.f, 0.f,
                                    // left up
-                                   -_radius, _radius, 0.0f,
+                                   -_radius, _radius, 0.f, 0.f, 1.0,
                                    // right up
-                                   _radius, _radius, 0.f,
+                                   _radius, _radius, 0.f, 1.f, 1.f,
                                    // right down
-                                   _radius, -_radius, 0.f};
+                                   _radius, -_radius, 0.f, 1.f, 0.f};
     std::vector<unsigned int> indices = {0, 1, 2, 2, 3, 0};
 
     return Mesh(vertices, indices);

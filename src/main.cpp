@@ -14,6 +14,7 @@
 #include "torusModel.hpp"
 
 #include "image.hpp"
+#include "texture.hpp"
 #include "textureResource.hpp"
 
 #include "grid.hpp"
@@ -53,6 +54,11 @@ int main(int, char **) {
   }
   glfwSetScrollCallback(window, scrollCallback);
 
+  // TEXTURE
+  Image image("../resources/textures/cursorTexture.png");
+  TextureResource textureResource(image);
+  Texture texture(textureResource);
+  //
   TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
   TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
   Cursor cursor;

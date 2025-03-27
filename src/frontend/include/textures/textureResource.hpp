@@ -16,6 +16,11 @@ public:
                  GL_UNSIGNED_INT_8_8_8_8, image.raw());
   }
 
+  void bind(uint32_t unit) const {
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, _id);
+  }
+
 private:
   GLuint _id;
   int _width, _height, bpp;
