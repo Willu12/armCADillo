@@ -10,6 +10,7 @@
 #include "torusSettings.hpp"
 
 #include "cursor.hpp"
+#include "cursorController.hpp"
 #include "modelController.hpp"
 #include "torusModel.hpp"
 
