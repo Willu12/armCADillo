@@ -17,7 +17,7 @@ public:
 
 private:
   std::unique_ptr<Cursor> _cursor;
-  std::shared_ptr<Mouse> _mouse;
+  Mouse &_mouse;
   GLFWwindow *_window;
   Camera *_camera;
 
@@ -33,7 +33,7 @@ private:
           1.f - (2.f * currentMousePosition.y) / GLFWHelper::getHeight(_window);
 
       _cursor.get()->updatePosition(x, y, *_camera);
-      _mouse.get()->_position =
+      _mouse._position =
           algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
       return true;
     }
