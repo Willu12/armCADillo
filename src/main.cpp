@@ -70,7 +70,7 @@ int main(int, char **) {
                        "../shaders/texturedBillboardShader.frag");
 
   ModelController torusController(&torusModel);
-  CameraController cameraController;
+  CameraController cameraController(window);
   CursorController cursorController(window, cameraController.getCamera());
   TorusSettings torusSettings(&torusModel, &torusController);
 

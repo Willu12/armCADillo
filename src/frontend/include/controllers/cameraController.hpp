@@ -7,7 +7,10 @@
 
 class CameraController : IController {
 public:
-  CameraController() : _mouse(Mouse::getInstance()) { _camera = new Camera(); }
+  CameraController(GLFWwindow *window)
+      : _window(window), _mouse(Mouse::getInstance()) {
+    _camera = new Camera(_window);
+  }
 
   Camera *getCamera() const { return _camera; }
 
@@ -25,6 +28,7 @@ public:
 
 private:
   Camera *_camera;
+  GLFWwindow *_window;
   std::shared_ptr<Mouse> _mouse;
 
   const float cameraSpeed = M_PI / 400.f;

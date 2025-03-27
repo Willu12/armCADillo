@@ -17,16 +17,25 @@ public:
   void updatePosition(float x, float y, float aspectRatio,
                       const Camera &camera) {
     // get current position
+    auto projection = algebra::transformations::projection(aspectRatio);
+    auto sceneCursorPosition =
+        projection * (camera.viewMatrix() * _position.toHomogenous());
 
-    auto screenPosition = algebra::Vec3f(x, y, 0.f).toHomogenous();
+    sceneCursorPosition = sceneCursorPosition * (1.0f / sceneCursorPosition[3]);
+    float z_ndc = sceneCursorPosition[2];
+    float z_screen =
+        (z_ndc + 1.0f) * 0.5f; // Convert NDC [-1,1] to depth range [0,1]
+
+    auto screenPosition = algebra::Vec3f(x, y, z_ndc).toHomogenous();
 
     auto viewPosition =
         algebra::transformations::inverseProjection(aspectRatio) *
         screenPosition;
     viewPosition = viewPosition * (1. / viewPosition[3]);
-    auto worldPos = camera.inverseViewMatrix() * viewPosition;
 
-    _position = worldPos.fromHomogenous();
+    auto worldPos = camera.inverseViewMatrix() * (viewPosition);
+
+    _position = viewPosition.fromHomogenous();
     printf("x == %f, y== %f, z==%f w==%f\n", worldPos[0], worldPos[1],
            worldPos[2], worldPos[3]);
   }

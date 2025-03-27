@@ -1,9 +1,13 @@
 #pragma once
 #include "algebra.hpp"
+#include "glfwHelper.hpp"
 #include "spherical.hpp"
+#include "utils.hpp"
 
 class Camera {
 public:
+  explicit Camera(GLFWwindow *window) : _window(window) {}
+
   algebra::Mat4f viewMatrix() const {
     auto Tx =
         algebra::transformations::translationMatrix(0.f, 0.f, -_position._r);
@@ -24,6 +28,18 @@ public:
     return Tp * R.transpose() * Tx;
   }
 
+  algebra::Mat4f projectionMatrix() const {
+    auto aspectRatio = GLFWHelper::getAspectRatio(_window);
+    return algebra::transformations::projection(
+        algebra::rotations::toRadians(_zoom), aspectRatio, 0.1f, 100.f);
+  }
+
+  algebra::Mat4f inverseProjectionMatrix() const {
+    auto aspectRatio = GLFWHelper::getAspectRatio(_window);
+    return algebra::transformations::inverseProjection(_zoom, aspectRatio, 0.1f,
+                                                       100.f);
+  }
+
   void rotateHorizontal(float angle) {
     if (std::abs(_position._phi + angle) < M_PI_2)
       _position._phi += angle;
@@ -42,8 +58,8 @@ public:
   void updateTarget(float xShift, float yShift) {
     algebra::Vec4f shiftVector(xShift, yShift, 0.0f, 0.0f);
     auto shiftWorld = inverseViewMatrix() * shiftVector;
-    _target =
-        _target + algebra::Vec3f(shiftWorld[0], shiftWorld[1], shiftWorld[2]);
+    _target = _target + shiftWorld.fromHomogenous();
+    // algebra::Vec3f(shiftWorld[0], shiftWorld[1], shiftWorld[2]);
   }
 
   algebra::Vec3f getPosition() const { return _position.getCartesian(); }
@@ -52,8 +68,10 @@ public:
   }
 
 private:
+  GLFWwindow *_window;
   algebra::SphericalPosition<float> _position =
       algebra::SphericalPosition((algebra::Vec3f(0.0f, 0.1f, -1.f)));
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
   algebra::Vec3f _up = algebra::Vec3f(0.f, 1.0f, 0.f);
+  float _zoom = 30.f;
 };

@@ -40,6 +40,9 @@ public:
   void setModelMatrix(const algebra::Mat4f &model) const {
     setMat4f("model", model.transpose());
   }
+  void setProjectionMatrix(const algebra::Mat4f &projection) const {
+    setMat4f("projection", projection.transpose());
+  }
 
   void setProjectionMatrix(float aspectRatio) const {
     auto projectionMatrix = algebra::transformations::projection<float>(

@@ -14,7 +14,8 @@ public:
 
     shader.setViewMatrix(_camera->viewMatrix());
     shader.setModelMatrix(entity.getModelMatrix());
-    shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
+    // shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
+    shader.setProjectionMatrix(_camera->projectionMatrix());
 
     const Mesh &mesh = entity.getMesh();
 

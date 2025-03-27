@@ -12,7 +12,7 @@ public:
   void render(Camera *camera) {
     _shader.use();
     _shader.setViewMatrix(camera->viewMatrix());
-    _shader.setProjectionMatrix(getAspectRatio());
+    _shader.setProjectionMatrix(camera->projectionMatrix());
     _shader.setVec3f("cameraWorldPos", camera->getPosition());
 
     glEnable(GL_BLEND);
