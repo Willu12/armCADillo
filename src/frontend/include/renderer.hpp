@@ -1,6 +1,7 @@
 #pragma once
 #include "GLFW/glfw3.h"
 #include "camera.hpp"
+#include "glfwHelper.hpp"
 #include "torusModel.hpp"
 
 class MeshRenderer {
@@ -13,7 +14,7 @@ public:
 
     shader.setViewMatrix(_camera->viewMatrix());
     shader.setModelMatrix(entity.getModelMatrix());
-    shader.setProjectionMatrix(getAspectRatio());
+    shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
 
     const Mesh &mesh = entity.getMesh();
 
@@ -34,7 +35,7 @@ public:
     shader.setModelMatrix(
         _camera->getSphericalPosition().getRotationMatrix().transpose() *
         entity.getModelMatrix() * scaleMatrix);
-    shader.setProjectionMatrix(getAspectRatio());
+    shader.setProjectionMatrix(GLFWHelper::getAspectRatio(_window));
 
     const Mesh &mesh = entity.getMesh();
     glBindVertexArray(mesh._vao);
@@ -44,10 +45,4 @@ public:
 private:
   Camera *_camera;
   GLFWwindow *_window;
-
-  float getAspectRatio() const {
-    int width, height;
-    glfwGetFramebufferSize(_window, &width, &height);
-    return static_cast<float>(width) / static_cast<float>(height);
-  }
 };

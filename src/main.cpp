@@ -71,7 +71,7 @@ int main(int, char **) {
 
   ModelController torusController(&torusModel);
   CameraController cameraController;
-  CursorController cursorController;
+  CursorController cursorController(window, cameraController.getCamera());
   TorusSettings torusSettings(&torusModel, &torusController);
 
   Grid grid(window);

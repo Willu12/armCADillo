@@ -6,8 +6,9 @@
 
 class CursorController : IController {
 public:
-  CursorController()
-      : _cursor(std::make_unique<Cursor>()), _mouse(Mouse::getInstance()) {}
+  CursorController(GLFWwindow *window, Camera *camera)
+      : _window(window), _cursor(std::make_unique<Cursor>()),
+        _mouse(Mouse::getInstance()), _camera(camera) {}
 
   bool processMouse() override { return processLeftMouseButton(); }
   bool processScroll() override { return false; }
@@ -17,6 +18,8 @@ public:
 private:
   std::unique_ptr<Cursor> _cursor;
   std::shared_ptr<Mouse> _mouse;
+  GLFWwindow *_window;
+  Camera *_camera;
 
   bool processLeftMouseButton() {
     if (!ImGui::IsAnyItemActive() &&
@@ -37,8 +40,15 @@ private:
         //   _camera->rotateHorizontal(deltaX * cameraSpeed);
         //   _camera->rotateVertical(deltaY * cameraSpeed);
 
-        _cursor.get()->updatePosition(currentMousePosition.x,
-                                      currentMousePosition.y);
+        float x =
+            (2.f * currentMousePosition.x) / GLFWHelper::getWidth(_window) -
+            1.f;
+        float y = 1.f - (2.f * currentMousePosition.y) /
+                            GLFWHelper::getHeight(_window);
+
+        printf("SCREEN X{%f} Y{%f}\n", x, y);
+        _cursor.get()->updatePosition(x, y, GLFWHelper::getAspectRatio(_window),
+                                      *_camera);
         _mouse.get()->_position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
