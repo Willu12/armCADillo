@@ -62,7 +62,6 @@ int main(int, char **) {
   //
   TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
   TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
-  Cursor cursor;
 
   Shader shader("../shaders/vertexShader.hlsl",
                 "../shaders/fragmentShader.hlsl");
@@ -72,6 +71,7 @@ int main(int, char **) {
 
   ModelController torusController(&torusModel);
   CameraController cameraController;
+  CursorController cursorController;
   TorusSettings torusSettings(&torusModel, &torusController);
 
   Grid grid(window);
@@ -106,10 +106,15 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // TODO: TO TRZEBA ZMIENIC NA ABSTRAKCJE
+
     if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
       cameraController.processScroll();
-    else
+    else if (torusSettings._controllerKind ==
+             TorusSettings::ControllerKind::Model)
       torusController.processScroll();
+    else
+      cursorController.processScroll();
 
     torusSettings.ShowSettingsWindow();
 
@@ -121,10 +126,15 @@ int main(int, char **) {
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // TODO: TO TRZEBA ZMIENIC NA ABSTRAKCJE
     if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
       cameraController.processMouse();
-    else
+    else if (torusSettings._controllerKind ==
+             TorusSettings::ControllerKind::Model)
       torusController.processMouse();
+    else
+      cursorController.processMouse();
 
     if (torusSettings._change) {
       torusModel.updateMesh();
@@ -133,7 +143,7 @@ int main(int, char **) {
 
     grid.render(cameraController.getCamera());
     MeshRenderer.renderMesh(torusModel, shader);
-    MeshRenderer.renderBillboard(cursor, textureShader);
+    MeshRenderer.renderBillboard(cursorController.getCursor(), textureShader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

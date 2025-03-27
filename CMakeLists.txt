@@ -13,6 +13,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/frontend/include/
     src/frontend/include/gui/
     src/frontend/include/textures/
+    src/frontend/include/controllers/
     src/backend/include/entities/
 
 )

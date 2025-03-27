@@ -6,7 +6,7 @@
 
 class TorusSettings {
 public:
-  enum ControllerKind { Camera = 0, Model = 1 };
+  enum ControllerKind { Camera = 0, Model = 1, Cursor = 2 };
 
   TorusModel *_torusModel;
   bool _change;
@@ -35,7 +35,7 @@ public:
       _change |= ImGui::SliderInt("Vertical Density",
                                   &_torusModel->getMeshDensity().t, 3, 100);
 
-      const char *controllerOptions[] = {"Camera", "Model"};
+      const char *controllerOptions[] = {"Camera", "Model", "Cursor"};
       int selectedIndex = static_cast<int>(_controllerKind);
 
       if (ImGui::Combo("Controller", &selectedIndex, controllerOptions,

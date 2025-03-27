@@ -13,6 +13,8 @@ public:
   const Mesh &getMesh() const override { return *_mesh; }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
+  void updatePosition(float x, float y) {}
+
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.5f, 0.5f, 0.5f);
   float _radius = 0.05f;

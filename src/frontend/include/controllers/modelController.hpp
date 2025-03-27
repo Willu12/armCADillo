@@ -1,32 +1,34 @@
 #pragma once
-#include "camera.hpp"
-#include "imgui.h"
-#include "mouse.hpp"
-#include "vec.hpp"
+#include "IController.hpp"
+#include "torusModel.hpp"
 
-class CameraController {
+enum Axis { X = 0, Y = 1, Z = 2 };
+
+class ModelController : IController {
 public:
-  CameraController() : _mouse(Mouse::getInstance()) { _camera = new Camera(); }
+  Axis _transformationAxis = Axis::X;
 
-  Camera *getCamera() const { return _camera; }
+  ModelController(TorusModel *torusModel) : _torusModel(torusModel) {
+    _mouse = Mouse::getInstance();
+  }
 
-  bool processScroll() {
+  bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
       return false;
-    _camera->changeZoom(-scroll * zoomSpeed);
+    _torusModel->getScale() += scroll * _scrollSpeed;
     return true;
   }
 
-  bool processMouse() { return processLeftButton() || processRightButton(); }
+  bool processMouse() override {
+    return processLeftButton() || processRightButton();
+  }
 
 private:
-  Camera *_camera;
+  TorusModel *_torusModel;
+  const float _scrollSpeed = 0.01f;
+  const float _moveSpeed = 0.01f;
   std::shared_ptr<Mouse> _mouse;
-
-  const float cameraSpeed = M_PI / 400.f;
-  const float cameraMoveSpeed = 0.002f;
-  const float zoomSpeed = 0.1f;
 
   bool processLeftButton() {
     if (!ImGui::IsAnyItemActive() &&
@@ -44,8 +46,8 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _camera->rotateHorizontal(deltaX * cameraSpeed);
-        _camera->rotateVertical(deltaY * cameraSpeed);
+        _torusModel->getRotation().getRotation()[_transformationAxis] +=
+            deltaY * _moveSpeed;
         _mouse.get()->_position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
@@ -73,8 +75,7 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _camera->updateTarget(-deltaX * cameraMoveSpeed,
-                              deltaY * cameraMoveSpeed);
+        _torusModel->getPosition()[_transformationAxis] += deltaY * _moveSpeed;
         _mouse.get()->_position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
