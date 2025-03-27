@@ -15,6 +15,8 @@ public:
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updatePosition(float x, float y, const Camera &camera) {
+    auto zoom_rad = algebra::rotations::toRadians(camera.getZoom());
+
     auto projection = camera.projectionMatrix();
     auto sceneCursorPosition =
         projection * (camera.viewMatrix() * _position.toHomogenous());
@@ -25,7 +27,7 @@ public:
     auto screenPosition = algebra::Vec3f(x, y, z_ndc).toHomogenous();
 
     auto viewPosition = camera.inverseProjectionMatrix() * screenPosition;
-    viewPosition = viewPosition * (1. / viewPosition[3]);
+    viewPosition = viewPosition * (1.f / viewPosition[3]);
     auto worldPos = camera.inverseViewMatrix() * viewPosition;
     _position = worldPos.fromHomogenous();
   }

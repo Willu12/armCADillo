@@ -44,12 +44,6 @@ public:
     setMat4f("projection", projection.transpose());
   }
 
-  void setProjectionMatrix(float aspectRatio) const {
-    auto projectionMatrix = algebra::transformations::projection<float>(
-        1.3, aspectRatio, 0.1f, 100.f);
-    setMat4f("projection", projectionMatrix.transpose());
-  }
-
   void setInt(const std::string &name, int value) const {
     glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
   }

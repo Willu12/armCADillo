@@ -36,8 +36,8 @@ public:
 
   algebra::Mat4f inverseProjectionMatrix() const {
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
-    return algebra::transformations::inverseProjection(_zoom, aspectRatio, 0.1f,
-                                                       100.f);
+    return algebra::transformations::inverseProjection(
+        algebra::rotations::toRadians(_zoom), aspectRatio, 0.1f, 100.f);
   }
 
   void rotateHorizontal(float angle) {
@@ -66,6 +66,9 @@ public:
   algebra::SphericalPosition<float> getSphericalPosition() const {
     return _position;
   }
+
+  float &getZoom() { return _zoom; }
+  const float &getZoom() const { return _zoom; }
 
 private:
   GLFWwindow *_window;
