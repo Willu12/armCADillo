@@ -69,10 +69,10 @@ int main(int, char **) {
   Shader textureShader("../shaders/textureShader.vert",
                        "../shaders/texturedBillboardShader.frag");
 
-  ModelController torusController(&torusModel);
+  ModelController modelController(&torusModel);
   CameraController cameraController(window);
   CursorController cursorController(window, cameraController.getCamera());
-  TorusSettings torusSettings(&torusModel, &torusController);
+  TorusSettings torusSettings(&torusModel, &modelController);
 
   Grid grid(window);
 
@@ -112,7 +112,7 @@ int main(int, char **) {
       cameraController.processScroll();
     else if (torusSettings._controllerKind ==
              TorusSettings::ControllerKind::Model)
-      torusController.processScroll();
+      modelController.processScroll();
     else
       cursorController.processScroll();
 
@@ -132,7 +132,7 @@ int main(int, char **) {
       cameraController.processMouse();
     else if (torusSettings._controllerKind ==
              TorusSettings::ControllerKind::Model)
-      torusController.processMouse();
+      modelController.processMouse();
     else
       cursorController.processMouse();
 

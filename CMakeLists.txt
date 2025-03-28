@@ -9,13 +9,13 @@ add_subdirectory(external)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    src/backend/include/
-    src/frontend/include/
-    src/frontend/include/gui/
-    src/frontend/include/textures/
-    src/frontend/include/controllers/
-    src/backend/include/entities/
+    src/include/
+    src/gui/
+    src/textures/
+    src/controllers/
+    src/entities/
     src/utils/
+    src/
 
 )
 
