@@ -57,20 +57,10 @@ public:
     ImGui::SetNextWindowBgAlpha(0.9f);
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     if (ImGui::Begin("Settings", nullptr, window_flags)) {
-
       showFPSCounter();
-      /*
-      _change |=
-          ImGui::SliderFloat("R", &_torusModel->getInnerRadius(), 0.1f, 10.f);
-      _change |=
-          ImGui::SliderFloat("r", &_torusModel->getTubeRadius(), 0.1f, 10.f);
-      _change |= ImGui::SliderInt("Horizontal Density",
-                                  &_torusModel->getMeshDensity().s, 3, 100);
-      _change |= ImGui::SliderInt("Vertical Density",
-                                  &_torusModel->getMeshDensity().t, 3, 100);
-      */
       renderModelSettings();
       renderControllerUI();
+
       ImGui::End();
     }
   }

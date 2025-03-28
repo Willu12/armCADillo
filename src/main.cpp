@@ -104,7 +104,6 @@ int main(int, char **) {
     ImGui::NewFrame();
 
     gui.displayGUI();
-
     gui.getController().processScroll();
 
     // Rendering
