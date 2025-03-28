@@ -7,10 +7,8 @@
 
 class CameraController : public IController {
 public:
-  CameraController(GLFWwindow *window)
-      : _window(window), _mouse(Mouse::getInstance()) {
-    _camera = new Camera(_window);
-  }
+  CameraController(GLFWwindow *window, Camera *camera)
+      : _window(window), _mouse(Mouse::getInstance()), _camera(camera) {}
 
   Camera *getCamera() const { return _camera; }
 

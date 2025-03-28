@@ -7,7 +7,6 @@
 #include "cameraController.hpp"
 #include "gui.hpp"
 #include "renderer.hpp"
-#include "torusSettings.hpp"
 
 #include "cursor.hpp"
 #include "cursorController.hpp"
@@ -69,15 +68,12 @@ int main(int, char **) {
   Shader textureShader("../resources/shaders/textureShader.vert",
                        "../resources/shaders/texturedBillboardShader.frag");
 
-  ModelController modelController(&torusModel);
-  CameraController cameraController(window);
-  CursorController cursorController(window, cameraController.getCamera());
+  Camera *camera = new Camera(window);
 
-  TorusSettings torusSettings(&torusModel, &modelController);
-
+  GUI gui(window, camera, &torusModel);
   Grid grid(window);
 
-  MeshRenderer MeshRenderer(cameraController.getCamera(), window);
+  MeshRenderer MeshRenderer(camera, window);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -107,17 +103,9 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // TODO: TO TRZEBA ZMIENIC NA ABSTRAKCJE
+    gui.displayGUI();
 
-    if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
-      cameraController.processScroll();
-    else if (torusSettings._controllerKind ==
-             TorusSettings::ControllerKind::Model)
-      modelController.processScroll();
-    else
-      cursorController.processScroll();
-
-    torusSettings.ShowSettingsWindow();
+    gui.getController().processScroll();
 
     // Rendering
     ImGui::Render();
@@ -128,23 +116,10 @@ int main(int, char **) {
                  clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // TODO: TO TRZEBA ZMIENIC NA ABSTRAKCJE
-    if (torusSettings._controllerKind == TorusSettings::ControllerKind::Camera)
-      cameraController.processMouse();
-    else if (torusSettings._controllerKind ==
-             TorusSettings::ControllerKind::Model)
-      modelController.processMouse();
-    else
-      cursorController.processMouse();
-
-    if (torusSettings._change) {
-      torusModel.updateMesh();
-      torusSettings._change = false;
-    }
-
-    grid.render(cameraController.getCamera());
+    gui.getController().processMouse();
+    grid.render(camera);
     MeshRenderer.renderMesh(torusModel, shader);
-    MeshRenderer.renderBillboard(cursorController.getCursor(), textureShader);
+    MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

@@ -35,7 +35,18 @@ public:
 
   inline const Mesh &getMesh() const override { return *_mesh; }
 
-  void updateMesh() { _mesh = generateMesh(); }
+  void updateMesh() override { _mesh = generateMesh(); }
+
+  bool renderSettings() override {
+    bool change = false;
+    change |= ImGui::SliderFloat("R", &getInnerRadius(), 0.1f, 10.f);
+    change |= ImGui::SliderFloat("r", &getTubeRadius(), 0.1f, 10.f);
+    change |=
+        ImGui::SliderInt("Horizontal Density", &getMeshDensity().s, 3, 100);
+    change |= ImGui::SliderInt("Vertical Density", &getMeshDensity().t, 3, 100);
+
+    return change;
+  }
 
 private:
   algebra::Torus<float> _torus;

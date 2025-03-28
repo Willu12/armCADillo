@@ -23,6 +23,8 @@ public:
     return processLeftButton() || processRightButton();
   }
 
+  void updateEntity(IEntity *entity) { _entity = entity; }
+
 private:
   IEntity *_entity;
   const float _scrollSpeed = 0.01f;

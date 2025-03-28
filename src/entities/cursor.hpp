@@ -18,6 +18,8 @@ public:
   algebra::EulerAngle<float> &getRotation() override { return _rotation; }
   float &getScale() override { return _scale; }
 
+  void updateMesh() override { _mesh = generateMesh(); }
+  bool renderSettings() override { return false; } // CHANGE IT
   void updatePosition(float x, float y, const Camera &camera) {
     auto zoom_rad = algebra::rotations::toRadians(camera.getZoom());
 

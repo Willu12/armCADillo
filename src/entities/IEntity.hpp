@@ -13,4 +13,8 @@ public:
 
   virtual algebra::EulerAngle<float> &getRotation() = 0;
   virtual float &getScale() = 0;
+  virtual void updateMesh() = 0;
+
+  // MAYBE CHANGE IT LATER???
+  virtual bool renderSettings() = 0;
 };
