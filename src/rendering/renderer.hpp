@@ -1,5 +1,6 @@
 #pragma once
 #include "GLFW/glfw3.h"
+#include "IRenderable.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
 #include "torusModel.hpp"
@@ -10,7 +11,7 @@ public:
   MeshRenderer(Camera *camera, GLFWwindow *window)
       : _camera(camera), _window(window) {}
 
-  void renderMesh(const IEntity &entity, Shader &shader) {
+  void renderMesh(const IRenderable &entity, Shader &shader) {
     shader.use();
 
     shader.setViewMatrix(_camera->viewMatrix());
@@ -23,7 +24,7 @@ public:
     glDrawElements(GL_LINES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
   }
 
-  void renderBillboard(const IEntity &entity, Shader &shader) {
+  void renderBillboard(const IRenderable &entity, Shader &shader) {
     shader.use();
 
     auto entityWorldPos =

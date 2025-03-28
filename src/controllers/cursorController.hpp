@@ -13,7 +13,7 @@ public:
   bool processMouse() override { return processLeftMouseButton(); }
   bool processScroll() override { return false; }
 
-  const Cursor &getCursor() { return *_cursor; }
+  Cursor &getCursor() { return *_cursor; }
 
 private:
   std::unique_ptr<Cursor> _cursor;

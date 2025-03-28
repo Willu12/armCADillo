@@ -4,7 +4,7 @@
 #include "transformations.hpp"
 #include "vec.hpp"
 
-class Cursor : public IEntity {
+class Cursor : public IRenderable {
 public:
   Cursor() : _mesh(generateMesh()) {}
   algebra::Mat4f getModelMatrix() const override {
@@ -12,14 +12,19 @@ public:
   }
 
   const Mesh &getMesh() const override { return *_mesh; }
-  algebra::Vec3f &getPosition() override { return _position; }
+  // algebra::Vec3f &getPosition() override { return _position; }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
-  algebra::EulerAngle<float> &getRotation() override { return _rotation; }
-  float &getScale() override { return _scale; }
+  // algebra::EulerAngle<float> &getRotation() override { return _rotation; }
+  //  float &getScale() override { return _scale; }
 
-  void updateMesh() override { _mesh = generateMesh(); }
-  bool renderSettings() override { return false; } // CHANGE IT
+  //  void updateMesh() override { _mesh = generateMesh(); }
+  // bool renderSettings() override { return false; } // CHANGE IT
+  void updatePosition(float x, float y, float z) {
+    printf("position = [%f]\n", x);
+    _position = algebra::Vec3f(x, y, z);
+  }
+
   void updatePosition(float x, float y, const Camera &camera) {
     auto zoom_rad = algebra::rotations::toRadians(camera.getZoom());
 

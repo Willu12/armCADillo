@@ -44,7 +44,7 @@ public:
     }
   }
 
-  const Cursor &getCursor() const {
+  Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
         _controllers[static_cast<int>(ControllerKind::Cursor)]);
     return cursorController.get()->getCursor();
@@ -97,19 +97,37 @@ private:
       _selectedController = static_cast<ControllerKind>(selectedIndex);
     }
     if (_selectedController == ControllerKind::Model) {
-      const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
+      renderModelControllSettings();
+      auto cursor = getCursor();
+      printf("cursor [%f]\n", cursor.getPosition()[0]);
+    } else if (_selectedController == ControllerKind::Cursor)
+      renderCursorControllerSettings();
+  }
 
-      auto modelController = std::dynamic_pointer_cast<ModelController>(
-          _controllers[static_cast<int>(ControllerKind::Model)]);
+  void renderModelControllSettings() {
+    const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
 
-      if (modelController) {
-        selectedIndex = static_cast<int>(modelController->_transformationAxis);
-        if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
-                         IM_ARRAYSIZE(AxisOptions))) {
-          modelController->_transformationAxis =
-              static_cast<Axis>(selectedIndex);
-        }
+    auto modelController = std::dynamic_pointer_cast<ModelController>(
+        _controllers[static_cast<int>(ControllerKind::Model)]);
+
+    if (modelController) {
+      int selectedIndex =
+          static_cast<int>(modelController->_transformationAxis);
+      if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
+                       IM_ARRAYSIZE(AxisOptions))) {
+        modelController->_transformationAxis = static_cast<Axis>(selectedIndex);
       }
+    }
+  }
+
+  void renderCursorControllerSettings() {
+    auto cursor = getCursor();
+    auto cursorPosition = cursor.getPosition();
+    float position[3] = {cursorPosition[0], cursorPosition[1],
+                         cursorPosition[2]};
+
+    if (ImGui::InputFloat3("Cursor Position", position)) {
+      cursor.updatePosition(position[0], position[1], position[2]);
     }
   }
 
