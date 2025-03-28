@@ -32,6 +32,15 @@ static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
   io.MouseWheel += static_cast<float>(yoffset); // Update ImGui's mouse wheel
 }
 
+void setupViewPortAndClear(GLFWwindow *window, const ImVec4 &clearColor) {
+  int display_w, display_h;
+  glfwGetFramebufferSize(window, &display_w, &display_h);
+  glViewport(0, 0, display_w, display_h);
+  glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w,
+               clearColor.z * clearColor.w, clearColor.w);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
   if (!glfwInit())
@@ -108,12 +117,7 @@ int main(int, char **) {
 
     // Rendering
     ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
-                 clear_color.z * clear_color.w, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
+    setupViewPortAndClear(window, clear_color);
 
     gui.getController().processMouse();
     grid.render(camera);
