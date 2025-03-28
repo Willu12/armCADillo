@@ -5,7 +5,7 @@
 #include "mouse.hpp"
 #include "vec.hpp"
 
-class CameraController : IController {
+class CameraController : public IController {
 public:
   CameraController(GLFWwindow *window)
       : _window(window), _mouse(Mouse::getInstance()) {

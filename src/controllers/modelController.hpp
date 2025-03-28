@@ -1,21 +1,21 @@
 #pragma once
 #include "IController.hpp"
-#include "torusModel.hpp"
+#include "IEntity.hpp"
 
 enum Axis { X = 0, Y = 1, Z = 2 };
 
-class ModelController : IController {
+class ModelController : public IController {
 public:
   Axis _transformationAxis = Axis::X;
 
-  ModelController(TorusModel *torusModel)
-      : _torusModel(torusModel), _mouse(Mouse::getInstance()) {}
+  ModelController(IEntity *entity)
+      : _entity(entity), _mouse(Mouse::getInstance()) {}
 
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
       return false;
-    _torusModel->getScale() += scroll * _scrollSpeed;
+    _entity->getScale() += scroll * _scrollSpeed;
     return true;
   }
 
@@ -24,7 +24,7 @@ public:
   }
 
 private:
-  TorusModel *_torusModel;
+  IEntity *_entity;
   const float _scrollSpeed = 0.01f;
   const float _moveSpeed = 0.01f;
   Mouse &_mouse;
@@ -45,7 +45,7 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _torusModel->getRotation().getRotation()[_transformationAxis] +=
+        _entity->getRotation().getRotation()[_transformationAxis] +=
             deltaY * _moveSpeed;
         _mouse._position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
@@ -74,7 +74,7 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _torusModel->getPosition()[_transformationAxis] += deltaY * _moveSpeed;
+        _entity->getPosition()[_transformationAxis] += deltaY * _moveSpeed;
         _mouse._position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;

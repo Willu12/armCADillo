@@ -6,8 +6,9 @@
 class Grid {
 public:
   Grid(GLFWwindow *window)
-      : _window(window), _shader("../shaders/gridVertexShader.hlsl",
-                                 "../shaders/gridFragmentShader.hlsl") {}
+      : _window(window),
+        _shader("../resources/shaders/gridVertexShader.hlsl",
+                "../resources/shaders/gridFragmentShader.hlsl") {}
 
   void render(Camera *camera) {
     _shader.use();

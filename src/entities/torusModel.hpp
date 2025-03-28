@@ -16,10 +16,10 @@ public:
 
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
-  float &getScale() { return _scale; }
-  algebra::Vec3f &getPosition() { return _position; }
+  float &getScale() override { return _scale; }
+  algebra::Vec3f &getPosition() override { return _position; }
   const algebra::Vec3f &getPosition() const override { return _position; }
-  algebra::EulerAngle<float> &getRotation() { return _rotation; }
+  algebra::EulerAngle<float> &getRotation() override { return _rotation; }
 
   MeshDensity &getMeshDensity() { return _meshDensity; }
 

@@ -63,15 +63,16 @@ int main(int, char **) {
   TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
   TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
 
-  Shader shader("../shaders/vertexShader.hlsl",
-                "../shaders/fragmentShader.hlsl");
+  Shader shader("../resources/shaders/vertexShader.hlsl",
+                "../resources/shaders/fragmentShader.hlsl");
 
-  Shader textureShader("../shaders/textureShader.vert",
-                       "../shaders/texturedBillboardShader.frag");
+  Shader textureShader("../resources/shaders/textureShader.vert",
+                       "../resources/shaders/texturedBillboardShader.frag");
 
   ModelController modelController(&torusModel);
   CameraController cameraController(window);
   CursorController cursorController(window, cameraController.getCamera());
+
   TorusSettings torusSettings(&torusModel, &modelController);
 
   Grid grid(window);

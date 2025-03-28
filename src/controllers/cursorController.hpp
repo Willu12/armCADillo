@@ -4,7 +4,7 @@
 #include "cursor.hpp"
 #include "mouse.hpp"
 
-class CursorController : IController {
+class CursorController : public IController {
 public:
   CursorController(GLFWwindow *window, Camera *camera)
       : _window(window), _cursor(std::make_unique<Cursor>()),
