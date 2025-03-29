@@ -66,6 +66,7 @@ public:
       renderControllerUI();
       displayEntitiesList();
       renderCreateTorusUI();
+      removeButtonUI();
 
       ImGui::End();
     }
@@ -145,6 +146,11 @@ private:
       createTorus();
   }
 
+  void removeButtonUI() {
+    if (ImGui::Button("Remove Entity"))
+      deleteEntity();
+  }
+
   void createTorus() {
     auto cursorPosition = getCursor().getPosition();
     auto torus = new TorusModel(2.f, 1.f, cursorPosition);
@@ -179,5 +185,16 @@ private:
     _controllers[static_cast<int>(ControllerKind::Model)] =
         std::make_shared<ModelController>(
             _entities[_selectedEntityIndex.value()]);
+  }
+
+  void deleteEntity() {
+    _entities.erase(_entities.begin() + _selectedEntityIndex.value());
+
+    if (_entities.size() == 0) {
+      _selectedEntityIndex = std::nullopt;
+      return;
+    }
+
+    _selectedEntityIndex = _selectedEntityIndex.value() % _entities.size();
   }
 };
