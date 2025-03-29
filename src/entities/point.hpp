@@ -8,7 +8,7 @@
 class Point : public IEntity {
 public:
   Point(algebra::Vec3f position)
-      : _position(position), _sphere(0.05f),
+      : _position(position), _sphere(0.01f),
         _name("Point_" + std::to_string(_id++)), _mesh(generateMesh()) {}
 
   algebra::Vec3f &getPosition() override { return _position; }
