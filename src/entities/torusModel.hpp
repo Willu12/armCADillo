@@ -1,7 +1,9 @@
 #pragma once
 #include "IEntity.hpp"
 #include "algebra.hpp"
+#include "imgui_stdlib.h"
 #include "mesh.hpp"
+#include <string>
 
 struct MeshDensity {
   int s = 20;
@@ -12,7 +14,8 @@ class TorusModel : public IEntity {
 public:
   TorusModel(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _position(position),
-        _mesh(generateMesh()) {}
+        _mesh(generateMesh()),
+        _name("Torus_" + std::to_string(TorusModel::_id++)) {}
 
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
@@ -39,6 +42,11 @@ public:
 
   bool renderSettings() override {
     bool change = false;
+
+    if (ImGui::InputText("Name", &getName())) {
+      change = true;
+    }
+
     change |= ImGui::SliderFloat("R", &getInnerRadius(), 0.1f, 10.f);
     change |= ImGui::SliderFloat("r", &getTubeRadius(), 0.1f, 10.f);
     change |=
@@ -48,6 +56,8 @@ public:
     return change;
   }
 
+  std::string &getName() override { return _name; }
+
 private:
   algebra::Torus<float> _torus;
   algebra::Vec3f _position;
@@ -55,6 +65,8 @@ private:
   float _scale = .1;
   MeshDensity _meshDensity;
   std::shared_ptr<Mesh> _mesh;
+  std::string _name;
+  static inline int _id;
 
   std::shared_ptr<Mesh> generateMesh() {
     auto vertices = generateVertices();

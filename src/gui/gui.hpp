@@ -12,7 +12,7 @@ public:
       : _window(window), _camera(camera) {
     _entities.push_back(_entity);
     initControllers();
-    selectEntity(_entity);
+    selectEntity(0);
   }
 
   void calculateFPS() {
@@ -34,8 +34,9 @@ public:
     return *_controllers[static_cast<int>(_selectedController)];
   }
 
-  void selectEntity(IEntity *entity) {
-    _selectedEntity = entity;
+  void selectEntity(int entityIndex) {
+    _selectedEntityIndex = entityIndex;
+    auto entity = _entities[entityIndex];
     auto modelController = std::dynamic_pointer_cast<ModelController>(
         _controllers[static_cast<int>(ControllerKind::Model)]);
 
@@ -60,6 +61,7 @@ public:
       showFPSCounter();
       renderModelSettings();
       renderControllerUI();
+      displayEntitiesList();
 
       ImGui::End();
     }
@@ -68,7 +70,7 @@ public:
 private:
   GLFWwindow *_window;
   Camera *_camera;
-  IEntity *_selectedEntity;
+  int _selectedEntityIndex = 0;
   std::vector<IEntity *> _entities;
   std::shared_ptr<IController> _controllers[3];
   ControllerKind _selectedController = ControllerKind::Camera;
@@ -82,7 +84,7 @@ private:
         std::make_shared<CameraController>(_window, _camera);
 
     _controllers[static_cast<int>(ControllerKind::Model)] =
-        std::make_shared<ModelController>(_selectedEntity);
+        std::make_shared<ModelController>(_entities[_selectedEntityIndex]);
 
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
         std::make_shared<CursorController>(_window, _camera);
@@ -132,7 +134,19 @@ private:
   }
 
   void renderModelSettings() {
-    if (_selectedEntity->renderSettings())
-      _selectedEntity->updateMesh();
+    auto selectedEntity = _entities[_selectedEntityIndex];
+    if (selectedEntity->renderSettings())
+      selectedEntity->updateMesh();
+  }
+
+  void displayEntitiesList() {
+    for (int i = 0; i < _entities.size(); ++i) {
+
+      auto name = _entities[i]->getName();
+      name = name.empty() ? "##" : name;
+      if (ImGui::Selectable(name.c_str(), _selectedEntityIndex == i)) {
+        _selectedEntityIndex = i;
+      }
+    }
   }
 };

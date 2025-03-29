@@ -12,14 +12,8 @@ public:
   }
 
   const Mesh &getMesh() const override { return *_mesh; }
-  // algebra::Vec3f &getPosition() override { return _position; }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
-  // algebra::EulerAngle<float> &getRotation() override { return _rotation; }
-  //  float &getScale() override { return _scale; }
-
-  //  void updateMesh() override { _mesh = generateMesh(); }
-  // bool renderSettings() override { return false; } // CHANGE IT
   void updatePosition(float x, float y, float z) {
     printf("position = [%f]\n", x);
     _position = algebra::Vec3f(x, y, z);
@@ -45,9 +39,7 @@ public:
 
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.0f, 0.0f, 0.0f);
-  algebra::EulerAngle<float> _rotation;
   float _radius = 0.03f;
-  float _scale = 1.f;
   std::shared_ptr<Mesh> _mesh;
 
   std::shared_ptr<Mesh> generateMesh() {
