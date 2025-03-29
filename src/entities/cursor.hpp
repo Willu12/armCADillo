@@ -15,7 +15,6 @@ public:
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updatePosition(float x, float y, float z) {
-    printf("position = [%f]\n", x);
     _position = algebra::Vec3f(x, y, z);
   }
 
@@ -39,7 +38,7 @@ public:
 
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.0f, 0.0f, 0.0f);
-  float _radius = 0.03f;
+  float _radius = 0.025f;
   std::shared_ptr<Mesh> _mesh;
 
   std::shared_ptr<Mesh> generateMesh() {

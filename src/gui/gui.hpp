@@ -123,11 +123,10 @@ private:
   }
 
   void renderCursorControllerSettings() {
-    auto cursor = getCursor();
-    auto cursorPosition = cursor.getPosition();
+    auto &cursor = getCursor();
+    auto &cursorPosition = cursor.getPosition();
     float position[3] = {cursorPosition[0], cursorPosition[1],
                          cursorPosition[2]};
-
     if (ImGui::InputFloat3("Cursor Position", position)) {
       cursor.updatePosition(position[0], position[1], position[2]);
     }

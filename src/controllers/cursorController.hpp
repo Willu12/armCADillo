@@ -7,7 +7,7 @@
 class CursorController : public IController {
 public:
   CursorController(GLFWwindow *window, Camera *camera)
-      : _window(window), _cursor(std::make_unique<Cursor>()),
+      : _window(window), _cursor(std::make_shared<Cursor>()),
         _mouse(Mouse::getInstance()), _camera(camera) {}
 
   bool processMouse() override { return processLeftMouseButton(); }
@@ -16,7 +16,7 @@ public:
   Cursor &getCursor() { return *_cursor; }
 
 private:
-  std::unique_ptr<Cursor> _cursor;
+  std::shared_ptr<Cursor> _cursor;
   Mouse &_mouse;
   GLFWwindow *_window;
   Camera *_camera;
