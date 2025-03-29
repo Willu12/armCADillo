@@ -36,15 +36,14 @@ public:
     _selectedEntityIndex = entityIndex;
     auto entity = _entities[entityIndex];
 
-    if (_controllers[static_cast<int>(ControllerKind::Model)] == nullptr)
+    auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
+    if (controller == nullptr)
       initModelController();
 
-    auto modelController = std::dynamic_pointer_cast<ModelController>(
-        _controllers[static_cast<int>(ControllerKind::Model)]);
+    auto modelController =
+        std::dynamic_pointer_cast<ModelController>(controller);
 
-    if (modelController) {
-      modelController->updateEntity(entity);
-    }
+    modelController->updateEntity(entity);
   }
 
   const std::vector<IEntity *> &getEntities() const { return _entities; }
@@ -171,7 +170,7 @@ private:
       auto name = _entities[i]->getName();
       name = name.empty() ? "##" : name;
       if (ImGui::Selectable(name.c_str(), _selectedEntityIndex.value() == i)) {
-        _selectedEntityIndex = i;
+        selectEntity(i);
       }
     }
   }
