@@ -3,6 +3,11 @@
 #include "vec.hpp"
 #include <vector>
 
+struct MeshDensity {
+  int s = 20;
+  int t = 20;
+};
+
 class Mesh {
 public:
   uint32_t _vao, _vbo, _ebo;

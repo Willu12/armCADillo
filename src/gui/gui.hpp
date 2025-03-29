@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "controllers.hpp"
 #include "imgui.h"
+#include "point.hpp"
 #include "torusModel.hpp"
 #include <chrono>
 
@@ -66,6 +67,7 @@ public:
       renderControllerUI();
       displayEntitiesList();
       renderCreateTorusUI();
+      renderCreatePointUI();
       removeButtonUI();
 
       ImGui::End();
@@ -146,6 +148,11 @@ private:
       createTorus();
   }
 
+  void renderCreatePointUI() {
+    if (ImGui::Button("Add new point"))
+      createPoint();
+  }
+
   void removeButtonUI() {
     if (ImGui::Button("Remove Entity"))
       deleteEntity();
@@ -155,6 +162,12 @@ private:
     auto cursorPosition = getCursor().getPosition();
     auto torus = new TorusModel(2.f, 1.f, cursorPosition);
     addEntity(torus);
+  }
+
+  void createPoint() {
+    auto cursorPosition = getCursor().getPosition();
+    auto point = new Point(cursorPosition);
+    addEntity(point);
   }
 
   void addEntity(IEntity *entity) {
