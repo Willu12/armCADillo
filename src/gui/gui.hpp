@@ -9,9 +9,7 @@ enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2 };
 
 class GUI {
 public:
-  GUI(GLFWwindow *window, Camera *camera, IEntity *_entity)
-      : _window(window), _camera(camera) {
-    addEntity(_entity);
+  GUI(GLFWwindow *window, Camera *camera) : _window(window), _camera(camera) {
     initControllers();
   }
 
@@ -37,6 +35,10 @@ public:
   void selectEntity(int entityIndex) {
     _selectedEntityIndex = entityIndex;
     auto entity = _entities[entityIndex];
+
+    if (_controllers[static_cast<int>(ControllerKind::Model)] == nullptr)
+      initModelController();
+
     auto modelController = std::dynamic_pointer_cast<ModelController>(
         _controllers[static_cast<int>(ControllerKind::Model)]);
 
@@ -73,7 +75,7 @@ public:
 private:
   GLFWwindow *_window;
   Camera *_camera;
-  int _selectedEntityIndex = 0;
+  std::optional<int> _selectedEntityIndex = std::nullopt;
   std::vector<IEntity *> _entities;
   std::shared_ptr<IController> _controllers[3];
   ControllerKind _selectedController = ControllerKind::Camera;
@@ -86,8 +88,8 @@ private:
     _controllers[static_cast<int>(ControllerKind::Camera)] =
         std::make_shared<CameraController>(_window, _camera);
 
-    _controllers[static_cast<int>(ControllerKind::Model)] =
-        std::make_shared<ModelController>(_entities[_selectedEntityIndex]);
+    if (_selectedEntityIndex)
+      initModelController();
 
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
         std::make_shared<CursorController>(_window, _camera);
@@ -99,11 +101,17 @@ private:
 
     if (ImGui::Combo("Controller", &selectedIndex, controllerOptions,
                      IM_ARRAYSIZE(controllerOptions))) {
-      _selectedController = static_cast<ControllerKind>(selectedIndex);
+      if (_controllers[static_cast<int>(ControllerKind::Model)] != nullptr ||
+          selectedIndex != 1) {
+        _selectedController = static_cast<ControllerKind>(selectedIndex);
+      }
     }
-    if (_selectedController == ControllerKind::Model)
-      renderModelControllSettings();
-    else if (_selectedController == ControllerKind::Cursor)
+
+    if (_selectedController == ControllerKind::Model) {
+      if (_controllers[static_cast<int>(ControllerKind::Model)] != nullptr)
+        renderModelControllSettings();
+
+    } else if (_selectedController == ControllerKind::Cursor)
       renderCursorControllerSettings();
   }
 
@@ -150,7 +158,9 @@ private:
   }
 
   void renderModelSettings() {
-    auto selectedEntity = _entities[_selectedEntityIndex];
+    if (!_selectedEntityIndex)
+      return;
+    auto selectedEntity = _entities[_selectedEntityIndex.value()];
     if (selectedEntity->renderSettings())
       selectedEntity->updateMesh();
   }
@@ -160,9 +170,15 @@ private:
 
       auto name = _entities[i]->getName();
       name = name.empty() ? "##" : name;
-      if (ImGui::Selectable(name.c_str(), _selectedEntityIndex == i)) {
+      if (ImGui::Selectable(name.c_str(), _selectedEntityIndex.value() == i)) {
         _selectedEntityIndex = i;
       }
     }
+  }
+
+  void initModelController() {
+    _controllers[static_cast<int>(ControllerKind::Model)] =
+        std::make_shared<ModelController>(
+            _entities[_selectedEntityIndex.value()]);
   }
 };

@@ -67,8 +67,6 @@ int main(int, char **) {
   Image image("../resources/textures/cursorTexture.png");
   TextureResource textureResource(image);
   Texture texture(textureResource);
-  //
-  TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
 
   Shader shader("../resources/shaders/vertexShader.hlsl",
                 "../resources/shaders/fragmentShader.hlsl");
@@ -78,7 +76,7 @@ int main(int, char **) {
 
   Camera *camera = new Camera(window);
 
-  GUI gui(window, camera, &torusModel);
+  GUI gui(window, camera);
   Grid grid(window);
 
   MeshRenderer MeshRenderer(camera, window);
