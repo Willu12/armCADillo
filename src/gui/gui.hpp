@@ -5,6 +5,7 @@
 #include "point.hpp"
 #include "torusModel.hpp"
 #include <chrono>
+#include <unordered_set>
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2 };
 
@@ -34,7 +35,7 @@ public:
   }
 
   void selectEntity(int entityIndex) {
-    _selectedEntityIndex = entityIndex;
+    _selectedEntities.insert(entityIndex);
     auto entity = _entities[entityIndex];
 
     auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
@@ -77,7 +78,7 @@ public:
 private:
   GLFWwindow *_window;
   Camera *_camera;
-  std::optional<int> _selectedEntityIndex = std::nullopt;
+  std::unordered_set<uint32_t> _selectedEntities;
   std::vector<IEntity *> _entities;
   std::shared_ptr<IController> _controllers[3];
   ControllerKind _selectedController = ControllerKind::Camera;
@@ -90,7 +91,7 @@ private:
     _controllers[static_cast<int>(ControllerKind::Camera)] =
         std::make_shared<CameraController>(_window, _camera);
 
-    if (_selectedEntityIndex)
+    if (!_selectedEntities.empty())
       initModelController();
 
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
@@ -155,7 +156,7 @@ private:
 
   void removeButtonUI() {
     if (ImGui::Button("Remove Entity"))
-      deleteEntity();
+      deleteSelectedEntities();
   }
 
   void createTorus() {
@@ -176,9 +177,9 @@ private:
   }
 
   void renderModelSettings() {
-    if (!_selectedEntityIndex)
+    if (_selectedEntities.size() != 1)
       return;
-    auto selectedEntity = _entities[_selectedEntityIndex.value()];
+    auto selectedEntity = _entities[*_selectedEntities.begin()];
     if (selectedEntity->renderSettings())
       selectedEntity->updateMesh();
   }
@@ -188,8 +189,20 @@ private:
 
       auto name = _entities[i]->getName();
       name = name.empty() ? "##" : name;
-      if (ImGui::Selectable(name.c_str(), _selectedEntityIndex.value() == i)) {
-        selectEntity(i);
+      bool isSelected = _selectedEntities.find(i) != _selectedEntities.end();
+
+      if (ImGui::Selectable(name.c_str(), isSelected,
+                            ImGuiSelectableFlags_AllowDoubleClick)) {
+        if (ImGui::GetIO().KeyCtrl) { // Ctrl for multi-selection
+          if (isSelected) {
+            _selectedEntities.erase(i);
+          } else {
+            _selectedEntities.insert(i);
+          }
+        } else { // Single selection
+          _selectedEntities.clear();
+          _selectedEntities.insert(i);
+        }
       }
     }
   }
@@ -197,17 +210,25 @@ private:
   void initModelController() {
     _controllers[static_cast<int>(ControllerKind::Model)] =
         std::make_shared<ModelController>(
-            _entities[_selectedEntityIndex.value()]);
+            _entities[*_selectedEntities.begin()]);
   }
 
-  void deleteEntity() {
-    _entities.erase(_entities.begin() + _selectedEntityIndex.value());
-
-    if (_entities.size() == 0) {
-      _selectedEntityIndex = std::nullopt;
+  void deleteSelectedEntities() {
+    if (_selectedEntities.empty())
       return;
+
+    std::vector<int> sortedIndices(_selectedEntities.begin(),
+                                   _selectedEntities.end());
+    std::sort(sortedIndices.rbegin(), sortedIndices.rend()); // Reverse sort
+
+    // Remove elements in reverse order to avoid shifting issues
+    for (int entityIndex : sortedIndices) {
+      if (entityIndex >= 0 && entityIndex < _entities.size()) {
+        _entities.erase(_entities.begin() + entityIndex);
+      }
     }
 
-    _selectedEntityIndex = _selectedEntityIndex.value() % _entities.size();
+    // Clear the selection set
+    _selectedEntities.clear();
   }
 };
