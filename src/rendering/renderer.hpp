@@ -11,6 +11,12 @@ public:
   MeshRenderer(Camera *camera, GLFWwindow *window)
       : _camera(camera), _window(window) {}
 
+  void renderEntities(const std::vector<IEntity *> &entities, Shader &shader) {
+    for (int i = 0; i < entities.size(); ++i) {
+      renderMesh(*entities[i], shader);
+    }
+  }
+
   void renderMesh(const IRenderable &entity, Shader &shader) {
     shader.use();
 

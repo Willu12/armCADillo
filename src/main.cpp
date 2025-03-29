@@ -69,7 +69,6 @@ int main(int, char **) {
   Texture texture(textureResource);
   //
   TorusModel torusModel(2.f, 1.0f, algebra::Vec3f(0.f, 0.f, 0.f));
-  TorusModel torusModel2(2.f, 1.0f, algebra::Vec3f(0.5f, 0.5f, 0.5f));
 
   Shader shader("../resources/shaders/vertexShader.hlsl",
                 "../resources/shaders/fragmentShader.hlsl");
@@ -121,7 +120,7 @@ int main(int, char **) {
 
     gui.getController().processMouse();
     grid.render(camera);
-    MeshRenderer.renderMesh(torusModel, shader);
+    MeshRenderer.renderEntities(gui.getEntities(), shader);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

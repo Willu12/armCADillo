@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "controllers.hpp"
 #include "imgui.h"
+#include "torusModel.hpp"
 #include <chrono>
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2 };
@@ -10,9 +11,8 @@ class GUI {
 public:
   GUI(GLFWwindow *window, Camera *camera, IEntity *_entity)
       : _window(window), _camera(camera) {
-    _entities.push_back(_entity);
+    addEntity(_entity);
     initControllers();
-    selectEntity(0);
   }
 
   void calculateFPS() {
@@ -45,6 +45,8 @@ public:
     }
   }
 
+  const std::vector<IEntity *> &getEntities() const { return _entities; }
+
   Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
         _controllers[static_cast<int>(ControllerKind::Cursor)]);
@@ -62,6 +64,7 @@ public:
       renderModelSettings();
       renderControllerUI();
       displayEntitiesList();
+      renderCreateTorusUI();
 
       ImGui::End();
     }
@@ -98,11 +101,9 @@ private:
                      IM_ARRAYSIZE(controllerOptions))) {
       _selectedController = static_cast<ControllerKind>(selectedIndex);
     }
-    if (_selectedController == ControllerKind::Model) {
+    if (_selectedController == ControllerKind::Model)
       renderModelControllSettings();
-      auto cursor = getCursor();
-      printf("cursor [%f]\n", cursor.getPosition()[0]);
-    } else if (_selectedController == ControllerKind::Cursor)
+    else if (_selectedController == ControllerKind::Cursor)
       renderCursorControllerSettings();
   }
 
@@ -130,6 +131,22 @@ private:
     if (ImGui::InputFloat3("Cursor Position", position)) {
       cursor.updatePosition(position[0], position[1], position[2]);
     }
+  }
+
+  void renderCreateTorusUI() {
+    if (ImGui::Button("Add new torus"))
+      createTorus();
+  }
+
+  void createTorus() {
+    auto cursorPosition = getCursor().getPosition();
+    auto torus = new TorusModel(2.f, 1.f, cursorPosition);
+    addEntity(torus);
+  }
+
+  void addEntity(IEntity *entity) {
+    _entities.push_back(entity);
+    selectEntity(_entities.size() - 1);
   }
 
   void renderModelSettings() {
