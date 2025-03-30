@@ -14,6 +14,7 @@
 #include "torusEntity.hpp"
 
 #include "image.hpp"
+#include "quaternion.hpp"
 #include "texture.hpp"
 #include "textureResource.hpp"
 
