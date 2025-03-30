@@ -5,12 +5,12 @@
 #include "mesh.hpp"
 #include <string>
 
-class TorusModel : public IEntity {
+class TorusEntity : public IEntity {
 public:
-  TorusModel(float innerRadius, float tubeRadius, algebra::Vec3f position)
+  TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _position(position),
         _mesh(generateMesh()),
-        _name("Torus_" + std::to_string(TorusModel::_id++)) {}
+        _name("Torus_" + std::to_string(TorusEntity::_id++)) {}
 
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }

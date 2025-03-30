@@ -1,9 +1,11 @@
 #pragma once
 #include "GLFW/glfw3.h"
+#include "centerPoint.hpp"
 #include "controllers.hpp"
 #include "imgui.h"
-#include "pointModel.hpp"
-#include "torusModel.hpp"
+#include "optional"
+#include "pointEntity.hpp"
+#include "torusEntity.hpp"
 #include <chrono>
 #include <unordered_set>
 
@@ -35,6 +37,15 @@ public:
     return cursorController.get()->getCursor();
   }
 
+  std::optional<const IRenderable *> getCenterPoint() {
+
+    if (_selectedEntities.size() == 0)
+      return std::nullopt;
+
+    _centerPoint.display(getSelectedEntities());
+    return &_centerPoint.getPoint();
+  }
+
   void displayGUI() {
     ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
@@ -46,7 +57,7 @@ public:
       renderModelSettings();
       renderControllerUI();
       displayEntitiesList();
-      renderShowCenterPointUI();
+
       renderCreateTorusUI();
       renderCreatePointUI();
       removeButtonUI();
@@ -62,7 +73,7 @@ private:
   std::vector<IEntity *> _entities;
   std::shared_ptr<IController> _controllers[3];
   ControllerKind _selectedController = ControllerKind::Camera;
-  bool _showCenterPoint = false;
+  CenterPoint _centerPoint;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
@@ -140,19 +151,15 @@ private:
       deleteSelectedEntities();
   }
 
-  void renderShowCenterPointUI() {
-    ImGui::Checkbox("Show Center Point", &_showCenterPoint);
-  };
-
   void createTorus() {
     auto cursorPosition = getCursor().getPosition();
-    auto torus = new TorusModel(2.f, 1.f, cursorPosition);
+    auto torus = new TorusEntity(2.f, 1.f, cursorPosition);
     addEntity(torus);
   }
 
   void createPoint() {
     auto cursorPosition = getCursor().getPosition();
-    auto point = new PointModel(cursorPosition);
+    auto point = new PointEntity(cursorPosition);
     addEntity(point);
   }
 

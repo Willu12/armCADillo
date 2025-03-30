@@ -6,9 +6,9 @@
 #include "point.hpp"
 #include "sphere.hpp"
 
-class PointModel : public IEntity, public Point {
+class PointEntity : public IEntity, public Point {
 public:
-  PointModel(algebra::Vec3f position)
+  PointEntity(algebra::Vec3f position)
       : Point(position), _name("Point_" + std::to_string(_id++)) {}
 
   algebra::Vec3f &getPosition() override { return _position; }

@@ -11,7 +11,7 @@
 #include "cursor.hpp"
 #include "cursorController.hpp"
 #include "modelController.hpp"
-#include "torusModel.hpp"
+#include "torusEntity.hpp"
 
 #include "image.hpp"
 #include "texture.hpp"
@@ -120,6 +120,11 @@ int main(int, char **) {
     grid.render(camera);
     MeshRenderer.renderEntities(gui.getEntities(), shader);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
+
+    //
+    if (gui.getCenterPoint()) {
+      MeshRenderer.renderMesh(*gui.getCenterPoint().value(), shader);
+    }
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

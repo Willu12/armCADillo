@@ -3,7 +3,7 @@
 #include "IRenderable.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
-#include "torusModel.hpp"
+#include "torusEntity.hpp"
 #include "transformations.hpp"
 
 class MeshRenderer {

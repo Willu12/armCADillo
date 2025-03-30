@@ -20,6 +20,7 @@ public:
 
   const Mesh &getMesh() const override { return *_mesh; }
   const algebra::Vec3f &getPosition() const override { return _position; }
+  algebra::Vec3f &getPosition() override { return _position; }
 
 protected:
   algebra::Sphere<float> _sphere;
