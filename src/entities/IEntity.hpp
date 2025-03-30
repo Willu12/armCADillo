@@ -35,6 +35,19 @@ public:
     return translationMatrix * rotationMatrix * scaleMatrix;
   }
 
+  void rotateAroundPoint(const algebra::Quaternion<float> &rotation,
+                         const algebra::Vec3f &point, ) {
+    auto rotatedAtOrigin = rotation * (_position - point);
+    _position = rotatedAtOrigin.toVector() + point;
+  }
+
+  void scaleAroundPoint(float scaleFactor, const algebra::Vec3f &centerPoint) {
+    auto translatedPosition = _position - centerPoint;
+    translatedPosition = translatedPosition * scaleFactor;
+    _position = translatedPosition + centerPoint;
+    _scale *= scaleFactor;
+  }
+
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;
