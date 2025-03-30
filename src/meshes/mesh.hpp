@@ -1,4 +1,5 @@
 #pragma once
+#include "IParametrizable.hpp"
 #include "shader.hpp"
 #include "vec.hpp"
 #include <vector>
@@ -28,6 +29,9 @@ public:
     mesh->addTextureLayout();
     return std::shared_ptr<Mesh>(mesh);
   }
+
+  static std::shared_ptr<Mesh>
+  fromParametrization(const IParametrizable<float> &parametrizable) {}
 
   ~Mesh() {
     if (_vao > 0)

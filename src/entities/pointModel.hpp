@@ -5,9 +5,9 @@
 #include "mesh.hpp"
 #include "sphere.hpp"
 
-class Point : public IEntity {
+class PointModel : public IEntity {
 public:
-  Point(algebra::Vec3f position)
+  PointModel(algebra::Vec3f position)
       : _position(position), _sphere(0.01f),
         _name("Point_" + std::to_string(_id++)), _mesh(generateMesh()) {}
 

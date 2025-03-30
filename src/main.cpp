@@ -11,7 +11,6 @@
 #include "cursor.hpp"
 #include "cursorController.hpp"
 #include "modelController.hpp"
-#include "point.hpp"
 #include "torusModel.hpp"
 
 #include "image.hpp"

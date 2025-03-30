@@ -2,7 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "controllers.hpp"
 #include "imgui.h"
-#include "point.hpp"
+#include "pointModel.hpp"
 #include "torusModel.hpp"
 #include <chrono>
 #include <unordered_set>
@@ -15,40 +15,19 @@ public:
     initControllers();
   }
 
-  void calculateFPS() {
-    auto currentTime = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double> timeDiff = currentTime - _lastTime;
-    if (timeDiff.count() > 0.0) {
-      _fps = 1.0 / timeDiff.count();
-      _lastTime = currentTime;
-    }
-  }
-
-  void showFPSCounter() {
-    calculateFPS();
-    ImGui::Text("FPS: %.1f", _fps);
-  }
-
   IController &getController() {
     return *_controllers[static_cast<int>(_selectedController)];
   }
 
-  void selectEntity(int entityIndex) {
-    _selectedEntities.insert(entityIndex);
-    auto entity = _entities[entityIndex];
-
-    auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
-    if (controller == nullptr)
-      initModelController();
-
-    auto modelController =
-        std::dynamic_pointer_cast<ModelController>(controller);
-
-    modelController->updateEntity(entity);
-  }
-
   const std::vector<IEntity *> &getEntities() const { return _entities; }
+
+  std::vector<IEntity *> getSelectedEntities() {
+    std::vector<IEntity *> selectedEntities;
+    for (auto selectedEntityIndex : _selectedEntities) {
+      selectedEntities.push_back(_entities[selectedEntityIndex]);
+    }
+    return selectedEntities;
+  }
 
   Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
@@ -67,6 +46,7 @@ public:
       renderModelSettings();
       renderControllerUI();
       displayEntitiesList();
+      renderShowCenterPointUI();
       renderCreateTorusUI();
       renderCreatePointUI();
       removeButtonUI();
@@ -82,6 +62,7 @@ private:
   std::vector<IEntity *> _entities;
   std::shared_ptr<IController> _controllers[3];
   ControllerKind _selectedController = ControllerKind::Camera;
+  bool _showCenterPoint = false;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
@@ -159,6 +140,10 @@ private:
       deleteSelectedEntities();
   }
 
+  void renderShowCenterPointUI() {
+    ImGui::Checkbox("Show Center Point", &_showCenterPoint);
+  };
+
   void createTorus() {
     auto cursorPosition = getCursor().getPosition();
     auto torus = new TorusModel(2.f, 1.f, cursorPosition);
@@ -167,7 +152,7 @@ private:
 
   void createPoint() {
     auto cursorPosition = getCursor().getPosition();
-    auto point = new Point(cursorPosition);
+    auto point = new PointModel(cursorPosition);
     addEntity(point);
   }
 
@@ -179,6 +164,7 @@ private:
   void renderModelSettings() {
     if (_selectedEntities.size() != 1)
       return;
+
     auto selectedEntity = _entities[*_selectedEntities.begin()];
     if (selectedEntity->renderSettings())
       selectedEntity->updateMesh();
@@ -193,13 +179,13 @@ private:
 
       if (ImGui::Selectable(name.c_str(), isSelected,
                             ImGuiSelectableFlags_AllowDoubleClick)) {
-        if (ImGui::GetIO().KeyCtrl) { // Ctrl for multi-selection
-          if (isSelected) {
+        if (ImGui::GetIO().KeyCtrl) {
+          if (isSelected)
             _selectedEntities.erase(i);
-          } else {
+          else
             _selectedEntities.insert(i);
-          }
-        } else { // Single selection
+
+        } else {
           _selectedEntities.clear();
           _selectedEntities.insert(i);
         }
@@ -219,16 +205,43 @@ private:
 
     std::vector<int> sortedIndices(_selectedEntities.begin(),
                                    _selectedEntities.end());
-    std::sort(sortedIndices.rbegin(), sortedIndices.rend()); // Reverse sort
+    std::sort(sortedIndices.rbegin(), sortedIndices.rend());
 
-    // Remove elements in reverse order to avoid shifting issues
     for (int entityIndex : sortedIndices) {
       if (entityIndex >= 0 && entityIndex < _entities.size()) {
         _entities.erase(_entities.begin() + entityIndex);
       }
     }
 
-    // Clear the selection set
     _selectedEntities.clear();
+  }
+
+  void calculateFPS() {
+    auto currentTime = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> timeDiff = currentTime - _lastTime;
+    if (timeDiff.count() > 0.0) {
+      _fps = 1.0 / timeDiff.count();
+      _lastTime = currentTime;
+    }
+  }
+
+  void showFPSCounter() {
+    calculateFPS();
+    ImGui::Text("FPS: %.1f", _fps);
+  }
+
+  void selectEntity(int entityIndex) {
+    _selectedEntities.insert(entityIndex);
+    auto entity = _entities[entityIndex];
+
+    auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
+    if (controller == nullptr)
+      initModelController();
+
+    auto modelController =
+        std::dynamic_pointer_cast<ModelController>(controller);
+
+    modelController->updateEntity(entity);
   }
 };
