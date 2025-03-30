@@ -62,6 +62,8 @@ public:
       renderCreatePointUI();
       removeButtonUI();
 
+      _mouse.process(_controllers);
+
       ImGui::End();
     }
   }
@@ -80,15 +82,17 @@ private:
   Camera *_camera;
   std::unordered_set<uint32_t> _selectedEntities;
   std::vector<IEntity *> _entities;
-  std::shared_ptr<IController> _controllers[3];
+  std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   CenterPoint _centerPoint;
+  Mouse _mouse;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
   double _fps = 0.0;
 
   void initControllers() {
+    _controllers.resize(3);
     _controllers[static_cast<int>(ControllerKind::Camera)] =
         std::make_shared<CameraController>(_window, _camera);
 

@@ -112,7 +112,7 @@ int main(int, char **) {
 
     gui.displayGUI();
     //   gui.getController().processScroll();
-    gui.processControllers();
+    // gui.processControllers();
 
     // Rendering
     ImGui::Render();
