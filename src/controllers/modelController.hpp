@@ -47,8 +47,7 @@ private:
         if (deltaY == 0.f && deltaX == 0.f)
           return false;
 
-        _entity->getRotation().getRotation()[_transformationAxis] +=
-            deltaY * _moveSpeed;
+        rotateAroundLocalAxis(deltaY * _moveSpeed, _transformationAxis);
         _mouse._position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
         return true;
@@ -85,5 +84,22 @@ private:
       _mouse._rightClicked = false;
     }
     return false;
+  }
+
+  algebra::Vec3f getAxisVector(const Axis &axis) {
+    if (axis == Axis::X)
+      return algebra::Vec3f(1.f, 0.f, 0.f);
+    else if (axis == Axis::Y)
+      return algebra::Vec3f(0.f, 1.f, 0.f);
+    else
+      return algebra::Vec3f(0.f, 0.f, 1.f);
+  }
+
+  void rotateAroundLocalAxis(float angle, const Axis &axis) {
+    auto axisVector = getAxisVector(axis);
+    auto quaternion =
+        algebra::Quaternion<float>::fromAxisAngle(axisVector, angle);
+
+    _entity->getRotation() = quaternion * _entity->getRotation();
   }
 };
