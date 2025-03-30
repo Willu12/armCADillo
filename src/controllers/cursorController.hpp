@@ -23,8 +23,8 @@ private:
 
   bool processLeftMouseButton() {
     if (!ImGui::IsAnyItemActive() &&
-        (ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
-         ImGui::IsMouseClicked(ImGuiMouseButton_Left))) {
+        (ImGui::IsMouseDown(ImGuiMouseButton_Right) ||
+         ImGui::IsMouseClicked(ImGuiMouseButton_Right))) {
       ImVec2 currentMousePosition = ImGui::GetMousePos();
 
       float x =

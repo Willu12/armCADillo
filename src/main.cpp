@@ -111,13 +111,14 @@ int main(int, char **) {
     ImGui::NewFrame();
 
     gui.displayGUI();
-    gui.getController().processScroll();
+    //   gui.getController().processScroll();
+    gui.processControllers();
 
     // Rendering
     ImGui::Render();
     setupViewPortAndClear(window, clear_color);
 
-    gui.getController().processMouse();
+    // gui.getController().processMouse();
     grid.render(camera);
     MeshRenderer.renderEntities(gui.getEntities(), shader);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);

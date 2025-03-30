@@ -55,7 +55,7 @@ public:
     if (ImGui::Begin("Settings", nullptr, window_flags)) {
       showFPSCounter();
       renderModelSettings();
-      renderControllerUI();
+      // renderControllerUI();
       displayEntitiesList();
 
       renderCreateTorusUI();
@@ -63,6 +63,15 @@ public:
       removeButtonUI();
 
       ImGui::End();
+    }
+  }
+
+  void processControllers() {
+    for (const auto &controller : _controllers) {
+      if (controller) {
+        controller->processMouse();
+        controller->processScroll();
+      }
     }
   }
 

@@ -36,7 +36,7 @@ public:
   }
 
   void rotateAroundPoint(const algebra::Quaternion<float> &rotation,
-                         const algebra::Vec3f &point, ) {
+                         const algebra::Vec3f &point) {
     auto rotatedAtOrigin = rotation * (_position - point);
     _position = rotatedAtOrigin.toVector() + point;
   }
