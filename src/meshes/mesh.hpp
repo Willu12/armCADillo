@@ -29,9 +29,13 @@ public:
     mesh->addTextureLayout();
     return std::shared_ptr<Mesh>(mesh);
   }
-
   static std::shared_ptr<Mesh>
-  fromParametrization(const IParametrizable<float> &parametrizable) {}
+  fromParametrization(const algebra::IParametrizable<float> &parametrizable,
+                      const MeshDensity &meshDensity) {
+    auto vertices = generateVertices(parametrizable, meshDensity);
+    auto indices = generateIndices(meshDensity);
+    return create(vertices, indices);
+  }
 
   ~Mesh() {
     if (_vao > 0)
@@ -116,5 +120,44 @@ private:
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(uint32_t),
                  _indices.data(), GL_STATIC_DRAW);
+  }
+
+  static std::vector<float>
+  generateVertices(const algebra::IParametrizable<float> &parametrizable,
+                   const MeshDensity &meshDensity) {
+    std::vector<float> vertices;
+
+    const auto bounds = parametrizable.getBounds();
+
+    for (int i = 0; i < meshDensity.s; ++i) {
+      float theta = i * (bounds[0] / static_cast<float>(meshDensity.s));
+      for (int j = 0; j < meshDensity.t; ++j) {
+        float phi = j * (bounds[1] / static_cast<float>(meshDensity.t));
+
+        const auto position = parametrizable.getPosition(theta, phi).toVector();
+
+        vertices.insert(vertices.end(), position.begin(), position.end());
+      }
+    }
+    return vertices;
+  }
+
+  static std::vector<unsigned int>
+  generateIndices(const MeshDensity &meshDensitiy) {
+    std::vector<unsigned int> indices;
+    for (int i = 0; i < meshDensitiy.s; ++i) {
+      for (int j = 0; j < meshDensitiy.t; ++j) {
+
+        int current = i * meshDensitiy.t + j;
+        int right = j + ((i + 1) % meshDensitiy.s) * meshDensitiy.t;
+        int down = i * meshDensitiy.t + (j + 1) % meshDensitiy.t;
+
+        indices.push_back(current);
+        indices.push_back(down);
+        indices.push_back(current);
+        indices.push_back(right);
+      }
+    }
+    return indices;
   }
 };
