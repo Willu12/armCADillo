@@ -6,10 +6,12 @@ class CenterPoint {
 public:
   CenterPoint() : _point(algebra::Vec3f()) {}
   void display(const std::vector<IEntity *> &entities) {
-    if (entities.size() < 2)
+    if (entities.size() < 1)
       return;
     updatePosition(entities);
   }
+
+  const algebra::Vec3f &getPosition() const { return _point.getPosition(); }
 
   const IRenderable &getPoint() { return _point; }
 

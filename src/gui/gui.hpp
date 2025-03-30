@@ -55,7 +55,7 @@ public:
     if (ImGui::Begin("Settings", nullptr, window_flags)) {
       showFPSCounter();
       renderModelSettings();
-      // renderControllerUI();
+      renderModelControllSettings();
       displayEntitiesList();
 
       renderCreateTorusUI();
@@ -96,11 +96,11 @@ private:
     _controllers[static_cast<int>(ControllerKind::Camera)] =
         std::make_shared<CameraController>(_window, _camera);
 
-    if (!_selectedEntities.empty())
-      initModelController();
-
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
         std::make_shared<CursorController>(_window, _camera);
+
+    _controllers[static_cast<int>(ControllerKind::Model)] =
+        std::make_shared<ModelController>(_centerPoint, getCursor());
   }
 
   void renderControllerUI() {
@@ -125,6 +125,7 @@ private:
 
   void renderModelControllSettings() {
     const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
+    const char *transformationCenterOptions[] = {"Center Point", "Cursor"};
 
     auto modelController = std::dynamic_pointer_cast<ModelController>(
         _controllers[static_cast<int>(ControllerKind::Model)]);
@@ -135,6 +136,14 @@ private:
       if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
                        IM_ARRAYSIZE(AxisOptions))) {
         modelController->_transformationAxis = static_cast<Axis>(selectedIndex);
+      }
+
+      selectedIndex = static_cast<int>(modelController->_transformationCenter);
+      if (ImGui::Combo("TransformationCenter", &selectedIndex,
+                       transformationCenterOptions,
+                       IM_ARRAYSIZE(transformationCenterOptions))) {
+        modelController->_transformationCenter =
+            static_cast<TransformationCenter>(selectedIndex);
       }
     }
   }
@@ -201,22 +210,16 @@ private:
                             ImGuiSelectableFlags_AllowDoubleClick)) {
         if (ImGui::GetIO().KeyCtrl) {
           if (isSelected)
-            _selectedEntities.erase(i);
+            unselectEntity(i);
           else
-            _selectedEntities.insert(i);
+            selectEntity(i);
 
         } else {
           _selectedEntities.clear();
-          _selectedEntities.insert(i);
+          selectEntity(i);
         }
       }
     }
-  }
-
-  void initModelController() {
-    _controllers[static_cast<int>(ControllerKind::Model)] =
-        std::make_shared<ModelController>(
-            _entities[*_selectedEntities.begin()]);
   }
 
   void deleteSelectedEntities() {
@@ -251,17 +254,18 @@ private:
     ImGui::Text("FPS: %.1f", _fps);
   }
 
+  std::shared_ptr<ModelController> getModelController() {
+    auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
+    return std::dynamic_pointer_cast<ModelController>(controller);
+  }
+
   void selectEntity(int entityIndex) {
     _selectedEntities.insert(entityIndex);
-    auto entity = _entities[entityIndex];
+    getModelController()->updateEntites(getSelectedEntities());
+  }
 
-    auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
-    if (controller == nullptr)
-      initModelController();
-
-    auto modelController =
-        std::dynamic_pointer_cast<ModelController>(controller);
-
-    modelController->updateEntity(entity);
+  void unselectEntity(int entityIndex) {
+    _selectedEntities.erase(entityIndex);
+    getModelController()->updateEntites(getSelectedEntities());
   }
 };

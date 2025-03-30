@@ -39,6 +39,7 @@ public:
                          const algebra::Vec3f &point) {
     auto rotatedAtOrigin = rotation * (_position - point);
     _position = rotatedAtOrigin.toVector() + point;
+    _rotation = rotation * _rotation;
   }
 
   void scaleAroundPoint(float scaleFactor, const algebra::Vec3f &centerPoint) {

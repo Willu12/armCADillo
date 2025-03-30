@@ -2,89 +2,74 @@
 #include "IController.hpp"
 #include "IEntity.hpp"
 
-enum Axis { X = 0, Y = 1, Z = 2 };
+enum class Axis { X = 0, Y = 1, Z = 2 };
+
+enum class TransformationCenter { CenterPoint = 0, Cursor = 1 };
 
 class ModelController : public IController {
 public:
   Axis _transformationAxis = Axis::X;
+  TransformationCenter _transformationCenter =
+      TransformationCenter::CenterPoint;
 
-  ModelController(IEntity *entity) : _entity(entity) {}
-
+  ModelController(CenterPoint &centerPoint, Cursor &cursor)
+      : _centerPoint(centerPoint), _cursor(cursor) {}
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
       return false;
-    _entity->getScale() += scroll * _scrollSpeed;
+    for (auto &entity : _entites)
+      entity->getScale() += scroll * _scrollSpeed;
     return true;
   }
 
-  bool processMouse() override {
-    return false; // return processLeftButton() || processRightButton();
+  bool processMouse() override { return false; }
+
+  void process(float x, float y) override {
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+      if (ImGui::GetIO().KeyShift)
+        rotateAroundCenterPoint(y);
+      else
+        translate(y);
+    }
   }
 
-  void process(float x, float y) override {}
-
-  void updateEntity(IEntity *entity) { _entity = entity; }
+  void updateEntites(const std::vector<IEntity *> &entites) {
+    _entites = entites;
+  }
 
 private:
-  IEntity *_entity;
+  std::vector<IEntity *> _entites;
   const float _scrollSpeed = 0.01f;
   const float _moveSpeed = 0.01f;
-  // Mouse &_mouse;
-  /*
-    bool processLeftButton() {
-      if (!ImGui::IsAnyItemActive() &&
-          ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-        ImVec2 currentMousePosition = ImGui::GetMousePos();
+  CenterPoint &_centerPoint;
+  Cursor &_cursor;
 
-        if (!_mouse._leftClicked) {
-          _mouse._leftClicked = true;
-          _mouse._position =
-              algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-        }
-        if (_mouse._leftClicked) {
-          float deltaY = _mouse._position[1] - currentMousePosition.y;
-          float deltaX = _mouse._position[0] - currentMousePosition.x;
-          if (deltaY == 0.f && deltaX == 0.f)
-            return false;
-
-          rotateAroundLocalAxis(deltaY * _moveSpeed, _transformationAxis);
-          _mouse._position =
-              algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-          return true;
-        }
-      } else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-        _mouse._leftClicked = false;
-      }
-      return false;
+  void translate(float deltaY) {
+    for (auto &entity : _entites) {
+      entity->getPosition()[static_cast<int>(_transformationAxis)] +=
+          deltaY * _moveSpeed;
     }
+  }
 
-    bool processRightButton() {
-      if (!ImGui::IsAnyItemActive() &&
-          ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-        ImVec2 currentMousePosition = ImGui::GetMousePos();
+  void rotateAroundCenterPoint(float deltaY) {
+    auto rotationPoint =
+        _transformationCenter == TransformationCenter::CenterPoint
+            ? _centerPoint.getPosition()
+            : _cursor.getPosition();
 
-        if (!_mouse._rightClicked) {
-          _mouse._rightClicked = true;
-          _mouse._position =
-              algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-        }
-        if (_mouse._rightClicked) {
-          float deltaY = _mouse._position[1] - currentMousePosition.y;
-          float deltaX = _mouse._position[0] - currentMousePosition.x;
+    auto quaternion = algebra::Quaternion<float>::fromAxisAngle(
+        getAxisVector(_transformationAxis), deltaY * _moveSpeed);
+    for (auto &entity : _entites) {
+      entity->rotateAroundPoint(quaternion, rotationPoint);
+    }
+  }
 
-          if (deltaY == 0.f && deltaX == 0.f)
-            return false;
-
-          _entity->getPosition()[_transformationAxis] += deltaY * _moveSpeed;
-          _mouse._position =
-              algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-          return true;
-        }
-      } else if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
-        _mouse._rightClicked = false;
+  /*
+    void scaleAroundCenterPoint(float deltaY) {
+      for (auto &entity : _entites) {
+        entity->rotateAroundPoint(quaternion, _centerPoint.getPosition());
       }
-      return false;
     }
     */
 
@@ -95,13 +80,5 @@ private:
       return algebra::Vec3f(0.f, 1.f, 0.f);
     else
       return algebra::Vec3f(0.f, 0.f, 1.f);
-  }
-
-  void rotateAroundLocalAxis(float angle, const Axis &axis) {
-    auto axisVector = getAxisVector(axis);
-    auto quaternion =
-        algebra::Quaternion<float>::fromAxisAngle(axisVector, angle);
-
-    _entity->getRotation() = quaternion * _entity->getRotation();
   }
 };
