@@ -6,7 +6,7 @@
 class Point : public IRenderable {
 public:
   Point(algebra::Vec3f position)
-      : _position(position), _sphere(0.1f), _mesh(generateMesh()) {}
+      : _position(position), _sphere(0.01f), _mesh(generateMesh()) {}
 
   algebra::Mat4f getModelMatrix() const override {
     auto scaleMatrix =
@@ -25,7 +25,7 @@ protected:
   algebra::Sphere<float> _sphere;
   algebra::Vec3f _position;
   algebra::EulerAngle<float> _rotation;
-  float _scale;
+  float _scale = 1.0f;
   MeshDensity _meshDensity;
   std::shared_ptr<Mesh> _mesh;
 
