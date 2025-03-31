@@ -44,14 +44,15 @@ public:
 
   void scaleAroundPoint(float scaleFactor, const algebra::Vec3f &centerPoint) {
     auto translatedPosition = _position - centerPoint;
-    translatedPosition = translatedPosition * scaleFactor;
+    _scale += scaleFactor;
+    translatedPosition = translatedPosition * _scale;
     _position = translatedPosition + centerPoint;
-    _scale *= scaleFactor;
   }
 
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;
   float _scale = 1.f;
+  // algrebra::Vec3f _scale = algebra::Vec3f(1.f,1.f,1.f);
   std::string _name;
 };
