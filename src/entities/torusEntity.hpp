@@ -25,9 +25,7 @@ public:
   bool renderSettings() override {
     bool change = false;
 
-    if (ImGui::InputText("Name", &getName())) {
-      change = true;
-    }
+    ImGui::InputText("Name", &getName());
 
     change |= ImGui::SliderFloat("R", &getInnerRadius(), 0.1f, 10.f);
     change |= ImGui::SliderFloat("r", &getTubeRadius(), 0.1f, 10.f);
