@@ -44,8 +44,9 @@ public:
 
   void scaleAroundPoint(float scaleFactor, const algebra::Vec3f &centerPoint) {
     auto translatedPosition = _position - centerPoint;
-    _scale += scaleFactor;
-    translatedPosition = translatedPosition * _scale;
+    translatedPosition = translatedPosition * scaleFactor;
+
+    _scale *= scaleFactor;
     _position = translatedPosition + centerPoint;
   }
 
