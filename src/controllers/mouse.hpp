@@ -19,8 +19,8 @@ public:
       if (_clicked) {
         float deltaY = _position[1] - currentMousePosition.y;
         float deltaX = _position[0] - currentMousePosition.x;
-        if (deltaY == 0.f && deltaX == 0.f)
-          return;
+        //   if (deltaY == 0.f && deltaX == 0.f)
+        //   return;
 
         for (auto controller : controllers)
           if (controller)

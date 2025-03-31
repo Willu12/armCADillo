@@ -62,7 +62,11 @@ private:
   }
 
   void scaleAroundCenterPoint(float deltaY) {
-    auto scaleFactor = deltaY > 0 ? 1.05f : 0.95f;
+    auto scaleFactor = 1.f;
+    if (deltaY > 0.f)
+      scaleFactor = 1.05f;
+    if (deltaY < 0.f)
+      scaleFactor = 0.95f;
     for (auto &entity : _entites) {
       if (entity->getScale() * scaleFactor > 0.01f) {
         entity->scaleAroundPoint(scaleFactor, getTransformationPoint());

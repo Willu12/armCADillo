@@ -23,7 +23,7 @@ public:
   void process(float x, float y) {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
 
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
       auto entity = getEntity(currentMousePosition.x, currentMousePosition.y);
       if (entity) {
         IEntity *entityPointer = entity.value();

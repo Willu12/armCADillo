@@ -25,7 +25,7 @@ public:
 
   const std::vector<IEntity *> &getEntities() const { return _entities; }
 
-  std::vector<IEntity *> getSelectedEntities() { return _entities; }
+  std::vector<IEntity *> getSelectedEntities() { return _selectedEntities; }
 
   Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
@@ -34,11 +34,12 @@ public:
   }
 
   std::optional<const IRenderable *> getCenterPoint() {
+    if (_selectedEntities.size() > 0)
+      _centerPoint.display(getSelectedEntities());
 
-    if (_selectedEntities.size() == 0)
+    if (_selectedEntities.size() < 2)
       return std::nullopt;
 
-    _centerPoint.display(getSelectedEntities());
     return &_centerPoint.getPoint();
   }
 
@@ -61,6 +62,9 @@ public:
       removeButtonUI();
 
       _mouse.process(getActiveControllers());
+      if (_controllMode == ControllMode::Selection)
+        _controllers[static_cast<int>(ControllerKind::Selection)]->process(0,
+                                                                           0);
 
       ImGui::End();
     }
@@ -296,10 +300,7 @@ private:
     activeControllers.push_back(
         _controllers[static_cast<int>(ControllerKind::Cursor)]);
 
-    if (_controllMode == ControllMode::Selection)
-      activeControllers.push_back(
-          _controllers[static_cast<int>(ControllerKind::Selection)]);
-    else
+    if (_controllMode == ControllMode::Transformation)
       activeControllers.push_back(
           _controllers[static_cast<int>(ControllerKind::Model)]);
 
