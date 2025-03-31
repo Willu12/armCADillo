@@ -130,6 +130,10 @@ int main(int, char **) {
     texture.bind(0);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
 
+    auto polygonalCurves = gui.getPolygonalCurves();
+    for (int i = 0; i < polygonalCurves.size(); ++i) {
+      MeshRenderer.renderMesh(*polygonalCurves[i], shader);
+    }
     //
     if (gui.getCenterPoint()) {
       MeshRenderer.renderMesh(*gui.getCenterPoint().value(), shader);

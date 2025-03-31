@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "optional"
 #include "pointEntity.hpp"
+#include "polygonalCurve.hpp"
 #include "selectionController.hpp"
 #include "torusEntity.hpp"
 #include <chrono>
@@ -57,6 +58,7 @@ public:
 
       renderCreateTorusUI();
       renderCreatePointUI();
+      createPolygonalCurveUI();
       removeButtonUI();
 
       _mouse.process(getActiveControllers());
@@ -70,11 +72,20 @@ public:
     return getSelectionController()->getPickingTexture();
   }
 
+  std::vector<IRenderable *> getPolygonalCurves() {
+    std::vector<IRenderable *> renderables;
+    for (auto polygonalCurve : _polygonalCurves) {
+      renderables.push_back(polygonalCurve);
+    }
+    return renderables;
+  }
+
 private:
   GLFWwindow *_window;
   Camera *_camera;
   std::vector<IEntity *> _selectedEntities;
   std::vector<IEntity *> _entities;
+  std::vector<PolygonalCurve *> _polygonalCurves;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   ControllMode _controllMode = ControllMode::Transformation;
@@ -159,6 +170,11 @@ private:
   void removeButtonUI() {
     if (ImGui::Button("Remove Entity"))
       deleteSelectedEntities();
+  }
+
+  void createPolygonalCurveUI() {
+    if (ImGui::Button("Create Polygonal Curve"))
+      createPolygonalCurve();
   }
 
   void createTorus() {
@@ -281,5 +297,19 @@ private:
           _controllers[static_cast<int>(ControllerKind::Model)]);
 
     return activeControllers;
+  }
+
+  void createPolygonalCurve() {
+    std::vector<PointEntity *> pointEntities;
+
+    for (IEntity *entity : _selectedEntities) {
+      PointEntity *point = dynamic_cast<PointEntity *>(entity);
+      if (point) {
+        pointEntities.push_back(point);
+      }
+    }
+    if (pointEntities.size() < 2)
+      return;
+    _polygonalCurves.push_back(new PolygonalCurve(pointEntities));
   }
 };

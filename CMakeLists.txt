@@ -18,6 +18,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/
     src/rendering/
     src/meshes/
+    src/renderables/
 
 )
 

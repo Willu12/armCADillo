@@ -14,8 +14,6 @@ public:
 
   void renderEntities(const std::vector<IEntity *> &entites, Shader &shader) {
     for (int i = 0; i < entites.size(); ++i) {
-      // printf("[%u], [%ld]\n", i + 1, entites.size());
-
       renderMesh(*entites[i], shader);
     }
   }
@@ -28,7 +26,6 @@ public:
     shader.setProjectionMatrix(_camera->projectionMatrix());
 
     const Mesh &mesh = entity.getMesh();
-
     glBindVertexArray(mesh._vao);
     glDrawElements(GL_LINES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
   }
