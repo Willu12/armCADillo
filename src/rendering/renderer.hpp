@@ -27,7 +27,9 @@ public:
 
     const Mesh &mesh = entity.getMesh();
     glBindVertexArray(mesh._vao);
-    glDrawElements(GL_LINES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
+    auto meshKind =
+        entity.getMeshKind() == MeshKind::Lines ? GL_LINES : GL_TRIANGLES;
+    glDrawElements(meshKind, mesh._indices.size(), GL_UNSIGNED_INT, 0);
   }
 
   void renderBillboard(const IRenderable &entity, Shader &shader) {

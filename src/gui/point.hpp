@@ -5,7 +5,7 @@
 
 class Point : public IEntity {
 public:
-  Point(algebra::Vec3f position, float radius = 0.01f)
+  Point(algebra::Vec3f position, float radius = 0.05f)
       : _sphere(radius), _mesh(generateMesh()) {
     _position = position;
   }
