@@ -14,6 +14,7 @@
 #include "torusEntity.hpp"
 
 #include "image.hpp"
+#include "pickingTexture.hpp"
 #include "quaternion.hpp"
 #include "texture.hpp"
 #include "textureResource.hpp"
@@ -63,6 +64,8 @@ int main(int, char **) {
     return 1;
   }
   glfwSetScrollCallback(window, scrollCallback);
+
+  PickingTexture pickingTexture;
 
   // TEXTURE
   Image image("../resources/textures/cursorTexture.png");
