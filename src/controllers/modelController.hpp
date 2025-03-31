@@ -12,8 +12,9 @@ public:
   TransformationCenter _transformationCenter =
       TransformationCenter::CenterPoint;
 
-  ModelController(CenterPoint &centerPoint, Cursor &cursor)
-      : _centerPoint(centerPoint), _cursor(cursor) {}
+  ModelController(const CenterPoint &centerPoint, const Cursor &cursor,
+                  const std::vector<IEntity *> &entites)
+      : _centerPoint(centerPoint), _cursor(cursor), _entites(entites) {}
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
@@ -34,16 +35,12 @@ public:
     }
   }
 
-  void updateEntites(const std::vector<IEntity *> &entites) {
-    _entites = entites;
-  }
-
 private:
-  std::vector<IEntity *> _entites;
+  const std::vector<IEntity *> &_entites;
   const float _scrollSpeed = 0.01f;
   const float _moveSpeed = 0.01f;
-  CenterPoint &_centerPoint;
-  Cursor &_cursor;
+  const CenterPoint &_centerPoint;
+  const Cursor &_cursor;
 
   void translate(float deltaY) {
     for (auto &entity : _entites) {

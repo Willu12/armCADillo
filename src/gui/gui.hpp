@@ -23,13 +23,7 @@ public:
 
   const std::vector<IEntity *> &getEntities() const { return _entities; }
 
-  std::vector<IEntity *> getSelectedEntities() {
-    std::vector<IEntity *> selectedEntities;
-    for (auto selectedEntityIndex : _selectedEntities) {
-      selectedEntities.push_back(_entities[selectedEntityIndex]);
-    }
-    return selectedEntities;
-  }
+  std::vector<IEntity *> getSelectedEntities() { return _entities; }
 
   Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
@@ -80,7 +74,7 @@ public:
 private:
   GLFWwindow *_window;
   Camera *_camera;
-  std::unordered_set<uint32_t> _selectedEntities;
+  std::vector<IEntity *> _selectedEntities;
   std::vector<IEntity *> _entities;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
@@ -100,7 +94,8 @@ private:
         std::make_shared<CursorController>(_window, _camera);
 
     _controllers[static_cast<int>(ControllerKind::Model)] =
-        std::make_shared<ModelController>(_centerPoint, getCursor());
+        std::make_shared<ModelController>(_centerPoint, getCursor(),
+                                          _selectedEntities);
   }
 
   void renderControllerUI() {
@@ -194,7 +189,7 @@ private:
     if (_selectedEntities.size() != 1)
       return;
 
-    auto selectedEntity = _entities[*_selectedEntities.begin()];
+    auto selectedEntity = *_selectedEntities.begin();
     if (selectedEntity->renderSettings())
       selectedEntity->updateMesh();
   }
@@ -204,7 +199,9 @@ private:
 
       auto name = _entities[i]->getName();
       name = name.empty() ? "##" : name;
-      bool isSelected = _selectedEntities.find(i) != _selectedEntities.end();
+      bool isSelected =
+          std::find(_selectedEntities.begin(), _selectedEntities.end(),
+                    _entities[i]) != _selectedEntities.end();
 
       if (ImGui::Selectable(name.c_str(), isSelected,
                             ImGuiSelectableFlags_AllowDoubleClick)) {
@@ -226,15 +223,14 @@ private:
     if (_selectedEntities.empty())
       return;
 
-    std::vector<int> sortedIndices(_selectedEntities.begin(),
-                                   _selectedEntities.end());
-    std::sort(sortedIndices.rbegin(), sortedIndices.rend());
-
-    for (int entityIndex : sortedIndices) {
-      if (entityIndex >= 0 && entityIndex < _entities.size()) {
-        _entities.erase(_entities.begin() + entityIndex);
-      }
-    }
+    _entities.erase(std::remove_if(_entities.begin(), _entities.end(),
+                                   [&](IEntity *entity) {
+                                     return std::find(_selectedEntities.begin(),
+                                                      _selectedEntities.end(),
+                                                      entity) !=
+                                            _selectedEntities.end();
+                                   }),
+                    _entities.end());
 
     _selectedEntities.clear();
   }
@@ -260,12 +256,15 @@ private:
   }
 
   void selectEntity(int entityIndex) {
-    _selectedEntities.insert(entityIndex);
-    getModelController()->updateEntites(getSelectedEntities());
+    _selectedEntities.push_back(_entities[entityIndex]);
+    // getModelController()->updateEntites(getSelectedEntities());
   }
 
   void unselectEntity(int entityIndex) {
-    _selectedEntities.erase(entityIndex);
-    getModelController()->updateEntites(getSelectedEntities());
+    _selectedEntities.erase(
+        std::remove(_selectedEntities.begin(), _selectedEntities.end(),
+                    _entities[entityIndex]),
+        _selectedEntities
+            .end()); // getModelController()->updateEntites(getSelectedEntities());
   }
 };
