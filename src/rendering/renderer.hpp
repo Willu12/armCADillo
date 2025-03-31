@@ -3,6 +3,7 @@
 #include "IRenderable.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
+#include "pickingTexture.hpp"
 #include "torusEntity.hpp"
 #include "transformations.hpp"
 
@@ -11,9 +12,11 @@ public:
   MeshRenderer(Camera *camera, GLFWwindow *window)
       : _camera(camera), _window(window) {}
 
-  void renderEntities(const std::vector<IEntity *> &entities, Shader &shader) {
-    for (int i = 0; i < entities.size(); ++i) {
-      renderMesh(*entities[i], shader);
+  void renderEntities(const std::vector<IEntity *> &entites, Shader &shader) {
+    for (int i = 0; i < entites.size(); ++i) {
+      // printf("[%u], [%ld]\n", i + 1, entites.size());
+
+      renderMesh(*entites[i], shader);
     }
   }
 
@@ -48,6 +51,20 @@ public:
     const Mesh &mesh = entity.getMesh();
     glBindVertexArray(mesh._vao);
     glDrawElements(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
+  }
+
+  void renderPicking(const std::vector<IEntity *> &entites, Shader &shader,
+                     PickingTexture &pickingTexture) {
+
+    pickingTexture.enableWriting();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (uint32_t i = 0; i < entites.size(); ++i) {
+      shader.use();
+      shader.setUInt("gObjectIndex", i + 1);
+      renderMesh(*entites[i], shader);
+    }
+    pickingTexture.disableWrtiing();
   }
 
 private:

@@ -8,7 +8,7 @@
 
 class PointEntity : public Point {
 public:
-  PointEntity(algebra::Vec3f position) : Point(position) {
+  PointEntity(algebra::Vec3f position) : Point(position, 0.1f) {
     _name = ("Point_" + std::to_string(_id++));
   }
 

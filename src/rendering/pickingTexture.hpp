@@ -6,7 +6,19 @@
 class PickingTexture {
 public:
   //  PickingTexture() {}
-  // ~PickingTexture();
+  ~PickingTexture() {
+    if (_fbo != 0) {
+      glDeleteFramebuffers(1, &_fbo);
+    }
+
+    if (_pickingTexture != 0) {
+      glDeleteTextures(1, &_pickingTexture);
+    }
+
+    if (_depthTexture != 0) {
+      glDeleteTextures(1, &_depthTexture);
+    }
+  }
 
   void init(unsigned int windowWidth, unsigned int windowHeight) {
     // create fbo

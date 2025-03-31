@@ -65,8 +65,6 @@ int main(int, char **) {
   }
   glfwSetScrollCallback(window, scrollCallback);
 
-  PickingTexture pickingTexture;
-
   // TEXTURE
   Image image("../resources/textures/cursorTexture.png");
   TextureResource textureResource(image);
@@ -77,6 +75,9 @@ int main(int, char **) {
 
   Shader textureShader("../resources/shaders/textureShader.vert",
                        "../resources/shaders/texturedBillboardShader.frag");
+
+  Shader pickupShader("../resources/shaders/vertexShader.hlsl",
+                      "../resources/shaders/pickingShader.frag");
 
   Camera *camera = new Camera(window);
 
@@ -114,16 +115,19 @@ int main(int, char **) {
     ImGui::NewFrame();
 
     gui.displayGUI();
-    //   gui.getController().processScroll();
-    // gui.processControllers();
 
     // Rendering
     ImGui::Render();
     setupViewPortAndClear(window, clear_color);
 
-    // gui.getController().processMouse();
     grid.render(camera);
+
+    if (gui.getMouse().anyButtonDown())
+      MeshRenderer.renderPicking(gui.getEntities(), pickupShader,
+                                 gui.getPickingTexture());
+
     MeshRenderer.renderEntities(gui.getEntities(), shader);
+    texture.bind(0);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
 
     //

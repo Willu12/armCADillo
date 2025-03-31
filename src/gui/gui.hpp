@@ -5,11 +5,13 @@
 #include "imgui.h"
 #include "optional"
 #include "pointEntity.hpp"
+#include "selectionController.hpp"
 #include "torusEntity.hpp"
 #include <chrono>
 #include <unordered_set>
 
-enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2 };
+enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
+enum class ControllMode { Transformation = 0, Selection = 1 };
 
 class GUI {
 public:
@@ -50,25 +52,22 @@ public:
       showFPSCounter();
       renderModelSettings();
       renderModelControllSettings();
+      renderControllModeSettings();
       displayEntitiesList();
 
       renderCreateTorusUI();
       renderCreatePointUI();
       removeButtonUI();
 
-      _mouse.process(_controllers);
+      _mouse.process(getActiveControllers());
 
       ImGui::End();
     }
   }
 
-  void processControllers() {
-    for (const auto &controller : _controllers) {
-      if (controller) {
-        controller->processMouse();
-        controller->processScroll();
-      }
-    }
+  const Mouse &getMouse() { return _mouse; }
+  PickingTexture &getPickingTexture() {
+    return getSelectionController()->getPickingTexture();
   }
 
 private:
@@ -78,6 +77,7 @@ private:
   std::vector<IEntity *> _entities;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
+  ControllMode _controllMode = ControllMode::Transformation;
   CenterPoint _centerPoint;
   Mouse _mouse;
 
@@ -86,7 +86,7 @@ private:
   double _fps = 0.0;
 
   void initControllers() {
-    _controllers.resize(3);
+    _controllers.resize(4);
     _controllers[static_cast<int>(ControllerKind::Camera)] =
         std::make_shared<CameraController>(_window, _camera);
 
@@ -96,26 +96,9 @@ private:
     _controllers[static_cast<int>(ControllerKind::Model)] =
         std::make_shared<ModelController>(_centerPoint, getCursor(),
                                           _selectedEntities);
-  }
-
-  void renderControllerUI() {
-    const char *controllerOptions[] = {"Camera", "Model", "Cursor"};
-    int selectedIndex = static_cast<int>(_selectedController);
-
-    if (ImGui::Combo("Controller", &selectedIndex, controllerOptions,
-                     IM_ARRAYSIZE(controllerOptions))) {
-      if (_controllers[static_cast<int>(ControllerKind::Model)] != nullptr ||
-          selectedIndex != 1) {
-        _selectedController = static_cast<ControllerKind>(selectedIndex);
-      }
-    }
-
-    if (_selectedController == ControllerKind::Model) {
-      if (_controllers[static_cast<int>(ControllerKind::Model)] != nullptr)
-        renderModelControllSettings();
-
-    } else if (_selectedController == ControllerKind::Cursor)
-      renderCursorControllerSettings();
+    _controllers[static_cast<int>(ControllerKind::Selection)] =
+        std::make_shared<SelectionController>(_window, _entities,
+                                              _selectedEntities);
   }
 
   void renderModelControllSettings() {
@@ -140,6 +123,16 @@ private:
         modelController->_transformationCenter =
             static_cast<TransformationCenter>(selectedIndex);
       }
+    }
+  }
+
+  void renderControllModeSettings() {
+    const char *controllModes[] = {"Transformation", "Selection"};
+    int selectedIndex = static_cast<int>(_controllMode);
+
+    if (ImGui::Combo("ControllMode", &selectedIndex, controllModes,
+                     IM_ARRAYSIZE(controllModes))) {
+      _controllMode = static_cast<ControllMode>(selectedIndex);
     }
   }
 
@@ -255,16 +248,38 @@ private:
     return std::dynamic_pointer_cast<ModelController>(controller);
   }
 
+  std::shared_ptr<SelectionController> getSelectionController() {
+    auto &controller =
+        _controllers[static_cast<int>(ControllerKind::Selection)];
+    return std::dynamic_pointer_cast<SelectionController>(controller);
+  }
+
   void selectEntity(int entityIndex) {
     _selectedEntities.push_back(_entities[entityIndex]);
-    // getModelController()->updateEntites(getSelectedEntities());
   }
 
   void unselectEntity(int entityIndex) {
-    _selectedEntities.erase(
-        std::remove(_selectedEntities.begin(), _selectedEntities.end(),
-                    _entities[entityIndex]),
-        _selectedEntities
-            .end()); // getModelController()->updateEntites(getSelectedEntities());
+    _selectedEntities.erase(std::remove(_selectedEntities.begin(),
+                                        _selectedEntities.end(),
+                                        _entities[entityIndex]),
+                            _selectedEntities.end());
+  }
+
+  std::vector<std::shared_ptr<IController>> getActiveControllers() {
+    std::vector<std::shared_ptr<IController>> activeControllers;
+
+    activeControllers.push_back(
+        _controllers[static_cast<int>(ControllerKind::Camera)]);
+    activeControllers.push_back(
+        _controllers[static_cast<int>(ControllerKind::Cursor)]);
+
+    if (_controllMode == ControllMode::Selection)
+      activeControllers.push_back(
+          _controllers[static_cast<int>(ControllerKind::Selection)]);
+    else
+      activeControllers.push_back(
+          _controllers[static_cast<int>(ControllerKind::Model)]);
+
+    return activeControllers;
   }
 };

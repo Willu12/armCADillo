@@ -34,15 +34,15 @@ public:
     }
   }
 
-private:
-  bool _clicked = false;
-  algebra::Vec2f _position;
-
   bool anyButtonDown() const {
     return ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
            ImGui::IsMouseDown(ImGuiMouseButton_Middle) ||
            ImGui::IsMouseDown(ImGuiMouseButton_Right);
   }
+
+private:
+  bool _clicked = false;
+  algebra::Vec2f _position;
 
   bool AllButtonsUp() const {
     return !ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
