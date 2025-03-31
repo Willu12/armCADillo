@@ -75,6 +75,7 @@ public:
   std::vector<IRenderable *> getPolygonalCurves() {
     std::vector<IRenderable *> renderables;
     for (auto polygonalCurve : _polygonalCurves) {
+      polygonalCurve->updateMesh();
       renderables.push_back(polygonalCurve);
     }
     return renderables;
@@ -299,7 +300,7 @@ private:
     return activeControllers;
   }
 
-  void createPolygonalCurve() {
+  std::vector<PointEntity *> getSelectedPoints() {
     std::vector<PointEntity *> pointEntities;
 
     for (IEntity *entity : _selectedEntities) {
@@ -308,6 +309,12 @@ private:
         pointEntities.push_back(point);
       }
     }
+    return pointEntities;
+  }
+
+  void createPolygonalCurve() {
+
+    auto pointEntities = getSelectedPoints();
     if (pointEntities.size() < 2)
       return;
     _polygonalCurves.push_back(new PolygonalCurve(pointEntities));

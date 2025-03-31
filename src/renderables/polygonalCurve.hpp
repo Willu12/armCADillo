@@ -14,6 +14,7 @@ public:
   const Mesh &getMesh() const override { return *_mesh; }
   const algebra::Vec3f &getPosition() const override { return _position; }
   algebra::Vec3f &getPosition() override { return _position; }
+  void updateMesh() { _mesh = generateMesh(); }
 
 private:
   std::vector<PointEntity *> _points;
@@ -25,9 +26,7 @@ private:
     std::vector<uint32_t> indices;
 
     for (int i = 0; i < _points.size(); ++i) {
-      auto point = _points[i];
-      auto worldPosition =
-          point->getModelMatrix() * point->getPosition().toHomogenous();
+      auto worldPosition = _points[i]->getPosition();
       vertices.push_back(worldPosition[0]);
       vertices.push_back(worldPosition[1]);
       vertices.push_back(worldPosition[2]);
