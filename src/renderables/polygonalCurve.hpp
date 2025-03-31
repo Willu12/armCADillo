@@ -1,6 +1,7 @@
 #pragma once
 #include "IRenderable.hpp"
 #include "pointEntity.hpp"
+#include <algorithm>
 #include <vector>
 
 class PolygonalCurve : public IRenderable {
@@ -15,6 +16,13 @@ public:
   const algebra::Vec3f &getPosition() const override { return _position; }
   algebra::Vec3f &getPosition() override { return _position; }
   void updateMesh() { _mesh = generateMesh(); }
+
+  void removePoint(const PointEntity *point) {
+    auto it = std::find(_points.begin(), _points.end(), point);
+    if (it == _points.end())
+      return;
+    _points.erase(it);
+  }
 
 private:
   std::vector<PointEntity *> _points;
@@ -37,5 +45,9 @@ private:
       }
     }
     return Mesh::create(vertices, indices);
+  }
+
+  bool containsPoint(const PointEntity *point) {
+    return std::find(_points.begin(), _points.end(), point) != _points.end();
   }
 };

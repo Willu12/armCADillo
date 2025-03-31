@@ -9,7 +9,6 @@
 #include "selectionController.hpp"
 #include "torusEntity.hpp"
 #include <chrono>
-#include <unordered_set>
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
@@ -232,6 +231,13 @@ private:
   void deleteSelectedEntities() {
     if (_selectedEntities.empty())
       return;
+
+    auto selectedPoints = getSelectedPoints();
+    for (auto curve : _polygonalCurves) {
+      for (auto point : selectedPoints) {
+        curve->removePoint(point);
+      }
+    }
 
     _entities.erase(std::remove_if(_entities.begin(), _entities.end(),
                                    [&](IEntity *entity) {
