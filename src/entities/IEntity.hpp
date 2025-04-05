@@ -1,7 +1,6 @@
 #pragma once
 #include "IRenderable.hpp"
 #include "matrix.hpp"
-#include "mesh.hpp"
 #include "quaternion.hpp"
 #include "transformations.hpp"
 
@@ -24,7 +23,7 @@ public:
   virtual void updateMesh() = 0;
   virtual bool renderSettings() = 0;
 
-  algebra::Mat4f getModelMatrix() const {
+  algebra::Mat4f getModelMatrix() const override {
     auto scale = getScale();
     auto scaleMatrix =
         algebra::transformations::scaleMatrix(scale, scale, scale);

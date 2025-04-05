@@ -1,8 +1,8 @@
 #pragma once
 #include "IEntity.hpp"
-#include "algebra.hpp"
 #include "imgui_stdlib.h"
 #include "mesh.hpp"
+#include "torus.hpp"
 #include <string>
 
 class TorusEntity : public IEntity {

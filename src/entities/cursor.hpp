@@ -1,6 +1,6 @@
 #pragma once
-#include "IEntity.hpp"
-#include "shader.hpp"
+#include "IRenderable.hpp"
+#include "camera.hpp"
 #include "transformations.hpp"
 #include "vec.hpp"
 
@@ -20,8 +20,6 @@ public:
   }
 
   void updatePosition(float x, float y, const Camera &camera) {
-    auto zoom_rad = algebra::rotations::toRadians(camera.getZoom());
-
     auto projection = camera.projectionMatrix();
     auto sceneCursorPosition =
         projection * (camera.viewMatrix() * _position.toHomogenous());

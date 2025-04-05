@@ -1,21 +1,12 @@
-#include "algebra.hpp"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <glad/glad.h>
 
-#include "cameraController.hpp"
 #include "gui.hpp"
 #include "renderer.hpp"
 
-#include "cursor.hpp"
-#include "cursorController.hpp"
-#include "modelController.hpp"
-#include "torusEntity.hpp"
-
 #include "image.hpp"
-#include "pickingTexture.hpp"
-#include "quaternion.hpp"
 #include "texture.hpp"
 #include "textureResource.hpp"
 

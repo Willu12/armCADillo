@@ -2,7 +2,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "stb_image.h"
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 class Image {
 public:

@@ -1,6 +1,5 @@
 #pragma once
-#include "IRenderable.hpp"
-#include "mesh.hpp"
+#include "IEntity.hpp"
 #include "sphere.hpp"
 
 class Point : public IEntity {

@@ -2,7 +2,7 @@
 
 #include "IController.hpp"
 #include "cursor.hpp"
-#include "mouse.hpp"
+#include "imgui.h"
 
 class CursorController : public IController {
 public:
@@ -28,7 +28,7 @@ public:
   Cursor &getCursor() { return *_cursor; }
 
 private:
-  std::shared_ptr<Cursor> _cursor;
   GLFWwindow *_window;
+  std::shared_ptr<Cursor> _cursor;
   Camera *_camera;
 };

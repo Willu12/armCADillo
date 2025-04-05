@@ -1,9 +1,7 @@
 #pragma once
 
-#include "camera.hpp"
 #include "glad/glad.h"
 #include "matrix.hpp"
-#include "transformations.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -99,7 +97,6 @@ private:
                              GLenum shaderType) {
     GLuint shader;
     int success;
-    char infoLog[512];
 
     shader = glCreateShader(shaderType);
 

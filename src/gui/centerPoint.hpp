@@ -1,5 +1,4 @@
 #pragma once
-#include "IEntity.hpp"
 #include "point.hpp"
 
 class CenterPoint {

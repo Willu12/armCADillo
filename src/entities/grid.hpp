@@ -1,7 +1,8 @@
 #pragma once
+#include "shader.hpp"
+
 #include "GLFW/glfw3.h"
 #include "camera.hpp"
-#include "shader.hpp"
 
 class Grid {
 public:
@@ -23,8 +24,8 @@ public:
   }
 
 private:
-  Shader _shader;
   GLFWwindow *_window;
+  Shader _shader;
 
   float getAspectRatio() const {
     int width, height;

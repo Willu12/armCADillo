@@ -2,10 +2,7 @@
 
 #include "IEntity.hpp"
 #include "imgui_stdlib.h"
-#include "matrix.hpp"
 #include "mesh.hpp"
-#include "point.hpp"
-#include "sphere.hpp"
 
 class PointEntity : public IEntity {
 public:

@@ -1,7 +1,7 @@
 #pragma once
 #include "IParametrizable.hpp"
 #include "shader.hpp"
-#include "vec.hpp"
+#include <memory>
 #include <vector>
 
 struct MeshDensity {

@@ -1,6 +1,7 @@
 #pragma once
 #include "IController.hpp"
 #include "IEntity.hpp"
+#include "imgui.h"
 
 enum class Axis { X = 0, Y = 1, Z = 2 };
 

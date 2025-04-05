@@ -8,6 +8,7 @@ class Mouse {
 public:
   void process(std::vector<std::shared_ptr<IController>> controllers) {
     processScroll(controllers);
+
     if (!ImGui::IsAnyItemActive() && anyButtonDown()) {
       ImVec2 currentMousePosition = ImGui::GetMousePos();
 

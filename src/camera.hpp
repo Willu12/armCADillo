@@ -1,7 +1,7 @@
 #pragma once
-#include "algebra.hpp"
 #include "glfwHelper.hpp"
 #include "spherical.hpp"
+#include "transformations.hpp"
 #include "utils.hpp"
 
 class Camera {

@@ -1,14 +1,15 @@
 #pragma once
-#include "GLFW/glfw3.h"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
 #include "imgui.h"
+#include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
 #include "polygonalCurve.hpp"
-#include "selectionController.hpp"
 #include "torusEntity.hpp"
 #include <chrono>
+
+#include "GLFW/glfw3.h"
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
@@ -103,7 +104,7 @@ private:
   void initControllers() {
     _controllers.resize(4);
     _controllers[static_cast<int>(ControllerKind::Camera)] =
-        std::make_shared<CameraController>(_window, _camera);
+        std::make_shared<CameraController>(_camera);
 
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
         std::make_shared<CursorController>(_window, _camera);

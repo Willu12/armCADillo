@@ -2,13 +2,10 @@
 #include "IController.hpp"
 #include "camera.hpp"
 #include "imgui.h"
-#include "mouse.hpp"
-#include "vec.hpp"
 
 class CameraController : public IController {
 public:
-  CameraController(GLFWwindow *window, Camera *camera)
-      : _window(window), _camera(camera) {}
+  CameraController(Camera *camera) : _camera(camera) {}
 
   Camera *getCamera() const { return _camera; }
 
@@ -31,7 +28,7 @@ public:
     _camera->updateTarget(-deltaX * cameraMoveSpeed, deltaY * cameraMoveSpeed);
   }
 
-  void process(float x, float y) {
+  void process(float x, float y) override {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
       if (ImGui::GetIO().KeyShift)
         translate(x, y);
@@ -42,7 +39,6 @@ public:
 
 private:
   Camera *_camera;
-  GLFWwindow *_window;
 
   const float cameraSpeed = M_PI / 400.f;
   const float cameraMoveSpeed = 0.002f;
