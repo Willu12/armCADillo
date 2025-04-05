@@ -6,7 +6,7 @@
 
 class CursorController : public IController {
 public:
-  CursorController(GLFWwindow *window, Camera *camera)
+  CursorController(GLFWwindow *window, std::shared_ptr<Camera> camera)
       : _window(window), _cursor(std::make_shared<Cursor>()), _camera(camera) {}
 
   bool processMouse() override { return false; }
@@ -30,5 +30,5 @@ public:
 private:
   GLFWwindow *_window;
   std::shared_ptr<Cursor> _cursor;
-  Camera *_camera;
+  std::shared_ptr<Camera> _camera;
 };

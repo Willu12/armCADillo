@@ -1,18 +1,16 @@
 #pragma once
-#include "GLFW/glfw3.h"
+#include "IEntity.hpp"
 #include "IRenderable.hpp"
 #include "camera.hpp"
-#include "glfwHelper.hpp"
 #include "pickingTexture.hpp"
-#include "torusEntity.hpp"
 #include "transformations.hpp"
 
 class MeshRenderer {
 public:
-  MeshRenderer(Camera *camera, GLFWwindow *window)
-      : _camera(camera), _window(window) {}
+  MeshRenderer(std::shared_ptr<Camera> camera) : _camera(camera) {}
 
-  void renderEntities(const std::vector<IEntity *> &entites, Shader &shader) {
+  void renderEntities(const std::vector<std::shared_ptr<IEntity>> &entites,
+                      Shader &shader) {
     for (int i = 0; i < entites.size(); ++i) {
       renderMesh(*entites[i], shader);
     }
@@ -52,8 +50,8 @@ public:
     glDrawElements(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
   }
 
-  void renderPicking(const std::vector<IEntity *> &entites, Shader &shader,
-                     PickingTexture &pickingTexture) {
+  void renderPicking(const std::vector<std::shared_ptr<IEntity>> &entites,
+                     Shader &shader, PickingTexture &pickingTexture) {
 
     pickingTexture.enableWriting();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -67,6 +65,5 @@ public:
   }
 
 private:
-  Camera *_camera;
-  GLFWwindow *_window;
+  std::shared_ptr<Camera> _camera;
 };

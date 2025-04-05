@@ -1,7 +1,10 @@
 #pragma once
 #include "IController.hpp"
 #include "IEntity.hpp"
+#include "centerPoint.hpp"
+#include "cursor.hpp"
 #include "imgui.h"
+#include <memory>
 
 enum class Axis { X = 0, Y = 1, Z = 2 };
 
@@ -14,7 +17,7 @@ public:
       TransformationCenter::CenterPoint;
 
   ModelController(const CenterPoint &centerPoint, const Cursor &cursor,
-                  const std::vector<IEntity *> &entites)
+                  const std::vector<std::shared_ptr<IEntity>> &entites)
       : _centerPoint(centerPoint), _cursor(cursor), _entites(entites) {}
 
   bool processScroll() override {
@@ -40,7 +43,7 @@ public:
   }
 
 private:
-  const std::vector<IEntity *> &_entites;
+  const std::vector<std::shared_ptr<IEntity>> &_entites;
   const float _scrollSpeed = 0.001f;
   const float _moveSpeed = 0.01f;
   const CenterPoint &_centerPoint;

@@ -3,6 +3,7 @@
 
 #include "GLFW/glfw3.h"
 #include "camera.hpp"
+#include <memory>
 
 class Grid {
 public:
@@ -11,7 +12,7 @@ public:
         _shader("../resources/shaders/gridVertexShader.hlsl",
                 "../resources/shaders/gridFragmentShader.hlsl") {}
 
-  void render(Camera *camera) {
+  void render(std::shared_ptr<Camera> camera) {
     _shader.use();
     _shader.setViewMatrix(camera->viewMatrix());
     _shader.setProjectionMatrix(camera->projectionMatrix());

@@ -3,15 +3,18 @@
 #include "IEntity.hpp"
 #include "algorithm"
 #include "pickingTexture.hpp"
+#include "scene.hpp"
+#include <memory>
 #include <optional>
 #include <vector>
 
+#include "glfwHelper.hpp"
+
 class SelectionController : public IController {
 public:
-  SelectionController(GLFWwindow *window, std::vector<IEntity *> &entities,
-                      std::vector<IEntity *> &selectedEntities)
-      : _window(window), _entities(entities),
-        _selectedEntities(selectedEntities) {
+  SelectionController(GLFWwindow *window, std::shared_ptr<Scene> scene,
+                      std::vector<std::shared_ptr<IEntity>> &selectedEntities)
+      : _window(window), _scene(scene), _selectedEntities(selectedEntities) {
 
     _pickingTexture.init(GLFWHelper::getWidth(_window),
                          GLFWHelper::getHeight(_window));
@@ -20,13 +23,13 @@ public:
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
 
-  void process(float x, float y) {
+  void process(float x, float y) override {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
 
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
       auto entity = getEntity(currentMousePosition.x, currentMousePosition.y);
       if (entity) {
-        IEntity *entityPointer = entity.value();
+        std::shared_ptr<IEntity> entityPointer = entity.value();
         if (ImGui::GetIO().KeyCtrl) {
           auto it = std::find(_selectedEntities.begin(),
                               _selectedEntities.end(), entityPointer);
@@ -45,20 +48,21 @@ public:
   PickingTexture &getPickingTexture() { return _pickingTexture; }
 
 private:
-  std::vector<IEntity *> &_selectedEntities;
-  std::vector<IEntity *> &_entities;
   GLFWwindow *_window;
+  std::shared_ptr<Scene> _scene;
+  std::vector<std::shared_ptr<IEntity>> &_selectedEntities;
   PickingTexture _pickingTexture;
 
-  std::optional<IEntity *> getEntity(float x, float y) {
+  std::optional<std::shared_ptr<IEntity>> getEntity(float x, float y) {
     PickingTexture::PixelInfo pixel =
         _pickingTexture.ReadPixel(x, GLFWHelper::getHeight(_window) - y - 1);
     if (pixel.ObjectId == 0)
       return std::nullopt;
     auto clickedObjectId = pixel.ObjectId - 1;
 
-    if (clickedObjectId > _entities.size())
+    auto sceneEntities = _scene->getEntites();
+    if (clickedObjectId > sceneEntities.size())
       return std::nullopt;
-    return _entities[clickedObjectId];
+    return sceneEntities[clickedObjectId];
   }
 };

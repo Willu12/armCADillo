@@ -2,12 +2,13 @@
 #include "IController.hpp"
 #include "camera.hpp"
 #include "imgui.h"
+#include "memory"
 
 class CameraController : public IController {
 public:
-  CameraController(Camera *camera) : _camera(camera) {}
+  CameraController(std::shared_ptr<Camera> camera) : _camera(camera) {}
 
-  Camera *getCamera() const { return _camera; }
+  std::shared_ptr<Camera> getCamera() const { return _camera; }
 
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
@@ -38,7 +39,7 @@ public:
   }
 
 private:
-  Camera *_camera;
+  std::shared_ptr<Camera> _camera;
 
   const float cameraSpeed = M_PI / 400.f;
   const float cameraMoveSpeed = 0.002f;

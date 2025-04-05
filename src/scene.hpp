@@ -1,0 +1,55 @@
+#pragma once
+#include "IEntity.hpp"
+#include "camera.hpp"
+#include "entitiesTypes.hpp"
+#include <algorithm>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+class Scene {
+public:
+  Scene(std::shared_ptr<Camera> camera) : _camera(camera){};
+  std::vector<std::shared_ptr<IEntity>> getEntites() {
+    std::vector<std::shared_ptr<IEntity>> entities;
+    for (const auto &specificEntities : _entities) {
+      entities.insert(entities.end(), specificEntities.second.begin(),
+                      specificEntities.second.end());
+    }
+    return entities;
+  }
+
+  void addEntity(EntityType entityType,
+                 const std::shared_ptr<IEntity> &entity) {
+    _entities[entityType].push_back(entity); // CHECK
+  }
+
+  std::shared_ptr<Camera> getCamera() { return _camera; }
+  void removeEntities(
+      const std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+    for (auto it = _entities.begin(); it != _entities.end();) {
+      auto &vec = it->second;
+
+      vec.erase(std::remove_if(vec.begin(), vec.end(),
+                               [&](const std::shared_ptr<IEntity> &e) {
+                                 return std::find(entitiesToRemove.begin(),
+                                                  entitiesToRemove.end(),
+                                                  e) != entitiesToRemove.end();
+                               }),
+                vec.end());
+
+      // Clean up empty vectors
+      if (vec.empty()) {
+        it = _entities.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+private:
+  // using namespace std;
+  std::shared_ptr<Camera> _camera;
+  std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
+      _entities;
+};

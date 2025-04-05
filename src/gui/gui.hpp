@@ -1,32 +1,44 @@
 #pragma once
+
+#include "EntityFactories/IEntityFactory.hpp"
+#include "EntityFactories/pointFactory.hpp"
+#include "EntityFactories/torusFactory.hpp"
+#include "IEntity.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
+#include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
 #include "polygonalCurve.hpp"
-#include "torusEntity.hpp"
+#include "scene.hpp"
 #include <chrono>
-
-#include "GLFW/glfw3.h"
+#include <memory>
+#include <unordered_map>
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
 
 class GUI {
 public:
-  GUI(GLFWwindow *window, Camera *camera) : _window(window), _camera(camera) {
+  GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
+      : _window(window), _scene(scene) {
     initControllers();
+    initEnitityFactories();
   }
 
   IController &getController() {
     return *_controllers[static_cast<int>(_selectedController)];
   }
 
-  const std::vector<IEntity *> &getEntities() const { return _entities; }
+  const std::vector<std::shared_ptr<IEntity>> getEntities() const {
+    return _scene->getEntites();
+  }
 
-  std::vector<IEntity *> getSelectedEntities() { return _selectedEntities; }
+  std::vector<std::shared_ptr<IEntity>> getSelectedEntities() {
+    return _selectedEntities;
+  }
 
   Cursor &getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
@@ -87,9 +99,8 @@ public:
 
 private:
   GLFWwindow *_window;
-  Camera *_camera;
-  std::vector<IEntity *> _selectedEntities;
-  std::vector<IEntity *> _entities;
+  std::shared_ptr<Scene> _scene;
+  std::vector<std::shared_ptr<IEntity>> _selectedEntities;
   std::vector<PolygonalCurve *> _polygonalCurves;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
@@ -97,23 +108,33 @@ private:
   CenterPoint _centerPoint;
   Mouse _mouse;
 
+  std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
+      _entityFactories;
+
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
   double _fps = 0.0;
 
+  void initEnitityFactories() {
+    _entityFactories.emplace(EntityType::Point,
+                             std::make_shared<PointFactory>());
+    _entityFactories.emplace(EntityType::Torus,
+                             std::make_shared<TorusFactory>());
+  }
+
   void initControllers() {
     _controllers.resize(4);
     _controllers[static_cast<int>(ControllerKind::Camera)] =
-        std::make_shared<CameraController>(_camera);
+        std::make_shared<CameraController>(_scene->getCamera());
 
     _controllers[static_cast<int>(ControllerKind::Cursor)] =
-        std::make_shared<CursorController>(_window, _camera);
+        std::make_shared<CursorController>(_window, _scene->getCamera());
 
     _controllers[static_cast<int>(ControllerKind::Model)] =
         std::make_shared<ModelController>(_centerPoint, getCursor(),
                                           _selectedEntities);
     _controllers[static_cast<int>(ControllerKind::Selection)] =
-        std::make_shared<SelectionController>(_window, _entities,
+        std::make_shared<SelectionController>(_window, _scene,
                                               _selectedEntities);
   }
 
@@ -164,12 +185,12 @@ private:
 
   void renderCreateTorusUI() {
     if (ImGui::Button("Add new torus"))
-      createTorus();
+      createEntity(EntityType::Torus);
   }
 
   void renderCreatePointUI() {
     if (ImGui::Button("Add new point"))
-      createPoint();
+      createEntity(EntityType::Point);
   }
 
   void removeButtonUI() {
@@ -182,21 +203,10 @@ private:
       createPolygonalCurve();
   }
 
-  void createTorus() {
-    auto cursorPosition = getCursor().getPosition();
-    auto torus = new TorusEntity(2.f, 1.f, cursorPosition);
-    addEntity(torus);
-  }
-
-  void createPoint() {
-    auto cursorPosition = getCursor().getPosition();
-    auto point = new PointEntity(cursorPosition);
-    addEntity(point);
-  }
-
-  void addEntity(IEntity *entity) {
-    _entities.push_back(entity);
-    selectEntity(_entities.size() - 1);
+  void createEntity(EntityType entityType) {
+    const auto &cursorPosition = getCursor().getPosition();
+    auto entity = _entityFactories.at(entityType)->create(cursorPosition);
+    _scene->addEntity(entityType, entity);
   }
 
   void renderModelSettings() {
@@ -209,13 +219,14 @@ private:
   }
 
   void displayEntitiesList() {
-    for (int i = 0; i < _entities.size(); ++i) {
+    auto entities = _scene->getEntites();
+    for (int i = 0; i < entities.size(); ++i) {
 
-      auto name = _entities[i]->getName();
+      auto name = entities[i]->getName();
       name = name.empty() ? "##" : name;
       bool isSelected =
           std::find(_selectedEntities.begin(), _selectedEntities.end(),
-                    _entities[i]) != _selectedEntities.end();
+                    entities[i]) != _selectedEntities.end();
 
       if (ImGui::Selectable(name.c_str(), isSelected,
                             ImGuiSelectableFlags_AllowDoubleClick)) {
@@ -244,14 +255,7 @@ private:
       }
     }
 
-    _entities.erase(std::remove_if(_entities.begin(), _entities.end(),
-                                   [&](IEntity *entity) {
-                                     return std::find(_selectedEntities.begin(),
-                                                      _selectedEntities.end(),
-                                                      entity) !=
-                                            _selectedEntities.end();
-                                   }),
-                    _entities.end());
+    _scene->removeEntities(_selectedEntities);
 
     _selectedEntities.clear();
   }
@@ -283,13 +287,14 @@ private:
   }
 
   void selectEntity(int entityIndex) {
-    _selectedEntities.push_back(_entities[entityIndex]);
+    auto entities = _scene->getEntites();
+    _selectedEntities.push_back(entities[entityIndex]);
   }
 
   void unselectEntity(int entityIndex) {
     _selectedEntities.erase(std::remove(_selectedEntities.begin(),
                                         _selectedEntities.end(),
-                                        _entities[entityIndex]),
+                                        getEntities()[entityIndex]),
                             _selectedEntities.end());
   }
 
@@ -308,11 +313,11 @@ private:
     return activeControllers;
   }
 
-  std::vector<PointEntity *> getSelectedPoints() {
-    std::vector<PointEntity *> pointEntities;
+  std::vector<std::shared_ptr<PointEntity>> getSelectedPoints() {
+    std::vector<std::shared_ptr<PointEntity>> pointEntities;
 
-    for (IEntity *entity : _selectedEntities) {
-      PointEntity *point = dynamic_cast<PointEntity *>(entity);
+    for (auto entity : _selectedEntities) {
+      auto point = std::dynamic_pointer_cast<PointEntity>(entity);
       if (point) {
         pointEntities.push_back(point);
       }

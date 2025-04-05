@@ -1,12 +1,14 @@
 #pragma once
 #include "IRenderable.hpp"
+#include "memory"
 #include "pointEntity.hpp"
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 class PolygonalCurve : public IRenderable {
 public:
-  PolygonalCurve(std::vector<PointEntity *> points)
+  PolygonalCurve(std::vector<std::shared_ptr<PointEntity>> points)
       : _points(points), _mesh(generateMesh()) {}
 
   algebra::Mat4f getModelMatrix() const override {
@@ -17,7 +19,7 @@ public:
   algebra::Vec3f &getPosition() override { return _position; }
   void updateMesh() { _mesh = generateMesh(); }
 
-  void removePoint(const PointEntity *point) {
+  void removePoint(const std::shared_ptr<PointEntity> &point) {
     auto it = std::find(_points.begin(), _points.end(), point);
     if (it == _points.end())
       return;
@@ -25,7 +27,7 @@ public:
   }
 
 private:
-  std::vector<PointEntity *> _points;
+  std::vector<std::shared_ptr<PointEntity>> _points;
   std::shared_ptr<Mesh> _mesh;
   algebra::Vec3f _position;
 
@@ -47,7 +49,7 @@ private:
     return Mesh::create(vertices, indices);
   }
 
-  bool containsPoint(const PointEntity *point) {
+  bool containsPoint(const std::shared_ptr<PointEntity> &point) {
     return std::find(_points.begin(), _points.end(), point) != _points.end();
   }
 };

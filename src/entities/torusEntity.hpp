@@ -1,6 +1,5 @@
 #pragma once
 #include "IEntity.hpp"
-#include "imgui_stdlib.h"
 #include "mesh.hpp"
 #include "torus.hpp"
 #include <string>

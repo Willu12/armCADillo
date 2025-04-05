@@ -1,7 +1,6 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <glad/glad.h>
 
 #include "gui.hpp"
 #include "renderer.hpp"
@@ -10,8 +9,9 @@
 #include "texture.hpp"
 #include "textureResource.hpp"
 
+#include "camera.hpp"
 #include "grid.hpp"
-#include <GLFW/glfw3.h>
+#include <memory>
 #include <stdio.h>
 
 #define WIDTH 1920
@@ -70,12 +70,13 @@ int main(int, char **) {
   Shader pickupShader("../resources/shaders/vertexShader.hlsl",
                       "../resources/shaders/pickingShader.frag");
 
-  Camera *camera = new Camera(window);
+  std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
+  std::shared_ptr<Scene> scene = std::make_shared<Scene>(camera);
 
-  GUI gui(window, camera);
+  GUI gui(window, scene);
   Grid grid(window);
 
-  MeshRenderer MeshRenderer(camera, window);
+  MeshRenderer MeshRenderer(camera);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
