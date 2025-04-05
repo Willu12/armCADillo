@@ -49,7 +49,7 @@ public:
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
   void enableWriting() { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo); }
-  void disableWrtiing() { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); };
+  void disableWriting() { glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); };
 
   struct PixelInfo {
     uint32_t ObjectId = 0;

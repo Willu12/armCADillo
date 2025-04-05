@@ -4,9 +4,12 @@ project(armCADillo)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(SANITIZER_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+
+
 add_subdirectory(external)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/rendering/renderer.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/include/

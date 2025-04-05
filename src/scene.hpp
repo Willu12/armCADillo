@@ -47,6 +47,11 @@ public:
     }
   }
 
+  const std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>> &
+  getGroupedEntities() {
+    return _entities;
+  }
+
 private:
   // using namespace std;
   std::shared_ptr<Camera> _camera;

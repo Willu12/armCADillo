@@ -81,7 +81,6 @@ int main(int, char **) {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
-  (void)io;
   io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
   io.ConfigFlags |=
@@ -111,25 +110,22 @@ int main(int, char **) {
     // Rendering
     ImGui::Render();
     setupViewPortAndClear(window, clear_color);
-
     grid.render(camera);
 
-    if (gui.getMouse().anyButtonDown())
+    MeshRenderer.renderGroupedEntites(scene->getGroupedEntities(), shader);
+    if (gui.getMouse().anyButtonDown()) {
       MeshRenderer.renderPicking(gui.getEntities(), pickupShader,
                                  gui.getPickingTexture());
+    }
 
-    MeshRenderer.renderEntities(gui.getEntities(), shader);
     texture.bind(0);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
 
-    auto polygonalCurves = gui.getPolygonalCurves();
-    for (int i = 0; i < polygonalCurves.size(); ++i) {
-      MeshRenderer.renderMesh(*polygonalCurves[i], shader);
-    }
-    //
-    if (gui.getCenterPoint()) {
+    for (const auto &polygonalCurve : gui.getPolygonalCurves())
+      MeshRenderer.renderMesh(*polygonalCurve, shader);
+
+    if (gui.getCenterPoint())
       MeshRenderer.renderMesh(*gui.getCenterPoint().value(), shader);
-    }
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
