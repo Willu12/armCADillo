@@ -23,9 +23,8 @@ public:
   void updateMesh() override { _mesh = generateMesh(); }
 
   bool renderSettings() override {
+    IEntity::renderSettings();
     bool change = false;
-
-    ImGui::InputText("Name", &getName());
 
     change |= ImGui::SliderFloat("R", &getInnerRadius(), 0.1f, 10.f);
     change |= ImGui::SliderFloat("r", &getTubeRadius(), 0.1f, 10.f);

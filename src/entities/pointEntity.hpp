@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IEntity.hpp"
-#include "imgui_stdlib.h"
 #include "mesh.hpp"
 
 class PointEntity : public IEntity {
@@ -14,10 +13,7 @@ public:
   }
 
   void updateMesh() override { _mesh = generateMesh(); };
-  bool renderSettings() override {
-    ImGui::InputText("Name", &getName());
-    return false;
-  }
+
   const Mesh &getMesh() const override { return *_mesh; }
 
 private:

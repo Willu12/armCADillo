@@ -1,5 +1,7 @@
 #pragma once
 #include "IRenderable.hpp"
+#include "imgui_stdlib.h"
+
 #include "matrix.hpp"
 #include "quaternion.hpp"
 #include "transformations.hpp"
@@ -21,7 +23,16 @@ public:
   const std::string &getName() const { return _name; }
 
   virtual void updateMesh() = 0;
-  virtual bool renderSettings() = 0;
+  virtual bool renderSettings() {
+    ImGui::InputText("Name", &getName());
+
+    float position[3] = {_position[0], _position[1], _position[2]};
+    if (ImGui::InputFloat3("Position", position)) {
+      _position = algebra::Vec3f(_position[0], _position[1], _position[2]);
+      return true;
+    }
+    return false;
+  }
 
   algebra::Mat4f getModelMatrix() const override {
     auto scale = getScale();
