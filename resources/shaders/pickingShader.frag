@@ -1,8 +1,7 @@
 #version 330
 
-uniform uint gObjectIndex;
-uniform uint gDrawIndex;
+flat in uint fObjectIndex;
 
 out uvec3 FragColor;
 
-void main() { FragColor = uvec3(gObjectIndex, gDrawIndex, gl_PrimitiveID); }
+void main() { FragColor = uvec3(fObjectIndex, 0, gl_PrimitiveID); }

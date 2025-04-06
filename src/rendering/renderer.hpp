@@ -25,12 +25,22 @@ public:
           EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities,
       Shader &shader);
 
+  void renderGroupedPicking(
+      const std::unordered_map<
+          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities,
+      Shader &shader, PickingTexture &pickingTexture);
+
 private:
   std::shared_ptr<Camera> _camera;
 
   GLuint prepareInstacedModelMatrices(
       const std::vector<std::shared_ptr<IEntity>> &entities);
+  GLuint preparePickingInstacedBuffers(
+      const std::vector<std::shared_ptr<IEntity>> &entities);
   void
   renderInstacedEntities(const std::vector<std::shared_ptr<IEntity>> &entities,
                          Shader &shader);
+  void
+  renderInstacedPicking(const std::vector<std::shared_ptr<IEntity>> &entities,
+                        Shader &shader, PickingTexture &pickingTexture);
 };

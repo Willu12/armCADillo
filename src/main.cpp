@@ -67,7 +67,7 @@ int main(int, char **) {
   Shader textureShader("../resources/shaders/textureShader.vert",
                        "../resources/shaders/texturedBillboardShader.frag");
 
-  Shader pickupShader("../resources/shaders/vertexShader.hlsl",
+  Shader pickupShader("../resources/shaders/vertexPickingShader.hlsl",
                       "../resources/shaders/pickingShader.frag");
 
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
@@ -114,8 +114,8 @@ int main(int, char **) {
 
     MeshRenderer.renderGroupedEntites(scene->getGroupedEntities(), shader);
     if (gui.getMouse().anyButtonDown()) {
-      MeshRenderer.renderPicking(gui.getEntities(), pickupShader,
-                                 gui.getPickingTexture());
+      MeshRenderer.renderGroupedPicking(scene->getGroupedEntities(),
+                                        pickupShader, gui.getPickingTexture());
     }
 
     texture.bind(0);
