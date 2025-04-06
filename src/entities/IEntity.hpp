@@ -11,18 +11,6 @@ class IEntity : public IRenderable {
 public:
   virtual ~IEntity() = default;
 
-  float &getScale() { return _scale; }
-  const float &getScale() const { return _scale; }
-
-  algebra::Vec3f &getPosition() override { return _position; }
-  const algebra::Vec3f &getPosition() const override { return _position; }
-
-  algebra::Quaternion<float> &getRotation() { return _rotation; }
-  const algebra::Quaternion<float> &getRotation() const { return _rotation; }
-
-  std::string &getName() { return _name; }
-  const std::string &getName() const { return _name; }
-
   virtual void updateMesh() = 0;
   virtual bool renderSettings() {
     ImGui::InputText("Name", &getName());
@@ -34,6 +22,18 @@ public:
     }
     return false;
   }
+
+  float &getScale() { return _scale; }
+  const float &getScale() const { return _scale; }
+
+  algebra::Vec3f &getPosition() override { return _position; }
+  const algebra::Vec3f &getPosition() const override { return _position; }
+
+  algebra::Quaternion<float> &getRotation() { return _rotation; }
+  const algebra::Quaternion<float> &getRotation() const { return _rotation; }
+
+  std::string &getName() { return _name; }
+  const std::string &getName() const { return _name; }
 
   algebra::Mat4f getModelMatrix() const override {
     auto scale = getScale();
