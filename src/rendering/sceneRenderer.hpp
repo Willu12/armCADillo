@@ -1,0 +1,50 @@
+#pragma once
+#include "IEntity.hpp"
+#include "IEntityRenderer.hpp"
+#include "camera.hpp"
+#include "entitiesTypes.hpp"
+#include "grid.hpp"
+#include "pickingRenderer.hpp"
+#include "pickingTexture.hpp"
+#include "pointRenderer.hpp"
+#include "torusRenderer.hpp"
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+class SceneRenderer {
+public:
+  SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture)
+      : _pickingRenderer(pickingTexture), _camera(camera) {
+    initEntityRenderers();
+  }
+
+  void
+  render(const std::unordered_map<
+         EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+    for (const auto &entityGroup : groupedEntities) {
+      auto &renderer = _entityRenderers.at(entityGroup.first);
+      renderer->render(entityGroup.second);
+    }
+    grid.render(_camera);
+  }
+
+  void
+  renderPicking(const std::vector<std::shared_ptr<IEntity>> pickableEntities) {
+    _pickingRenderer.render(pickableEntities, _camera);
+  }
+
+private:
+  std::unordered_map<EntityType, std::unique_ptr<IEntityRenderer>>
+      _entityRenderers;
+  PickingRenderer _pickingRenderer;
+  std::shared_ptr<Camera> _camera;
+  Grid grid;
+
+  void initEntityRenderers() {
+    _entityRenderers.insert(
+        {EntityType::Torus, std::make_unique<TorusRenderer>(_camera)});
+    _entityRenderers.insert(
+        {EntityType::Point, std::make_unique<PointRenderer>(_camera)});
+  }
+};

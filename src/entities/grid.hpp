@@ -1,15 +1,13 @@
 #pragma once
 #include "shader.hpp"
 
-#include "GLFW/glfw3.h"
 #include "camera.hpp"
 #include <memory>
 
 class Grid {
 public:
-  Grid(GLFWwindow *window)
-      : _window(window),
-        _shader("../resources/shaders/gridVertexShader.hlsl",
+  Grid()
+      : _shader("../resources/shaders/gridVertexShader.hlsl",
                 "../resources/shaders/gridFragmentShader.hlsl") {}
 
   void render(std::shared_ptr<Camera> camera) {
@@ -25,12 +23,5 @@ public:
   }
 
 private:
-  GLFWwindow *_window;
   Shader _shader;
-
-  float getAspectRatio() const {
-    int width, height;
-    glfwGetFramebufferSize(_window, &width, &height);
-    return static_cast<float>(width) / static_cast<float>(height);
-  }
 };

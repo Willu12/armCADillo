@@ -6,6 +6,7 @@
 #include "renderer.hpp"
 
 #include "image.hpp"
+#include "sceneRenderer.hpp"
 #include "texture.hpp"
 #include "textureResource.hpp"
 
@@ -74,9 +75,9 @@ int main(int, char **) {
   std::shared_ptr<Scene> scene = std::make_shared<Scene>(camera);
 
   GUI gui(window, scene);
-  Grid grid(window);
 
   MeshRenderer MeshRenderer(camera);
+  SceneRenderer sceneRenderer(camera, gui.getPickingTexture());
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -110,13 +111,10 @@ int main(int, char **) {
     // Rendering
     ImGui::Render();
     setupViewPortAndClear(window, clear_color);
-    grid.render(camera);
 
-    MeshRenderer.renderGroupedEntites(scene->getGroupedEntities(), shader);
-    if (gui.getMouse().anyButtonDown()) {
-      MeshRenderer.renderGroupedPicking(scene->getGroupedEntities(),
-                                        pickupShader, gui.getPickingTexture());
-    }
+    sceneRenderer.render(scene->getGroupedEntities());
+    if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
+      sceneRenderer.renderPicking(scene->getPoints());
 
     texture.bind(0);
     MeshRenderer.renderBillboard(gui.getCursor(), textureShader);

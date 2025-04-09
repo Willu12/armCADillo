@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IController.hpp"
 #include "imgui.h"
 #include "vec.hpp"
 #include <memory>
@@ -39,6 +40,10 @@ public:
     return ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
            ImGui::IsMouseDown(ImGuiMouseButton_Middle) ||
            ImGui::IsMouseDown(ImGuiMouseButton_Right);
+  }
+
+  bool leftButtonDown() const {
+    return ImGui::IsMouseDown(ImGuiMouseButton_Left);
   }
 
 private:

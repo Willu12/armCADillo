@@ -22,6 +22,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/rendering/
     src/meshes/
     src/renderables/
+    src/rendering/EntityRenderers/
 
 )
 

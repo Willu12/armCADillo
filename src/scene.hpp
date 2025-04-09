@@ -52,6 +52,12 @@ public:
     return _entities;
   }
 
+  std::vector<std::shared_ptr<IEntity>> getPoints() {
+    if (_entities.contains(EntityType::Point) == false)
+      return std::vector<std::shared_ptr<IEntity>>();
+    return _entities.at(EntityType::Point);
+  }
+
 private:
   // using namespace std;
   std::shared_ptr<Camera> _camera;
