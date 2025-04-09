@@ -1,10 +1,10 @@
 #pragma once
-#include "IRenderable.hpp"
+#include "IEntity.hpp"
 #include "camera.hpp"
 #include "transformations.hpp"
 #include "vec.hpp"
 
-class Cursor : public IRenderable {
+class Cursor : public IEntity {
 public:
   Cursor() : _mesh(generateMesh()) {}
   algebra::Mat4f getModelMatrix() const override {
@@ -34,6 +34,8 @@ public:
     auto worldPos = camera.inverseViewMatrix() * viewPosition;
     _position = worldPos.fromHomogenous();
   }
+
+  void updateMesh() override { _mesh = generateMesh(); }
 
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.0f, 0.0f, 0.0f);

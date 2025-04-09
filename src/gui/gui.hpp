@@ -6,6 +6,7 @@
 #include "IEntity.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
+#include "cursor.hpp"
 #include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "mouse.hpp"
@@ -40,7 +41,7 @@ public:
     return _selectedEntities;
   }
 
-  Cursor &getCursor() {
+  std::shared_ptr<Cursor> getCursor() {
     auto cursorController = std::dynamic_pointer_cast<CursorController>(
         _controllers[static_cast<int>(ControllerKind::Cursor)]);
     return cursorController.get()->getCursor();
@@ -174,12 +175,12 @@ private:
   }
 
   void renderCursorControllerSettings() {
-    auto &cursor = getCursor();
-    auto &cursorPosition = cursor.getPosition();
+    auto cursor = getCursor();
+    auto &cursorPosition = cursor->getPosition();
     float position[3] = {cursorPosition[0], cursorPosition[1],
                          cursorPosition[2]};
     if (ImGui::InputFloat3("Cursor Position", position)) {
-      cursor.updatePosition(position[0], position[1], position[2]);
+      cursor->updatePosition(position[0], position[1], position[2]);
     }
   }
 
@@ -204,7 +205,7 @@ private:
   }
 
   void createEntity(EntityType entityType) {
-    const auto &cursorPosition = getCursor().getPosition();
+    const auto &cursorPosition = getCursor()->getPosition();
     auto entity = _entityFactories.at(entityType)->create(cursorPosition);
     _scene->addEntity(entityType, entity);
   }

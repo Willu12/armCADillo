@@ -2,6 +2,8 @@
 #include "IEntity.hpp"
 #include "IEntityRenderer.hpp"
 #include "camera.hpp"
+#include "cursor.hpp"
+#include "cursorRenderer.hpp"
 #include "entitiesTypes.hpp"
 #include "grid.hpp"
 #include "pickingRenderer.hpp"
@@ -22,16 +24,21 @@ public:
   void
   render(const std::unordered_map<
          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+    grid.render(_camera);
+
     for (const auto &entityGroup : groupedEntities) {
       auto &renderer = _entityRenderers.at(entityGroup.first);
       renderer->render(entityGroup.second);
     }
-    grid.render(_camera);
   }
 
   void
   renderPicking(const std::vector<std::shared_ptr<IEntity>> pickableEntities) {
     _pickingRenderer.render(pickableEntities, _camera);
+  }
+  void renderCursor(const std::shared_ptr<Cursor> &cursor) {
+    auto &cursorRenderer = _entityRenderers.at(EntityType::Cursor);
+    cursorRenderer->render({cursor});
   }
 
 private:
@@ -46,5 +53,7 @@ private:
         {EntityType::Torus, std::make_unique<TorusRenderer>(_camera)});
     _entityRenderers.insert(
         {EntityType::Point, std::make_unique<PointRenderer>(_camera)});
+    _entityRenderers.insert(
+        {EntityType::Cursor, std::make_unique<CursorRenderer>(_camera)});
   }
 };

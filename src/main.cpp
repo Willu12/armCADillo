@@ -58,9 +58,6 @@ int main(int, char **) {
   glfwSetScrollCallback(window, scrollCallback);
 
   // TEXTURE
-  Image image("../resources/textures/cursorTexture.png");
-  TextureResource textureResource(image);
-  Texture texture(textureResource);
 
   Shader shader("../resources/shaders/vertexShader.hlsl",
                 "../resources/shaders/fragmentShader.hlsl");
@@ -113,11 +110,11 @@ int main(int, char **) {
     setupViewPortAndClear(window, clear_color);
 
     sceneRenderer.render(scene->getGroupedEntities());
+
     if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
       sceneRenderer.renderPicking(scene->getPoints());
 
-    texture.bind(0);
-    MeshRenderer.renderBillboard(gui.getCursor(), textureShader);
+    sceneRenderer.renderCursor(gui.getCursor());
 
     for (const auto &polygonalCurve : gui.getPolygonalCurves())
       MeshRenderer.renderMesh(*polygonalCurve, shader);

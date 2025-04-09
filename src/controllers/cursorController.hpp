@@ -3,6 +3,7 @@
 #include "IController.hpp"
 #include "cursor.hpp"
 #include "imgui.h"
+#include <memory>
 
 class CursorController : public IController {
 public:
@@ -25,7 +26,7 @@ public:
       translate(currentMousePosition.x, currentMousePosition.y);
   }
 
-  Cursor &getCursor() { return *_cursor; }
+  std::shared_ptr<Cursor> getCursor() { return _cursor; }
 
 private:
   GLFWwindow *_window;

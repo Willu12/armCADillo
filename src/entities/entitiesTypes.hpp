@@ -1,6 +1,3 @@
 #pragma once
 
-enum class EntityType {
-  Point,
-  Torus,
-};
+enum class EntityType { Point, Torus, Cursor };

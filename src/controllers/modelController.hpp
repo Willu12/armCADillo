@@ -16,7 +16,8 @@ public:
   TransformationCenter _transformationCenter =
       TransformationCenter::CenterPoint;
 
-  ModelController(const CenterPoint &centerPoint, const Cursor &cursor,
+  ModelController(const CenterPoint &centerPoint,
+                  const std::shared_ptr<Cursor> &cursor,
                   const std::vector<std::shared_ptr<IEntity>> &entites)
       : _centerPoint(centerPoint), _cursor(cursor), _entites(entites) {}
 
@@ -47,7 +48,7 @@ private:
   const float _scrollSpeed = 0.001f;
   const float _moveSpeed = 0.01f;
   const CenterPoint &_centerPoint;
-  const Cursor &_cursor;
+  const std::shared_ptr<Cursor> _cursor;
 
   void translate(float deltaY) {
     for (auto &entity : _entites) {
@@ -90,6 +91,6 @@ private:
   algebra::Vec3f getTransformationPoint() const {
     return _transformationCenter == TransformationCenter::CenterPoint
                ? _centerPoint.getPosition()
-               : _cursor.getPosition();
+               : _cursor->getPosition();
   }
 };
