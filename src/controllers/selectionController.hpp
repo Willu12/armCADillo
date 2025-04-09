@@ -60,7 +60,7 @@ private:
       return std::nullopt;
     auto clickedObjectId = pixel.ObjectId - 1;
 
-    auto sceneEntities = _scene->getEntites();
+    auto sceneEntities = _scene->getPoints();
     if (clickedObjectId > sceneEntities.size())
       return std::nullopt;
     return sceneEntities[clickedObjectId];

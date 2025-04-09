@@ -5,13 +5,9 @@
 #include "gui.hpp"
 #include "renderer.hpp"
 
-#include "image.hpp"
 #include "sceneRenderer.hpp"
-#include "texture.hpp"
-#include "textureResource.hpp"
 
 #include "camera.hpp"
-#include "grid.hpp"
 #include <memory>
 #include <stdio.h>
 
@@ -40,7 +36,7 @@ int main(int, char **) {
   if (!glfwInit())
     return 1;
 
-  const char *glsl_version = "#version 130";
+  const char *glsl_version = "#version 330";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -57,16 +53,8 @@ int main(int, char **) {
   }
   glfwSetScrollCallback(window, scrollCallback);
 
-  // TEXTURE
-
   Shader shader("../resources/shaders/vertexShader.hlsl",
                 "../resources/shaders/fragmentShader.hlsl");
-
-  Shader textureShader("../resources/shaders/textureShader.vert",
-                       "../resources/shaders/texturedBillboardShader.frag");
-
-  Shader pickupShader("../resources/shaders/vertexPickingShader.hlsl",
-                      "../resources/shaders/pickingShader.frag");
 
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
   std::shared_ptr<Scene> scene = std::make_shared<Scene>(camera);
