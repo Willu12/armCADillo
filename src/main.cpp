@@ -3,7 +3,6 @@
 #include "imgui_impl_opengl3.h"
 
 #include "gui.hpp"
-#include "renderer.hpp"
 
 #include "sceneRenderer.hpp"
 
@@ -61,7 +60,6 @@ int main(int, char **) {
 
   GUI gui(window, scene);
 
-  MeshRenderer MeshRenderer(camera);
   SceneRenderer sceneRenderer(camera, gui.getPickingTexture());
 
   IMGUI_CHECKVERSION();
@@ -90,25 +88,24 @@ int main(int, char **) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
     gui.displayGUI();
-
     // Rendering
     ImGui::Render();
+
     setupViewPortAndClear(window, clear_color);
 
     sceneRenderer.render(scene->getGroupedEntities());
+
+    if (gui.getCenterPoint())
+      sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
 
     if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
       sceneRenderer.renderPicking(scene->getPoints());
 
     sceneRenderer.renderCursor(gui.getCursor());
 
-    for (const auto &polygonalCurve : gui.getPolygonalCurves())
-      MeshRenderer.renderMesh(*polygonalCurve, shader);
-
-    if (gui.getCenterPoint())
-      MeshRenderer.renderMesh(*gui.getCenterPoint().value(), shader);
+    // for (const auto &polygonalCurve : gui.getPolygonalCurves())
+    //   MeshRenderer.renderMesh(*polygonalCurve, shader);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

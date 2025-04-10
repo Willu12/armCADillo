@@ -1,7 +1,9 @@
 #pragma once
 #include "IEntity.hpp"
 #include "IEntityRenderer.hpp"
+#include "IRenderable.hpp"
 #include "camera.hpp"
+#include "centerPointRenderer.hpp"
 #include "cursor.hpp"
 #include "cursorRenderer.hpp"
 #include "entitiesTypes.hpp"
@@ -17,7 +19,8 @@
 class SceneRenderer {
 public:
   SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture)
-      : _pickingRenderer(pickingTexture), _camera(camera) {
+      : _centerPointRenderer(*camera), _pickingRenderer(pickingTexture),
+        _camera(camera) {
     initEntityRenderers();
   }
 
@@ -41,9 +44,15 @@ public:
     cursorRenderer->render({cursor});
   }
 
+  void renderCenterPoint(const IRenderable &centerPoint) {
+    _centerPointRenderer.render(centerPoint);
+  }
+
 private:
   std::unordered_map<EntityType, std::unique_ptr<IEntityRenderer>>
       _entityRenderers;
+
+  CenterPointRenderer _centerPointRenderer;
   PickingRenderer _pickingRenderer;
   std::shared_ptr<Camera> _camera;
   Grid grid;
