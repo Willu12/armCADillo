@@ -6,7 +6,7 @@
 
 class TorusRenderer : public IEntityRenderer {
 public:
-  explicit TorusRenderer(const std::shared_ptr<Camera> &camera)
+  explicit TorusRenderer(const Camera &camera)
       : _shader("../resources/shaders/vertexShader.hlsl",
                 "../resources/shaders/fragmentShader.hlsl"),
         _camera(camera) {}
@@ -16,8 +16,8 @@ public:
       return;
 
     _shader.use();
-    _shader.setViewMatrix(_camera->viewMatrix());
-    _shader.setProjectionMatrix(_camera->projectionMatrix());
+    _shader.setViewMatrix(_camera.viewMatrix());
+    _shader.setProjectionMatrix(_camera.projectionMatrix());
 
     const Mesh &sampleMesh = entities[0]->getMesh();
     glBindVertexArray(sampleMesh._vao);
@@ -35,5 +35,5 @@ public:
 
 private:
   Shader _shader;
-  std::shared_ptr<Camera> _camera;
+  const Camera &_camera;
 };

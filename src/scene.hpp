@@ -10,6 +10,7 @@
 class Scene {
 public:
   Scene(std::shared_ptr<Camera> camera) : _camera(camera){};
+
   std::vector<std::shared_ptr<IEntity>> getEntites() {
     std::vector<std::shared_ptr<IEntity>> entities;
     for (const auto &specificEntities : _entities) {
@@ -21,7 +22,7 @@ public:
 
   void addEntity(EntityType entityType,
                  const std::shared_ptr<IEntity> &entity) {
-    _entities[entityType].push_back(entity); // CHECK
+    _entities[entityType].push_back(entity);
   }
 
   std::shared_ptr<Camera> getCamera() { return _camera; }
@@ -38,12 +39,10 @@ public:
                                }),
                 vec.end());
 
-      // Clean up empty vectors
-      if (vec.empty()) {
+      if (vec.empty())
         it = _entities.erase(it);
-      } else {
+      else
         ++it;
-      }
     }
   }
 
@@ -59,7 +58,6 @@ public:
   }
 
 private:
-  // using namespace std;
   std::shared_ptr<Camera> _camera;
   std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
       _entities;

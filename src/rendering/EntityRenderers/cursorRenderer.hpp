@@ -8,7 +8,7 @@
 
 class CursorRenderer : public IEntityRenderer {
 public:
-  CursorRenderer(std::shared_ptr<Camera> &camera)
+  CursorRenderer(const Camera &camera)
       : _camera(camera),
         _shader("../resources/shaders/textureShader.vert",
                 "../resources/shaders/texturedBillboardShader.frag"),
@@ -22,11 +22,11 @@ public:
       auto scaleMatrix = algebra::transformations::scaleMatrix(
           cameraDistance, cameraDistance, cameraDistance);
 
-      _shader.setViewMatrix(_camera->viewMatrix());
+      _shader.setViewMatrix(_camera.viewMatrix());
       _shader.setModelMatrix(
           entity->getModelMatrix() * scaleMatrix *
-          _camera->getSphericalPosition().getRotationMatrix().transpose());
-      _shader.setProjectionMatrix(_camera->projectionMatrix());
+          _camera.getSphericalPosition().getRotationMatrix().transpose());
+      _shader.setProjectionMatrix(_camera.projectionMatrix());
 
       const Mesh &mesh = entity->getMesh();
       glBindVertexArray(mesh._vao);
@@ -36,13 +36,13 @@ public:
   }
 
 private:
-  std::shared_ptr<Camera> _camera;
+  const Camera &_camera;
   Shader _shader;
   Texture _texture;
 
   float distanceFromCamera(const std::shared_ptr<IEntity> &entity) {
     auto entityWorldPos =
-        _camera->viewMatrix() * entity->getPosition().toHomogenous();
+        _camera.viewMatrix() * entity->getPosition().toHomogenous();
     return std::abs(entityWorldPos[2]);
   }
 

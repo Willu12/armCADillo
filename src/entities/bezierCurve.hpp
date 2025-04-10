@@ -11,9 +11,9 @@ public:
   explicit BezierCurve(const std::vector<std::shared_ptr<Point>> points)
       : _points(points) {}
 
-  void updateMesh() override {};
+  void updateMesh() override{};
 
-  const Mesh &getMesh() const override {}
+  const Mesh &getMesh() const override { return *_mesh; }
 
 private:
   std::vector<std::shared_ptr<Point>> _points;

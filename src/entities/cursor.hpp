@@ -40,9 +40,9 @@ public:
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.0f, 0.0f, 0.0f);
   float _radius = 0.025f;
-  std::shared_ptr<Mesh> _mesh;
+  std::unique_ptr<Mesh> _mesh;
 
-  std::shared_ptr<Mesh> generateMesh() {
+  std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices = {// left down             //text
                                    -_radius, -_radius, 0.f, 0.f, 0.f,
                                    // left up               //text

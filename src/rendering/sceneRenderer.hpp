@@ -37,7 +37,7 @@ public:
 
   void
   renderPicking(const std::vector<std::shared_ptr<IEntity>> pickableEntities) {
-    _pickingRenderer.render(pickableEntities, _camera);
+    _pickingRenderer.render(pickableEntities, *_camera);
   }
   void renderCursor(const std::shared_ptr<Cursor> &cursor) {
     auto &cursorRenderer = _entityRenderers.at(EntityType::Cursor);
@@ -59,10 +59,10 @@ private:
 
   void initEntityRenderers() {
     _entityRenderers.insert(
-        {EntityType::Torus, std::make_unique<TorusRenderer>(_camera)});
+        {EntityType::Torus, std::make_unique<TorusRenderer>(*_camera)});
     _entityRenderers.insert(
-        {EntityType::Point, std::make_unique<PointRenderer>(_camera)});
+        {EntityType::Point, std::make_unique<PointRenderer>(*_camera)});
     _entityRenderers.insert(
-        {EntityType::Cursor, std::make_unique<CursorRenderer>(_camera)});
+        {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
   }
 };

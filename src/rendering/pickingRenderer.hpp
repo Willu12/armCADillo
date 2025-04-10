@@ -13,7 +13,7 @@ public:
                 "../resources/shaders/pickingShader.frag") {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities,
-              std::shared_ptr<Camera> camera) {
+              const Camera &camera) {
 
     if (entities.empty())
       return;
@@ -21,8 +21,8 @@ public:
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _shader.use();
-    _shader.setViewMatrix(camera->viewMatrix());
-    _shader.setProjectionMatrix(camera->projectionMatrix());
+    _shader.setViewMatrix(camera.viewMatrix());
+    _shader.setProjectionMatrix(camera.projectionMatrix());
 
     const Mesh &sampleMesh = entities[0]->getMesh();
     glBindVertexArray(sampleMesh._vao);

@@ -15,21 +15,21 @@ public:
   std::vector<float> _vertices;
   std::vector<uint32_t> _indices;
 
-  static std::shared_ptr<Mesh> create(const std::vector<float> &vertices,
+  static std::unique_ptr<Mesh> create(const std::vector<float> &vertices,
                                       const std::vector<uint32_t> &indices) {
     auto *mesh = new Mesh(vertices, indices);
     mesh->addSimpleVertexLayout();
-    return std::shared_ptr<Mesh>(mesh);
+    return std::unique_ptr<Mesh>(mesh);
   }
 
-  static std::shared_ptr<Mesh>
+  static std::unique_ptr<Mesh>
   createTexturedMesh(const std::vector<float> &vertices,
                      const std::vector<uint32_t> &indices) {
     auto *mesh = new Mesh(vertices, indices);
     mesh->addTextureLayout();
-    return std::shared_ptr<Mesh>(mesh);
+    return std::unique_ptr<Mesh>(mesh);
   }
-  static std::shared_ptr<Mesh>
+  static std::unique_ptr<Mesh>
   fromParametrization(const algebra::IParametrizable<float> &parametrizable,
                       const MeshDensity &meshDensity) {
     auto vertices = generateVertices(parametrizable, meshDensity);

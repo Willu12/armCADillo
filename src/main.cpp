@@ -52,9 +52,6 @@ int main(int, char **) {
   }
   glfwSetScrollCallback(window, scrollCallback);
 
-  Shader shader("../resources/shaders/vertexShader.hlsl",
-                "../resources/shaders/fragmentShader.hlsl");
-
   std::shared_ptr<Camera> camera = std::make_shared<Camera>(window);
   std::shared_ptr<Scene> scene = std::make_shared<Scene>(camera);
 
