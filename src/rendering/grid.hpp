@@ -18,8 +18,10 @@ public:
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    glBindVertexArray(1);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glDisable(GL_BLEND);
   }
 
 private:
