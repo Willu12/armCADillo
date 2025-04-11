@@ -3,32 +3,34 @@
 #include "mesh.hpp"
 #include "point.hpp"
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <vector>
 
 class BezierCurve : public IEntity {
 public:
-  explicit BezierCurve(const std::vector<std::shared_ptr<Point>> points)
+  explicit BezierCurve(const std::vector<std::reference_wrapper<Point>> points)
       : _points(points) {}
 
-  void updateMesh() override{};
+  void updateMesh() override {};
 
   const Mesh &getMesh() const override { return *_mesh; }
 
 private:
-  std::vector<std::shared_ptr<Point>> _points;
-  std::shared_ptr<Mesh> _mesh;
+  std::vector<std::reference_wrapper<Point>> _points;
+  std::unique_ptr<Mesh> _mesh;
   //  uint32_t _segmentCount;
 
-  std::vector<std::vector<std::shared_ptr<Point>>> createSegments() const {
-    auto segments = std::vector<std::vector<std::shared_ptr<Point>>>();
+  std::vector<std::vector<std::reference_wrapper<Point>>>
+  createSegments() const {
+    auto segments = std::vector<std::vector<std::reference_wrapper<Point>>>();
 
     const uint32_t pointsPerSegment = 4;
     const uint32_t pointsFloored = (_points.size() / 4) * 4;
     uint32_t index = 0;
 
     while (index < pointsFloored) {
-      std::vector<std::shared_ptr<Point>> segment;
+      std::vector<std::reference_wrapper<Point>> segment;
 
       for (int j = 0; j < pointsPerSegment; ++j) {
         segment.push_back(_points[index++]);
@@ -38,23 +40,23 @@ private:
     return segments;
   }
 
-  std::shared_ptr<Mesh> generateMesh() {
-    // get segmetns and generate mesh from segments
-    // auto segments = createSegments();
+  std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
 
     for (int i = 0; i < _points.size(); ++i) {
-      auto worldPosition = _points[i]->getPosition();
+      auto worldPosition = _points[i].get().getPosition();
       vertices.push_back(worldPosition[0]);
       vertices.push_back(worldPosition[1]);
       vertices.push_back(worldPosition[2]);
-
-      if (i > 0) {
-        indices.push_back(i - 1);
-        indices.push_back(i);
-      }
     }
+    for (uint32_t i = 0; i + 3 < _points.size(); i += 3) {
+      indices.push_back(i);
+      indices.push_back(i + 1);
+      indices.push_back(i + 2);
+      indices.push_back(i + 3);
+    }
+
     return Mesh::create(vertices, indices);
   }
 };

@@ -31,7 +31,7 @@ public:
       const Mesh &mesh = entity->getMesh();
       glBindVertexArray(mesh._vao);
       glDrawElements(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
-      //   glBindVertexArray(0);
+      glBindVertexArray(0);
     }
   }
 

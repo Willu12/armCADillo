@@ -90,6 +90,7 @@ int main(int, char **) {
     ImGui::Render();
 
     setupViewPortAndClear(window, clear_color);
+    sceneRenderer.renderCursor(gui.getCursor());
 
     sceneRenderer.render(scene->getGroupedEntities());
 
@@ -98,8 +99,6 @@ int main(int, char **) {
 
     if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
       sceneRenderer.renderPicking(scene->getPoints());
-
-    sceneRenderer.renderCursor(gui.getCursor());
 
     // for (const auto &polygonalCurve : gui.getPolygonalCurves())
     //   MeshRenderer.renderMesh(*polygonalCurve, shader);

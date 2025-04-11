@@ -22,6 +22,22 @@ public:
     _id = createProgram({vertexShader, fragmentShader});
   }
 
+  // TO DO: add SHADER PATH {string: path, SHADER_TYPE: tpye} struct
+  Shader(const std::string &vertexPath, const std::string &geometryPath,
+         const std::string &fragmentPath) {
+
+    std::string vertexShaderSource = readShaderFromFile(vertexPath);
+    std::string fragmentShaderSource = readShaderFromFile(fragmentPath);
+    std::string geometryShaderSource = readShaderFromFile(geometryPath);
+
+    auto vertexShader = createShader(vertexShaderSource, GL_VERTEX_SHADER);
+    auto fragmentShader =
+        createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+    auto geometryShader =
+        createShader(geometryShaderSource, GL_GEOMETRY_SHADER);
+    _id = createProgram({vertexShader, fragmentShader, geometryShader});
+  }
+
   void setMat4f(const std::string &name, const algebra::Mat4f &mat) const {
     glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE,
                        &mat(0, 0));

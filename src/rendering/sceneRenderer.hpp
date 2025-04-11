@@ -2,6 +2,7 @@
 #include "IEntity.hpp"
 #include "IEntityRenderer.hpp"
 #include "IRenderable.hpp"
+#include "bezierCurveRenderer.hpp"
 #include "camera.hpp"
 #include "centerPointRenderer.hpp"
 #include "cursor.hpp"
@@ -64,5 +65,7 @@ private:
         {EntityType::Point, std::make_unique<PointRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
+    // _entityRenderers.insert({EntityType::BezierCurve,
+    //                      std::make_unique<BezierCurveRenderer>(*_camera)});
   }
 };
