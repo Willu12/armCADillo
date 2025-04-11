@@ -4,6 +4,7 @@
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
 #include "IEntity.hpp"
+#include "bezierCurve.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
 #include "cursor.hpp"
@@ -15,6 +16,7 @@
 #include "polygonalCurve.hpp"
 #include "scene.hpp"
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 
@@ -72,7 +74,7 @@ public:
 
       renderCreateTorusUI();
       renderCreatePointUI();
-      createPolygonalCurveUI();
+      createBezierCurveUI();
       removeButtonUI();
 
       _mouse.process(getActiveControllers());
@@ -89,20 +91,10 @@ public:
     return getSelectionController()->getPickingTexture();
   }
 
-  std::vector<IRenderable *> getPolygonalCurves() {
-    std::vector<IRenderable *> renderables;
-    for (auto polygonalCurve : _polygonalCurves) {
-      polygonalCurve->updateMesh();
-      renderables.push_back(polygonalCurve);
-    }
-    return renderables;
-  }
-
 private:
   GLFWwindow *_window;
   std::shared_ptr<Scene> _scene;
   std::vector<std::shared_ptr<IEntity>> _selectedEntities;
-  std::vector<PolygonalCurve *> _polygonalCurves;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   ControllMode _controllMode = ControllMode::Transformation;
@@ -199,9 +191,9 @@ private:
       deleteSelectedEntities();
   }
 
-  void createPolygonalCurveUI() {
-    if (ImGui::Button("Create Polygonal Curve"))
-      createPolygonalCurve();
+  void createBezierCurveUI() {
+    if (ImGui::Button("Create Bezier Curve"))
+      createBezierCurve();
   }
 
   void createEntity(EntityType entityType) {
@@ -249,12 +241,14 @@ private:
     if (_selectedEntities.empty())
       return;
 
-    auto selectedPoints = getSelectedPoints();
-    for (auto curve : _polygonalCurves) {
-      for (auto point : selectedPoints) {
-        curve->removePoint(point);
-      }
+    /*
+  auto selectedPoints = getSelectedPoints();
+  for (auto curve : _polygonalCurves) {
+    for (auto point : selectedPoints) {
+      curve->removePoint(point);
     }
+  }
+  */
 
     _scene->removeEntities(_selectedEntities);
 
@@ -314,23 +308,25 @@ private:
     return activeControllers;
   }
 
-  std::vector<std::shared_ptr<PointEntity>> getSelectedPoints() {
-    std::vector<std::shared_ptr<PointEntity>> pointEntities;
+  std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints() {
+    std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
     for (auto entity : _selectedEntities) {
       auto point = std::dynamic_pointer_cast<PointEntity>(entity);
       if (point) {
-        pointEntities.push_back(point);
+        pointEntities.push_back(*point);
       }
     }
     return pointEntities;
   }
 
-  void createPolygonalCurve() {
-
+  void createBezierCurve() {
     auto pointEntities = getSelectedPoints();
     if (pointEntities.size() < 2)
       return;
-    _polygonalCurves.push_back(new PolygonalCurve(pointEntities));
+
+    std::shared_ptr<IEntity> bezierCurve =
+        std::make_shared<BezierCurve>(pointEntities);
+    _scene->addEntity(EntityType::BezierCurve, bezierCurve);
   }
 };

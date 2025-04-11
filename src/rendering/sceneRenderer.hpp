@@ -65,7 +65,7 @@ private:
         {EntityType::Point, std::make_unique<PointRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
-    // _entityRenderers.insert({EntityType::BezierCurve,
-    //                      std::make_unique<BezierCurveRenderer>(*_camera)});
+    _entityRenderers.insert({EntityType::BezierCurve,
+                             std::make_unique<BezierCurveRenderer>(*_camera)});
   }
 };

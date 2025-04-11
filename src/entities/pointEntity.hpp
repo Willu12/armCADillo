@@ -9,7 +9,7 @@ public:
     _name = "Point_" + std::to_string(_id++);
     _position = position;
     _meshKind = MeshKind::Triangles;
-    _scale = 0.05f;
+    _scale = 0.02f;
   }
 
   void updateMesh() override { _mesh = generateMesh(); };

@@ -1,7 +1,7 @@
 #pragma once
 #include "IEntity.hpp"
 #include "mesh.hpp"
-#include "point.hpp"
+#include "pointEntity.hpp"
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -9,28 +9,30 @@
 
 class BezierCurve : public IEntity {
 public:
-  explicit BezierCurve(const std::vector<std::reference_wrapper<Point>> points)
-      : _points(points) {}
+  explicit BezierCurve(
+      const std::vector<std::reference_wrapper<PointEntity>> points)
+      : _points(points), _mesh(generateMesh()) {}
 
   void updateMesh() override {};
 
   const Mesh &getMesh() const override { return *_mesh; }
 
 private:
-  std::vector<std::reference_wrapper<Point>> _points;
+  std::vector<std::reference_wrapper<PointEntity>> _points;
   std::unique_ptr<Mesh> _mesh;
   //  uint32_t _segmentCount;
 
-  std::vector<std::vector<std::reference_wrapper<Point>>>
+  std::vector<std::vector<std::reference_wrapper<PointEntity>>>
   createSegments() const {
-    auto segments = std::vector<std::vector<std::reference_wrapper<Point>>>();
+    auto segments =
+        std::vector<std::vector<std::reference_wrapper<PointEntity>>>();
 
     const uint32_t pointsPerSegment = 4;
     const uint32_t pointsFloored = (_points.size() / 4) * 4;
     uint32_t index = 0;
 
     while (index < pointsFloored) {
-      std::vector<std::reference_wrapper<Point>> segment;
+      std::vector<std::reference_wrapper<PointEntity>> segment;
 
       for (int j = 0; j < pointsPerSegment; ++j) {
         segment.push_back(_points[index++]);

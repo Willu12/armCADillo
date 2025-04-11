@@ -90,7 +90,6 @@ int main(int, char **) {
     ImGui::Render();
 
     setupViewPortAndClear(window, clear_color);
-    sceneRenderer.renderCursor(gui.getCursor());
 
     sceneRenderer.render(scene->getGroupedEntities());
 
@@ -102,6 +101,7 @@ int main(int, char **) {
 
     // for (const auto &polygonalCurve : gui.getPolygonalCurves())
     //   MeshRenderer.renderMesh(*polygonalCurve, shader);
+    sceneRenderer.renderCursor(gui.getCursor());
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
