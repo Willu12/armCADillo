@@ -26,7 +26,7 @@ public:
   float &getScale() { return _scale; }
   const float &getScale() const { return _scale; }
 
-  algebra::Vec3f &getPosition() override { return _position; }
+  virtual algebra::Vec3f &getPosition() override { return _position; }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   algebra::Quaternion<float> &getRotation() { return _rotation; }

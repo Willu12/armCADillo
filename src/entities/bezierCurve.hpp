@@ -1,5 +1,6 @@
 #pragma once
 #include "IEntity.hpp"
+#include "ISubscriber.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include <cstdint>
@@ -7,40 +8,35 @@
 #include <memory>
 #include <vector>
 
-class BezierCurve : public IEntity {
+class BezierCurve : public IEntity, public ISubscriber {
 public:
   explicit BezierCurve(
       const std::vector<std::reference_wrapper<PointEntity>> points)
-      : _points(points), _mesh(generateMesh()) {}
+      : _mesh(generateMesh()) {
+    _name = "BezierCurveC0_" + std::to_string(_id++);
+    for (auto &p : points) {
+      p.get().subscribe(*this);
+      _points.push_back(p);
+    }
+  }
 
-  void updateMesh() override {};
-
+  void updateMesh() override { _mesh = generateMesh(); };
+  void update() override { updateMesh(); }
+  void onSubscribableDestroyed(const ISubscribable &publisher) override {
+    const PointEntity &point = static_cast<const PointEntity &>(publisher);
+    auto it =
+        std::find_if(_points.begin(), _points.end(),
+                     [&point](const auto &p) { return &p.get() == &point; });
+    _points.erase(it);
+    update();
+  }
   const Mesh &getMesh() const override { return *_mesh; }
 
 private:
-  std::vector<std::reference_wrapper<PointEntity>> _points;
+  inline static int _id;
+
+  std::vector<std::reference_wrapper<const PointEntity>> _points;
   std::unique_ptr<Mesh> _mesh;
-  //  uint32_t _segmentCount;
-
-  std::vector<std::vector<std::reference_wrapper<PointEntity>>>
-  createSegments() const {
-    auto segments =
-        std::vector<std::vector<std::reference_wrapper<PointEntity>>>();
-
-    const uint32_t pointsPerSegment = 4;
-    const uint32_t pointsFloored = (_points.size() / 4) * 4;
-    uint32_t index = 0;
-
-    while (index < pointsFloored) {
-      std::vector<std::reference_wrapper<PointEntity>> segment;
-
-      for (int j = 0; j < pointsPerSegment; ++j) {
-        segment.push_back(_points[index++]);
-      }
-      index--;
-    }
-    return segments;
-  }
 
   std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices;

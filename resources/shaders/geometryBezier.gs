@@ -6,7 +6,7 @@ uniform int uNumSegments;
 uniform mat4 view;
 uniform mat4 projection;
 
-vec3 bezier3(vec3 b0, vec3 b1, vec3 b2, vec3 b3, float t) {
+vec4 bezier3(vec4 b0, vec4 b1, vec4 b2, vec4 b3, float t) {
   float t1 = 1.0f - t;
 
   b0 = t1 * b0 + t * b1;
@@ -28,10 +28,7 @@ void main() {
 
   for (int i = 0; i <= uNumSegments; ++i) {
     float t = float(i) / uNumSegments;
-    float u = 1.0 - t;
-
-    vec4 point = u * u * u * b0 + 3 * u * u * t * b1 + 3 * u * t * t * b2 +
-                 t * t * t * b3;
+    vec4 point = bezier3(b0, b1, b2, b3, t);
     gl_Position = pv * point;
     EmitVertex();
   }

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "IEntity.hpp"
+#include "ISubscribable.hpp"
 #include "mesh.hpp"
 
-class PointEntity : public IEntity {
+class PointEntity : public IEntity, public ISubscribable {
 public:
   PointEntity(algebra::Vec3f position) : _mesh(generateMesh()) {
     _name = "Point_" + std::to_string(_id++);
@@ -12,8 +13,13 @@ public:
     _scale = 0.02f;
   }
 
-  void updateMesh() override { _mesh = generateMesh(); };
+  algebra::Vec3f &getPosition() override {
+    notifySubscribers();
+    return _position;
+  }
+  const algebra::Vec3f &getPosition() const override { return _position; }
 
+  void updateMesh() override { _mesh = generateMesh(); };
   const Mesh &getMesh() const override { return *_mesh; }
 
 private:
