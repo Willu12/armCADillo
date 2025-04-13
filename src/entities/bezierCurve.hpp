@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 
+#include "gui.hpp"
+
 class BezierCurve : public IEntity, public ISubscriber {
 public:
   explicit BezierCurve(
@@ -44,6 +46,8 @@ public:
     ImGui::InputText("Name", &getName());
     ImGui::Checkbox("Show Polygonal Line", &_showPolyLine);
 
+    auto remainingPoints = intersection(gui.getPoints(), _points);
+
     for (const auto &point : _points) {
       std::string label = point.get().getName() + "##";
       ImGui::Selectable(label.c_str(), false);
@@ -77,5 +81,25 @@ private:
     }
 
     return Mesh::create(vertices, indices);
+  }
+
+  std::vector<std::reference_wrapper<const PointEntity>>
+  intersection(std::vector<std::reference_wrapper<const PointEntity>> v1,
+               std::vector<std::reference_wrapper<const PointEntity>> v2) {
+
+    std::vector<std::reference_wrapper<const PointEntity>> v3;
+
+    auto ptrLess = [](const std::reference_wrapper<const PointEntity> &a,
+                      const std::reference_wrapper<const PointEntity> &b) {
+      return &a.get() < &b.get();
+    };
+
+    std::sort(v1.begin(), v1.end(), ptrLess);
+    std::sort(v2.begin(), v2.end(), ptrLess);
+
+    std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
+                          std::back_inserter(v3), ptrLess);
+
+    return v3;
   }
 };

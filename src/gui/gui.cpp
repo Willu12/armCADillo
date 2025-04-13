@@ -1,6 +1,7 @@
 #include "gui.hpp"
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
+#include "bezierCurve.hpp"
 #include "imgui.h"
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
@@ -17,7 +18,7 @@ const std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
   return _scene->getEntites();
 }
 
-std::vector<std::shared_ptr<IEntity>> GUI::getSelectedEntities() {
+std::vector<std::shared_ptr<IEntity>> GUI::getSelectedEntities() const {
   return _selectedEntities;
 }
 
@@ -260,6 +261,18 @@ std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
 
 std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
   std::vector<std::reference_wrapper<PointEntity>> pointEntities;
+
+  for (auto entity : _selectedEntities) {
+    auto point = std::dynamic_pointer_cast<PointEntity>(entity);
+    if (point) {
+      pointEntities.push_back(*point);
+    }
+  }
+  return pointEntities;
+}
+
+std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
+  std::vector<std::reference_wrapper<const PointEntity>> pointEntities;
 
   for (auto entity : _selectedEntities) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);

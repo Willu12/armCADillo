@@ -2,7 +2,6 @@
 
 #include "EntityFactories/IEntityFactory.hpp"
 #include "IEntity.hpp"
-#include "bezierCurve.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
 #include "cursor.hpp"
@@ -17,6 +16,8 @@
 #include <unordered_map>
 #include <vector>
 
+class BezierCurve;
+
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
 
@@ -26,8 +27,8 @@ public:
   IController &getController();
 
   const std::vector<std::shared_ptr<IEntity>> getEntities() const;
-
-  std::vector<std::shared_ptr<IEntity>> getSelectedEntities();
+  std::vector<std::reference_wrapper<const PointEntity>> getPoints() const;
+  std::vector<std::shared_ptr<IEntity>> getSelectedEntities() const;
 
   std::shared_ptr<Cursor> getCursor();
 
