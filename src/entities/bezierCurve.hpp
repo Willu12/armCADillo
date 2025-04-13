@@ -1,6 +1,7 @@
 #pragma once
 #include "IEntity.hpp"
 #include "ISubscriber.hpp"
+#include "imgui.h"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include <cstdint>
@@ -20,6 +21,13 @@ public:
     }
   }
 
+  void addPoint(PointEntity &point) {
+    point.subscribe(*this);
+    _points.push_back(point);
+    if (_points.size() % 3 == 1)
+      updateMesh();
+  }
+
   void updateMesh() override { _mesh = generateMesh(); };
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(const ISubscribable &publisher) override {
@@ -32,11 +40,22 @@ public:
   }
   const Mesh &getMesh() const override { return *_mesh; }
 
+  bool renderSettings() override {
+    ImGui::InputText("Name", &getName());
+    ImGui::Checkbox("Show Polygonal Line", &_showPolyLine);
+
+    for (const auto &point : _points) {
+      ImGui::Selectable(point.get().getName().c_str(), false);
+    }
+
+    return false;
+  }
+
 private:
   inline static int _id;
-
   std::vector<std::reference_wrapper<const PointEntity>> _points;
   std::unique_ptr<Mesh> _mesh;
+  bool _showPolyLine = false;
 
   std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices;

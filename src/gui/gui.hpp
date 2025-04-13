@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
@@ -182,8 +183,16 @@ private:
   }
 
   void renderCreatePointUI() {
-    if (ImGui::Button("Add new point"))
-      createEntity(EntityType::Point);
+
+    if (ImGui::Button("Add new point")) {
+      auto &entity = static_cast<PointEntity &>(
+          createEntity(EntityType::Point)); // std::static_cast()
+
+      auto bezierCurves = getSelectedBezierCurves();
+      for (const auto &bezierCurve : bezierCurves) {
+        bezierCurve.get().addPoint(entity);
+      }
+    }
   }
 
   void removeButtonUI() {
@@ -196,10 +205,11 @@ private:
       createBezierCurve();
   }
 
-  void createEntity(EntityType entityType) {
+  IEntity &createEntity(EntityType entityType) {
     const auto &cursorPosition = getCursor()->getPosition();
     auto entity = _entityFactories.at(entityType)->create(cursorPosition);
     _scene->addEntity(entityType, entity);
+    return *entity;
   }
 
   void renderModelSettings() {
@@ -318,6 +328,17 @@ private:
       }
     }
     return pointEntities;
+  }
+
+  std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves() {
+    std::vector<std::reference_wrapper<BezierCurve>> bezierCurves;
+    for (auto entity : _selectedEntities) {
+      auto bezierCurve = std::dynamic_pointer_cast<BezierCurve>(entity);
+      if (bezierCurve) {
+        bezierCurves.push_back(*bezierCurve);
+      }
+    }
+    return bezierCurves;
   }
 
   void createBezierCurve() {
