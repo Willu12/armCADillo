@@ -16,8 +16,8 @@ public:
       : _mesh(generateMesh()) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
     for (auto &p : points) {
-      p.get().subscribe(*this);
       _points.push_back(p);
+      subscribe(p);
     }
   }
 

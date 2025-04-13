@@ -17,11 +17,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "GLFW/glfw3.h"
+
 class SceneRenderer {
 public:
-  SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture)
+  SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture,
+                GLFWwindow *window)
       : _centerPointRenderer(*camera), _pickingRenderer(pickingTexture),
-        _camera(camera) {
+        _camera(camera), _window(window) {
     initEntityRenderers();
   }
 
@@ -56,6 +59,7 @@ private:
   CenterPointRenderer _centerPointRenderer;
   PickingRenderer _pickingRenderer;
   std::shared_ptr<Camera> _camera;
+  GLFWwindow *_window;
   Grid grid;
 
   void initEntityRenderers() {
@@ -65,7 +69,8 @@ private:
         {EntityType::Point, std::make_unique<PointRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
-    _entityRenderers.insert({EntityType::BezierCurve,
-                             std::make_unique<BezierCurveRenderer>(*_camera)});
+    _entityRenderers.insert(
+        {EntityType::BezierCurve,
+         std::make_unique<BezierCurveRenderer>(*_camera, _window)});
   }
 };

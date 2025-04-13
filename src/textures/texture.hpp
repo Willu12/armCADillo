@@ -10,7 +10,7 @@ enum class TextureWrapping {
 };
 class Texture {
 public:
-  explicit Texture(const TextureResource &textureResource)
+  explicit Texture(TextureResource textureResource)
       : _textureResource(textureResource) {}
 
   void bind(uint32_t unit) const {
@@ -41,7 +41,7 @@ public:
   }
 
 private:
-  const TextureResource &_textureResource;
+  TextureResource _textureResource;
   TextureFiltering _filtering = TextureFiltering::Linear;
   TextureWrapping _wrapping = TextureWrapping::Repeat;
 };

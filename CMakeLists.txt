@@ -4,8 +4,8 @@ project(armCADillo)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SANITIZER_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
-
+#set(CMAKE_CXX_FLAGS " -fsanitize=address,undefined -g")
+#set(CMAKE_LINKER_FLAGS " -fsanitize=address,undefined")
 
 add_subdirectory(external)
 

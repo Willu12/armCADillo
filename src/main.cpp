@@ -57,7 +57,7 @@ int main(int, char **) {
 
   GUI gui(window, scene);
 
-  SceneRenderer sceneRenderer(camera, gui.getPickingTexture());
+  SceneRenderer sceneRenderer(camera, gui.getPickingTexture(), window);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();

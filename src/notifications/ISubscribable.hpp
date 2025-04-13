@@ -19,6 +19,12 @@ public:
       subscriber.get().update();
   }
 
+  void removeSubscriber(const ISubscriber &subscriber) {
+    std::erase_if(_subscribers, [&subscriber](const auto &ref) {
+      return &ref.get() == &subscriber;
+    });
+  }
+
 private:
   std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
 };
