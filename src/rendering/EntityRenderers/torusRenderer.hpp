@@ -7,7 +7,7 @@
 class TorusRenderer : public IEntityRenderer {
 public:
   explicit TorusRenderer(const Camera &camera)
-      : _shader("../resources/shaders/torusShader.vert",
+      : _shader("../resources/shaders/torusShader.vs",
                 "../resources/shaders/fragmentShader.hlsl"),
         _camera(camera) {}
 

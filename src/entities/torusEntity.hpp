@@ -21,8 +21,8 @@ public:
 
   void updateMesh() override { _mesh = generateMesh(); }
 
-  bool renderSettings() override {
-    IEntity::renderSettings();
+  bool renderSettings(const GUI &gui) override {
+    IEntity::renderSettings(gui);
     bool change = false;
 
     change |= ImGui::SliderFloat("R", &getInnerRadius(), 0.1f, 10.f);

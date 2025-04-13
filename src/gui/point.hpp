@@ -11,7 +11,7 @@ public:
 
   const Mesh &getMesh() const override { return *_mesh; }
   void updateMesh() override { _mesh = generateMesh(); }
-  bool renderSettings() override { return false; }
+  bool renderSettings(const GUI &gui) override { return false; }
 
 protected:
   algebra::Sphere<float> _sphere;

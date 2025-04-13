@@ -7,12 +7,14 @@
 #include "quaternion.hpp"
 #include "transformations.hpp"
 
+class GUI;
+
 class IEntity : public IRenderable {
 public:
   virtual ~IEntity() = default;
 
   virtual void updateMesh() = 0;
-  virtual bool renderSettings() {
+  virtual bool renderSettings(const GUI &gui) {
     ImGui::InputText("Name", &getName());
 
     float position[3] = {_position[0], _position[1], _position[2]};

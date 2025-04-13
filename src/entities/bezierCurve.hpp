@@ -40,12 +40,13 @@ public:
   }
   const Mesh &getMesh() const override { return *_mesh; }
 
-  bool renderSettings() override {
+  bool renderSettings(const GUI &gui) override {
     ImGui::InputText("Name", &getName());
     ImGui::Checkbox("Show Polygonal Line", &_showPolyLine);
 
     for (const auto &point : _points) {
-      ImGui::Selectable(point.get().getName().c_str(), false);
+      std::string label = point.get().getName() + "##";
+      ImGui::Selectable(label.c_str(), false);
     }
 
     return false;
