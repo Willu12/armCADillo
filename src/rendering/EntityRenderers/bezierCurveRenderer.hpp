@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IEntityRenderer.hpp"
+#include "bezierCurve.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
 
@@ -20,6 +21,8 @@ public:
     _shader.setInt("uNumSegments", 100); // FIX ME
 
     for (const auto &entity : entities) {
+      BezierCurve &bezier = static_cast<BezierCurve &>(*entity);
+      _shader.setInt("renderPolyLine", bezier.showPolyLine());
       auto &mesh = entity->getMesh();
       glBindVertexArray(mesh._vao);
       glDrawElements(GL_LINES_ADJACENCY, mesh._indices.size(), GL_UNSIGNED_INT,

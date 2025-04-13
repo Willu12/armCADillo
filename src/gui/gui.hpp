@@ -13,7 +13,6 @@
 #include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
-#include "polygonalCurve.hpp"
 #include "scene.hpp"
 #include <chrono>
 #include <functional>
@@ -248,20 +247,9 @@ private:
   }
 
   void deleteSelectedEntities() {
-    if (_selectedEntities.empty())
-      return;
-
-    /*
-  auto selectedPoints = getSelectedPoints();
-  for (auto curve : _polygonalCurves) {
-    for (auto point : selectedPoints) {
-      curve->removePoint(point);
-    }
-  }
-  */
-
+    // if (_selectedEntities.empty())
+    //  return;
     _scene->removeEntities(_selectedEntities);
-
     _selectedEntities.clear();
   }
 

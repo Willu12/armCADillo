@@ -50,6 +50,7 @@ public:
 
     return false;
   }
+  bool showPolyLine() const { return _showPolyLine; }
 
 private:
   inline static int _id;
