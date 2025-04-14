@@ -11,20 +11,21 @@ public:
       subscriber.get().onSubscribableDestroyed(*this);
     }
   }
-  void subscribe(ISubscriber &subscriber) {
+  void subscribe(ISubscriber &subscriber) const {
     _subscribers.push_back(subscriber);
   }
+
   void notifySubscribers() {
     for (const auto subscriber : _subscribers)
       subscriber.get().update();
   }
 
-  void removeSubscriber(const ISubscriber &subscriber) {
+  void removeSubscriber(const ISubscriber &subscriber) const {
     std::erase_if(_subscribers, [&subscriber](const auto &ref) {
       return &ref.get() == &subscriber;
     });
   }
 
 private:
-  std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
+  mutable std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
 };

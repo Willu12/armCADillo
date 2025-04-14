@@ -26,6 +26,9 @@ bool GuiVisitor::visitBezierCurve(BezierCurve &bezierCurve) {
 
   renderPointList(points, "Bezier curve points");
   renderPointList(remainingPoints, "remainingPoints");
+  renderAddingSelectedPoints(bezierCurve);
+  ImGui::SameLine();
+  renderRemovingSelectedPoints(bezierCurve);
 
   return false;
 }
@@ -91,17 +94,29 @@ GuiVisitor::getRemainingPoints(
 
 bool GuiVisitor::renderAddingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
-  if (ImGui::Button("+ Add selected points")) {
+  if (ImGui::Button("+")) {
     for (const auto &p : _selectedEntities) {
-      /*
       bool alreadyIn =
           std::any_of(points.begin(), points.end(),
                       [&](const auto &q) { return &p.get() == &q.get(); });
       if (!alreadyIn) {
-        bezierCurve.addPoint(
-            p); // assuming bezierCurve.addPoint(ref_wrapper) exists
+        bezierCurve.addPoint(p.get());
       }
-      */
+    }
+  }
+  return false;
+}
+
+bool GuiVisitor::renderRemovingSelectedPoints(BezierCurve &bezierCurve) {
+  auto points = bezierCurve.getPoints();
+  if (ImGui::Button("-")) {
+    for (const auto &p : _selectedEntities) {
+      bool isIn = std::any_of(points.begin(), points.end(), [&](const auto &q) {
+        return &p.get() == &q.get();
+      });
+      if (isIn) {
+        bezierCurve.removePoint(p.get());
+      }
     }
   }
   return false;

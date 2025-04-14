@@ -37,4 +37,5 @@ private:
       const std::string &label);
 
   bool renderAddingSelectedPoints(BezierCurve &bezierCurve);
+  bool renderRemovingSelectedPoints(BezierCurve &bezierCurve);
 };

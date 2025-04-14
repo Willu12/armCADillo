@@ -23,12 +23,14 @@ public:
     }
   }
 
-  void addPoint(PointEntity &point) {
+  void addPoint(const PointEntity &point) {
     point.subscribe(*this);
     _points.push_back(point);
     if (_points.size() % 3 == 1)
       updateMesh();
   }
+
+  void removePoint(const PointEntity &point) { onSubscribableDestroyed(point); }
 
   std::vector<std::reference_wrapper<const PointEntity>> getPoints() const {
     return _points;
