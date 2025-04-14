@@ -1,5 +1,6 @@
 #pragma once
 #include "IRenderable.hpp"
+#include "IVisitor.hpp"
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
@@ -14,6 +15,8 @@ public:
   virtual ~IEntity() = default;
 
   virtual void updateMesh() = 0;
+  virtual bool acceptVisitor(IVisitor &visitor) { return false; };
+
   virtual bool renderSettings(const GUI &gui) {
     ImGui::InputText("Name", &getName());
 

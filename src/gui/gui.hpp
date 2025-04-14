@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EntityFactories/IEntityFactory.hpp"
+#include "GuiVisitor.hpp"
 #include "IEntity.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
@@ -48,6 +49,7 @@ private:
   ControllMode _controllMode = ControllMode::Transformation;
   CenterPoint _centerPoint;
   Mouse _mouse;
+  GuiVisitor _GuiSettingsVisitor;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;

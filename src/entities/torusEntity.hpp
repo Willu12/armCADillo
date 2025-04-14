@@ -12,6 +12,10 @@ public:
     _name = ("Torus_" + std::to_string(TorusEntity::_id++));
   }
 
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitTorus(*this);
+  }
+
   float &getInnerRadius() { return _torus.getInnerRadius(); }
   float &getTubeRadius() { return _torus.getTubeRadius(); }
 

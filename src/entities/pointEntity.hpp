@@ -2,6 +2,7 @@
 
 #include "IEntity.hpp"
 #include "ISubscribable.hpp"
+#include "IVisitor.hpp"
 #include "mesh.hpp"
 
 class PointEntity : public IEntity, public ISubscribable {
@@ -11,6 +12,10 @@ public:
     _position = position;
     _meshKind = MeshKind::Triangles;
     _scale = 0.02f;
+  }
+
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitPoint(*this);
   }
 
   algebra::Vec3f &getPosition() override {

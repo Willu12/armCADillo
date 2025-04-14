@@ -30,6 +30,14 @@ public:
       updateMesh();
   }
 
+  std::vector<std::reference_wrapper<const PointEntity>> getPoints() const {
+    return _points;
+  }
+
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitBezierCurve(*this);
+  }
+
   void updateMesh() override { _mesh = generateMesh(); };
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(const ISubscribable &publisher) override {
@@ -42,6 +50,7 @@ public:
   }
   const Mesh &getMesh() const override { return *_mesh; }
 
+  /*
   bool renderSettings(const GUI &gui) override {
     ImGui::InputText("Name", &getName());
     ImGui::Checkbox("Show Polygonal Line", &_showPolyLine);
@@ -54,8 +63,8 @@ public:
     }
 
     return false;
-  }
-  bool showPolyLine() const { return _showPolyLine; }
+  }*/
+  bool &showPolyLine() { return _showPolyLine; }
 
 private:
   inline static int _id;
@@ -81,25 +90,5 @@ private:
     }
 
     return Mesh::create(vertices, indices);
-  }
-
-  std::vector<std::reference_wrapper<const PointEntity>>
-  intersection(std::vector<std::reference_wrapper<const PointEntity>> v1,
-               std::vector<std::reference_wrapper<const PointEntity>> v2) {
-
-    std::vector<std::reference_wrapper<const PointEntity>> v3;
-
-    auto ptrLess = [](const std::reference_wrapper<const PointEntity> &a,
-                      const std::reference_wrapper<const PointEntity> &b) {
-      return &a.get() < &b.get();
-    };
-
-    std::sort(v1.begin(), v1.end(), ptrLess);
-    std::sort(v2.begin(), v2.end(), ptrLess);
-
-    std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
-                          std::back_inserter(v3), ptrLess);
-
-    return v3;
   }
 };
