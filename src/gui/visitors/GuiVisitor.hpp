@@ -20,21 +20,21 @@ private:
   std::vector<std::reference_wrapper<const PointEntity>> _selectedEntities;
 
   bool renderBasicEntitySettings(IEntity &entity);
-  std::vector<std::reference_wrapper<const PointEntity>>
-  intersection(std::vector<std::reference_wrapper<const PointEntity>> v1,
-               std::vector<std::reference_wrapper<const PointEntity>> v2);
 
-  void selectEntity(
-      int entityIndex,
-      std::vector<std::reference_wrapper<const PointEntity>> &entities) {
-    _selectedEntities.push_back(entities[entityIndex]);
+  bool isEntitySelected(const PointEntity &entity) const;
+  void unselectEntity(const PointEntity &entity);
+  void selectEntity(const PointEntity &entity) {
+    _selectedEntities.push_back(entity);
   }
 
-  void unselectEntity(
-      int entityIndex,
-      std::vector<std::reference_wrapper<const PointEntity>> &entities) {
-    std::erase_if(_selectedEntities, [&](const auto &elem) {
-      return &elem == &entities[entityIndex];
-    });
-  }
+  std::vector<std::reference_wrapper<const PointEntity>> getRemainingPoints(
+      const std::vector<std::reference_wrapper<const PointEntity>> &allPoints,
+      const std::vector<std::reference_wrapper<const PointEntity>>
+          &currentPoints) const;
+
+  void renderPointList(
+      const std::vector<std::reference_wrapper<const PointEntity>> &entities,
+      const std::string &label);
+
+  bool renderAddingSelectedPoints(BezierCurve &bezierCurve);
 };

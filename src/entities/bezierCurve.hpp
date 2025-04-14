@@ -1,7 +1,7 @@
 #pragma once
 #include "IEntity.hpp"
 #include "ISubscriber.hpp"
-#include "imgui.h"
+#include "IVisitor.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include <cstdint>
@@ -49,21 +49,6 @@ public:
     update();
   }
   const Mesh &getMesh() const override { return *_mesh; }
-
-  /*
-  bool renderSettings(const GUI &gui) override {
-    ImGui::InputText("Name", &getName());
-    ImGui::Checkbox("Show Polygonal Line", &_showPolyLine);
-
-    auto remainingPoints = intersection(gui.getPoints(), _points);
-
-    for (const auto &point : _points) {
-      std::string label = point.get().getName() + "##";
-      ImGui::Selectable(label.c_str(), false);
-    }
-
-    return false;
-  }*/
   bool &showPolyLine() { return _showPolyLine; }
 
 private:

@@ -3,6 +3,7 @@
 #include "EntityFactories/torusFactory.hpp"
 #include "bezierCurve.hpp"
 #include "imgui.h"
+#include "scene.hpp"
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
     : _window(window), _scene(scene), _GuiSettingsVisitor(*this) {
@@ -274,7 +275,7 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
 std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
   std::vector<std::reference_wrapper<const PointEntity>> pointEntities;
 
-  for (auto entity : _selectedEntities) {
+  for (auto entity : _scene->getPoints()) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);
     if (point) {
       pointEntities.push_back(*point);
