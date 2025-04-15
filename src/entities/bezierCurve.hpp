@@ -50,6 +50,12 @@ public:
         std::find_if(_points.begin(), _points.end(),
                      [&point](const auto &p) { return &p.get() == &point; });
     _points.erase(it);
+
+    // remove from subs
+    auto pub_it =
+        std::find_if(_publishers.begin(), _publishers.end(),
+                     [&point](const auto &p) { return &p.get() == &point; });
+    _publishers.erase(pub_it);
     update();
   }
   const IMeshable &getMesh() const override { return *_mesh; }

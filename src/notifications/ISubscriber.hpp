@@ -11,6 +11,6 @@ public:
   virtual void onSubscribableDestroyed(const ISubscribable &publisher) = 0;
   virtual void update() = 0;
 
-private:
+protected:
   std::vector<std::reference_wrapper<ISubscribable>> _publishers;
 };
