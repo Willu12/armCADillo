@@ -16,12 +16,9 @@ public:
     _shader.setModelMatrix(renderable.getModelMatrix());
     _shader.setProjectionMatrix(_camera.projectionMatrix());
 
-    const Mesh &mesh = renderable.getMesh();
-    glBindVertexArray(mesh._vao);
-
-    auto meshKind =
-        renderable.getMeshKind() == MeshKind::Lines ? GL_LINES : GL_TRIANGLES;
-    glDrawElements(meshKind, mesh._indices.size(), GL_UNSIGNED_INT, 0);
+    const auto &mesh = renderable.getMesh();
+    glBindVertexArray(mesh.getVAO());
+    glDrawElements(GL_LINES, mesh.getIndicesLength(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
   }
 

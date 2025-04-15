@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(external)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/rendering/renderer.cpp src/notifications/ISubsriber.cpp src/gui/gui.cpp src/gui/visitors/GuiVisitor.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/notifications/ISubsriber.cpp src/gui/gui.cpp src/gui/visitors/GuiVisitor.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/include/

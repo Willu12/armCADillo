@@ -4,6 +4,7 @@
 #include "bezierCurve.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
+#include "mesh.hpp"
 #include "shader.hpp"
 
 #include "GLFW/glfw3.h"
@@ -29,9 +30,9 @@ public:
       BezierCurve &bezier = static_cast<BezierCurve &>(*entity);
       _shader.setInt("renderPolyLine", bezier.showPolyLine());
       auto &mesh = entity->getMesh();
-      glBindVertexArray(mesh._vao);
-      glDrawElements(GL_LINES_ADJACENCY, mesh._indices.size(), GL_UNSIGNED_INT,
-                     0);
+
+      glBindVertexArray(mesh.getVAO());
+      glDrawArrays(GL_POINTS, 0, mesh.getIndicesLength());
       glBindVertexArray(0);
     }
   }

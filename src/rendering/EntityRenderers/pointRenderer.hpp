@@ -19,13 +19,11 @@ public:
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.projectionMatrix());
 
-    const Mesh &sampleMesh = entities[0]->getMesh();
-    glBindVertexArray(sampleMesh._vao);
+    const auto &sampleMesh = entities[0]->getMesh();
+    glBindVertexArray(sampleMesh.getVAO());
     GLuint mbuffer = prepareInstacedModelMatrices(entities);
 
-    auto meshKind =
-        entities[0]->getMeshKind() == MeshKind::Lines ? GL_LINES : GL_TRIANGLES;
-    glDrawElementsInstanced(meshKind, sampleMesh._indices.size(),
+    glDrawElementsInstanced(GL_TRIANGLES, sampleMesh.getIndicesLength(),
                             GL_UNSIGNED_INT, 0, entities.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind the buffer
     glBindVertexArray(0);

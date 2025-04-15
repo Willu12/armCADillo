@@ -1,6 +1,7 @@
 #pragma once
+#include "IMeshable.hpp"
 #include "IParametrizable.hpp"
-#include "shader.hpp"
+#include "glad/glad.h"
 #include <memory>
 #include <vector>
 
@@ -9,11 +10,12 @@ struct MeshDensity {
   int t = 20;
 };
 
-class Mesh {
+class Mesh : public IMeshable {
 public:
-  uint32_t _vao, _vbo, _ebo;
-  std::vector<float> _vertices;
-  std::vector<uint32_t> _indices;
+  uint32_t getVAO() const override { return _vao; }
+  uint32_t getVBO() const override { return _vbo; }
+  uint32_t getEBO() const override { return _ebo; }
+  uint32_t getIndicesLength() const override { return _indices.size(); }
 
   static std::unique_ptr<Mesh> create(const std::vector<float> &vertices,
                                       const std::vector<uint32_t> &indices) {
@@ -87,6 +89,10 @@ protected:
   }
 
 private:
+  uint32_t _vao, _vbo, _ebo;
+  std::vector<float> _vertices;
+  std::vector<uint32_t> _indices;
+
   void addSimpleVertexLayout() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);

@@ -29,12 +29,12 @@ public:
           _camera.getSphericalPosition().getRotationMatrix().transpose());
       _shader.setProjectionMatrix(_camera.projectionMatrix());
 
-      const Mesh &mesh = entity->getMesh();
+      const auto &mesh = entity->getMesh();
 
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glBindVertexArray(mesh._vao);
-      glDrawElements(GL_TRIANGLES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
+      glBindVertexArray(mesh.getVAO());
+      glDrawElements(GL_TRIANGLES, mesh.getIndicesLength(), GL_UNSIGNED_INT, 0);
 
       glBindVertexArray(0);
       glDisable(GL_BLEND);

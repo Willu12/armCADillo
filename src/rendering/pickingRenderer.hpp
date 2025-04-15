@@ -24,13 +24,13 @@ public:
     _shader.setViewMatrix(camera.viewMatrix());
     _shader.setProjectionMatrix(camera.projectionMatrix());
 
-    const Mesh &sampleMesh = entities[0]->getMesh();
-    glBindVertexArray(sampleMesh._vao);
+    const auto &sampleMesh = entities[0]->getMesh();
+    glBindVertexArray(sampleMesh.getVAO());
     auto mbuffer = preparePickingInstacedBuffers(entities);
 
     auto meshKind =
         entities[0]->getMeshKind() == MeshKind::Lines ? GL_LINES : GL_TRIANGLES;
-    glDrawElementsInstanced(meshKind, sampleMesh._indices.size(),
+    glDrawElementsInstanced(meshKind, sampleMesh.getIndicesLength(),
                             GL_UNSIGNED_INT, 0, entities.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind the buffer
     glBindVertexArray(0);

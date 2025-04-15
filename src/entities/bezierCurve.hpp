@@ -1,10 +1,13 @@
 #pragma once
 #include "IEntity.hpp"
+#include "IMeshable.hpp"
 #include "ISubscriber.hpp"
 #include "IVisitor.hpp"
+#include "bezierCurveMesh.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -14,20 +17,19 @@
 class BezierCurve : public IEntity, public ISubscriber {
 public:
   explicit BezierCurve(
-      const std::vector<std::reference_wrapper<PointEntity>> points)
-      : _mesh(generateMesh()) {
+      const std::vector<std::reference_wrapper<PointEntity>> points) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
     for (auto &p : points) {
       _points.push_back(p);
       subscribe(p);
     }
+    _mesh = generateMesh();
   }
 
   void addPoint(const PointEntity &point) {
     point.subscribe(*this);
     _points.push_back(point);
-    if (_points.size() % 3 == 1)
-      updateMesh();
+    updateMesh();
   }
 
   void removePoint(const PointEntity &point) { onSubscribableDestroyed(point); }
@@ -50,32 +52,20 @@ public:
     _points.erase(it);
     update();
   }
-  const Mesh &getMesh() const override { return *_mesh; }
+  const IMeshable &getMesh() const override { return *_mesh; }
   bool &showPolyLine() { return _showPolyLine; }
 
 private:
   inline static int _id;
   std::vector<std::reference_wrapper<const PointEntity>> _points;
-  std::unique_ptr<Mesh> _mesh;
+  std::unique_ptr<BezierMesh> _mesh;
   bool _showPolyLine = false;
 
-  std::unique_ptr<Mesh> generateMesh() {
-    std::vector<float> vertices;
-    std::vector<uint32_t> indices;
+  std::unique_ptr<BezierMesh> generateMesh() {
+    std::vector<algebra::Vec3f> vertices;
+    for (auto &point : _points)
+      vertices.push_back(point.get().getPosition());
 
-    for (int i = 0; i < _points.size(); ++i) {
-      auto worldPosition = _points[i].get().getPosition();
-      vertices.push_back(worldPosition[0]);
-      vertices.push_back(worldPosition[1]);
-      vertices.push_back(worldPosition[2]);
-    }
-    for (uint32_t i = 0; i + 3 < _points.size(); i += 3) {
-      indices.push_back(i);
-      indices.push_back(i + 1);
-      indices.push_back(i + 2);
-      indices.push_back(i + 3);
-    }
-
-    return Mesh::create(vertices, indices);
+    return BezierMesh::create(vertices);
   }
 };

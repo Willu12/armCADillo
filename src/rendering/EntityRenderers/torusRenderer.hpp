@@ -19,10 +19,10 @@ public:
     _shader.setProjectionMatrix(_camera.projectionMatrix());
 
     for (auto &entity : entities) {
-      const Mesh &mesh = entity->getMesh();
+      const auto &mesh = entity->getMesh();
       _shader.setModelMatrix(entity->getModelMatrix());
-      glBindVertexArray(mesh._vao);
-      glDrawElements(GL_LINES, mesh._indices.size(), GL_UNSIGNED_INT, 0);
+      glBindVertexArray(mesh.getVAO());
+      glDrawElements(GL_LINES, mesh.getIndicesLength(), GL_UNSIGNED_INT, 0);
       glBindVertexArray(0);
     }
   }
