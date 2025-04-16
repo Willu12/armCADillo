@@ -33,7 +33,7 @@ int calculateLength(in vec4 b0, in vec4 b1, in vec4 b2, in vec4 b3, in mat4 pv,
                     distance(sb2.xy, sb3.xy);
   }
 
-  int segments = 10 * int(length_screen * screenResolution);
+  int segments = int(length_screen * screenResolution);
   return clamp(segments, 8, 256);
 }
 

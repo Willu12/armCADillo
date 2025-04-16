@@ -99,10 +99,7 @@ int main(int, char **) {
     if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
       sceneRenderer.renderPicking(scene->getPoints());
 
-    // for (const auto &polygonalCurve : gui.getPolygonalCurves())
-    //   MeshRenderer.renderMesh(*polygonalCurve, shader);
     sceneRenderer.renderCursor(gui.getCursor());
-
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);

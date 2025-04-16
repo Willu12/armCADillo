@@ -47,6 +47,10 @@ public:
     glUniform3fv(glGetUniformLocation(_id, name.c_str()), 1, &value[0]);
   }
 
+  void setVec4f(const std::string &name, const algebra::Vec4f &value) const {
+    glUniform4fv(glGetUniformLocation(_id, name.c_str()), 1, &value[0]);
+  }
+
   void setViewMatrix(const algebra::Mat4f &view) const {
     setMat4f("view", view.transpose());
   }

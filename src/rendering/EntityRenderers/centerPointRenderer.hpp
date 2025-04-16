@@ -6,12 +6,13 @@
 class CenterPointRenderer {
 public:
   CenterPointRenderer(const Camera &camera)
-      : _camera(camera), _shader("../resources/shaders/centerPointShader.vs",
-                                 "../resources/shaders/fragmentShader.hlsl") {}
+      : _camera(camera),
+        _shader("../resources/shaders/centerPointShader.vs",
+                "../resources/shaders/colorFragmentShader.hlsl") {}
 
   void render(const IRenderable &renderable) {
     _shader.use();
-
+    _shader.setVec4f("Color", algebra::Vec4f(1.f, 0.5f, 0.f, 1.f));
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setModelMatrix(renderable.getModelMatrix());
     _shader.setProjectionMatrix(_camera.projectionMatrix());
