@@ -13,7 +13,9 @@ public:
       : _camera(camera),
         _shader("../resources/shaders/textureShader.vert",
                 "../resources/shaders/texturedBillboardShader.frag"),
-        _texture(prepareTexture()) {}
+        _texture(
+            Texture::createTexture("../resources/textures/cursorTexture.png")) {
+  }
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) {
     _texture->bind(0);
@@ -50,12 +52,5 @@ private:
     auto entityWorldPos =
         _camera.viewMatrix() * entity->getPosition().toHomogenous();
     return std::abs(entityWorldPos[2]);
-  }
-
-  std::unique_ptr<Texture> prepareTexture() {
-    Image image("../resources/textures/cursorTexture.png");
-    TextureResource textureResource(image);
-    Texture *texture = new Texture(textureResource);
-    return std::unique_ptr<Texture>(texture);
   }
 };

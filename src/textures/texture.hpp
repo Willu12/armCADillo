@@ -1,5 +1,6 @@
 #pragma once
 #include "textureResource.hpp"
+#include <memory>
 enum class TextureFiltering { Linear, Nearest };
 
 enum class TextureWrapping {
@@ -12,6 +13,13 @@ class Texture {
 public:
   explicit Texture(TextureResource textureResource)
       : _textureResource(textureResource) {}
+
+  static std::unique_ptr<Texture> createTexture(const std::string &imagePath) {
+    Image image(imagePath);
+    TextureResource textureResource(image);
+    Texture *texture = new Texture(textureResource);
+    return std::unique_ptr<Texture>(texture);
+  }
 
   void bind(uint32_t unit) const {
     _textureResource.bind(unit);
