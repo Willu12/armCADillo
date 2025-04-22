@@ -1,7 +1,8 @@
 #include "gui.hpp"
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
-#include "bezierCurve.hpp"
+#include "bezierCurveC0.hpp"
+#include "bezierCurveC2.hpp"
 #include "imgui.h"
 #include "scene.hpp"
 
@@ -55,6 +56,7 @@ void GUI::displayGUI() {
     renderCreateTorusUI();
     renderCreatePointUI();
     createBezierCurveUI();
+    createBezierCurveC2UI();
     removeButtonUI();
 
     _mouse.process(getActiveControllers());
@@ -159,6 +161,10 @@ void GUI::removeButtonUI() {
 void GUI::createBezierCurveUI() {
   if (ImGui::Button("Create Bezier Curve"))
     createBezierCurve();
+}
+void GUI::createBezierCurveC2UI() {
+  if (ImGui::Button("Create Bezier Curve C2"))
+    createBezierCurveC2();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {
@@ -284,11 +290,11 @@ std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
   return pointEntities;
 }
 
-std::vector<std::reference_wrapper<BezierCurve>>
+std::vector<std::reference_wrapper<BezierCurveC0>>
 GUI::getSelectedBezierCurves() {
-  std::vector<std::reference_wrapper<BezierCurve>> bezierCurves;
+  std::vector<std::reference_wrapper<BezierCurveC0>> bezierCurves;
   for (auto entity : _selectedEntities) {
-    auto bezierCurve = std::dynamic_pointer_cast<BezierCurve>(entity);
+    auto bezierCurve = std::dynamic_pointer_cast<BezierCurveC0>(entity);
     if (bezierCurve) {
       bezierCurves.push_back(*bezierCurve);
     }
@@ -302,6 +308,16 @@ void GUI::createBezierCurve() {
     return;
 
   std::shared_ptr<IEntity> bezierCurve =
-      std::make_shared<BezierCurve>(pointEntities);
-  _scene->addEntity(EntityType::BezierCurve, bezierCurve);
+      std::make_shared<BezierCurveC0>(pointEntities);
+  _scene->addEntity(EntityType::BezierCurveC0, bezierCurve);
+}
+
+void GUI::createBezierCurveC2() {
+  auto pointEntities = getSelectedPoints();
+  if (pointEntities.size() < 2)
+    return;
+
+  std::shared_ptr<IEntity> bezierCurve =
+      std::make_shared<BezierCurveC2>(pointEntities);
+  _scene->addEntity(EntityType::BezierCurveC2, bezierCurve);
 }

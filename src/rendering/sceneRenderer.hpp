@@ -70,7 +70,7 @@ private:
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
     _entityRenderers.insert(
-        {EntityType::BezierCurve,
+        {EntityType::BezierCurveC0,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
   }
 };

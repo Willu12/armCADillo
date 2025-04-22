@@ -3,7 +3,8 @@
 #include "gui.hpp"
 #include "imgui.h"
 
-#include "bezierCurve.hpp"
+#include "bezierCurveC0.hpp"
+#include "bezierCurveC2.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
 #include <algorithm>
@@ -16,7 +17,24 @@ bool GuiVisitor::visitTorus(TorusEntity &torus) {
 bool GuiVisitor::visitPoint(PointEntity &point) {
   return point.renderSettings(_gui);
 }
-bool GuiVisitor::visitBezierCurve(BezierCurve &bezierCurve) {
+bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
+  ImGui::InputText("Name", &bezierCurve.getName());
+  ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
+
+  auto allPoints = _gui.getPoints();
+  auto points = bezierCurve.getPoints();
+  auto remainingPoints = getRemainingPoints(allPoints, points);
+
+  renderPointList(points, "Bezier curve points");
+  renderPointList(remainingPoints, "remainingPoints");
+  renderAddingSelectedPoints(bezierCurve);
+  ImGui::SameLine();
+  renderRemovingSelectedPoints(bezierCurve);
+
+  return false;
+}
+
+bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
   ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
 

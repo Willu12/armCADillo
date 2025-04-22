@@ -2,9 +2,11 @@
 
 #include "IEntity.hpp"
 #include "IVisitor.hpp"
+#include "bezierCurve.hpp"
 #include <functional>
 class TorusEntity;
 class PointEntity;
+class BezierCurveC0;
 class BezierCurve;
 class GUI;
 
@@ -13,7 +15,8 @@ public:
   explicit GuiVisitor(GUI &gui) : _gui(gui) {}
   virtual bool visitTorus(TorusEntity &torus) override;
   virtual bool visitPoint(PointEntity &point) override;
-  virtual bool visitBezierCurve(BezierCurve &bezierCurve) override;
+  virtual bool visitBezierCurve(BezierCurveC0 &bezierCurve) override;
+  virtual bool visitBezierCurveC2(BezierCurveC2 &bezierCurve) override;
 
 private:
   GUI &_gui;

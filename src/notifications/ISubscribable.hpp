@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ISubscriber.hpp"
+#include <cstdio>
 #include <functional>
 #include <vector>
 

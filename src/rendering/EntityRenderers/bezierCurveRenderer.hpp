@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IEntityRenderer.hpp"
-#include "bezierCurve.hpp"
+#include "bezierCurveC0.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
 #include "mesh.hpp"
@@ -27,7 +27,7 @@ public:
                                               GLFWHelper::getWidth(_window)));
 
     for (const auto &entity : entities) {
-      BezierCurve &bezier = static_cast<BezierCurve &>(*entity);
+      BezierCurveC0 &bezier = static_cast<BezierCurveC0 &>(*entity);
       _shader.setInt("renderPolyLine", bezier.showPolyLine());
       auto &mesh = entity->getMesh();
 

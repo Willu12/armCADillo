@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <vector>
 
-class BezierCurve;
+class BezierCurveC0;
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
 enum class ControllMode { Transformation = 0, Selection = 1 };
@@ -69,9 +69,11 @@ private:
   void renderCreatePointUI();
   void removeButtonUI();
   void createBezierCurveUI();
+  void createBezierCurveC2UI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
+  void createBezierCurveC2();
   void renderModelSettings();
 
   void displayEntitiesList();
@@ -87,5 +89,5 @@ private:
   std::vector<std::shared_ptr<IController>> getActiveControllers();
 
   std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints();
-  std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
+  std::vector<std::reference_wrapper<BezierCurveC0>> getSelectedBezierCurves();
 };

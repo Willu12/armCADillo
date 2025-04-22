@@ -25,6 +25,16 @@ public:
     return std::unique_ptr<BezierMesh>(mesh);
   }
 
+  static std::unique_ptr<BezierMesh>
+  createC2(const std::vector<algebra::Vec3f> &vertices) {
+    auto *mesh = new BezierMesh(vertices);
+
+    mesh->_bezierSegments = bezierC2Data(vertices);
+    mesh->initBuffers();
+    mesh->addSimpleVertexLayout();
+    return std::unique_ptr<BezierMesh>(mesh);
+  }
+
   ~BezierMesh() {
     if (_vao > 0)
       glDeleteVertexArrays(1, &_vao);
@@ -104,7 +114,7 @@ private:
                  _bezierSegments.data(), GL_STATIC_DRAW);
   }
 
-  std::vector<BezierVertex>
+  static std::vector<BezierVertex>
   buildBezierVertexData(const std::vector<algebra::Vec3f> &points) {
     std::vector<BezierVertex> data;
 
@@ -117,6 +127,54 @@ private:
       data.push_back(v);
       i += 3;
     }
+    return data;
+  }
+
+  static std::vector<BezierVertex>
+  bezierC2Data(const std::vector<algebra::Vec3f> &points) {
+    std::vector<BezierVertex> data;
+
+    if (points.size() < 4) {
+      // Just store what we have in one vertex
+      BezierVertex v;
+      v.len = points.size();
+      for (size_t i = 0; i < points.size(); ++i)
+        v.pts[i] = points[i];
+      data.emplace_back(v);
+      return data;
+    }
+
+    // First segment — directly from the first 4 control points
+    BezierVertex first;
+    first.len = 4;
+    for (int i = 0; i < 4; ++i)
+      first.pts[i] = points[i];
+    data.emplace_back(first);
+
+    // Continue with computed control points for C² continuity
+    algebra::Vec3f P2 = points[2];
+    algebra::Vec3f P3 = points[3];
+
+    for (size_t i = 4; i < points.size(); ++i) {
+      BezierVertex seg;
+      seg.len = 4;
+
+      algebra::Vec3f P4 = P3 * 2.0f - P2;
+      algebra::Vec3f P5 = P4 * 2.0 - P3;
+      algebra::Vec3f P6 = points[i];
+
+      seg.pts[0] = P3;
+      seg.pts[1] = P4;
+      seg.pts[2] = P5;
+      seg.pts[3] = P6;
+
+      data.emplace_back(seg);
+
+      // Update for next segment
+      P2 = seg.pts[2];
+      P3 = seg.pts[3];
+    }
+
     return data;
   }
 };
