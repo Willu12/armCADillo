@@ -21,7 +21,7 @@ public:
 
   MeshDensity &getMeshDensity() { return _meshDensity; }
 
-  inline const Mesh &getMesh() const override { return *_mesh; }
+  const Mesh &getMesh() const override { return *_mesh; }
 
   void updateMesh() override { _mesh = generateMesh(); }
 

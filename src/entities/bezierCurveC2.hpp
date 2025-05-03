@@ -4,16 +4,15 @@
 #include "bezierCurveMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
-#include <stdexcept>
 #include <unistd.h>
 #include <vector>
 
 class BezierCurveC2 : public BezierCurve {
 public:
   explicit BezierCurveC2(
-      const std::vector<std::reference_wrapper<PointEntity>> points) {
+      const std::vector<std::reference_wrapper<PointEntity>> &points) {
     _name = "BezierCurveC2_" + std::to_string(_id++);
-    for (auto &p : points) {
+    for (const auto &p : points) {
       _points.emplace_back(p);
       subscribe(p);
     }
@@ -27,6 +26,7 @@ public:
 private:
   inline static int _id;
   std::vector<algebra::Vec3f> _bezierPoints;
+  bool _showBezierPoints = false;
 
   std::vector<algebra::Vec3f> bezierPoints() {
     std::vector<algebra::Vec3f> bezierPoints;

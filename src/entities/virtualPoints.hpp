@@ -5,17 +5,17 @@
 #include "IVisitor.hpp"
 #include "mesh.hpp"
 
-class PointEntity : public IEntity, public ISubscribable {
+class VirtualPoint : public IEntity, public ISubscribable {
 public:
-  explicit PointEntity(algebra::Vec3f position) : _mesh(generateMesh()) {
-    _name = "Point_" + std::to_string(_id++);
+  explicit VirtualPoint(algebra::Vec3f position) : _mesh(generateMesh()) {
+    _name = "BezierPoint" + std::to_string(_id++);
     _position = position;
     _meshKind = MeshKind::Triangles;
     _scale = 0.02f;
   }
 
   bool acceptVisitor(IVisitor &visitor) override {
-    return visitor.visitPoint(*this);
+    return visitor.visitVirtualPoint(*this);
   }
 
   algebra::Vec3f &getPosition() override {

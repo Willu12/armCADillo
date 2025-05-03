@@ -13,10 +13,11 @@ class GUI;
 class GuiVisitor : public IVisitor {
 public:
   explicit GuiVisitor(GUI &gui) : _gui(gui) {}
-  virtual bool visitTorus(TorusEntity &torus) override;
-  virtual bool visitPoint(PointEntity &point) override;
-  virtual bool visitBezierCurve(BezierCurveC0 &bezierCurve) override;
-  virtual bool visitBezierCurveC2(BezierCurveC2 &bezierCurve) override;
+  bool visitTorus(TorusEntity &torus) override;
+  bool visitPoint(PointEntity &point) override;
+  bool visitBezierCurve(BezierCurveC0 &bezierCurve) override;
+  bool visitBezierCurveC2(BezierCurveC2 &bezierCurve) override;
+  bool visitVirtualPoint(VirtualPoint &point) override;
 
 private:
   GUI &_gui;

@@ -1,10 +1,9 @@
 #pragma once
 #include "IEntity.hpp"
-#include "sphere.hpp"
 
 class Point : public IEntity {
 public:
-  Point(algebra::Vec3f position, float radius = 0.01f)
+  explicit Point(algebra::Vec3f position, float radius = 0.01f)
       : _radius(radius), _mesh(generateMesh()) {
     _position = position;
   }

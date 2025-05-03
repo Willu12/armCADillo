@@ -7,6 +7,7 @@
 #include "bezierCurveC2.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
+#include "virtualPoints.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <functional>
@@ -17,6 +18,9 @@ bool GuiVisitor::visitTorus(TorusEntity &torus) {
 bool GuiVisitor::visitPoint(PointEntity &point) {
   return point.renderSettings(_gui);
 }
+
+bool GuiVisitor::visitVirtualPoint(VirtualPoint &point) { return false; }
+
 bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
   ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
