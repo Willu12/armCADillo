@@ -28,7 +28,7 @@ private:
   bool isEntitySelected(const PointEntity &entity) const;
   void unselectEntity(const PointEntity &entity);
   void selectEntity(const PointEntity &entity) {
-    _selectedEntities.push_back(entity);
+    _selectedEntities.emplace_back(entity);
   }
 
   std::vector<std::reference_wrapper<const PointEntity>> getRemainingPoints(
