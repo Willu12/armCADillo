@@ -13,6 +13,7 @@
 #include "pickingTexture.hpp"
 #include "pointRenderer.hpp"
 #include "torusRenderer.hpp"
+#include <cstdio>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -71,6 +72,9 @@ private:
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::BezierCurveC0,
+         std::make_unique<BezierCurveRenderer>(*_camera, _window)});
+    _entityRenderers.insert(
+        {EntityType::BezierCurveC2,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
   }
 };

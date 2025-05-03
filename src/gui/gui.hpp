@@ -49,7 +49,7 @@ private:
   ControllMode _controllMode = ControllMode::Transformation;
   CenterPoint _centerPoint;
   Mouse _mouse;
-  GuiVisitor _GuiSettingsVisitor;
+  GuiVisitor _guiSettingsVisitor;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;

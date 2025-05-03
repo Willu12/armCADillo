@@ -7,8 +7,9 @@
 #include "sceneRenderer.hpp"
 
 #include "camera.hpp"
+#include <cstdio>
 #include <memory>
-#include <stdio.h>
+#include <print>
 
 #define WIDTH 1920
 #define HEIGHT 1080
@@ -16,13 +17,16 @@
 static void glfw_error_callback(int error, const char *description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
-static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+static void scrollCallback(GLFWwindow * /*window*/, double /*xoffset*/,
+                           double yoffset) {
   ImGuiIO &io = ImGui::GetIO();
   io.MouseWheel += static_cast<float>(yoffset); // Update ImGui's mouse wheel
 }
 
-void setupViewPortAndClear(GLFWwindow *window, const ImVec4 &clearColor) {
-  int display_w, display_h;
+static void setupViewPortAndClear(GLFWwindow *window,
+                                  const ImVec4 &clearColor) {
+  int display_w = 0;
+  int display_h = 0;
   glfwGetFramebufferSize(window, &display_w, &display_h);
   glViewport(0, 0, display_w, display_h);
   glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w,
@@ -46,8 +50,8 @@ int main(int, char **) {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    fprintf(stderr, "Failed to initialize GLAD\n");
+  if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+    std::println(stderr, "Failed to initialize GLAD");
     return 1;
   }
   glfwSetScrollCallback(window, scrollCallback);

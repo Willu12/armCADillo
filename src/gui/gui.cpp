@@ -7,7 +7,7 @@
 #include "scene.hpp"
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
-    : _window(window), _scene(scene), _GuiSettingsVisitor(*this) {
+    : _window(window), _scene(scene), _guiSettingsVisitor(*this) {
   initControllers();
   initEnitityFactories();
 }
@@ -179,7 +179,7 @@ void GUI::renderModelSettings() {
     return;
 
   auto selectedEntity = *_selectedEntities.begin();
-  if (selectedEntity->acceptVisitor(_GuiSettingsVisitor))
+  if (selectedEntity->acceptVisitor(_guiSettingsVisitor))
     selectedEntity->updateMesh();
 }
 

@@ -22,7 +22,7 @@ public:
 
   void addEntity(EntityType entityType,
                  const std::shared_ptr<IEntity> &entity) {
-    _entities[entityType].push_back(entity);
+    _entities[entityType].emplace_back(entity);
   }
 
   std::shared_ptr<Camera> getCamera() { return _camera; }
@@ -52,7 +52,7 @@ public:
   }
 
   std::vector<std::shared_ptr<IEntity>> getPoints() {
-    if (_entities.contains(EntityType::Point) == false)
+    if (!_entities.contains(EntityType::Point))
       return std::vector<std::shared_ptr<IEntity>>();
     return _entities.at(EntityType::Point);
   }
