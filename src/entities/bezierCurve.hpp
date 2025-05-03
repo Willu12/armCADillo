@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "IEntity.hpp"
 #include "ISubscriber.hpp"
 #include "bezierCurveMesh.hpp"
@@ -20,15 +22,13 @@ public:
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(const ISubscribable &publisher) override {
     const auto &point = dynamic_cast<const PointEntity &>(publisher);
-    auto it =
-        std::find_if(_points.begin(), _points.end(),
-                     [&point](const auto &p) { return &p.get() == &point; });
+    auto it = std::ranges::find_if(
+        _points, [&point](const auto &p) { return &p.get() == &point; });
     _points.erase(it);
 
     // remove from subs
-    auto pub_it =
-        std::find_if(_publishers.begin(), _publishers.end(),
-                     [&point](const auto &p) { return &p.get() == &point; });
+    auto pub_it = std::ranges::find_if(
+        _publishers, [&point](const auto &p) { return &p.get() == &point; });
     pub_it->get().removeSubscriber(*this);
     _publishers.erase(pub_it);
     update();

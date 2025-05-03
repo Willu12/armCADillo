@@ -100,8 +100,9 @@ int main(int, char **) {
     if (gui.getCenterPoint())
       sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
 
-    if (gui.getMouse().anyButtonDown() && !scene->getPoints().empty())
-      sceneRenderer.renderPicking(scene->getPoints());
+    if (gui.getMouse().anyButtonDown() && !scene->getPickables().empty()) {
+      sceneRenderer.renderPicking(scene->getPickables());
+    }
 
     sceneRenderer.renderCursor(gui.getCursor());
     sceneRenderer.renderVirtualPoints(scene->getVirtualPoints());

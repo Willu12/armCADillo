@@ -19,7 +19,7 @@ bool GuiVisitor::visitPoint(PointEntity &point) {
   return point.renderSettings(_gui);
 }
 
-bool GuiVisitor::visitVirtualPoint(VirtualPoint &point) { return false; }
+bool GuiVisitor::visitVirtualPoint(VirtualPoint & /*point*/) { return false; }
 
 bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
@@ -68,8 +68,8 @@ bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
 
 bool GuiVisitor::isEntitySelected(const PointEntity &entity) const {
   const PointEntity *ptr = &entity;
-  return std::any_of(_selectedEntities.begin(), _selectedEntities.end(),
-                     [&](const auto &e) { return &e.get() == ptr; });
+  return std::ranges::any_of(_selectedEntities,
+                             [&](const auto &e) { return &e.get() == ptr; });
 }
 
 void GuiVisitor::unselectEntity(const PointEntity &entity) {
@@ -82,7 +82,7 @@ void GuiVisitor::renderPointList(
     const std::string &label) {
 
   ImGui::LabelText("##", "%s", label.c_str());
-  for (auto &entity : entities) {
+  for (const auto &entity : entities) {
     bool isSelected = isEntitySelected(entity);
     if (ImGui::Selectable((entity.get().getName() + "##").c_str(), isSelected,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
@@ -118,9 +118,8 @@ bool GuiVisitor::renderAddingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
   if (ImGui::Button("+")) {
     for (const auto &p : _selectedEntities) {
-      bool alreadyIn =
-          std::any_of(points.begin(), points.end(),
-                      [&](const auto &q) { return &p.get() == &q.get(); });
+      bool alreadyIn = std::ranges::any_of(
+          points, [&](const auto &q) { return &p.get() == &q.get(); });
       if (!alreadyIn) {
         bezierCurve.addPoint(p.get());
       }
@@ -133,9 +132,8 @@ bool GuiVisitor::renderRemovingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
   if (ImGui::Button("-")) {
     for (const auto &p : _selectedEntities) {
-      bool isIn = std::any_of(points.begin(), points.end(), [&](const auto &q) {
-        return &p.get() == &q.get();
-      });
+      bool isIn = std::ranges::any_of(
+          points, [&](const auto &q) { return &p.get() == &q.get(); });
       if (isIn) {
         bezierCurve.removePoint(p.get());
       }

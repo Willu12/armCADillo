@@ -53,11 +53,13 @@ public:
     return _entities;
   }
 
-  std::vector<std::shared_ptr<IEntity>> getPoints() {
-    if (!_entities.contains(EntityType::Point))
-      return std::vector<std::shared_ptr<IEntity>>();
-    return _entities.at(EntityType::Point);
+  std::vector<std::shared_ptr<IEntity>> getPickables() const {
+    auto points = getPoints();
+    auto vPoints = getVirtualPoints();
+    points.insert(points.begin(), vPoints.begin(), vPoints.end());
+    return points;
   }
+
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const {
     std::vector<std::shared_ptr<IEntity>> virtualPoints;
     if (!_entities.contains(EntityType::BezierCurveC2))
@@ -71,6 +73,12 @@ public:
       virtualPoints.insert(virtualPoints.end(), vPoints.begin(), vPoints.end());
     }
     return virtualPoints;
+  }
+
+  std::vector<std::shared_ptr<IEntity>> getPoints() const {
+    if (!_entities.contains(EntityType::Point))
+      return std::vector<std::shared_ptr<IEntity>>();
+    return _entities.at(EntityType::Point);
   }
 
 private:
