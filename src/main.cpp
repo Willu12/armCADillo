@@ -96,7 +96,7 @@ int main(int, char **) {
     if (gui.getCenterPoint())
       sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
 
-    if (gui.getMouse().anyButtonDown() && scene->getPoints().empty() == false)
+    if (gui.getMouse().anyButtonDown() && !scene->getPoints().empty())
       sceneRenderer.renderPicking(scene->getPoints());
 
     sceneRenderer.renderCursor(gui.getCursor());

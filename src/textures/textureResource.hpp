@@ -6,7 +6,7 @@
 class TextureResource {
 public:
   TextureResource(const Image &image)
-      : _id(0), _width(image.getWidth()), _height(image.getHeight()), bpp(4) {
+      : _width(image.getWidth()), _height(image.getHeight()), bpp(4) {
 
     glGenTextures(1, &_id);
     glBindTexture(GL_TEXTURE_2D, _id);
@@ -22,7 +22,7 @@ public:
   }
 
 private:
-  GLuint _id;
+  GLuint _id{};
   int _width, _height, bpp;
 
   void setWrappingParameters() {

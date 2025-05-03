@@ -1,36 +1,88 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,-modernize-use-trailing-return-type'
-WarningsAsErrors: true
-HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
-FormatStyle:     google
+Checks: >
+  -*,
+  bugprone-*,
+  google-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  -android-*,
+  -readability-uppercase-literal-suffix,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  -cppcoreguidelines-special-member-functions,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -google-readability-braces-around-statements,
+  -google-readability-namespace-comments,
+  -google-runtime-references,
+  -modernize-return-braced-init-list,
+  -modernize-use-trailing-return-type,
+  -modernize-concat-nested-namespaces,
+  -modernize-use-nodiscard,
+  -modernize-avoid-c-arrays,
+  -performance-move-const-arg,
+  -performance-avoid-endl,
+  -readability-identifier-length,
+  -readability-braces-around-statements,
+  -readability-named-parameter,
+  -readability-redundant-declaration,
+  -readability-function-cognitive-complexity,
+  -readability-redundant-access-specifiers,
+  -readability-magic-numbers,
+  -readability-math-missing-parentheses,
+  -readability-convert-member-functions-to-static,
+  -bugprone-narrowing-conversions,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-implicit-widening-of-multiplication-result,
+  -bugprone-unchecked-optional-access,
+  -bugprone-exception-escape,
+
+HeaderFilterRegex: ""
+
+# Google Formatting naming conventions: https://github.com/googleapis/google-cloud-cpp/blob/main/.clang-tidy
 CheckOptions:
-  - key:             cert-dcl16-c.NewSuffixes
-    value:           'L;LL;LU;LLU'
-  - key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
-    value:           '0'
-  - key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
-    value:           '1'
-  - key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
-    value:           '1'
-  - key:             google-readability-braces-around-statements.ShortStatementLines
-    value:           '1'
-  - key:             google-readability-function-size.StatementThreshold
-    value:           '800'
-  - key:             google-readability-namespace-comments.ShortNamespaceLines
-    value:           '10'
-  - key:             google-readability-namespace-comments.SpacesBeforeComments
-    value:           '2'
-  - key:             modernize-loop-convert.MaxCopySize
-    value:           '16'
-  - key:             modernize-loop-convert.MinConfidence
-    value:           reasonable
-  - key:             modernize-loop-convert.NamingStyle
-    value:           CamelCase
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-...
+  - { key: readability-identifier-naming.NamespaceCase, value: lower_case }
+  - { key: readability-identifier-naming.ClassCase, value: CamelCase }
+  - { key: readability-identifier-naming.StructCase, value: CamelCase }
+  - {
+      key: readability-identifier-naming.TemplateParameterCase,
+      value: CamelCase,
+    }
+  - { key: readability-identifier-naming.FunctionCase, value: aNy_CasE }
+  - { key: readability-identifier-naming.VariableCase, value: lower_case }
+  - { key: readability-identifier-naming.ClassMemberCase, value: lower_case }
+  - { key: readability-identifier-naming.ClassMemberPrefix, value: _ }
+  - { key: readability-identifier-naming.PrivateMemberPrefix, value: _ }
+  - { key: readability-identifier-naming.ProtectedMemberPrefix, value: _ }
+  - { key: readability-identifier-naming.EnumConstantCase, value: CamelCase }
+  - {
+      key: readability-identifier-naming.ConstexprVariableCase,
+      value: CamelCase,
+    }
+  - { key: readability-identifier-naming.ConstexprVariablePrefix, value: k }
+  - { key: readability-identifier-naming.GlobalConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.GlobalConstantPrefix, value: k }
+  - { key: readability-identifier-naming.MemberConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.MemberConstantPrefix, value: k }
+  - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.StaticConstantPrefix, value: k }
+  - {
+      key: readability-implicit-bool-conversion.AllowIntegerConditions,
+      value: 1,
+    }
+  - {
+      key: readability-implicit-bool-conversion.AllowPointerConditions,
+      value: 1,
+    }
+  - { key: readability-function-cognitive-complexity.IgnoreMacros, value: 1 }
