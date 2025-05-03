@@ -9,7 +9,7 @@ class BezierCurve : public IEntity, public ISubscriber {
 public:
   void addPoint(const PointEntity &point) {
     subscribe(point);
-    _points.push_back(point);
+    _points.emplace_back(point);
     updateMesh();
   }
   void removePoint(const PointEntity &point) { onSubscribableDestroyed(point); }
@@ -19,7 +19,7 @@ public:
   void updateMesh() override { _mesh = generateMesh(); };
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(const ISubscribable &publisher) override {
-    const PointEntity &point = static_cast<const PointEntity &>(publisher);
+    const auto &point = dynamic_cast<const PointEntity &>(publisher);
     auto it =
         std::find_if(_points.begin(), _points.end(),
                      [&point](const auto &p) { return &p.get() == &point; });

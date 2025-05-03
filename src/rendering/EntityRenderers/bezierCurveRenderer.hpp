@@ -17,7 +17,7 @@ public:
                 "../resources/shaders/geometryBezier.gs",
                 "../resources/shaders/fragmentShader.hlsl") {}
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities) {
+  void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
     if (entities.empty())
       return;
     _shader.use();
@@ -27,7 +27,7 @@ public:
                                               GLFWHelper::getWidth(_window)));
 
     for (const auto &entity : entities) {
-      BezierCurveC0 &bezier = static_cast<BezierCurveC0 &>(*entity);
+      auto &bezier = dynamic_cast<BezierCurve &>(*entity);
       _shader.setInt("renderPolyLine", bezier.showPolyLine());
       auto &mesh = entity->getMesh();
 

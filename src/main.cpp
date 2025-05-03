@@ -104,6 +104,7 @@ int main(int, char **) {
       sceneRenderer.renderPicking(scene->getPoints());
 
     sceneRenderer.renderCursor(gui.getCursor());
+    sceneRenderer.renderVirtualPoints(scene->getVirtualPoints());
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);

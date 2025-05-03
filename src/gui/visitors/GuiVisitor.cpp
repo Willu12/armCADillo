@@ -40,7 +40,7 @@ bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
 
 bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
-  ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
+  ImGui::Checkbox("Show Bezier Points", &bezierCurve.showBezierPoints());
 
   auto allPoints = _gui.getPoints();
   auto points = bezierCurve.getPoints();

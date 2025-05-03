@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "GLFW/glfw3.h"
+#include "vec.hpp"
 
 class SceneRenderer {
 public:
@@ -41,7 +42,7 @@ public:
   }
 
   void
-  renderPicking(const std::vector<std::shared_ptr<IEntity>> pickableEntities) {
+  renderPicking(const std::vector<std::shared_ptr<IEntity>> &pickableEntities) {
     _pickingRenderer.render(pickableEntities, *_camera);
   }
   void renderCursor(const std::shared_ptr<Cursor> &cursor) {
@@ -51,6 +52,12 @@ public:
 
   void renderCenterPoint(const IRenderable &centerPoint) {
     _centerPointRenderer.render(centerPoint);
+  }
+
+  void renderVirtualPoints(
+      const std::vector<std::shared_ptr<IEntity>> &virtualPoints) {
+    auto &virtualPointRenderer = _entityRenderers.at(EntityType::VirtualPoint);
+    virtualPointRenderer->render(virtualPoints);
   }
 
 private:
@@ -67,7 +74,13 @@ private:
     _entityRenderers.insert(
         {EntityType::Torus, std::make_unique<TorusRenderer>(*_camera)});
     _entityRenderers.insert(
-        {EntityType::Point, std::make_unique<PointRenderer>(*_camera)});
+        {EntityType::Point,
+         std::make_unique<PointRenderer>(
+             *_camera, algebra::Vec4f{0.5f, 0.0f, 0.7f, 1.0f})});
+    _entityRenderers.insert(
+        {EntityType::VirtualPoint,
+         std::make_unique<PointRenderer>(
+             *_camera, algebra::Vec4f{0.0f, 1.0f, 0.0f, 1.0f})});
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
     _entityRenderers.insert(

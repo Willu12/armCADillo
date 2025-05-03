@@ -17,7 +17,7 @@ public:
       const std::vector<std::reference_wrapper<PointEntity>> points) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
     for (auto &p : points) {
-      _points.push_back(p);
+      _points.emplace_back(p);
       subscribe(p);
     }
     _mesh = generateMesh();
@@ -32,6 +32,7 @@ private:
 
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> vertices;
+    vertices.reserve(_points.size());
     for (auto &point : _points)
       vertices.push_back(point.get().getPosition());
 

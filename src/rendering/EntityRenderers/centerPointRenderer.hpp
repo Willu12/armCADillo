@@ -16,13 +16,6 @@ public:
   void render(const IRenderable &renderable) {
     _texture->bind(0);
     _shader.use();
-    _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setModelMatrix(renderable.getModelMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
-
-    // const float cameraDistance = distanceFromCamera(entity);
-    // auto scaleMatrix = algebra::transformations::scaleMatrix(
-    //   cameraDistance, cameraDistance, cameraDistance);
 
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setModelMatrix(

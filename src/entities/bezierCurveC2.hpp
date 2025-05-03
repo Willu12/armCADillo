@@ -4,6 +4,8 @@
 #include "bezierCurveMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
+#include "virtualPoints.hpp"
+#include <memory>
 #include <unistd.h>
 #include <vector>
 
@@ -23,13 +25,18 @@ public:
     return visitor.visitBezierCurveC2(*this);
   }
 
+  bool &showBezierPoints() { return _showBezierPoints; }
+  const std::vector<std::shared_ptr<VirtualPoint>> &getVirtualPoints() const {
+    return _bezierPoints;
+  }
+
 private:
   inline static int _id;
-  std::vector<algebra::Vec3f> _bezierPoints;
+  std::vector<std::shared_ptr<VirtualPoint>> _bezierPoints;
   bool _showBezierPoints = false;
 
-  std::vector<algebra::Vec3f> bezierPoints() {
-    std::vector<algebra::Vec3f> bezierPoints;
+  std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
+    std::vector<std::shared_ptr<VirtualPoint>> bezierPoints;
 
     if (_points.size() < 4)
       return bezierPoints;
@@ -41,16 +48,25 @@ private:
       auto p2 = _points[i + 2].get().getPosition();
       auto p3 = _points[i + 3].get().getPosition();
 
-      bezierPoints.emplace_back((p0 + p1 * 4 + p2) / 6);
-      bezierPoints.emplace_back((p1 * 4 + p2 * 2) / 6);
-      bezierPoints.emplace_back((p1 * 2 + p2 * 4) / 6);
-      bezierPoints.emplace_back((p1 + p2 * 4 + p3) / 6);
+      bezierPoints.push_back(
+          std::make_shared<VirtualPoint>(((p0 + p1 * 4 + p2) / 6)));
+      bezierPoints.push_back(
+          std::make_shared<VirtualPoint>(((p1 * 4 + p2 * 2) / 6)));
+      bezierPoints.push_back(
+          std::make_shared<VirtualPoint>(((p1 * 2 + p2 * 4) / 6)));
+      bezierPoints.push_back(
+          std::make_shared<VirtualPoint>(((p1 + p2 * 4 + p3) / 6)));
     }
     return bezierPoints;
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {
     _bezierPoints = bezierPoints();
-    return BezierMesh::create(_bezierPoints);
+    std::vector<algebra::Vec3f> bezierPositions;
+    bezierPositions.reserve(_bezierPoints.size());
+    for (const auto &p : _bezierPoints)
+      bezierPositions.emplace_back(p->getPosition());
+
+    return BezierMesh::create(bezierPositions);
   }
 };

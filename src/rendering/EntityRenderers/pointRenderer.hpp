@@ -2,14 +2,15 @@
 #include "IEntityRenderer.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
+#include "vec.hpp"
 #include <memory>
 
 class PointRenderer : public IEntityRenderer {
 public:
-  explicit PointRenderer(const Camera &camera)
+  explicit PointRenderer(const Camera &camera, algebra::Vec4f color)
       : _shader("../resources/shaders/vertexShader.hlsl",
-                "../resources/shaders/fragmentShader.hlsl"),
-        _camera(camera) {}
+                "../resources/shaders/colorFragmentShader.hlsl"),
+        _camera(camera), _color(color) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
     if (entities.empty())
@@ -18,13 +19,14 @@ public:
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setVec4f("Color", _color);
 
     const auto &sampleMesh = entities[0]->getMesh();
     glBindVertexArray(sampleMesh.getVAO());
     GLuint mbuffer = prepareInstacedModelMatrices(entities);
 
     glDrawElementsInstanced(GL_TRIANGLES, sampleMesh.getIndicesLength(),
-                            GL_UNSIGNED_INT, 0, entities.size());
+                            GL_UNSIGNED_INT, nullptr, entities.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind the buffer
     glBindVertexArray(0);
 
@@ -34,4 +36,5 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
+  algebra::Vec4f _color{0.5f, 0.f, 0.7f, 1.f};
 };
