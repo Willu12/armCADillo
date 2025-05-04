@@ -45,25 +45,23 @@ public:
     size_t index = std::distance(_bezierPoints.begin(), it);
     std::size_t segmentIndex = index / 4;
     std::size_t knotIndex = index % 4;
-    /*
-        if (knotIndex == 0) {
-          // Modify the De Boor points on the left
-          _points[segmentIndex].get().getPosition() =
-              _points[segmentIndex].get().getPosition() + point.getPosition();
-        } else if (knotIndex == 3) {
-          // Modify the De Boor points on the right
-          _points[segmentIndex + 1].get().getPosition() =
-              _points[segmentIndex + 1].get().getPosition() +
-       point.getPosition(); } else {
-          // If it's one of the middle Bezier points, modify the related De Boor
-          // points
-          _points[segmentIndex + 1].get().getPosition() =
-              _points[segmentIndex + 1].get().getPosition() +
-       point.getPosition(); _points[segmentIndex + 2].get().getPosition() =
-              _points[segmentIndex + 1].get().getPosition() +
-       point.getPosition();
-        }
-        */
+
+    if (knotIndex == 0) {
+      // Modify the De Boor points on the left
+      _points[segmentIndex].get().updatePosition(
+          _points[segmentIndex].get().getPosition() + point.getPosition());
+    } else if (knotIndex == 3) {
+      // Modify the De Boor points on the right
+      _points[segmentIndex + 1].get().updatePosition(
+          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+    } else {
+      // If it's one of the middle Bezier points, modify the related De Boor
+      // points
+      _points[segmentIndex + 1].get().updatePosition(
+          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+      _points[segmentIndex + 2].get().updatePosition(
+          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+    }
   }
 
 private:
