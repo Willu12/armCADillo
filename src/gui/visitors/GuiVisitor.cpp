@@ -66,7 +66,8 @@ bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   auto &_position = entity.getPosition();
   float position[3] = {_position[0], _position[1], _position[2]};
   if (ImGui::InputFloat3("Position", position)) {
-    _position = algebra::Vec3f(_position[0], _position[1], _position[2]);
+    entity.updatePosition(
+        algebra::Vec3f(_position[0], _position[1], _position[2]));
     return true;
   }
   return false;

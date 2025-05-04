@@ -11,7 +11,8 @@ public:
   virtual algebra::Mat4f getModelMatrix() const = 0;
   virtual const IMeshable &getMesh() const = 0;
   virtual const algebra::Vec3f &getPosition() const = 0;
-  virtual algebra::Vec3f &getPosition() = 0;
+  virtual void updatePosition(const algebra::Vec3f &position) = 0;
+  //  virtual algebra::Vec3f &getPosition() = 0;
 
   MeshKind getMeshKind() const { return _meshKind; }
 

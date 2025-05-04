@@ -24,11 +24,10 @@ private:
     auto averagePosition = algebra::Vec3f();
 
     for (const auto &entity : entities) {
-      averagePosition = averagePosition + std::as_const(*entity).getPosition();
+      averagePosition = averagePosition + entity->getPosition();
     }
     averagePosition = averagePosition / static_cast<float>(entities.size());
 
-    auto &pointPosition = _point.getPosition();
-    pointPosition = averagePosition;
+    _point.updatePosition(averagePosition);
   }
 };

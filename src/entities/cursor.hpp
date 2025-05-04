@@ -13,7 +13,7 @@ public:
 
   const Mesh &getMesh() const override { return *_mesh; }
   const algebra::Vec3f &getPosition() const override { return _position; }
-  algebra::Vec3f &getPosition() override { return _position; }
+  // algebra::Vec3f &getPosition() override { return _position; }
 
   void updatePosition(float x, float y, float z) {
     _position = algebra::Vec3f(x, y, z);

@@ -7,6 +7,7 @@
 #include "matrix.hpp"
 #include "quaternion.hpp"
 #include "transformations.hpp"
+#include "vec.hpp"
 
 class GUI;
 
@@ -31,7 +32,10 @@ public:
   float &getScale() { return _scale; }
   const float &getScale() const { return _scale; }
 
-  algebra::Vec3f &getPosition() override { return _position; }
+  // algebra::Vec3f &getPosition() override { return _position; }
+  void updatePosition(const algebra::Vec3f &position) override {
+    _position = position;
+  }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   algebra::Quaternion<float> &getRotation() { return _rotation; }

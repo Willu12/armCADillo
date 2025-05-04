@@ -52,8 +52,9 @@ private:
 
   void translate(float deltaY) {
     for (const auto &entity : _entites) {
-      entity->getPosition()[static_cast<int>(_transformationAxis)] +=
-          deltaY * _moveSpeed;
+      auto pos = entity->getPosition();
+      pos[static_cast<int>(_transformationAxis)] += deltaY * _moveSpeed;
+      entity->updatePosition(pos);
     }
   }
 

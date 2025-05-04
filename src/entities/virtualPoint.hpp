@@ -20,10 +20,11 @@ public:
 
   void notifySubscribers() override;
 
-  algebra::Vec3f &getPosition() override {
+  void updatePosition(const algebra::Vec3f &position) override {
     notifySubscribers();
-    return _position;
+    IEntity::updatePosition(position);
   }
+
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updateMesh() override { _mesh = generateMesh(); };

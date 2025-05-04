@@ -4,6 +4,7 @@
 #include "ISubscribable.hpp"
 #include "IVisitor.hpp"
 #include "mesh.hpp"
+#include "vec.hpp"
 
 class PointEntity : public IEntity, public ISubscribable {
 public:
@@ -23,10 +24,15 @@ public:
     return visitor.visitPoint(*this);
   }
 
-  algebra::Vec3f &getPosition() override {
+  void updatePosition(const algebra::Vec3f &position) override {
     notifySubscribers();
-    return _position;
+    IEntity::updatePosition(position);
   }
+
+  // algebra::Vec3f &getPosition() override {
+  //   notifySubscribers();
+  //  return _position;
+  // }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updateMesh() override { _mesh = generateMesh(); };
