@@ -7,7 +7,7 @@ ISubscriber::~ISubscriber() {
   }
 }
 
-void ISubscriber::subscribe(const ISubscribable &publisher) {
+void ISubscriber::subscribe(ISubscribable &publisher) {
   publisher.subscribe(*this);
   _publishers.emplace_back(publisher);
 }

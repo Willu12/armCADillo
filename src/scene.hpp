@@ -3,7 +3,7 @@
 #include "bezierCurveC2.hpp"
 #include "camera.hpp"
 #include "entitiesTypes.hpp"
-#include "virtualPoints.hpp"
+#include "virtualPoint.hpp"
 #include <algorithm>
 #include <memory>
 #include <unordered_map>

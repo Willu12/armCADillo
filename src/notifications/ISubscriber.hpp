@@ -7,10 +7,10 @@ class ISubscribable;
 class ISubscriber {
 public:
   virtual ~ISubscriber();
-  void subscribe(const ISubscribable &publisher);
-  virtual void onSubscribableDestroyed(const ISubscribable &publisher) = 0;
+  void subscribe(ISubscribable &publisher);
+  virtual void onSubscribableDestroyed(ISubscribable &publisher) = 0;
   virtual void update() = 0;
 
 protected:
-  mutable std::vector<std::reference_wrapper<const ISubscribable>> _publishers;
+  mutable std::vector<std::reference_wrapper<ISubscribable>> _publishers;
 };

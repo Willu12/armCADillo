@@ -22,7 +22,7 @@ public:
 
 private:
   GUI &_gui;
-  std::vector<std::reference_wrapper<const PointEntity>> _selectedEntities;
+  std::vector<std::reference_wrapper<PointEntity>> _selectedEntities;
   std::vector<std::reference_wrapper<const VirtualPoint>>
       _selectedVirtualPoints;
 
@@ -30,15 +30,15 @@ private:
 
   bool isEntitySelected(const PointEntity &entity) const;
   void unselectEntity(const PointEntity &entity);
-  void selectEntity(const PointEntity &entity);
+  void selectEntity(PointEntity &entity);
 
-  std::vector<std::reference_wrapper<const PointEntity>> getRemainingPoints(
-      const std::vector<std::reference_wrapper<const PointEntity>> &allPoints,
-      const std::vector<std::reference_wrapper<const PointEntity>>
-          &currentPoints) const;
+  std::vector<std::reference_wrapper<PointEntity>> getRemainingPoints(
+      const std::vector<std::reference_wrapper<PointEntity>> &allPoints,
+      const std::vector<std::reference_wrapper<PointEntity>> &currentPoints)
+      const;
 
   void renderPointList(
-      const std::vector<std::reference_wrapper<const PointEntity>> &entities,
+      const std::vector<std::reference_wrapper<PointEntity>> &entities,
       const std::string &label);
 
   bool renderAddingSelectedPoints(BezierCurve &bezierCurve);

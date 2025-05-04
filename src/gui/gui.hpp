@@ -11,7 +11,7 @@
 #include "optional"
 #include "pointEntity.hpp"
 #include "scene.hpp"
-#include "virtualPoints.hpp"
+#include "virtualPoint.hpp"
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -29,7 +29,7 @@ public:
   IController &getController();
 
   std::vector<std::shared_ptr<IEntity>> getEntities() const;
-  std::vector<std::reference_wrapper<const PointEntity>> getPoints() const;
+  std::vector<std::reference_wrapper<PointEntity>> getPoints() const;
   std::vector<std::shared_ptr<IEntity>> getSelectedEntities() const;
 
   std::shared_ptr<Cursor> getCursor();

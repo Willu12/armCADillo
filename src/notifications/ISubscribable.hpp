@@ -12,12 +12,12 @@ public:
     _subscribers.emplace_back(subscriber);
   }
 
-  void notifySubscribers() {
-    for (const auto subscriber : _subscribers)
+  virtual void notifySubscribers() {
+    for (auto &subscriber : _subscribers)
       subscriber.get().update();
   }
 
-  void removeSubscriber(const ISubscriber &subscriber) const {
+  void removeSubscriber(ISubscriber &subscriber) const {
     std::erase_if(_subscribers, [&subscriber](const auto &ref) {
       return &ref.get() == &subscriber;
     });

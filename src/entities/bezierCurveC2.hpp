@@ -4,9 +4,10 @@
 #include "bezierCurveMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
-#include "virtualPoints.hpp"
+#include "virtualPoint.hpp"
 #include <memory>
 #include <unistd.h>
+#include <utility>
 #include <vector>
 
 class BezierCurveC2 : public BezierCurve {
@@ -30,6 +31,44 @@ public:
     return _bezierPoints;
   }
 
+  void updateBezier(const VirtualPoint &point) {
+
+    auto it = std::ranges::find_if(
+        _bezierPoints,
+        [&point](const std::shared_ptr<VirtualPoint> &bezierPoint) {
+          return bezierPoint.get() == &point;
+        });
+
+    if (it == _bezierPoints.end())
+      return;
+
+    size_t index = std::distance(_bezierPoints.begin(), it);
+    std::size_t segmentIndex = index / 4;
+    std::size_t knotIndex = index % 4;
+    /*
+        auto deBoorPoints = _points;
+
+        if (knotIndex == 0) {
+          // Modify the De Boor points on the left
+          deBoorPoints[segmentIndex].get().getPosition() =
+              deBoorPoints[segmentIndex].get().getPosition() +
+       point.getPosition(); } else if (knotIndex == 3) {
+          // Modify the De Boor points on the right
+          _points[segmentIndex + 1].get().getPosition() +=
+              _points[segmentIndex + 1].get().getPosition() +
+       point.getPosition(); } else {
+          // If it's one of the middle Bezier points, modify the related De Boor
+          // points
+          _points[segmentIndex + 1].get().getPosition() =
+              _points[segmentIndex + 1].get().getPosition() +
+       point.getPosition(); _points[segmentIndex + 2].get().getPosition() =
+              _points[segmentIndex + 1].get().getPosition() +
+       point.getPosition();
+        }
+        _points = deBoorPoints;
+        */
+  }
+
 private:
   inline static int _id;
   std::vector<std::shared_ptr<VirtualPoint>> _bezierPoints;
@@ -43,10 +82,10 @@ private:
 
     bezierPoints.reserve((_points.size() - 3) * 4);
     for (std::size_t i = 0; i < _points.size() - 3; ++i) {
-      auto p0 = _points[i].get().getPosition();
-      auto p1 = _points[i + 1].get().getPosition();
-      auto p2 = _points[i + 2].get().getPosition();
-      auto p3 = _points[i + 3].get().getPosition();
+      auto p0 = std::as_const(_points[i].get()).getPosition();
+      auto p1 = std::as_const(_points[i + 1].get()).getPosition();
+      auto p2 = std::as_const(_points[i + 2].get()).getPosition();
+      auto p3 = std::as_const(_points[i + 3].get()).getPosition();
 
       bezierPoints.push_back(
           std::make_shared<VirtualPoint>(((p0 + p1 * 4 + p2) / 6)));

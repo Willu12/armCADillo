@@ -33,8 +33,8 @@ private:
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> vertices;
     vertices.reserve(_points.size());
-    for (auto &point : _points)
-      vertices.push_back(point.get().getPosition());
+    for (const auto &point : _points)
+      vertices.push_back(std::as_const(point.get()).getPosition());
 
     return BezierMesh::create(vertices);
   }

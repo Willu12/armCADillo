@@ -7,7 +7,7 @@
 #include "bezierCurveC2.hpp"
 #include "imgui.h"
 #include "scene.hpp"
-#include "virtualPoints.hpp"
+#include "virtualPoint.hpp"
 #include <cstdio>
 #include <utility>
 #include <vector>
@@ -281,8 +281,8 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
   return pointEntities;
 }
 
-std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
-  std::vector<std::reference_wrapper<const PointEntity>> pointEntities;
+std::vector<std::reference_wrapper<PointEntity>> GUI::getPoints() const {
+  std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
   for (auto &entity : _scene->getPoints()) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);

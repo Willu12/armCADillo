@@ -18,6 +18,8 @@ public:
     return visitor.visitVirtualPoint(*this);
   }
 
+  void notifySubscribers() override;
+
   algebra::Vec3f &getPosition() override {
     notifySubscribers();
     return _position;

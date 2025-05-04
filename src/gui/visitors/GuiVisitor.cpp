@@ -7,7 +7,7 @@
 #include "bezierCurveC2.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
-#include "virtualPoints.hpp"
+#include "virtualPoint.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <functional>
@@ -83,12 +83,12 @@ void GuiVisitor::unselectEntity(const PointEntity &entity) {
                 [&](const auto &elem) { return &elem.get() == &entity; });
 }
 
-void GuiVisitor::selectEntity(const PointEntity &entity) {
+void GuiVisitor::selectEntity(PointEntity &entity) {
   _selectedEntities.emplace_back(entity);
 }
 
 void GuiVisitor::renderPointList(
-    const std::vector<std::reference_wrapper<const PointEntity>> &entities,
+    const std::vector<std::reference_wrapper<PointEntity>> &entities,
     const std::string &label) {
 
   ImGui::LabelText("##", "%s", label.c_str());
@@ -109,16 +109,15 @@ void GuiVisitor::renderPointList(
   }
 }
 
-std::vector<std::reference_wrapper<const PointEntity>>
-GuiVisitor::getRemainingPoints(
-    const std::vector<std::reference_wrapper<const PointEntity>> &allPoints,
-    const std::vector<std::reference_wrapper<const PointEntity>> &currentPoints)
+std::vector<std::reference_wrapper<PointEntity>> GuiVisitor::getRemainingPoints(
+    const std::vector<std::reference_wrapper<PointEntity>> &allPoints,
+    const std::vector<std::reference_wrapper<PointEntity>> &currentPoints)
     const {
-  std::vector<std::reference_wrapper<const PointEntity>> remainingPoints;
+  std::vector<std::reference_wrapper<PointEntity>> remainingPoints;
 
   for (const auto &p : allPoints) {
-    if (!std::ranges::any_of(
-            currentPoints, [&](const auto &e) { return &e.get() == &p.get(); }))
+    if (!std::ranges::any_of(currentPoints,
+                             [&](auto &e) { return &e.get() == &p.get(); }))
       remainingPoints.push_back(p);
   }
   return remainingPoints;
@@ -141,7 +140,7 @@ bool GuiVisitor::renderAddingSelectedPoints(BezierCurve &bezierCurve) {
 bool GuiVisitor::renderRemovingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
   if (ImGui::Button("-")) {
-    for (const auto &p : _selectedEntities) {
+    for (auto &p : _selectedEntities) {
       bool isIn = std::ranges::any_of(
           points, [&](const auto &q) { return &p.get() == &q.get(); });
       if (isIn) {

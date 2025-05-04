@@ -10,20 +10,20 @@
 
 class BezierCurve : public IEntity, public ISubscriber {
 public:
-  void addPoint(const PointEntity &point) {
+  void addPoint(PointEntity &point) {
     subscribe(point);
     _points.emplace_back(point);
     updateMesh();
   }
-  void removePoint(const PointEntity &point) { onSubscribableDestroyed(point); }
-  std::vector<std::reference_wrapper<const PointEntity>> getPoints() const {
+  void removePoint(PointEntity &point) { onSubscribableDestroyed(point); }
+  std::vector<std::reference_wrapper<PointEntity>> getPoints() const {
     return _points;
   }
   void updateMesh() override { _mesh = generateMesh(); };
   void update() override { updateMesh(); }
-  void onSubscribableDestroyed(const ISubscribable &publisher) override {
+  void onSubscribableDestroyed(ISubscribable &publisher) override {
 
-    const auto *point = dynamic_cast<const PointEntity *>(&publisher);
+    const auto *point = dynamic_cast<PointEntity *>(&publisher);
     if (!point) {
       throw std::runtime_error("Unexpected publisher type: " +
                                std::string(typeid(publisher).name()));
@@ -42,7 +42,7 @@ public:
   bool &showPolyLine() { return _showPolyLine; }
 
 protected:
-  std::vector<std::reference_wrapper<const PointEntity>> _points;
+  std::vector<std::reference_wrapper<PointEntity>> _points;
   std::unique_ptr<BezierMesh> _mesh;
   bool _showPolyLine = false;
 
