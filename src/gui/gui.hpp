@@ -11,6 +11,7 @@
 #include "optional"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "virtualPoints.hpp"
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -27,7 +28,7 @@ public:
   GUI(GLFWwindow *window, std::shared_ptr<Scene> scene);
   IController &getController();
 
-  const std::vector<std::shared_ptr<IEntity>> getEntities() const;
+  std::vector<std::shared_ptr<IEntity>> getEntities() const;
   std::vector<std::reference_wrapper<const PointEntity>> getPoints() const;
   std::vector<std::shared_ptr<IEntity>> getSelectedEntities() const;
 
@@ -40,10 +41,14 @@ public:
   const Mouse &getMouse();
   PickingTexture &getPickingTexture();
 
+  void setSelectedVirtualPoints(
+      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints);
+
 private:
   GLFWwindow *_window;
   std::shared_ptr<Scene> _scene;
   std::vector<std::shared_ptr<IEntity>> _selectedEntities;
+  std::vector<std::shared_ptr<VirtualPoint>> _selectedVirtualPoints;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   ControllMode _controllMode = ControllMode::Transformation;
@@ -60,6 +65,8 @@ private:
 
   void initEnitityFactories();
   void initControllers();
+  void processControllers();
+  void processModelControllers(std::vector<std::shared_ptr<IEntity>> &entities);
 
   void renderModelControllSettings();
   void renderControllModeSettings();

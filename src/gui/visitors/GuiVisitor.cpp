@@ -53,7 +53,9 @@ bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
   renderRemovingSelectedPoints(bezierCurve);
 
   if (bezierCurve.showBezierPoints()) {
-    renderVirtualPointList(bezierCurve.getVirtualPoints());
+    const auto &vPoints = bezierCurve.getVirtualPoints();
+    renderVirtualPointList(vPoints);
+    _gui.setSelectedVirtualPoints(vPoints);
   }
 
   return false;

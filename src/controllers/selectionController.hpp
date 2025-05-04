@@ -1,9 +1,9 @@
 #pragma once
 #include "IController.hpp"
 #include "IEntity.hpp"
-#include "algorithm"
 #include "pickingTexture.hpp"
 #include "scene.hpp"
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -23,16 +23,15 @@ public:
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
 
-  void process(float x, float y) override {
+  void process(float /*x*/, float /*y*/) override {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
 
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
       auto entity = getEntity(currentMousePosition.x, currentMousePosition.y);
       if (entity) {
-        std::shared_ptr<IEntity> entityPointer = entity.value();
+        const std::shared_ptr<IEntity> &entityPointer = entity.value();
         if (ImGui::GetIO().KeyCtrl) {
-          auto it = std::find(_selectedEntities.begin(),
-                              _selectedEntities.end(), entityPointer);
+          auto it = std::ranges::find(_selectedEntities, entityPointer);
           if (it != _selectedEntities.end())
             _selectedEntities.erase(it);
           else

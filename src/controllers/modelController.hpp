@@ -51,7 +51,7 @@ private:
   const std::shared_ptr<Cursor> _cursor;
 
   void translate(float deltaY) {
-    for (auto &entity : _entites) {
+    for (const auto &entity : _entites) {
       entity->getPosition()[static_cast<int>(_transformationAxis)] +=
           deltaY * _moveSpeed;
     }
@@ -61,7 +61,7 @@ private:
     auto quaternion = algebra::Quaternion<float>::fromAxisAngle(
         getAxisVector(_transformationAxis), deltaY * _moveSpeed);
 
-    for (auto &entity : _entites) {
+    for (const auto &entity : _entites) {
       entity->rotateAroundPoint(quaternion, getTransformationPoint());
     }
   }
@@ -72,7 +72,7 @@ private:
       scaleFactor = 1.05f;
     if (deltaY < 0.f)
       scaleFactor = 0.95f;
-    for (auto &entity : _entites) {
+    for (const auto &entity : _entites) {
       if (entity->getScale() * scaleFactor > 0.01f) {
         entity->scaleAroundPoint(scaleFactor, getTransformationPoint());
       }
@@ -82,10 +82,10 @@ private:
   algebra::Vec3f getAxisVector(const Axis &axis) {
     if (axis == Axis::X)
       return algebra::Vec3f(1.f, 0.f, 0.f);
-    else if (axis == Axis::Y)
+    if (axis == Axis::Y)
       return algebra::Vec3f(0.f, 1.f, 0.f);
-    else
-      return algebra::Vec3f(0.f, 0.f, 1.f);
+
+    return algebra::Vec3f(0.f, 0.f, 1.f);
   }
 
   algebra::Vec3f getTransformationPoint() const {

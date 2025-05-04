@@ -2,10 +2,12 @@
 
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
+#include "IEntity.hpp"
 #include "bezierCurveC0.hpp"
 #include "bezierCurveC2.hpp"
 #include "imgui.h"
 #include "scene.hpp"
+#include "virtualPoints.hpp"
 #include <utility>
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
@@ -18,7 +20,7 @@ IController &GUI::getController() {
   return *_controllers[static_cast<int>(_selectedController)];
 }
 
-const std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
+std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
   return _scene->getEntites();
 }
 
@@ -61,9 +63,7 @@ void GUI::displayGUI() {
     createBezierCurveC2UI();
     removeButtonUI();
 
-    _mouse.process(getActiveControllers());
-    if (_controllMode == ControllMode::Selection)
-      _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
+    processControllers();
 
     ImGui::End();
   }
@@ -274,7 +274,7 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
   for (auto &entity : _selectedEntities) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);
     if (point) {
-      pointEntities.push_back(*point);
+      pointEntities.emplace_back(*point);
     }
   }
   return pointEntities;
@@ -298,7 +298,7 @@ GUI::getSelectedBezierCurves() {
   for (auto &entity : _selectedEntities) {
     auto bezierCurve = std::dynamic_pointer_cast<BezierCurveC0>(entity);
     if (bezierCurve) {
-      bezierCurves.push_back(*bezierCurve);
+      bezierCurves.emplace_back(*bezierCurve);
     }
   }
   return bezierCurves;
@@ -322,4 +322,21 @@ void GUI::createBezierCurveC2() {
   std::shared_ptr<IEntity> bezierCurve =
       std::make_shared<BezierCurveC2>(pointEntities);
   _scene->addEntity(EntityType::BezierCurveC2, bezierCurve);
+}
+
+void GUI::processControllers() {
+  _mouse.process(getActiveControllers());
+  if (_controllMode == ControllMode::Selection)
+    _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
+}
+
+void GUI::processModelControllers(
+    std::vector<std::shared_ptr<IEntity>> &entities) {
+
+  const auto modelController = getModelController();
+}
+
+void GUI::setSelectedVirtualPoints(
+    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints) {
+  _selectedVirtualPoints = virtualPoints;
 }
