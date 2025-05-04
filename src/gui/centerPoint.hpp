@@ -2,6 +2,7 @@
 #include "IEntity.hpp"
 #include "point.hpp"
 #include <memory>
+#include <utility>
 
 class CenterPoint {
 public:
@@ -23,7 +24,7 @@ private:
     auto averagePosition = algebra::Vec3f();
 
     for (const auto &entity : entities) {
-      averagePosition = averagePosition + entity->getPosition();
+      averagePosition = averagePosition + std::as_const(*entity).getPosition();
     }
     averagePosition = averagePosition / static_cast<float>(entities.size());
 
