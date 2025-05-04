@@ -24,7 +24,7 @@ public:
         //   if (deltaY == 0.f && deltaX == 0.f)
         //   return;
 
-        for (auto controller : controllers)
+        for (const auto &controller : controllers)
           if (controller)
             controller->process(deltaX, deltaY);
 
@@ -58,7 +58,7 @@ private:
 
   void
   processScroll(const std::vector<std::shared_ptr<IController>> &controllers) {
-    for (auto controller : controllers)
+    for (const auto &controller : controllers)
       if (controller)
         controller->processScroll();
   }

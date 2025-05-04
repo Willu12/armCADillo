@@ -193,9 +193,8 @@ void GUI::displayEntitiesList() {
 
     auto name = entities[i]->getName();
     name = name.empty() ? "##" : name;
-    bool isSelected =
-        std::find(_selectedEntities.begin(), _selectedEntities.end(),
-                  entities[i]) != _selectedEntities.end();
+    bool isSelected = std::ranges::find(_selectedEntities, entities[i]) !=
+                      _selectedEntities.end();
 
     if (ImGui::Selectable(name.c_str(), isSelected,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
