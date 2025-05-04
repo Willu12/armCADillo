@@ -8,7 +8,9 @@
 #include "imgui.h"
 #include "scene.hpp"
 #include "virtualPoints.hpp"
+#include <cstdio>
 #include <utility>
+#include <vector>
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
     : _window(window), _scene(std::move(scene)), _guiSettingsVisitor(*this) {
@@ -325,18 +327,58 @@ void GUI::createBezierCurveC2() {
 }
 
 void GUI::processControllers() {
+
+  auto selectedEntities = getSelectedEntities();
+  auto vPoints = getSelectedVirtualPoints();
+  _selectedEntities.insert(_selectedEntities.end(), vPoints.begin(),
+                           vPoints.end());
+
   _mouse.process(getActiveControllers());
   if (_controllMode == ControllMode::Selection)
     _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
+
+  _selectedEntities = selectedEntities;
 }
 
-void GUI::processModelControllers(
-    std::vector<std::shared_ptr<IEntity>> &entities) {
+void GUI::setVirtualPoints(
+    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints,
+    const std::vector<std::reference_wrapper<const VirtualPoint>>
+        &selectedVirtualPoints) {
+  _virtualPoints = virtualPoints;
 
-  const auto modelController = getModelController();
+  std::vector<std::shared_ptr<VirtualPoint>> selectedVirtualPointsPtrs;
+  for (const auto &ref : selectedVirtualPoints) {
+    const VirtualPoint *rawPtr = &ref.get();
+
+    auto it = std::ranges::find_if(
+        _virtualPoints, [rawPtr](const std::shared_ptr<VirtualPoint> &vp) {
+          return vp.get() == rawPtr;
+        });
+
+    if (it != _virtualPoints.end()) {
+      selectedVirtualPointsPtrs.push_back(*it);
+    } else {
+      throw std::runtime_error(
+          "Selected VirtualPoint not found in _virtualPoints");
+    }
+  }
+  _selectedVirtualPoints = selectedVirtualPointsPtrs;
 }
 
-void GUI::setSelectedVirtualPoints(
-    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints) {
-  _selectedVirtualPoints = virtualPoints;
+std::vector<std::shared_ptr<IEntity>> GUI::getSelectedVirtualPoints() const {
+  std::vector<std::shared_ptr<IEntity>> virtualPoints;
+  virtualPoints.reserve(_selectedVirtualPoints.size());
+  for (const auto &vPoint : _selectedVirtualPoints) {
+    virtualPoints.emplace_back(vPoint);
+  }
+  return virtualPoints;
+}
+
+std::vector<std::shared_ptr<IEntity>> GUI::getVirtualPoints() const {
+  std::vector<std::shared_ptr<IEntity>> virtualPoints;
+  virtualPoints.reserve(_virtualPoints.size());
+  for (const auto &vPoint : _virtualPoints) {
+    virtualPoints.emplace_back(vPoint);
+  }
+  return virtualPoints;
 }

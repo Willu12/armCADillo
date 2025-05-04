@@ -41,14 +41,19 @@ public:
   const Mouse &getMouse();
   PickingTexture &getPickingTexture();
 
-  void setSelectedVirtualPoints(
-      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints);
+  void setVirtualPoints(
+      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints,
+      const std::vector<std::reference_wrapper<const VirtualPoint>>
+          &selectedVirtualPoints);
+  std::vector<std::shared_ptr<IEntity>> getSelectedVirtualPoints() const;
+  std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
 
 private:
   GLFWwindow *_window;
   std::shared_ptr<Scene> _scene;
   std::vector<std::shared_ptr<IEntity>> _selectedEntities;
   std::vector<std::shared_ptr<VirtualPoint>> _selectedVirtualPoints;
+  std::vector<std::shared_ptr<VirtualPoint>> _virtualPoints;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   ControllMode _controllMode = ControllMode::Transformation;
@@ -66,7 +71,6 @@ private:
   void initEnitityFactories();
   void initControllers();
   void processControllers();
-  void processModelControllers(std::vector<std::shared_ptr<IEntity>> &entities);
 
   void renderModelControllSettings();
   void renderControllModeSettings();

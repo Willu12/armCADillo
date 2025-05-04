@@ -59,7 +59,6 @@ public:
     algebra::Vec4f shiftVector(xShift, yShift, 0.0f, 0.0f);
     auto shiftWorld = inverseViewMatrix() * shiftVector;
     _target = _target + shiftWorld.fromHomogenous();
-    // algebra::Vec3f(shiftWorld[0], shiftWorld[1], shiftWorld[2]);
   }
 
   algebra::Vec3f getPosition() const { return _position.getCartesian(); }
