@@ -14,6 +14,11 @@ public:
     _scale = 0.02f;
   }
 
+  ~PointEntity() {
+    for (const auto &subscriber : _subscribers) {
+      subscriber.get().onSubscribableDestroyed(*this);
+    }
+  }
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitPoint(*this);
   }

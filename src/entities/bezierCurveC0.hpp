@@ -16,7 +16,7 @@ public:
   explicit BezierCurveC0(
       const std::vector<std::reference_wrapper<PointEntity>> points) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
-    for (auto &p : points) {
+    for (const auto &p : points) {
       _points.emplace_back(p);
       subscribe(p);
     }

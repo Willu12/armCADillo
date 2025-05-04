@@ -7,11 +7,7 @@
 
 class ISubscribable {
 public:
-  virtual ~ISubscribable() {
-    for (const auto &subscriber : _subscribers) {
-      subscriber.get().onSubscribableDestroyed(*this);
-    }
-  }
+  virtual ~ISubscribable() = default;
   void subscribe(ISubscriber &subscriber) const {
     _subscribers.emplace_back(subscriber);
   }
@@ -27,6 +23,6 @@ public:
     });
   }
 
-private:
+protected:
   mutable std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
 };

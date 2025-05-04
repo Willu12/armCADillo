@@ -9,5 +9,5 @@ ISubscriber::~ISubscriber() {
 
 void ISubscriber::subscribe(const ISubscribable &publisher) {
   publisher.subscribe(*this);
-  _publishers.push_back(publisher);
+  _publishers.emplace_back(publisher);
 }
