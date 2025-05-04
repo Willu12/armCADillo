@@ -4,6 +4,7 @@
 #include "IVisitor.hpp"
 #include "bezierCurve.hpp"
 #include <functional>
+#include <vector>
 class TorusEntity;
 class PointEntity;
 class BezierCurveC0;
@@ -22,14 +23,14 @@ public:
 private:
   GUI &_gui;
   std::vector<std::reference_wrapper<const PointEntity>> _selectedEntities;
+  std::vector<std::reference_wrapper<const VirtualPoint>>
+      _selectedVirtualPoints;
 
   bool renderBasicEntitySettings(IEntity &entity);
 
   bool isEntitySelected(const PointEntity &entity) const;
   void unselectEntity(const PointEntity &entity);
-  void selectEntity(const PointEntity &entity) {
-    _selectedEntities.emplace_back(entity);
-  }
+  void selectEntity(const PointEntity &entity);
 
   std::vector<std::reference_wrapper<const PointEntity>> getRemainingPoints(
       const std::vector<std::reference_wrapper<const PointEntity>> &allPoints,
@@ -42,4 +43,12 @@ private:
 
   bool renderAddingSelectedPoints(BezierCurve &bezierCurve);
   bool renderRemovingSelectedPoints(BezierCurve &bezierCurve);
+
+  // Virtual Points Handlers
+
+  void renderVirtualPointList(
+      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints);
+  bool isVirtualPointSelected(const VirtualPoint &point) const;
+  void selectVirtualPoint(const VirtualPoint &point);
+  void unselectVirtualPoint(const VirtualPoint &point);
 };

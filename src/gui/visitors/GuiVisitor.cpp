@@ -52,6 +52,10 @@ bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
   ImGui::SameLine();
   renderRemovingSelectedPoints(bezierCurve);
 
+  if (bezierCurve.showBezierPoints()) {
+    renderVirtualPointList(bezierCurve.getVirtualPoints());
+  }
+
   return false;
 }
 
@@ -75,6 +79,10 @@ bool GuiVisitor::isEntitySelected(const PointEntity &entity) const {
 void GuiVisitor::unselectEntity(const PointEntity &entity) {
   std::erase_if(_selectedEntities,
                 [&](const auto &elem) { return &elem.get() == &entity; });
+}
+
+void GuiVisitor::selectEntity(const PointEntity &entity) {
+  _selectedEntities.emplace_back(entity);
 }
 
 void GuiVisitor::renderPointList(
@@ -107,8 +115,8 @@ GuiVisitor::getRemainingPoints(
   std::vector<std::reference_wrapper<const PointEntity>> remainingPoints;
 
   for (const auto &p : allPoints) {
-    if (!std::any_of(currentPoints.begin(), currentPoints.end(),
-                     [&](const auto &e) { return &e.get() == &p.get(); }))
+    if (!std::ranges::any_of(
+            currentPoints, [&](const auto &e) { return &e.get() == &p.get(); }))
       remainingPoints.push_back(p);
   }
   return remainingPoints;
@@ -140,4 +148,37 @@ bool GuiVisitor::renderRemovingSelectedPoints(BezierCurve &bezierCurve) {
     }
   }
   return false;
+}
+
+bool GuiVisitor::isVirtualPointSelected(const VirtualPoint &point) const {
+  const VirtualPoint *ptr = &point;
+  return std::ranges::any_of(_selectedVirtualPoints,
+                             [&](const auto &e) { return &e.get() == ptr; });
+}
+void GuiVisitor::selectVirtualPoint(const VirtualPoint &point) {
+  _selectedVirtualPoints.emplace_back(point);
+}
+void GuiVisitor::unselectVirtualPoint(const VirtualPoint &point) {
+  std::erase_if(_selectedVirtualPoints,
+                [&](const auto &elem) { return &elem.get() == &point; });
+}
+
+void GuiVisitor::renderVirtualPointList(
+    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints) {
+  ImGui::LabelText("##", "%s", "Virtual Points");
+  for (const auto &vPoint : virtualPoints) {
+    bool isSelected = isVirtualPointSelected(*vPoint);
+    if (ImGui::Selectable((vPoint->getName() + "##").c_str(), isSelected,
+                          ImGuiSelectableFlags_AllowDoubleClick)) {
+      if (ImGui::GetIO().KeyCtrl) {
+        if (isSelected)
+          unselectVirtualPoint(*vPoint);
+        else
+          selectVirtualPoint(*vPoint);
+      } else {
+        _selectedVirtualPoints.clear();
+        selectVirtualPoint(*vPoint);
+      }
+    }
+  }
 }
