@@ -13,7 +13,7 @@ public:
     }
   }
   void subscribe(ISubscriber &subscriber) const {
-    _subscribers.push_back(subscriber);
+    _subscribers.emplace_back(subscriber);
   }
 
   void notifySubscribers() {

@@ -4,8 +4,12 @@ project(armCADillo)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_FLAGS " -fsanitize=address,undefined -g")
-set(CMAKE_LINKER_FLAGS " -fsanitize=address,undefined")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+set(CMAKE_CXX_FLAGS "-fsanitize=address,undefined -g")
+set(CMAKE_LINKER_FLAGS "-fsanitize=address,undefined")
 
 add_subdirectory(external)
 

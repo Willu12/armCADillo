@@ -1,13 +1,15 @@
 #include "gui.hpp"
+
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
 #include "bezierCurveC0.hpp"
 #include "bezierCurveC2.hpp"
 #include "imgui.h"
 #include "scene.hpp"
+#include <utility>
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
-    : _window(window), _scene(scene), _guiSettingsVisitor(*this) {
+    : _window(window), _scene(std::move(scene)), _guiSettingsVisitor(*this) {
   initControllers();
   initEnitityFactories();
 }
@@ -27,7 +29,7 @@ std::vector<std::shared_ptr<IEntity>> GUI::getSelectedEntities() const {
 std::shared_ptr<Cursor> GUI::getCursor() {
   auto cursorController = std::dynamic_pointer_cast<CursorController>(
       _controllers[static_cast<int>(ControllerKind::Cursor)]);
-  return cursorController.get()->getCursor();
+  return cursorController->getCursor();
 }
 
 std::optional<const IRenderable *> GUI::getCenterPoint() {
@@ -143,7 +145,7 @@ void GUI::renderCreateTorusUI() {
 void GUI::renderCreatePointUI() {
 
   if (ImGui::Button("Add new point")) {
-    auto &entity = static_cast<PointEntity &>(
+    auto &entity = dynamic_cast<PointEntity &>(
         createEntity(EntityType::Point)); // std::static_cast()
 
     auto bezierCurves = getSelectedBezierCurves();
@@ -269,7 +271,7 @@ std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
 std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
   std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
-  for (auto entity : _selectedEntities) {
+  for (auto &entity : _selectedEntities) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);
     if (point) {
       pointEntities.push_back(*point);
@@ -281,10 +283,10 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
 std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
   std::vector<std::reference_wrapper<const PointEntity>> pointEntities;
 
-  for (auto entity : _scene->getPoints()) {
+  for (auto &entity : _scene->getPoints()) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);
     if (point) {
-      pointEntities.push_back(*point);
+      pointEntities.emplace_back(*point);
     }
   }
   return pointEntities;
@@ -293,7 +295,7 @@ std::vector<std::reference_wrapper<const PointEntity>> GUI::getPoints() const {
 std::vector<std::reference_wrapper<BezierCurveC0>>
 GUI::getSelectedBezierCurves() {
   std::vector<std::reference_wrapper<BezierCurveC0>> bezierCurves;
-  for (auto entity : _selectedEntities) {
+  for (auto &entity : _selectedEntities) {
     auto bezierCurve = std::dynamic_pointer_cast<BezierCurveC0>(entity);
     if (bezierCurve) {
       bezierCurves.push_back(*bezierCurve);
