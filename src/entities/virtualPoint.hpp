@@ -4,6 +4,7 @@
 #include "ISubscribable.hpp"
 #include "IVisitor.hpp"
 #include "mesh.hpp"
+#include "vec.hpp"
 
 class VirtualPoint : public IEntity, public ISubscribable {
 public:
@@ -19,6 +20,10 @@ public:
   }
 
   // void notifySubscribers() override;
+
+  void updatePositionNoNotify(const algebra::Vec3f &position) {
+    _position = position;
+  }
 
   void updatePosition(const algebra::Vec3f &position) override;
   const algebra::Vec3f &getPosition() const override { return _position; }

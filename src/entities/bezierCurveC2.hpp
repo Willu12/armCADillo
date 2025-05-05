@@ -7,7 +7,6 @@
 #include "virtualPoint.hpp"
 #include <memory>
 #include <unistd.h>
-#include <utility>
 #include <vector>
 
 class BezierCurveC2 : public BezierCurve {
@@ -30,6 +29,11 @@ public:
   bool &showBezierPoints() { return _showBezierPoints; }
   const std::vector<std::shared_ptr<VirtualPoint>> &getVirtualPoints() const {
     return _bezierPoints;
+  }
+
+  void update() override {
+    recalculateBezierPoints();
+    updateMesh();
   }
 
   void updateBezier(const VirtualPoint &point, const algebra::Vec3f &pos) {
@@ -64,7 +68,7 @@ public:
       _points[segmentIndex + 2].get().setPositionWithoutNotify(
           _points[segmentIndex + 2].get().getPosition() + point.getPosition());
     }
-    generateMesh();
+    updateMesh();
   }
 
 private:
@@ -72,6 +76,22 @@ private:
   std::vector<std::shared_ptr<VirtualPoint>> _bezierPoints;
   bool _showBezierPoints = false;
 
+  void recalculateBezierPoints() {
+    if (_points.size() < 4)
+      return;
+
+    for (std::size_t i = 0; i < _points.size() - 3; ++i) {
+      auto p0 = _points[i].get().getPosition();
+      auto p1 = _points[i + 1].get().getPosition();
+      auto p2 = _points[i + 2].get().getPosition();
+      auto p3 = _points[i + 3].get().getPosition();
+
+      _bezierPoints[4 * i]->updatePositionNoNotify((p0 + p1 * 4 + p2) / 6);
+      _bezierPoints[4 * i + 1]->updatePositionNoNotify((p1 * 4 + p2 * 2) / 6);
+      _bezierPoints[4 * i + 2]->updatePositionNoNotify((p1 * 2 + p2 * 4) / 6);
+      _bezierPoints[4 * i + 3]->updatePositionNoNotify((p1 + p2 * 4 + p3) / 6);
+    }
+  }
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
     std::vector<std::shared_ptr<VirtualPoint>> bezierPoints;
 
@@ -102,6 +122,7 @@ private:
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {
+    // recalculateBezierPoints();
     std::vector<algebra::Vec3f> bezierPositions;
     bezierPositions.reserve(_bezierPoints.size());
     for (const auto &p : _bezierPoints)
