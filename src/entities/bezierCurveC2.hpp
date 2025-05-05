@@ -57,23 +57,16 @@ public:
     size_t index = std::distance(_bezierPoints.begin(), it);
     std::size_t segmentIndex = index / 4;
     std::size_t knotIndex = index % 4;
+    auto delta = pos - _bezierPoints[index]->getPosition();
 
-    if (knotIndex == 0) {
-      auto delta = pos - _bezierPoints[index]->getPosition();
-      // printf("[%f,%f,%f]\n", delta[0], delta[1], delta[2]);
-      _points[index].get().setPositionWithoutNotify(
-          _points[index].get().getPosition() - delta);
-    } else if (knotIndex == 3) {
-      // Modify the De Boor points on the right
-      _points[segmentIndex + 1].get().setPositionWithoutNotify(
-          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+    if (knotIndex == 0 || knotIndex == 3) {
+      _points[segmentIndex + knotIndex].get().setPositionWithoutNotify(
+          _points[segmentIndex + knotIndex].get().getPosition() - delta);
     } else {
-      // If it's one of the middle Bezier points, modify the related De Boor
-      // points
       _points[segmentIndex + 1].get().setPositionWithoutNotify(
-          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+          _points[segmentIndex + 1].get().getPosition() - delta);
       _points[segmentIndex + 2].get().setPositionWithoutNotify(
-          _points[segmentIndex + 2].get().getPosition() + point.getPosition());
+          _points[segmentIndex + 2].get().getPosition() - delta);
     }
     updateMesh();
   }
