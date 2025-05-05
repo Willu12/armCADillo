@@ -105,8 +105,10 @@ private:
       auto p2 = _points[i + 2].get().getPosition();
       auto p3 = _points[i + 3].get().getPosition();
 
-      bezierPoints.push_back(
-          std::make_shared<VirtualPoint>(((p0 + p1 * 4 + p2) / 6)));
+      if (i == 0) {
+        bezierPoints.push_back(
+            std::make_shared<VirtualPoint>(((p0 + p1 * 4 + p2) / 6)));
+      }
       bezierPoints.push_back(
           std::make_shared<VirtualPoint>(((p1 * 4 + p2 * 2) / 6)));
       bezierPoints.push_back(
@@ -128,6 +130,6 @@ private:
     for (const auto &p : _bezierPoints)
       bezierPositions.emplace_back(p->getPosition());
 
-    return BezierMesh::createC2(bezierPositions);
+    return BezierMesh::create(bezierPositions);
   }
 };
