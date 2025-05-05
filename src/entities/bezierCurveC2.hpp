@@ -55,19 +55,20 @@ public:
       return;
 
     size_t index = std::distance(_bezierPoints.begin(), it);
-    std::size_t segmentIndex = index / 4;
-    std::size_t knotIndex = index % 4;
+    std::size_t segmentIndex = (index - 1) / 3;
+
     auto delta = pos - _bezierPoints[index]->getPosition();
 
-    if (knotIndex == 0 || knotIndex == 3) {
-      _points[segmentIndex + knotIndex].get().setPositionWithoutNotify(
-          _points[segmentIndex + knotIndex].get().getPosition() - delta);
+    if (index % 3 == 0) {
+      _points[index / 3 + 1].get().setPositionWithoutNotify(
+          _points[index / 3 + 1].get().getPosition() - delta * 1.5f);
     } else {
       _points[segmentIndex + 1].get().setPositionWithoutNotify(
           _points[segmentIndex + 1].get().getPosition() - delta);
       _points[segmentIndex + 2].get().setPositionWithoutNotify(
           _points[segmentIndex + 2].get().getPosition() - delta);
     }
+
     updateMesh();
   }
 
@@ -80,16 +81,23 @@ private:
     if (_points.size() < 4)
       return;
 
+    std::size_t bezierIndex = 0;
+
     for (std::size_t i = 0; i < _points.size() - 3; ++i) {
       auto p0 = _points[i].get().getPosition();
       auto p1 = _points[i + 1].get().getPosition();
       auto p2 = _points[i + 2].get().getPosition();
       auto p3 = _points[i + 3].get().getPosition();
-
-      _bezierPoints[4 * i]->updatePositionNoNotify((p0 + p1 * 4 + p2) / 6);
-      _bezierPoints[4 * i + 1]->updatePositionNoNotify((p1 * 4 + p2 * 2) / 6);
-      _bezierPoints[4 * i + 2]->updatePositionNoNotify((p1 * 2 + p2 * 4) / 6);
-      _bezierPoints[4 * i + 3]->updatePositionNoNotify((p1 + p2 * 4 + p3) / 6);
+      if (i == 0) {
+        _bezierPoints[bezierIndex++]->updatePositionNoNotify(
+            (p0 + p1 * 4 + p2) / 6);
+      }
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 * 4 + p2 * 2) /
+                                                           6);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 * 2 + p2 * 4) /
+                                                           6);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 + p2 * 4 + p3) /
+                                                           6);
     }
   }
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
@@ -124,7 +132,6 @@ private:
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {
-    // recalculateBezierPoints();
     std::vector<algebra::Vec3f> bezierPositions;
     bezierPositions.reserve(_bezierPoints.size());
     for (const auto &p : _bezierPoints)
