@@ -10,7 +10,7 @@
 
 class BezierCurve : public IEntity, public ISubscriber {
 public:
-  void addPoint(PointEntity &point) {
+  virtual void addPoint(PointEntity &point) {
     subscribe(point);
     _points.emplace_back(point);
     updateMesh();

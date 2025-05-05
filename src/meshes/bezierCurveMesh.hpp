@@ -134,47 +134,14 @@ private:
   bezierC2Data(const std::vector<algebra::Vec3f> &points) {
     std::vector<BezierVertex> data;
 
-    if (points.size() < 4) {
-      // Just store what we have in one vertex
+    for (size_t i = 0; i < points.size(); i += 4) {
       BezierVertex v;
-      v.len = points.size();
-      for (size_t i = 0; i < points.size(); ++i)
-        v.pts[i] = points[i];
-      data.emplace_back(v);
-      return data;
+      v.len = 4;
+      for (int j = 0; j < 4; ++j) {
+        v.pts[j] = points[i + j];
+      }
+      data.push_back(v);
     }
-
-    // First segment — directly from the first 4 control points
-    BezierVertex first;
-    first.len = 4;
-    for (int i = 0; i < 4; ++i)
-      first.pts[i] = points[i];
-    data.emplace_back(first);
-
-    // Continue with computed control points for C² continuity
-    algebra::Vec3f P2 = points[2];
-    algebra::Vec3f P3 = points[3];
-
-    for (size_t i = 4; i < points.size(); ++i) {
-      BezierVertex seg;
-      seg.len = 4;
-
-      algebra::Vec3f P4 = P3 * 2.0f - P2;
-      algebra::Vec3f P5 = P4 * 2.0 - P3;
-      algebra::Vec3f P6 = points[i];
-
-      seg.pts[0] = P3;
-      seg.pts[1] = P4;
-      seg.pts[2] = P5;
-      seg.pts[3] = P6;
-
-      data.emplace_back(seg);
-
-      // Update for next segment
-      P2 = seg.pts[2];
-      P3 = seg.pts[3];
-    }
-
     return data;
   }
 };

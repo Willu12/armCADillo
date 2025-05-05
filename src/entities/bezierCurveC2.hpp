@@ -36,6 +36,13 @@ public:
     updateMesh();
   }
 
+  void addPoint(PointEntity &point) override {
+    subscribe(point);
+    _points.emplace_back(point);
+    _bezierPoints = bezierPoints();
+    updateMesh();
+  }
+
   void updateBezier(const VirtualPoint &point, const algebra::Vec3f &pos) {
 
     auto it = std::ranges::find_if(
@@ -128,6 +135,6 @@ private:
     for (const auto &p : _bezierPoints)
       bezierPositions.emplace_back(p->getPosition());
 
-    return BezierMesh::create(bezierPositions);
+    return BezierMesh::createC2(bezierPositions);
   }
 };
