@@ -47,6 +47,7 @@ public:
           &selectedVirtualPoints);
   std::vector<std::shared_ptr<IEntity>> getSelectedVirtualPoints() const;
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
+  void clearVirtualPoints();
 
 private:
   GLFWwindow *_window;

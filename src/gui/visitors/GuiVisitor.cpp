@@ -56,6 +56,8 @@ bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
     const auto &vPoints = bezierCurve.getVirtualPoints();
     renderVirtualPointList(vPoints);
     _gui.setVirtualPoints(vPoints, _selectedVirtualPoints);
+  } else {
+    _gui.clearVirtualPoints();
   }
 
   return false;

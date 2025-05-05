@@ -182,6 +182,7 @@ void GUI::renderModelSettings() {
   if (_selectedEntities.size() != 1)
     return;
 
+  clearVirtualPoints();
   auto selectedEntity = *_selectedEntities.begin();
   if (selectedEntity->acceptVisitor(_guiSettingsVisitor))
     selectedEntity->updateMesh();
@@ -380,4 +381,9 @@ std::vector<std::shared_ptr<IEntity>> GUI::getVirtualPoints() const {
     virtualPoints.emplace_back(vPoint);
   }
   return virtualPoints;
+}
+
+void GUI::clearVirtualPoints() {
+  _selectedVirtualPoints.clear();
+  _virtualPoints.clear();
 }

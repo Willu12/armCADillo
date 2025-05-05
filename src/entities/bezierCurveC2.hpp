@@ -19,6 +19,7 @@ public:
       _points.emplace_back(p);
       subscribe(p);
     }
+    _bezierPoints = bezierPoints();
     _mesh = generateMesh();
   }
 
@@ -31,7 +32,7 @@ public:
     return _bezierPoints;
   }
 
-  void updateBezier(const VirtualPoint &point) {
+  void updateBezier(const VirtualPoint &point, const algebra::Vec3f &pos) {
 
     auto it = std::ranges::find_if(
         _bezierPoints,
@@ -47,21 +48,23 @@ public:
     std::size_t knotIndex = index % 4;
 
     if (knotIndex == 0) {
-      // Modify the De Boor points on the left
-      _points[segmentIndex].get().updatePosition(
-          _points[segmentIndex].get().getPosition() + point.getPosition());
+      auto delta = pos - _bezierPoints[index]->getPosition();
+      // printf("[%f,%f,%f]\n", delta[0], delta[1], delta[2]);
+      _points[index].get().setPositionWithoutNotify(
+          _points[index].get().getPosition() - delta);
     } else if (knotIndex == 3) {
       // Modify the De Boor points on the right
-      _points[segmentIndex + 1].get().updatePosition(
+      _points[segmentIndex + 1].get().setPositionWithoutNotify(
           _points[segmentIndex + 1].get().getPosition() + point.getPosition());
     } else {
       // If it's one of the middle Bezier points, modify the related De Boor
       // points
-      _points[segmentIndex + 1].get().updatePosition(
+      _points[segmentIndex + 1].get().setPositionWithoutNotify(
           _points[segmentIndex + 1].get().getPosition() + point.getPosition());
-      _points[segmentIndex + 2].get().updatePosition(
-          _points[segmentIndex + 1].get().getPosition() + point.getPosition());
+      _points[segmentIndex + 2].get().setPositionWithoutNotify(
+          _points[segmentIndex + 2].get().getPosition() + point.getPosition());
     }
+    generateMesh();
   }
 
 private:
@@ -99,7 +102,6 @@ private:
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {
-    _bezierPoints = bezierPoints();
     std::vector<algebra::Vec3f> bezierPositions;
     bezierPositions.reserve(_bezierPoints.size());
     for (const auto &p : _bezierPoints)

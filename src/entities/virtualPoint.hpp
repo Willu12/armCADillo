@@ -18,13 +18,9 @@ public:
     return visitor.visitVirtualPoint(*this);
   }
 
-  void notifySubscribers() override;
+  // void notifySubscribers() override;
 
-  void updatePosition(const algebra::Vec3f &position) override {
-    notifySubscribers();
-    IEntity::updatePosition(position);
-  }
-
+  void updatePosition(const algebra::Vec3f &position) override;
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updateMesh() override { _mesh = generateMesh(); };

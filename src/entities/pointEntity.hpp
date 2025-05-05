@@ -29,6 +29,10 @@ public:
     IEntity::updatePosition(position);
   }
 
+  void setPositionWithoutNotify(const algebra::Vec3f &position) {
+    IEntity::updatePosition(position);
+  }
+
   // algebra::Vec3f &getPosition() override {
   //   notifySubscribers();
   //  return _position;
