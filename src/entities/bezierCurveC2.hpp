@@ -57,17 +57,21 @@ public:
     size_t index = std::distance(_bezierPoints.begin(), it);
     std::size_t segmentIndex = (index - 1) / 3;
 
-    auto delta = pos - _bezierPoints[index]->getPosition();
+    auto delta = (pos - _bezierPoints[index]->getPosition()) * 1.5;
 
-    if (index % 3 == 0) {
-      _points[index / 3 + 1].get().setPositionWithoutNotify(
-          _points[index / 3 + 1].get().getPosition() - delta * 1.5f);
-    } else {
-      _points[segmentIndex + 1].get().setPositionWithoutNotify(
-          _points[segmentIndex + 1].get().getPosition() - delta);
-      _points[segmentIndex + 2].get().setPositionWithoutNotify(
-          _points[segmentIndex + 2].get().getPosition() - delta);
-    }
+    /*
+      if (index % 3 == 0) {
+        _points[index / 3 + 1].get().setPositionWithoutNotify(
+            _points[index / 3 + 1].get().getPosition() - delta * 1.5f);
+      } else {
+        _points[segmentIndex + 1].get().setPositionWithoutNotify(
+            _points[segmentIndex + 1].get().getPosition() - delta);
+        _points[segmentIndex + 2].get().setPositionWithoutNotify(
+            _points[segmentIndex + 2].get().getPosition() - delta);
+      }
+      */
+    _points[(index + 1) / 3 + 1].get().setPositionWithoutNotify(
+        _points[(index + 1) / 3 + 1].get().getPosition() - delta);
 
     updateMesh();
   }

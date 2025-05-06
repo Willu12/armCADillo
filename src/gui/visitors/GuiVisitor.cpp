@@ -41,6 +41,7 @@ bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
 bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
   ImGui::Checkbox("Show Bezier Points", &bezierCurve.showBezierPoints());
+  ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
 
   auto allPoints = _gui.getPoints();
   auto points = bezierCurve.getPoints();
@@ -65,7 +66,7 @@ bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
 
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
-  auto &_position = entity.getPosition();
+  const auto &_position = entity.getPosition();
   float position[3] = {_position[0], _position[1], _position[2]};
   if (ImGui::InputFloat3("Position", position)) {
     entity.updatePosition(
