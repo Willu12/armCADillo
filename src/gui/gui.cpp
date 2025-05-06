@@ -294,11 +294,11 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getPoints() const {
   return pointEntities;
 }
 
-std::vector<std::reference_wrapper<BezierCurveC0>>
+std::vector<std::reference_wrapper<BezierCurve>>
 GUI::getSelectedBezierCurves() {
-  std::vector<std::reference_wrapper<BezierCurveC0>> bezierCurves;
+  std::vector<std::reference_wrapper<BezierCurve>> bezierCurves;
   for (auto &entity : _selectedEntities) {
-    auto bezierCurve = std::dynamic_pointer_cast<BezierCurveC0>(entity);
+    auto bezierCurve = std::dynamic_pointer_cast<BezierCurve>(entity);
     if (bezierCurve) {
       bezierCurves.emplace_back(*bezierCurve);
     }

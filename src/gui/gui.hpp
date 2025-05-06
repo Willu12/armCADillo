@@ -101,5 +101,5 @@ private:
   std::vector<std::shared_ptr<IController>> getActiveControllers();
 
   std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints();
-  std::vector<std::reference_wrapper<BezierCurveC0>> getSelectedBezierCurves();
+  std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
 };

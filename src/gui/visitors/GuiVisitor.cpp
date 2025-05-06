@@ -66,11 +66,11 @@ bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
 
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
-  const auto &_position = entity.getPosition();
-  float position[3] = {_position[0], _position[1], _position[2]};
-  if (ImGui::InputFloat3("Position", position)) {
+  const auto &position = entity.getPosition();
+  float guiPosition[3] = {position[0], position[1], position[2]};
+  if (ImGui::InputFloat3("Position", guiPosition)) {
     entity.updatePosition(
-        algebra::Vec3f(_position[0], _position[1], _position[2]));
+        algebra::Vec3f(position[0], position[1], position[2]));
     return true;
   }
   return false;
