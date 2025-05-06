@@ -75,9 +75,9 @@ public:
 
     if (mod == 0) {
       if (index == 0) {
-        D0.setPositionWithoutNotify(D0.getPosition() + delta * 6.0f);
+        D0.setPositionWithoutNotify(D0.getPosition() + delta * 3.0f);
       } else {
-        D3.setPositionWithoutNotify(D3.getPosition() + delta * 6.0f);
+        D3.setPositionWithoutNotify(D3.getPosition() + delta * 3.0f);
       }
     } else if (mod == 1) {
       D1.setPositionWithoutNotify(D1.getPosition() + delta * 2.0f);
@@ -86,6 +86,7 @@ public:
       D1.setPositionWithoutNotify(D1.getPosition() + delta * 1.0f);
       D2.setPositionWithoutNotify(D2.getPosition() + delta * 2.0f);
     }
+    recalculateBezierPoints();
     updateMesh();
   }
 
