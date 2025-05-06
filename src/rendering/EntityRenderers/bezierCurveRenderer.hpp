@@ -30,7 +30,7 @@ public:
       auto &bezier = dynamic_cast<BezierCurve &>(*entity);
       _shader.setInt("renderPolyLine", bezier.showPolyLine());
       auto &mesh = entity->getMesh();
-
+      glPointSize(10.0f);
       glBindVertexArray(mesh.getVAO());
       glDrawArrays(GL_POINTS, 0, mesh.getIndicesLength());
       glBindVertexArray(0);

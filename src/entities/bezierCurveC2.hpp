@@ -56,12 +56,36 @@ public:
       return;
 
     size_t index = std::distance(_bezierPoints.begin(), it);
+    if (_bezierPoints.size() < 4 || _points.size() < 4)
+      return;
 
-    auto delta = (pos - _bezierPoints[index]->getPosition()) * 1.5;
+    algebra::Vec3f delta = _bezierPoints[index]->getPosition() - pos;
 
-    _points[(index + 1) / 3 + 1].get().setPositionWithoutNotify(
-        _points[(index + 1) / 3 + 1].get().getPosition() - delta);
+    int segment = std::max<int>((int)index - 1, 0) / 3;
 
+    if (segment + 3 >= _points.size())
+      return;
+
+    auto &D0 = _points[segment].get();
+    auto &D1 = _points[segment + 1].get();
+    auto &D2 = _points[segment + 2].get();
+    auto &D3 = _points[segment + 3].get();
+
+    int mod = index % 3;
+
+    if (mod == 0) {
+      if (index == 0) {
+        D0.setPositionWithoutNotify(D0.getPosition() + delta * 6.0f);
+      } else {
+        D3.setPositionWithoutNotify(D3.getPosition() + delta * 6.0f);
+      }
+    } else if (mod == 1) {
+      D1.setPositionWithoutNotify(D1.getPosition() + delta * 2.0f);
+      D2.setPositionWithoutNotify(D2.getPosition() + delta * 1.0f);
+    } else if (mod == 2) {
+      D1.setPositionWithoutNotify(D1.getPosition() + delta * 1.0f);
+      D2.setPositionWithoutNotify(D2.getPosition() + delta * 2.0f);
+    }
     updateMesh();
   }
 
@@ -74,78 +98,61 @@ private:
     if (_points.size() < 4)
       return;
 
-    const long currentBezierCount = 4 + (_points.size() - 4) * 3;
+    const long currentBezierCount = 3 * _points.size() - 8;
     const auto bezierRemoveCount = _bezierPoints.size() - currentBezierCount;
-
     _bezierPoints.erase(_bezierPoints.end() - bezierRemoveCount,
                         _bezierPoints.end());
 
+    algebra::Vec3f g = _points[0].get().getPosition() * (1.f / 3.f) +
+                       _points[1].get().getPosition() * (2.f / 3.f);
+    algebra::Vec3f f;
+    algebra::Vec3f e;
+
     std::size_t bezierIndex = 0;
 
-    for (std::size_t i = 0; i < _points.size() - 3; ++i) {
-      auto p0 = _points[i].get().getPosition();
-      auto p1 = _points[i + 1].get().getPosition();
-      auto p2 = _points[i + 2].get().getPosition();
-      auto p3 = _points[i + 3].get().getPosition();
-      if (i == 0) {
-        _bezierPoints[bezierIndex++]->updatePositionNoNotify(
-            (p0 + p1 * 4 + p2) / 6);
-      }
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 * 4 + p2 * 2) /
-                                                           6);
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 * 2 + p2 * 4) /
-                                                           6);
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 + p2 * 4 + p3) /
-                                                           6);
+    for (std::size_t i = 1; i < _points.size() - 2; ++i) {
+      f = _points[i].get().getPosition() * (2.f / 3.f) +
+          _points[i + 1].get().getPosition() * (1.f / 3.f);
+      e = (f + g) * 0.5f;
+      g = _points[i].get().getPosition() * (1.f / 3.f) +
+          _points[i + 1].get().getPosition() * (2.f / 3.f);
+
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify(f);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify(g);
     }
+    f = _points[_points.size() - 2].get().getPosition() * (2.0f / 3.0f) +
+        _points[_points.size() - 1].get().getPosition() * (1.0f / 3.0f);
+    e = (f + g) * 0.5f;
+    _bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
   }
+
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
     std::vector<std::shared_ptr<VirtualPoint>> bezierPoints;
 
     if (_points.size() < 4)
       return bezierPoints;
 
-    bezierPoints.reserve((_points.size() - 3) * 4);
-    for (std::size_t i = 0; i < _points.size() - 3; ++i) {
-      auto p0 = _points[i].get().getPosition();
-      auto p1 = _points[i + 1].get().getPosition();
-      auto p2 = _points[i + 2].get().getPosition();
-      auto p3 = _points[i + 3].get().getPosition();
-
-      if (i == 0) {
-        bezierPoints.push_back(
-            std::make_shared<VirtualPoint>(((p0 + p1 * 4 + p2) / 6)));
-      }
-      bezierPoints.push_back(
-          std::make_shared<VirtualPoint>(((p1 * 4 + p2 * 2) / 6)));
-      bezierPoints.push_back(
-          std::make_shared<VirtualPoint>(((p1 * 2 + p2 * 4) / 6)));
-      bezierPoints.push_back(
-          std::make_shared<VirtualPoint>(((p1 + p2 * 4 + p3) / 6)));
+    for (int i = 0; i < _points.size() * 3 - 8; ++i) {
+      bezierPoints.emplace_back(
+          std::make_shared<VirtualPoint>(algebra::Vec3f()));
     }
 
     for (const auto &p : bezierPoints) {
       p->subscribe(*this);
     }
-    return bezierPoints;
+    _bezierPoints = bezierPoints;
+    recalculateBezierPoints();
+    return _bezierPoints;
   }
 
   void addBezierPoints() {
-    auto index = _points.size() - 4;
-    auto p1 = _points[index + 1].get().getPosition();
-    auto p2 = _points[index + 2].get().getPosition();
-    auto p3 = _points[index + 3].get().getPosition();
-
-    _bezierPoints.push_back(
-        std::make_shared<VirtualPoint>(((p1 * 4 + p2 * 2) / 6)));
-    _bezierPoints.push_back(
-        std::make_shared<VirtualPoint>(((p1 * 2 + p2 * 4) / 6)));
-    _bezierPoints.push_back(
-        std::make_shared<VirtualPoint>(((p1 + p2 * 4 + p3) / 6)));
-
-    for (const auto &p : std::span(_bezierPoints).last(3)) {
-      p->subscribe(*this);
+    for (int i = 0; i < 3; ++i) {
+      auto bernsteinPoint = std::make_shared<VirtualPoint>(algebra::Vec3f());
+      bernsteinPoint->subscribe(*this);
+      _bezierPoints.emplace_back(bernsteinPoint);
     }
+    recalculateBezierPoints();
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {

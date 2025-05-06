@@ -16,7 +16,7 @@ public:
   }
   const Mesh &getMesh() const override { return *_mesh; }
   const algebra::Vec3f &getPosition() const override { return _position; }
-  algebra::Vec3f &getPosition() override { return _position; }
+  algebra::Vec3f &getPosition() { return _position; }
   void updateMesh() { _mesh = generateMesh(); }
 
   void removePoint(const std::shared_ptr<PointEntity> &point) {
