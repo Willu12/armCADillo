@@ -39,7 +39,8 @@ public:
   void addPoint(PointEntity &point) override {
     subscribe(point);
     _points.emplace_back(point);
-    _bezierPoints = bezierPoints();
+    addBezierPoints();
+    //_bezierPoints = bezierPoints();
     updateMesh();
   }
 
@@ -72,6 +73,12 @@ private:
   void recalculateBezierPoints() {
     if (_points.size() < 4)
       return;
+
+    const long currentBezierCount = 4 + (_points.size() - 4) * 3;
+    const auto bezierRemoveCount = _bezierPoints.size() - currentBezierCount;
+
+    _bezierPoints.erase(_bezierPoints.end() - bezierRemoveCount,
+                        _bezierPoints.end());
 
     std::size_t bezierIndex = 0;
 
@@ -121,6 +128,24 @@ private:
       p->subscribe(*this);
     }
     return bezierPoints;
+  }
+
+  void addBezierPoints() {
+    auto index = _points.size() - 4;
+    auto p1 = _points[index + 1].get().getPosition();
+    auto p2 = _points[index + 2].get().getPosition();
+    auto p3 = _points[index + 3].get().getPosition();
+
+    _bezierPoints.push_back(
+        std::make_shared<VirtualPoint>(((p1 * 4 + p2 * 2) / 6)));
+    _bezierPoints.push_back(
+        std::make_shared<VirtualPoint>(((p1 * 2 + p2 * 4) / 6)));
+    _bezierPoints.push_back(
+        std::make_shared<VirtualPoint>(((p1 + p2 * 4 + p3) / 6)));
+
+    for (const auto &p : std::span(_bezierPoints).last(3)) {
+      p->subscribe(*this);
+    }
   }
 
   std::unique_ptr<BezierMesh> generateMesh() override {
