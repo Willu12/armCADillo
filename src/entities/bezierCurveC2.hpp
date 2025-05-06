@@ -110,7 +110,8 @@ private:
 
     std::size_t bezierIndex = 0;
 
-    for (std::size_t i = 1; i < _points.size() - 2; ++i) {
+    for (std::size_t i = 0; i < _points.size() - 3; ++i) {
+      /*
       f = _points[i].get().getPosition() * (2.f / 3.f) +
           _points[i + 1].get().getPosition() * (1.f / 3.f);
       e = (f + g) * 0.5f;
@@ -120,11 +121,25 @@ private:
       _bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
       _bezierPoints[bezierIndex++]->updatePositionNoNotify(f);
       _bezierPoints[bezierIndex++]->updatePositionNoNotify(g);
+      */
+      auto p0 = _points[i].get().getPosition();
+      auto p1 = _points[i + 1].get().getPosition();
+      auto p2 = _points[i + 2].get().getPosition();
+      auto p3 = _points[i + 3].get().getPosition();
+      if (i == 0) {
+        _bezierPoints[bezierIndex++]->updatePositionNoNotify(
+            (p0 + p1 * 4 + p2) / 6.f);
+      }
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 * 2 + p2 * 1) /
+                                                           3.f);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 + p2 * 2) / 3.f);
+      _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 + p2 * 4 + p3) /
+                                                           6.f);
     }
-    f = _points[_points.size() - 2].get().getPosition() * (2.0f / 3.0f) +
-        _points[_points.size() - 1].get().getPosition() * (1.0f / 3.0f);
-    e = (f + g) * 0.5f;
-    _bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
+    //  f = _points[_points.size() - 2].get().getPosition() * (2.0f / 3.0f) +
+    //    _points[_points.size() - 1].get().getPosition() * (1.0f / 3.0f);
+    // e = (f + g) * 0.5f;
+    //_bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
   }
 
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
