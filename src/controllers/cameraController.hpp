@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include "IController.hpp"
 #include "camera.hpp"
 #include "imgui.h"
@@ -6,7 +8,8 @@
 
 class CameraController : public IController {
 public:
-  CameraController(std::shared_ptr<Camera> camera) : _camera(camera) {}
+  explicit CameraController(std::shared_ptr<Camera> camera)
+      : _camera(std::move(camera)) {}
 
   std::shared_ptr<Camera> getCamera() const { return _camera; }
 

@@ -6,9 +6,9 @@
 #include "imgui.h"
 #include <memory>
 
-enum class Axis { X = 0, Y = 1, Z = 2 };
+enum class Axis : uint8_t { X = 0, Y = 1, Z = 2 };
 
-enum class TransformationCenter { CenterPoint = 0, Cursor = 1 };
+enum class TransformationCenter : uint8_t { CenterPoint = 0, Cursor = 1 };
 
 class ModelController : public IController {
 public:
@@ -19,7 +19,7 @@ public:
   ModelController(const CenterPoint &centerPoint,
                   const std::shared_ptr<Cursor> &cursor,
                   const std::vector<std::shared_ptr<IEntity>> &entites)
-      : _centerPoint(centerPoint), _cursor(cursor), _entites(entites) {}
+      : _entites(entites), _centerPoint(centerPoint), _cursor(cursor) {}
 
   bool processScroll() override { return false; }
   bool processMouse() override { return false; }

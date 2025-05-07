@@ -23,9 +23,11 @@ public:
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.projectionMatrix());
-    _shader.setInt("screenResolution",
-                   static_cast<int>(0.5f * (GLFWHelper::getHeight(_window)) +
-                                    GLFWHelper::getWidth(_window)));
+    _shader.setInt(
+        "screenResolution",
+        static_cast<int>(0.5f *
+                         static_cast<float>(GLFWHelper::getHeight(_window))) +
+            GLFWHelper::getWidth(_window));
 
     for (const auto &entity : entities) {
       auto &bezier = dynamic_cast<BezierCurve &>(*entity);
@@ -33,7 +35,7 @@ public:
       const auto &mesh = entity->getMesh();
       glLineWidth(2.0f);
       glBindVertexArray(mesh.getVAO());
-      glDrawArrays(GL_POINTS, 0, mesh.getIndicesLength());
+      glDrawArrays(GL_POINTS, 0, static_cast<int>(mesh.getIndicesLength()));
       glBindVertexArray(0);
     }
   }

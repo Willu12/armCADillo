@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "glfwHelper.hpp"
@@ -14,7 +15,8 @@ class SelectionController : public IController {
 public:
   SelectionController(GLFWwindow *window, std::shared_ptr<Scene> scene,
                       std::vector<std::shared_ptr<IEntity>> &selectedEntities)
-      : _window(window), _scene(scene), _selectedEntities(selectedEntities) {
+      : _window(window), _scene(std::move(scene)),
+        _selectedEntities(selectedEntities) {
 
     _pickingTexture.init(GLFWHelper::getWidth(_window),
                          GLFWHelper::getHeight(_window));
