@@ -56,7 +56,6 @@ void GUI::displayGUI() {
     showFPSCounter();
     renderModelSettings();
     renderModelControllSettings();
-    renderControllModeSettings();
     displayEntitiesList();
 
     renderCreateTorusUI();
@@ -117,16 +116,6 @@ void GUI::renderModelControllSettings() {
       modelController->_transformationCenter =
           static_cast<TransformationCenter>(selectedIndex);
     }
-  }
-}
-
-void GUI::renderControllModeSettings() {
-  const char *controllModes[] = {"Transformation", "Selection"};
-  int selectedIndex = static_cast<int>(_controllMode);
-
-  if (ImGui::Combo("ControllMode", &selectedIndex, controllModes,
-                   IM_ARRAYSIZE(controllModes))) {
-    _controllMode = static_cast<ControllMode>(selectedIndex);
   }
 }
 
@@ -262,10 +251,11 @@ std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
       _controllers[static_cast<int>(ControllerKind::Camera)]);
   activeControllers.push_back(
       _controllers[static_cast<int>(ControllerKind::Cursor)]);
+  // activeControllers.push_back(
+  //   _controllers[static_cast<int>(ControllerKind::Selection)]);
 
-  if (_controllMode == ControllMode::Transformation)
-    activeControllers.push_back(
-        _controllers[static_cast<int>(ControllerKind::Model)]);
+  activeControllers.push_back(
+      _controllers[static_cast<int>(ControllerKind::Model)]);
 
   return activeControllers;
 }
@@ -333,11 +323,10 @@ void GUI::processControllers() {
   _selectedEntities.insert(_selectedEntities.end(), vPoints.begin(),
                            vPoints.end());
 
-  _mouse.process(getActiveControllers());
-  if (_controllMode == ControllMode::Selection)
-    _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
-
   _selectedEntities = selectedEntities;
+
+  _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
+  _mouse.process(getActiveControllers());
 }
 
 void GUI::setVirtualPoints(

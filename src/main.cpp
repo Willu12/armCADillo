@@ -101,7 +101,7 @@ int main(int, char **) {
     if (gui.getCenterPoint())
       sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
 
-    if (gui.getMouse().anyButtonDown() && !scene->getPickables().empty()) {
+    if (gui.getMouse().leftButtonDown() && !scene->getPickables().empty()) {
       sceneRenderer.renderPicking(scene->getPickables());
     }
 

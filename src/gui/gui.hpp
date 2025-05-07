@@ -21,7 +21,6 @@
 class BezierCurveC0;
 
 enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
-enum class ControllMode { Transformation = 0, Selection = 1 };
 
 class GUI {
 public:
@@ -57,7 +56,6 @@ private:
   std::vector<std::shared_ptr<VirtualPoint>> _virtualPoints;
   std::vector<std::shared_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
-  ControllMode _controllMode = ControllMode::Transformation;
   CenterPoint _centerPoint;
   Mouse _mouse;
   GuiVisitor _guiSettingsVisitor;
@@ -74,7 +72,6 @@ private:
   void processControllers();
 
   void renderModelControllSettings();
-  void renderControllModeSettings();
   void renderCursorControllerSettings();
 
   void renderCreateTorusUI();
