@@ -65,6 +65,7 @@ void createPolyLine(in vec4 b0, in vec4 b1, in vec4 b2, in vec4 b3, in mat4 pv,
     gl_Position = pv * gs_in[0].pts[i];
     EmitVertex();
   }
+  EndPrimitive();
 }
 
 void main() {
@@ -76,13 +77,8 @@ void main() {
 
   mat4 pv = projection * view;
 
-  if (renderPolyLine) {
-    for (int i = 0; i < gs_in[0].len; i++) {
-      gl_Position = pv * gs_in[0].pts[i];
-      EmitVertex();
-    }
-    EndPrimitive();
-  }
+  if (renderPolyLine)
+    createPolyLine(b0, b1, b2, b3, pv, len);
 
   if (len == 1) {
     gl_Position = pv * b0;
@@ -106,6 +102,7 @@ void main() {
       float t = float(i) / segmentsCount;
       vec4 point = bezier3(b0, b1, b2, b3, t);
       gl_Position = pv * point;
+      gl_PointSize = 10.0;
       EmitVertex();
     }
   }

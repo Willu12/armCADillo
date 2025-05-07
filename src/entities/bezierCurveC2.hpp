@@ -61,7 +61,7 @@ public:
 
     algebra::Vec3f delta = _bezierPoints[index]->getPosition() - pos;
 
-    int segment = std::max<int>((int)index - 1, 0) / 3;
+    int segment = std::max<int>(static_cast<int>(index) - 1, 0) / 3;
 
     if (segment + 3 >= _points.size())
       return;
@@ -71,7 +71,7 @@ public:
     auto &D2 = _points[segment + 2].get();
     auto &D3 = _points[segment + 3].get();
 
-    int mod = index % 3;
+    int mod = static_cast<int>(index) % 3;
 
     if (mod == 0) {
       if (index == 0) {
@@ -112,17 +112,6 @@ private:
     std::size_t bezierIndex = 0;
 
     for (std::size_t i = 0; i < _points.size() - 3; ++i) {
-      /*
-      f = _points[i].get().getPosition() * (2.f / 3.f) +
-          _points[i + 1].get().getPosition() * (1.f / 3.f);
-      e = (f + g) * 0.5f;
-      g = _points[i].get().getPosition() * (1.f / 3.f) +
-          _points[i + 1].get().getPosition() * (2.f / 3.f);
-
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify(f);
-      _bezierPoints[bezierIndex++]->updatePositionNoNotify(g);
-      */
       auto p0 = _points[i].get().getPosition();
       auto p1 = _points[i + 1].get().getPosition();
       auto p2 = _points[i + 2].get().getPosition();
@@ -137,10 +126,6 @@ private:
       _bezierPoints[bezierIndex++]->updatePositionNoNotify((p1 + p2 * 4 + p3) /
                                                            6.f);
     }
-    //  f = _points[_points.size() - 2].get().getPosition() * (2.0f / 3.0f) +
-    //    _points[_points.size() - 1].get().getPosition() * (1.0f / 3.0f);
-    // e = (f + g) * 0.5f;
-    //_bezierPoints[bezierIndex++]->updatePositionNoNotify(e);
   }
 
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {

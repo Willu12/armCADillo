@@ -4,6 +4,7 @@
 
 #include "gui.hpp"
 
+#include "mesh.hpp"
 #include "sceneRenderer.hpp"
 
 #include "camera.hpp"
