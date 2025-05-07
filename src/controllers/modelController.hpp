@@ -21,15 +21,7 @@ public:
                   const std::vector<std::shared_ptr<IEntity>> &entites)
       : _centerPoint(centerPoint), _cursor(cursor), _entites(entites) {}
 
-  bool processScroll() override {
-    /*float scroll = ImGui::GetIO().MouseWheel;
-    if (scroll == 0.0f)
-      return false;
-    for (auto &entity : _entites)
-      entity->getScale() += scroll * _scrollSpeed;*/
-    return false;
-  }
-
+  bool processScroll() override { return false; }
   bool processMouse() override { return false; }
 
   void process(float x, float y) override {
@@ -45,22 +37,21 @@ public:
 
 private:
   const std::vector<std::shared_ptr<IEntity>> &_entites;
-  const float _scrollSpeed = 0.001f;
-  const float _moveSpeed = 0.01f;
+  static constexpr float kMoveSpeed = 0.01f;
   const CenterPoint &_centerPoint;
   const std::shared_ptr<Cursor> _cursor;
 
   void translate(float deltaY) {
     for (const auto &entity : _entites) {
       auto pos = entity->getPosition();
-      pos[static_cast<int>(_transformationAxis)] += deltaY * _moveSpeed;
+      pos[static_cast<int>(_transformationAxis)] += deltaY * kMoveSpeed;
       entity->updatePosition(pos);
     }
   }
 
   void rotateAroundCenterPoint(float deltaY) {
     auto quaternion = algebra::Quaternion<float>::fromAxisAngle(
-        getAxisVector(_transformationAxis), deltaY * _moveSpeed);
+        getAxisVector(_transformationAxis), deltaY * kMoveSpeed);
 
     for (const auto &entity : _entites) {
       entity->rotateAroundPoint(quaternion, getTransformationPoint());

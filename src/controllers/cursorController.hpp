@@ -17,7 +17,7 @@ public:
     float x = (2.f * mouseX) / GLFWHelper::getWidth(_window) - 1.f;
     float y = 1.f - (2.f * MouseY) / GLFWHelper::getHeight(_window);
 
-    _cursor.get()->updatePosition(x, y, *_camera);
+    _cursor->updatePosition(x, y, *_camera);
   }
 
   void process(float x, float y) override {

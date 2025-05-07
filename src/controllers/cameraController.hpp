@@ -14,19 +14,20 @@ public:
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll == 0.0f)
       return false;
-    _camera->changeZoom(-scroll * zoomSpeed);
+    _camera->changeZoom(-scroll * kZoomSpeed);
     return true;
   }
 
   bool processMouse() override { return false; }
 
   void rotate(float deltaX, float deltaY) {
-    _camera->rotateHorizontal(deltaX * cameraSpeed);
-    _camera->rotateVertical(deltaY * cameraSpeed);
+    _camera->rotateHorizontal(deltaX * kCameraRotationSpeed);
+    _camera->rotateVertical(deltaY * kCameraRotationSpeed);
   }
 
   void translate(float deltaX, float deltaY) {
-    _camera->updateTarget(-deltaX * cameraMoveSpeed, deltaY * cameraMoveSpeed);
+    _camera->updateTarget(-deltaX * kCameraMoveSpeed,
+                          deltaY * kCameraMoveSpeed);
   }
 
   void process(float x, float y) override {
@@ -41,7 +42,7 @@ public:
 private:
   std::shared_ptr<Camera> _camera;
 
-  const float cameraSpeed = M_PI / 400.f;
-  const float cameraMoveSpeed = 0.002f;
-  const float zoomSpeed = 0.1f;
+  static constexpr float kCameraRotationSpeed = M_PI / 400.f;
+  static constexpr float kCameraMoveSpeed = 0.002f;
+  static constexpr float kZoomSpeed = 0.1f;
 };
