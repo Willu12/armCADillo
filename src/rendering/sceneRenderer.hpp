@@ -33,7 +33,7 @@ public:
   void
   render(const std::unordered_map<
          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
-    grid.render(_camera);
+    _grid.render(_camera);
 
     for (const auto &entityGroup : groupedEntities) {
       auto &renderer = _entityRenderers.at(entityGroup.first);
@@ -68,7 +68,7 @@ private:
   PickingRenderer _pickingRenderer;
   std::shared_ptr<Camera> _camera;
   GLFWwindow *_window;
-  Grid grid;
+  Grid _grid;
 
   void initEntityRenderers() {
     _entityRenderers.insert(

@@ -69,6 +69,8 @@ public:
   float &getZoom() { return _zoom; }
   const float &getZoom() const { return _zoom; }
 
+  GLFWwindow &getWindow() const { return *_window; }
+
 private:
   GLFWwindow *_window;
   algebra::SphericalPosition<float> _position =

@@ -57,7 +57,7 @@ public:
     uint32_t primId = 0;
   };
 
-  PixelInfo ReadPixel(uint32_t x, uint32_t y) {
+  PixelInfo ReadPixel(uint32_t x, uint32_t y) const {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     PixelInfo pixel;

@@ -1,6 +1,7 @@
 #pragma once
 #include "IController.hpp"
 #include "IEntity.hpp"
+#include "camera.hpp"
 #include "centerPoint.hpp"
 #include "cursor.hpp"
 #include "imgui.h"
@@ -18,8 +19,10 @@ public:
 
   ModelController(const CenterPoint &centerPoint,
                   const std::shared_ptr<Cursor> &cursor,
-                  const std::vector<std::shared_ptr<IEntity>> &entites)
-      : _entites(entites), _centerPoint(centerPoint), _cursor(cursor) {}
+                  const std::vector<std::shared_ptr<IEntity>> &entites,
+                  const Camera &camera)
+      : _entites(entites), _centerPoint(centerPoint), _cursor(cursor),
+        _camera(camera) {}
 
   bool processScroll() override { return false; }
   bool processMouse() override { return false; }
@@ -30,8 +33,11 @@ public:
         rotateAroundCenterPoint(y);
       else if (ImGui::GetIO().KeyCtrl)
         scaleAroundCenterPoint(y);
-      else
-        translate(y);
+      else {
+        ImVec2 currentMousePosition = ImGui::GetMousePos();
+
+        translate(currentMousePosition.x, currentMousePosition.y);
+      }
     }
   }
 
@@ -40,12 +46,15 @@ private:
   static constexpr float kMoveSpeed = 0.01f;
   const CenterPoint &_centerPoint;
   const std::shared_ptr<Cursor> _cursor;
+  const Camera &_camera;
 
-  void translate(float deltaY) {
+  void translate(float x, float y) {
+    auto &window = _camera.getWindow();
+    x = (2.f * x) / static_cast<float>(GLFWHelper::getWidth(&window)) - 1.f;
+    y = 1.f - (2.f * y) / static_cast<float>(GLFWHelper::getHeight(&window));
     for (const auto &entity : _entites) {
-      auto pos = entity->getPosition();
-      pos[static_cast<int>(_transformationAxis)] += deltaY * kMoveSpeed;
-      entity->updatePosition(pos);
+
+      updateFromCamera(entity, x, y);
     }
   }
 
@@ -84,5 +93,23 @@ private:
     return _transformationCenter == TransformationCenter::CenterPoint
                ? _centerPoint.getPosition()
                : _cursor->getPosition();
+  }
+
+  void updateFromCamera(const std::shared_ptr<IEntity> &entity, float x,
+                        float y) {
+    auto projection = _camera.projectionMatrix();
+    auto sceneCursorPosition =
+        projection *
+        (_camera.viewMatrix() * entity->getPosition().toHomogenous());
+
+    sceneCursorPosition = sceneCursorPosition * (1.0f / sceneCursorPosition[3]);
+    float z_ndc = sceneCursorPosition[2];
+
+    auto screenPosition = algebra::Vec3f(x, y, z_ndc).toHomogenous();
+
+    auto viewPosition = _camera.inverseProjectionMatrix() * screenPosition;
+    viewPosition = viewPosition * (1.f / viewPosition[3]);
+    auto worldPos = _camera.inverseViewMatrix() * viewPosition;
+    entity->updatePosition(worldPos.fromHomogenous());
   }
 };

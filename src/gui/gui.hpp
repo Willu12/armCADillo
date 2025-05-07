@@ -20,7 +20,12 @@
 
 class BezierCurveC0;
 
-enum class ControllerKind { Camera = 0, Model = 1, Cursor = 2, Selection = 3 };
+enum class ControllerKind : uint8_t {
+  Camera = 0,
+  Model = 1,
+  Cursor = 2,
+  Selection = 3
+};
 
 class GUI {
 public:

@@ -89,8 +89,8 @@ void GUI::initControllers() {
       std::make_shared<CursorController>(_window, _scene->getCamera());
 
   _controllers[static_cast<int>(ControllerKind::Model)] =
-      std::make_shared<ModelController>(_centerPoint, getCursor(),
-                                        _selectedEntities);
+      std::make_shared<ModelController>(
+          _centerPoint, getCursor(), _selectedEntities, *_scene->getCamera());
   _controllers[static_cast<int>(ControllerKind::Selection)] =
       std::make_shared<SelectionController>(_window, _scene, _selectedEntities);
 }
