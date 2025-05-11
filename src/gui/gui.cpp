@@ -156,7 +156,7 @@ void GUI::createBezierCurveUI() {
     createBezierCurve();
 }
 void GUI::createBSplineCurveUI() {
-  if (ImGui::Button("Create Bezier Curve C2"))
+  if (ImGui::Button("Create BSplineCurve"))
     createBSplineCurve();
 }
 
