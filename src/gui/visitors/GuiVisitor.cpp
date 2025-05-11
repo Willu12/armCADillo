@@ -64,6 +64,11 @@ bool GuiVisitor::visitBSplineCurve(BSplineCurve &bezierCurve) {
   return false;
 }
 
+bool GuiVisitor::visitInterpolatingSplineCurve(
+    InterpolatingSplineC2 &interpolatingSpline) {
+  return renderCurveGui(interpolatingSpline);
+}
+
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
   const auto &position = entity.getPosition();
@@ -186,4 +191,17 @@ void GuiVisitor::renderVirtualPointList(
       }
     }
   }
+}
+bool GuiVisitor::renderCurveGui(BezierCurve &curve) {
+  ImGui::InputText("Name", &curve.getName());
+  auto allPoints = _gui.getPoints();
+  auto points = curve.getPoints();
+  auto remainingPoints = getRemainingPoints(allPoints, points);
+
+  renderPointList(points, "Bezier curve points");
+  renderPointList(remainingPoints, "remainingPoints");
+  renderAddingSelectedPoints(curve);
+  ImGui::SameLine();
+  renderRemovingSelectedPoints(curve);
+  return false;
 }

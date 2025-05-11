@@ -5,7 +5,9 @@
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
+#include "entitiesTypes.hpp"
 #include "imgui.h"
+#include "interpolatingSplineC2.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
 #include <cstdio>
@@ -62,6 +64,7 @@ void GUI::displayGUI() {
     renderCreatePointUI();
     createBezierCurveUI();
     createBSplineCurveUI();
+    createInterpolatingSplineCurveUI();
     removeButtonUI();
 
     processControllers();
@@ -158,6 +161,11 @@ void GUI::createBezierCurveUI() {
 void GUI::createBSplineCurveUI() {
   if (ImGui::Button("Create BSplineCurve"))
     createBSplineCurve();
+}
+
+void GUI::createInterpolatingSplineCurveUI() {
+  if (ImGui::Button("Create Interpolating Spline Curve"))
+    createInterpolatingSplineCurve();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {
@@ -314,6 +322,15 @@ void GUI::createBSplineCurve() {
   std::shared_ptr<IEntity> bezierCurve =
       std::make_shared<BSplineCurve>(pointEntities);
   _scene->addEntity(EntityType::BSplineCurve, bezierCurve);
+}
+
+void GUI::createInterpolatingSplineCurve() {
+  auto pointEntities = getSelectedPoints();
+  if (pointEntities.size() < 2)
+    return;
+  std::shared_ptr<IEntity> interpolatingSpline =
+      std::make_shared<InterpolatingSplineC2>(pointEntities);
+  _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
 }
 
 void GUI::processControllers() {

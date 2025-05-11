@@ -3,6 +3,7 @@
 #include "IEntity.hpp"
 #include "IVisitor.hpp"
 #include "bezierCurve.hpp"
+#include "interpolatingSplineC2.hpp"
 #include <functional>
 #include <vector>
 class TorusEntity;
@@ -19,6 +20,8 @@ public:
   bool visitBezierCurve(BezierCurveC0 &bezierCurve) override;
   bool visitBSplineCurve(BSplineCurve &bezierCurve) override;
   bool visitVirtualPoint(VirtualPoint &point) override;
+  bool visitInterpolatingSplineCurve(
+      InterpolatingSplineC2 &interpolatingSpline) override;
 
 private:
   GUI &_gui;
@@ -51,4 +54,6 @@ private:
   bool isVirtualPointSelected(const VirtualPoint &point) const;
   void selectVirtualPoint(const VirtualPoint &point);
   void unselectVirtualPoint(const VirtualPoint &point);
+
+  bool renderCurveGui(BezierCurve &curve);
 };

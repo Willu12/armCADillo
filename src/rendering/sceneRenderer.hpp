@@ -89,5 +89,8 @@ private:
     _entityRenderers.insert(
         {EntityType::BSplineCurve,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
+    _entityRenderers.insert(
+        {EntityType::InterpolatingSplineCurve,
+         std::make_unique<BezierCurveRenderer>(*_camera, _window)});
   }
 };

@@ -14,7 +14,7 @@
 class BezierCurveC0 : public BezierCurve {
 public:
   explicit BezierCurveC0(
-      const std::vector<std::reference_wrapper<PointEntity>> points) {
+      const std::vector<std::reference_wrapper<PointEntity>> &points) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
     for (const auto &p : points) {
       _points.emplace_back(p);

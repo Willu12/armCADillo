@@ -84,10 +84,12 @@ private:
   void removeButtonUI();
   void createBezierCurveUI();
   void createBSplineCurveUI();
+  void createInterpolatingSplineCurveUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
   void createBSplineCurve();
+  void createInterpolatingSplineCurve();
   void renderModelSettings();
 
   void displayEntitiesList();
