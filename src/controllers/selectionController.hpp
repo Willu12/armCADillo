@@ -1,6 +1,7 @@
 #pragma once
 #include "IController.hpp"
 #include "IEntity.hpp"
+#include "imgui.h"
 #include "pickingTexture.hpp"
 #include "scene.hpp"
 #include <algorithm>
@@ -42,6 +43,9 @@ public:
           _selectedEntities.clear();
           _selectedEntities.push_back(entityPointer);
         }
+      } else if (!entity && !ImGui::GetIO().KeyCtrl &&
+                 !ImGui::GetIO().WantCaptureMouse) {
+        _selectedEntities.clear();
       }
     }
   };
