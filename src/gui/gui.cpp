@@ -3,8 +3,8 @@
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
 #include "IEntity.hpp"
+#include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
-#include "bezierCurveC2.hpp"
 #include "imgui.h"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
@@ -61,7 +61,7 @@ void GUI::displayGUI() {
     renderCreateTorusUI();
     renderCreatePointUI();
     createBezierCurveUI();
-    createBezierCurveC2UI();
+    createBSplineCurveUI();
     removeButtonUI();
 
     processControllers();
@@ -155,9 +155,9 @@ void GUI::createBezierCurveUI() {
   if (ImGui::Button("Create Bezier Curve"))
     createBezierCurve();
 }
-void GUI::createBezierCurveC2UI() {
+void GUI::createBSplineCurveUI() {
   if (ImGui::Button("Create Bezier Curve C2"))
-    createBezierCurveC2();
+    createBSplineCurve();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {
@@ -306,14 +306,14 @@ void GUI::createBezierCurve() {
   _scene->addEntity(EntityType::BezierCurveC0, bezierCurve);
 }
 
-void GUI::createBezierCurveC2() {
+void GUI::createBSplineCurve() {
   auto pointEntities = getSelectedPoints();
   if (pointEntities.size() < 2)
     return;
 
   std::shared_ptr<IEntity> bezierCurve =
-      std::make_shared<BezierCurveC2>(pointEntities);
-  _scene->addEntity(EntityType::BezierCurveC2, bezierCurve);
+      std::make_shared<BSplineCurve>(pointEntities);
+  _scene->addEntity(EntityType::BSplineCurve, bezierCurve);
 }
 
 void GUI::processControllers() {

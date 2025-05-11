@@ -3,8 +3,8 @@
 #include "gui.hpp"
 #include "imgui.h"
 
+#include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
-#include "bezierCurveC2.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
@@ -38,7 +38,7 @@ bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   return false;
 }
 
-bool GuiVisitor::visitBezierCurveC2(BezierCurveC2 &bezierCurve) {
+bool GuiVisitor::visitBSplineCurve(BSplineCurve &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
   ImGui::Checkbox("Show Bezier Points", &bezierCurve.showBezierPoints());
   ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());

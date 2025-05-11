@@ -1,5 +1,5 @@
 #include "virtualPoint.hpp"
-#include "bezierCurveC2.hpp"
+#include "bSplineCurve.hpp"
 
 void VirtualPoint::updatePosition(const algebra::Vec3f &position) {
 
@@ -7,13 +7,13 @@ void VirtualPoint::updatePosition(const algebra::Vec3f &position) {
   IEntity::updatePosition(position);
 
   for (auto &subscriber : _subscribers) {
-    auto *bezierCurveC2 = dynamic_cast<BezierCurveC2 *>(&subscriber.get());
+    auto *bSplineCurve = dynamic_cast<BSplineCurve *>(&subscriber.get());
 
-    if (bezierCurveC2) {
-      bezierCurveC2->updateBezier(*this, oldPosition);
-      bezierCurveC2->updateMesh();
+    if (bSplineCurve) {
+      bSplineCurve->updateBezier(*this, oldPosition);
+      bSplineCurve->updateMesh();
     } else
-      throw std::runtime_error("failed to dynamic_cast to BezierCurveC2");
+      throw std::runtime_error("failed to dynamic_cast to BSplineCurve");
   }
   // notifySubscribers();
 }

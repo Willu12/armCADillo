@@ -6,6 +6,6 @@ enum class EntityType : uint8_t {
   Torus,
   Cursor,
   BezierCurveC0,
-  BezierCurveC2,
+  BSplineCurve,
   VirtualPoint
 };

@@ -9,11 +9,11 @@
 #include <unistd.h>
 #include <vector>
 
-class BezierCurveC2 : public BezierCurve {
+class BSplineCurve : public BezierCurve {
 public:
-  explicit BezierCurveC2(
+  explicit BSplineCurve(
       const std::vector<std::reference_wrapper<PointEntity>> &points) {
-    _name = "BezierCurveC2_" + std::to_string(_id++);
+    _name = "BSplineCurve_" + std::to_string(_id++);
     for (const auto &p : points) {
       _points.emplace_back(p);
       subscribe(p);
@@ -23,7 +23,7 @@ public:
   }
 
   bool acceptVisitor(IVisitor &visitor) override {
-    return visitor.visitBezierCurveC2(*this);
+    return visitor.visitBSplineCurve(*this);
   }
 
   bool &showBezierPoints() { return _showBezierPoints; }

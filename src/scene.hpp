@@ -1,6 +1,6 @@
 #pragma once
 #include "IEntity.hpp"
-#include "bezierCurveC2.hpp"
+#include "bSplineCurve.hpp"
 #include "camera.hpp"
 #include "entitiesTypes.hpp"
 #include "virtualPoint.hpp"
@@ -62,10 +62,10 @@ public:
 
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const {
     std::vector<std::shared_ptr<IEntity>> virtualPoints;
-    if (!_entities.contains(EntityType::BezierCurveC2))
+    if (!_entities.contains(EntityType::BSplineCurve))
       return virtualPoints;
-    for (const auto &entity : _entities.at(EntityType::BezierCurveC2)) {
-      auto bezierCurve = std::dynamic_pointer_cast<BezierCurveC2>(entity);
+    for (const auto &entity : _entities.at(EntityType::BSplineCurve)) {
+      auto bezierCurve = std::dynamic_pointer_cast<BSplineCurve>(entity);
       if (!bezierCurve || !bezierCurve->showBezierPoints())
         continue;
 

@@ -87,7 +87,7 @@ private:
         {EntityType::BezierCurveC0,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
     _entityRenderers.insert(
-        {EntityType::BezierCurveC2,
+        {EntityType::BSplineCurve,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
   }
 };

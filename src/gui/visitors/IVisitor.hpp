@@ -4,7 +4,7 @@ class VirtualPoint;
 class TorusEntity;
 class PointEntity;
 class BezierCurveC0;
-class BezierCurveC2;
+class BSplineCurve;
 
 class IVisitor {
 public:
@@ -13,5 +13,5 @@ public:
   virtual bool visitPoint(PointEntity &point) = 0;
   virtual bool visitVirtualPoint(VirtualPoint &point) = 0;
   virtual bool visitBezierCurve(BezierCurveC0 &bezierCurve) = 0;
-  virtual bool visitBezierCurveC2(BezierCurveC2 &bezierCurve) = 0;
+  virtual bool visitBSplineCurve(BSplineCurve &bezierCurve) = 0;
 };

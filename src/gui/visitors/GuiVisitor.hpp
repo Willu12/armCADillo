@@ -17,7 +17,7 @@ public:
   bool visitTorus(TorusEntity &torus) override;
   bool visitPoint(PointEntity &point) override;
   bool visitBezierCurve(BezierCurveC0 &bezierCurve) override;
-  bool visitBezierCurveC2(BezierCurveC2 &bezierCurve) override;
+  bool visitBSplineCurve(BSplineCurve &bezierCurve) override;
   bool visitVirtualPoint(VirtualPoint &point) override;
 
 private:

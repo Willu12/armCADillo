@@ -102,7 +102,6 @@ void main() {
       float t = float(i) / segmentsCount;
       vec4 point = bezier3(b0, b1, b2, b3, t);
       gl_Position = pv * point;
-      gl_PointSize = 10.0;
       EmitVertex();
     }
   }

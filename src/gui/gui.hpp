@@ -83,11 +83,11 @@ private:
   void renderCreatePointUI();
   void removeButtonUI();
   void createBezierCurveUI();
-  void createBezierCurveC2UI();
+  void createBSplineCurveUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
-  void createBezierCurveC2();
+  void createBSplineCurve();
   void renderModelSettings();
 
   void displayEntitiesList();
