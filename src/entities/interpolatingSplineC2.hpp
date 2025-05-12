@@ -8,6 +8,7 @@ class InterpolatingSplineC2 : public BezierCurve {
 public:
   explicit InterpolatingSplineC2(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
+  bool acceptVisitor(IVisitor &visitor) override;
 
 private:
   inline static int _id;

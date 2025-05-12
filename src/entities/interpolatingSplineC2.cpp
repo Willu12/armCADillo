@@ -126,3 +126,7 @@ std::unique_ptr<BezierMesh> InterpolatingSplineC2::generateMesh() {
   auto bezierPositions = calculateBezierPoints();
   return BezierMesh::createC2(bezierPositions);
 };
+
+bool InterpolatingSplineC2::acceptVisitor(IVisitor &visitor) {
+  return visitor.visitInterpolatingSplineCurve(*this);
+}
