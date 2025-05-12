@@ -91,7 +91,7 @@ void main() {
   } else if (len == 3) {
     int segmentsCount = calculateLength(b0, b1, b2, b3, pv, len);
     for (int i = 0; i <= segmentsCount; ++i) {
-      float t = float(i) / segmentsCount;
+      float t = float(i) / float(segmentsCount);
       vec4 point = bezier2(b0, b1, b2, t);
       gl_Position = pv * point;
       EmitVertex();
@@ -99,7 +99,7 @@ void main() {
   } else if (len == 4) {
     int segmentsCount = calculateLength(b0, b1, b2, b3, pv, len);
     for (int i = 0; i <= segmentsCount; ++i) {
-      float t = float(i) / segmentsCount;
+      float t = float(i) / float(segmentsCount);
       vec4 point = bezier3(b0, b1, b2, b3, t);
       gl_Position = pv * point;
       EmitVertex();

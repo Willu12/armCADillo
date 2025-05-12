@@ -124,5 +124,5 @@ InterpolatingSplineC2::solveTridiagonalMatrix(std::vector<float> &alpha,
 
 std::unique_ptr<BezierMesh> InterpolatingSplineC2::generateMesh() {
   auto bezierPositions = calculateBezierPoints();
-  return BezierMesh::create(bezierPositions);
+  return BezierMesh::createC2(bezierPositions);
 };
