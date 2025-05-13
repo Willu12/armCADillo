@@ -16,7 +16,7 @@ std::vector<float> InterpolatingSplineC2::calculateChordLengthKnotsDists() {
   for (std::size_t i = 1; i < _points.size(); ++i) {
     auto deltaP =
         _points[i].get().getPosition() - _points[i - 1].get().getPosition();
-    dists[i - 1] = deltaP.length();
+    dists[i - 1] = deltaP.length() == 0.f ? 10e-6f : deltaP.length();
   }
   return dists;
 }

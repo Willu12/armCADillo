@@ -23,7 +23,7 @@ public:
 
     float position[3] = {_position[0], _position[1], _position[2]};
     if (ImGui::InputFloat3("Position", position)) {
-      _position = algebra::Vec3f(_position[0], _position[1], _position[2]);
+      updatePosition(algebra::Vec3f(position[0], position[1], position[2]));
       return true;
     }
     return false;

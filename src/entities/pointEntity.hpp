@@ -21,7 +21,10 @@ public:
     }
   }
   bool acceptVisitor(IVisitor &visitor) override {
-    return visitor.visitPoint(*this);
+    bool changed = visitor.visitPoint(*this);
+    if (changed)
+      notifySubscribers();
+    return changed;
   }
 
   void updatePosition(const algebra::Vec3f &position) override {
