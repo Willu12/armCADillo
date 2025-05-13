@@ -41,7 +41,7 @@ std::vector<algebra::Vec3f> InterpolatingSplineC2::calculateBezierPoints() {
         d0;
     auto p1 =
         (_points[i + 1].get().getPosition() - _points[i].get().getPosition()) /
-        d0;
+        d1;
     r.push_back(((p1 - p0) * 3.f) / (d0 + d1));
   }
   auto c = solveTridiagonalMatrix(alpha, beta, r);
