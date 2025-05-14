@@ -26,29 +26,7 @@ public:
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
 
-  void process(const Mouse & /*mouse*/) override {
-    ImVec2 currentMousePosition = ImGui::GetMousePos();
-
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-      auto entity = getEntity(currentMousePosition.x, currentMousePosition.y);
-      if (entity) {
-        const std::shared_ptr<IEntity> &entityPointer = entity.value();
-        if (ImGui::GetIO().KeyCtrl) {
-          auto it = std::ranges::find(_selectedEntities, entityPointer);
-          if (it != _selectedEntities.end())
-            _selectedEntities.erase(it);
-          else
-            _selectedEntities.push_back(entityPointer);
-        } else {
-          _selectedEntities.clear();
-          _selectedEntities.push_back(entityPointer);
-        }
-      } else if (!entity && !ImGui::GetIO().KeyCtrl &&
-                 !ImGui::GetIO().WantCaptureMouse) {
-        _selectedEntities.clear();
-      }
-    }
-  };
+  void process(const Mouse & /*mouse*/) override;
 
   PickingTexture &getPickingTexture() { return _pickingTexture; }
 
@@ -57,17 +35,9 @@ private:
   std::shared_ptr<Scene> _scene;
   std::vector<std::shared_ptr<IEntity>> &_selectedEntities;
   PickingTexture _pickingTexture;
+  bool _selectionBoxActive = false;
 
-  std::optional<std::shared_ptr<IEntity>> getEntity(float x, float y) {
-    PickingTexture::PixelInfo pixel =
-        _pickingTexture.ReadPixel(x, GLFWHelper::getHeight(_window) - y - 1);
-    if (pixel.ObjectId == 0)
-      return std::nullopt;
-    auto clickedObjectId = pixel.ObjectId - 1;
-
-    auto sceneEntities = _scene->getPoints();
-    if (clickedObjectId > sceneEntities.size())
-      return std::nullopt;
-    return sceneEntities[clickedObjectId];
-  }
+  std::optional<std::shared_ptr<IEntity>> getEntity(float x, float y);
+  std::vector<std::shared_ptr<IEntity>>
+  getEntities(const algebra::Vec2f &startPos, const algebra::Vec2f &endPos);
 };

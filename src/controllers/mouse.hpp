@@ -39,6 +39,10 @@ public:
   }
 
   const algebra::Vec2f &getPositionDelta() const { return _lastDelta; }
+  const algebra::Vec2f &getCurrentPosition() const { return _position; }
+  const algebra::Vec2f &getLastClickedPosition() const {
+    return _lastClickedPosition;
+  }
 
 private:
   bool _clicked = false;
