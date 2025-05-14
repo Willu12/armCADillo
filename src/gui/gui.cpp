@@ -342,7 +342,7 @@ void GUI::processControllers() {
 
   _selectedEntities = selectedEntities;
 
-  _controllers[static_cast<int>(ControllerKind::Selection)]->process(0, 0);
+  _controllers[static_cast<int>(ControllerKind::Selection)]->process(_mouse);
   _mouse.process(getActiveControllers());
 }
 

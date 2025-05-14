@@ -25,7 +25,7 @@ public:
     _cursor->updatePosition(x, y, *_camera);
   }
 
-  void process(float /*x*/, float /*y*/) override {
+  void process(const Mouse & /*mouse*/) override {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
     if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
       translate(currentMousePosition.x, currentMousePosition.y);

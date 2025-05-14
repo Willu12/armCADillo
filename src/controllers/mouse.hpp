@@ -7,29 +7,21 @@
 
 class Mouse {
 public:
-  void process(std::vector<std::shared_ptr<IController>> controllers) {
+  void process(const std::vector<std::shared_ptr<IController>> &controllers) {
     processScroll(controllers);
 
     if (!ImGui::IsAnyItemActive() && anyButtonDown()) {
-      ImVec2 currentMousePosition = ImGui::GetMousePos();
-
       if (!_clicked) {
+        ImVec2 currentMousePosition = ImGui::GetMousePos();
         _clicked = true;
         _position =
             algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
-      }
-      if (_clicked) {
-        float deltaY = _position[1] - currentMousePosition.y;
-        float deltaX = _position[0] - currentMousePosition.x;
-        if (deltaY == 0.f && deltaX == 0.f)
-          return;
-
+        _lastClickedPosition = _position;
+      } else if (_clicked) {
+        updateDelta();
         for (const auto &controller : controllers)
           if (controller)
-            controller->process(deltaX, deltaY);
-
-        _position =
-            algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
+            controller->process(*this);
       }
     } else if (AllButtonsUp()) {
       _clicked = false;
@@ -46,9 +38,13 @@ public:
     return ImGui::IsMouseDown(ImGuiMouseButton_Left);
   }
 
+  const algebra::Vec2f &getPositionDelta() const { return _lastDelta; }
+
 private:
   bool _clicked = false;
   algebra::Vec2f _position;
+  algebra::Vec2f _lastClickedPosition;
+  algebra::Vec2f _lastDelta;
 
   bool AllButtonsUp() const {
     return !ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
@@ -61,5 +57,16 @@ private:
     for (const auto &controller : controllers)
       if (controller)
         controller->processScroll();
+  }
+
+  void updateDelta() {
+    ImVec2 currentMousePosition = ImGui::GetMousePos();
+    float deltaY = _position[1] - currentMousePosition.y;
+    float deltaX = _position[0] - currentMousePosition.x;
+    if (deltaY == 0.f && deltaX == 0.f)
+      return;
+
+    _lastDelta = algebra::Vec2f{deltaX, deltaY};
+    _position = algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);
   }
 };

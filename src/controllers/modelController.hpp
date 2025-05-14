@@ -5,6 +5,7 @@
 #include "centerPoint.hpp"
 #include "cursor.hpp"
 #include "imgui.h"
+#include "mouse.hpp"
 #include <memory>
 
 enum class Axis : uint8_t { X = 0, Y = 1, Z = 2 };
@@ -27,15 +28,14 @@ public:
   bool processScroll() override { return false; }
   bool processMouse() override { return false; }
 
-  void process(float x, float y) override {
+  void process(const Mouse &mouse) override {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
       if (ImGui::GetIO().KeyShift)
-        rotateAroundCenterPoint(y);
+        rotateAroundCenterPoint(mouse.getPositionDelta()[1]);
       else if (ImGui::GetIO().KeyCtrl)
-        scaleAroundCenterPoint(y);
+        scaleAroundCenterPoint(mouse.getPositionDelta()[1]);
       else {
         ImVec2 currentMousePosition = ImGui::GetMousePos();
-
         translate(currentMousePosition.x, currentMousePosition.y);
       }
     }

@@ -5,6 +5,7 @@
 #include "camera.hpp"
 #include "imgui.h"
 #include "memory"
+#include "mouse.hpp"
 
 class CameraController : public IController {
 public:
@@ -33,12 +34,13 @@ public:
                           deltaY * kCameraMoveSpeed);
   }
 
-  void process(float x, float y) override {
+  void process(const Mouse &mouse) override {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
+      const auto &delta = mouse.getPositionDelta();
       if (ImGui::GetIO().KeyShift)
-        translate(x, y);
+        translate(delta[0], delta[1]);
       else
-        rotate(x, y);
+        rotate(delta[0], delta[1]);
     }
   }
 

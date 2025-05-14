@@ -26,7 +26,7 @@ public:
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
 
-  void process(float /*x*/, float /*y*/) override {
+  void process(const Mouse & /*mouse*/) override {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
 
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
