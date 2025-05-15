@@ -61,7 +61,7 @@ void SelectionController::process(const Mouse &mouse) {
 std::vector<std::shared_ptr<IEntity>>
 SelectionController::getEntities(const algebra::Vec2f &startPos,
                                  const algebra::Vec2f &endPos) {
-  const size_t stepCount = 10;
+  const size_t stepCount = 30;
   const float dx = (endPos[0] - startPos[0]) / stepCount;
   const float dy = (endPos[1] - startPos[1]) / stepCount;
 

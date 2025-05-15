@@ -9,10 +9,13 @@
 #include "cursorRenderer.hpp"
 #include "entitiesTypes.hpp"
 #include "grid.hpp"
+#include "imgui.h"
 #include "pickingRenderer.hpp"
 #include "pickingTexture.hpp"
 #include "pointRenderer.hpp"
+#include "selectionBoxRenderer.hpp"
 #include "torusRenderer.hpp"
+
 #include <cstdio>
 #include <memory>
 #include <unordered_map>
@@ -60,12 +63,18 @@ public:
     virtualPointRenderer->render(virtualPoints);
   }
 
+  void renderSelectionBox(const Mouse &mouse) {
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+      _selectionBoxRenderer.render(*_camera, mouse, _window);
+  }
+
 private:
   std::unordered_map<EntityType, std::unique_ptr<IEntityRenderer>>
       _entityRenderers;
 
   CenterPointRenderer _centerPointRenderer;
   PickingRenderer _pickingRenderer;
+  SelectionBoxRenderer _selectionBoxRenderer;
   std::shared_ptr<Camera> _camera;
   GLFWwindow *_window;
   Grid _grid;

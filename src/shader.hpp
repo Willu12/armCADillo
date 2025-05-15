@@ -2,6 +2,7 @@
 
 #include "glad/glad.h"
 #include "matrix.hpp"
+#include "vec.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -43,6 +44,9 @@ public:
                        &mat(0, 0));
   }
 
+  void setVec2f(const std::string &name, const algebra::Vec2f &value) const {
+    glUniform2fv(glad_glGetUniformLocation(_id, name.c_str()), 1, &value[0]);
+  }
   void setVec3f(const std::string &name, const algebra::Vec3f &value) const {
     glUniform3fv(glGetUniformLocation(_id, name.c_str()), 1, &value[0]);
   }

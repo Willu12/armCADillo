@@ -105,6 +105,7 @@ int main(int, char **) {
       sceneRenderer.renderPicking(scene->getPickables());
     }
 
+    sceneRenderer.renderSelectionBox(gui.getMouse());
     sceneRenderer.renderCursor(gui.getCursor());
     sceneRenderer.renderVirtualPoints(gui.getVirtualPoints());
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
