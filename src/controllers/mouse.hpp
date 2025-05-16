@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IController.hpp"
+#include "camera.hpp"
 #include "imgui.h"
 #include "vec.hpp"
 #include <memory>
@@ -43,6 +44,10 @@ public:
   const algebra::Vec2f &getLastClickedPosition() const {
     return _lastClickedPosition;
   }
+
+  // bool &isSelectionBoxActive() const { return _isSelectionBoxActive; }
+  // const bool &isSelectionBoxActive() const { return _isSelectionBoxActive; }
+  mutable bool _isSelectionBoxActive = false;
 
 private:
   bool _clicked = false;

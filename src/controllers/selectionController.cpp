@@ -2,6 +2,7 @@
 #include "IEntity.hpp"
 #include "imgui.h"
 #include "mouse.hpp"
+#include <algorithm>
 #include <print>
 #include <vector>
 
@@ -19,6 +20,42 @@ SelectionController::getEntity(float x, float y) {
   return sceneEntities[clickedObjectId];
 }
 
+void SelectionController::process(const Mouse &mouse) {
+  if (ImGui::IsAnyItemActive())
+    return; // This maybe unnecessary
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+    if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+      _selectedEntities.clear();
+
+    // check if something was clicked;
+    const auto &currentMousePos = ImGui::GetMousePos();
+    if (auto entity = getEntity(currentMousePos[0], currentMousePos[1])) {
+      mouse._isSelectionBoxActive = false;
+      if (std::ranges::find(_selectedEntities, *entity) ==
+          _selectedEntities.end())
+        _selectedEntities.emplace_back(*entity);
+    } else
+      mouse._isSelectionBoxActive = true;
+  }
+
+  else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+           mouse._isSelectionBoxActive) {
+    mouse._isSelectionBoxActive = false;
+    const auto &entities =
+        getEntities(mouse.getLastClickedPosition(), mouse.getCurrentPosition());
+    if (!ImGui::GetIO().KeyCtrl) {
+      _selectedEntities = entities;
+    } else {
+      for (const auto &entity : entities) {
+        if (std::ranges::find(_selectedEntities, entity) ==
+            _selectedEntities.end())
+          _selectedEntities.emplace_back(entity);
+      }
+    }
+  }
+}
+/*
 void SelectionController::process(const Mouse &mouse) {
   if (ImGui::IsAnyItemActive())
     return;
@@ -57,6 +94,7 @@ void SelectionController::process(const Mouse &mouse) {
     }
   }
 };
+*/
 
 std::vector<std::shared_ptr<IEntity>>
 SelectionController::getEntities(const algebra::Vec2f &startPos,
@@ -82,6 +120,5 @@ SelectionController::getEntities(const algebra::Vec2f &startPos,
       }
     }
   }
-  printf("fooound\n");
   return selectedEntities;
 }

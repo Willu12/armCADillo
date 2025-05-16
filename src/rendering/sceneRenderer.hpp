@@ -64,7 +64,7 @@ public:
   }
 
   void renderSelectionBox(const Mouse &mouse) {
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
+    if (mouse._isSelectionBoxActive)
       _selectionBoxRenderer.render(*_camera, mouse, _window);
   }
 

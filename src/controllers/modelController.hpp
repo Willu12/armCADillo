@@ -32,7 +32,7 @@ public:
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
       if (ImGui::GetIO().KeyShift)
         rotateAroundCenterPoint(mouse.getPositionDelta()[1]);
-      else if (ImGui::GetIO().KeyCtrl)
+      else if (ImGui::GetIO().KeyAlt)
         scaleAroundCenterPoint(mouse.getPositionDelta()[1]);
       else {
         ImVec2 currentMousePosition = ImGui::GetMousePos();
