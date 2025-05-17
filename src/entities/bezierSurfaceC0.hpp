@@ -9,33 +9,33 @@
 
 class BezierSurfaceC0 : public BezierSurface {
 public:
-  BezierSurfaceC0() {
+  explicit BezierSurfaceC0(const algebra::Vec3f &position) {
     _name = "BezierCurveC0_" + std::to_string(_id++);
     // generate 4 points in the middle of the
     std::vector<algebra::Vec3f> controlPoints = {
         // Row 0 (v = 0)
-        algebra::Vec3f(-0.5f, -0.5f, 0.0f),
-        algebra::Vec3f(-0.166f, -0.5f, 0.1f),
-        algebra::Vec3f(0.166f, -0.5f, 0.1f),
-        algebra::Vec3f(0.5f, -0.5f, 0.0f),
+        algebra::Vec3f(-0.5f, -0.5f, 0.0f) + position,
+        algebra::Vec3f(-0.166f, -0.5f, 0.1f) + position,
+        algebra::Vec3f(0.166f, -0.5f, 0.1f) + position,
+        algebra::Vec3f(0.5f, -0.5f, 0.0f) + position,
 
         // Row 1 (v = 1/3)
-        algebra::Vec3f(-0.5f, -0.166f, 0.1f),
-        algebra::Vec3f(-0.166f, -0.166f, 0.2f),
-        algebra::Vec3f(0.166f, -0.166f, 0.2f),
-        algebra::Vec3f(0.5f, -0.166f, 0.1f),
+        algebra::Vec3f(-0.5f, -0.166f, 0.1f) + position,
+        algebra::Vec3f(-0.166f, -0.166f, 0.2f) + position,
+        algebra::Vec3f(0.166f, -0.166f, 0.2f) + position,
+        algebra::Vec3f(0.5f, -0.166f, 0.1f) + position,
 
         // Row 2 (v = 2/3)
-        algebra::Vec3f(-0.5f, 0.166f, 0.1f),
-        algebra::Vec3f(-0.166f, 0.166f, 0.2f),
-        algebra::Vec3f(0.166f, 0.166f, 0.2f),
-        algebra::Vec3f(0.5f, 0.166f, 0.1f),
+        algebra::Vec3f(-0.5f, 0.166f, 0.1f) + position,
+        algebra::Vec3f(-0.166f, 0.166f, 0.2f) + position,
+        algebra::Vec3f(0.166f, 0.166f, 0.2f) + position,
+        algebra::Vec3f(0.5f, 0.166f, 0.1f) + position,
 
         // Row 3 (v = 1)
-        algebra::Vec3f(-0.5f, 0.5f, 0.0f),
-        algebra::Vec3f(-0.166f, 0.5f, 0.1f),
-        algebra::Vec3f(0.166f, 0.5f, 0.1f),
-        algebra::Vec3f(0.5f, 0.5f, 0.0f),
+        algebra::Vec3f(-0.5f, 0.5f, 0.0f) + position,
+        algebra::Vec3f(-0.166f, 0.5f, 0.1f) + position,
+        algebra::Vec3f(0.166f, 0.5f, 0.1f) + position,
+        algebra::Vec3f(0.5f, 0.5f, 0.0f) + position,
     };
 
     for (const auto &controlPoint : controlPoints) {

@@ -9,6 +9,8 @@
 class Mouse {
 public:
   void process(const std::vector<std::shared_ptr<IController>> &controllers) {
+    if (ImGui::IsAnyItemHovered())
+      return;
     processScroll(controllers);
 
     if (!ImGui::IsAnyItemActive() && anyButtonDown()) {

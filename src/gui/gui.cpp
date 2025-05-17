@@ -11,6 +11,7 @@
 #include "interpolatingSplineC2.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
+#include <algorithm>
 #include <cstdio>
 #include <memory>
 #include <utility>
@@ -195,6 +196,13 @@ void GUI::renderModelSettings() {
 
 void GUI::displayEntitiesList() {
   auto entities = _scene->getEntites();
+  if (entities.empty())
+    return;
+  const float height = entities.size() > 4 ? 100.f : 25.f * entities.size();
+  ImVec2 childSize(-1, height);
+
+  ImGui::BeginChild("EntitiesListChild", childSize, true,
+                    ImGuiWindowFlags_HorizontalScrollbar);
   for (int i = 0; i < entities.size(); ++i) {
 
     auto name = entities[i]->getName();
@@ -216,6 +224,7 @@ void GUI::displayEntitiesList() {
       }
     }
   }
+  ImGui::EndChild();
 }
 
 void GUI::deleteSelectedEntities() {
@@ -254,10 +263,10 @@ void GUI::selectEntity(int entityIndex) {
 }
 
 void GUI::unselectEntity(int entityIndex) {
-  _selectedEntities.erase(std::remove(_selectedEntities.begin(),
-                                      _selectedEntities.end(),
-                                      getEntities()[entityIndex]),
-                          _selectedEntities.end());
+  _selectedEntities.erase(
+      std::ranges::remove(_selectedEntities, getEntities()[entityIndex])
+          .begin(),
+      _selectedEntities.end());
 }
 
 std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
@@ -342,8 +351,10 @@ void GUI::createInterpolatingSplineCurve() {
 }
 
 void GUI::createBezierSurfaceC0() {
+  const auto &cursorPosition = getCursor()->getPosition();
+
   std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>();
+      std::make_shared<BezierSurfaceC0>(cursorPosition);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
   for (const auto &point : bezierSurfaceC0->getPoints()) {
     _scene->addEntity(EntityType::Point, point);
