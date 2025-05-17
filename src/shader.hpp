@@ -9,35 +9,34 @@
 #include <string>
 #include <vector>
 
+struct ShaderPath {
+  std::string _path;
+  int _type;
+};
+
 class Shader {
 public:
   void use() { glUseProgram(_id); }
-  Shader(const std::string &vertexPath, const std::string &fragmentPath) {
-
-    std::string vertexShaderSource = readShaderFromFile(vertexPath);
-    std::string fragmentShaderSource = readShaderFromFile(fragmentPath);
-
-    auto vertexShader = createShader(vertexShaderSource, GL_VERTEX_SHADER);
-    auto fragmentShader =
-        createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-    _id = createProgram({vertexShader, fragmentShader});
+  explicit Shader(const std::vector<ShaderPath> &shaderPaths) {
+    std::vector<GLuint> shaderIds;
+    shaderIds.reserve(shaderPaths.size());
+    for (const auto &shaderPath : shaderPaths) {
+      shaderIds.emplace_back(
+          createShader(readShaderFromFile(shaderPath._path), shaderPath._type));
+    }
+    _id = createProgram(shaderIds);
   }
+  Shader(const std::string &vertexPath, const std::string &fragmentPath)
+      : Shader(
+            {ShaderPath{._path = vertexPath, ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path = fragmentPath, ._type = GL_FRAGMENT_SHADER}}) {}
 
-  // TO DO: add SHADER PATH {string: path, SHADER_TYPE: tpye} struct
   Shader(const std::string &vertexPath, const std::string &geometryPath,
-         const std::string &fragmentPath) {
-
-    std::string vertexShaderSource = readShaderFromFile(vertexPath);
-    std::string fragmentShaderSource = readShaderFromFile(fragmentPath);
-    std::string geometryShaderSource = readShaderFromFile(geometryPath);
-
-    auto vertexShader = createShader(vertexShaderSource, GL_VERTEX_SHADER);
-    auto fragmentShader =
-        createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-    auto geometryShader =
-        createShader(geometryShaderSource, GL_GEOMETRY_SHADER);
-    _id = createProgram({vertexShader, fragmentShader, geometryShader});
-  }
+         const std::string &fragmentPath)
+      : Shader(
+            {ShaderPath{._path = vertexPath, ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path = fragmentPath, ._type = GL_FRAGMENT_SHADER},
+             ShaderPath{._path = geometryPath, ._type = GL_GEOMETRY_SHADER}}) {}
 
   void setMat4f(const std::string &name, const algebra::Mat4f &mat) const {
     glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE,
@@ -77,7 +76,7 @@ public:
   }
 
 private:
-  unsigned int _id;
+  unsigned int _id{};
   static void checkCompileErrors(unsigned int shader, const std::string &type) {
     int success;
     char infoLog[1024];
