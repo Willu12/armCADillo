@@ -3,6 +3,7 @@
 #include "bSplineCurve.hpp"
 #include "camera.hpp"
 #include "entitiesTypes.hpp"
+#include "pointEntity.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
 #include <memory>
@@ -28,18 +29,16 @@ public:
   }
 
   std::shared_ptr<Camera> getCamera() { return _camera; }
-  void removeEntities(
-      const std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+  void removeEntities(std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+
+    filterEntitiesToRemove(entitiesToRemove);
     for (auto it = _entities.begin(); it != _entities.end();) {
       auto &vec = it->second;
 
-      vec.erase(std::remove_if(vec.begin(), vec.end(),
-                               [&](const std::shared_ptr<IEntity> &e) {
-                                 return std::find(entitiesToRemove.begin(),
-                                                  entitiesToRemove.end(),
-                                                  e) != entitiesToRemove.end();
-                               }),
-                vec.end());
+      auto new_end = std::ranges::remove_if(vec, [&](const auto &e) {
+        return std::ranges::find(entitiesToRemove, e) != entitiesToRemove.end();
+      });
+      vec.erase(new_end.begin(), vec.end());
 
       if (vec.empty())
         it = _entities.erase(it);
@@ -85,4 +84,14 @@ private:
   std::shared_ptr<Camera> _camera;
   std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
       _entities;
+
+  void filterEntitiesToRemove(
+      std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+    std::erase_if(entitiesToRemove, [](const std::shared_ptr<IEntity> &entity) {
+      if (auto point = std::dynamic_pointer_cast<PointEntity>(entity)) {
+        return point->surfacePoint();
+      }
+      return false;
+    });
+  }
 };

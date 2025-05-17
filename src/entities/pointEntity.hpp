@@ -44,10 +44,12 @@ public:
 
   void updateMesh() override { _mesh = generateMesh(); };
   const Mesh &getMesh() const override { return *_mesh; }
+  bool &surfacePoint() { return _surfacePoint; }
 
 private:
   inline static int _id;
   std::shared_ptr<Mesh> _mesh;
+  bool _surfacePoint = false;
 
   std::shared_ptr<Mesh> generateMesh() {
     std::vector<float> vertices = {// Front face

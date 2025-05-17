@@ -40,6 +40,7 @@ public:
 
     for (const auto &controlPoint : controlPoints) {
       auto point = std::make_unique<PointEntity>(controlPoint);
+      point->surfacePoint() = true;
       subscribe(*point);
       _points.emplace_back(std::move(point));
     }
