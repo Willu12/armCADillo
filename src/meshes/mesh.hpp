@@ -1,7 +1,7 @@
 #pragma once
 #include "IMeshable.hpp"
 #include "IParametrizable.hpp"
-#include "glad/glad.h"
+#include "glad/gl.h"
 #include <memory>
 #include <vector>
 

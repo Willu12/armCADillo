@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glad/glad.h"
+#include "glad/gl.h"
 #include "matrix.hpp"
 #include "vec.hpp"
 #include <fstream>

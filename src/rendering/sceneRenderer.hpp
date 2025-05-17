@@ -3,6 +3,7 @@
 #include "IEntityRenderer.hpp"
 #include "IRenderable.hpp"
 #include "bezierCurveRenderer.hpp"
+#include "bezierSurfaceRenderer.hpp"
 #include "camera.hpp"
 #include "centerPointRenderer.hpp"
 #include "cursor.hpp"
@@ -101,5 +102,9 @@ private:
     _entityRenderers.insert(
         {EntityType::InterpolatingSplineCurve,
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
+    _entityRenderers.insert(
+        {EntityType::BezierSurfaceC0,
+         std::make_unique<BezierSurfaceRenderer>(
+             *_camera, *_entityRenderers[EntityType::Point])});
   }
 };

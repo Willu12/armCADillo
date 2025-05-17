@@ -5,12 +5,14 @@
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
 #include <cstdio>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -65,6 +67,7 @@ void GUI::displayGUI() {
     createBezierCurveUI();
     createBSplineCurveUI();
     createInterpolatingSplineCurveUI();
+    createBezierSurfaceC0UI();
     removeButtonUI();
 
     processControllers();
@@ -166,6 +169,11 @@ void GUI::createBSplineCurveUI() {
 void GUI::createInterpolatingSplineCurveUI() {
   if (ImGui::Button("Create Interpolating Spline Curve"))
     createInterpolatingSplineCurve();
+}
+
+void GUI::createBezierSurfaceC0UI() {
+  if (ImGui::Button("Create Bezier Surface C0"))
+    createBezierSurfaceC0();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {
@@ -331,6 +339,12 @@ void GUI::createInterpolatingSplineCurve() {
   std::shared_ptr<IEntity> interpolatingSpline =
       std::make_shared<InterpolatingSplineC2>(pointEntities);
   _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
+}
+
+void GUI::createBezierSurfaceC0() {
+  std::shared_ptr<IEntity> bezierSurfaceC0 =
+      std::make_shared<BezierSurfaceC0>();
+  _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
 }
 
 void GUI::processControllers() {

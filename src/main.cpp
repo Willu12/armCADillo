@@ -40,8 +40,8 @@ int main(int, char **) {
   if (!glfwInit())
     return 1;
 
-  const char *glsl_version = "#version 330";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  const char *glsl_version = "#version 430";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   GLFWwindow *window =
@@ -51,8 +51,8 @@ int main(int, char **) {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
 
-  if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-    std::println(stderr, "Failed to initialize GLAD");
+  if (!gladLoaderLoadGL()) {
+    std::println("Failed to initialize GLAD");
     return 1;
   }
   glfwSetScrollCallback(window, scrollCallback);

@@ -85,11 +85,13 @@ private:
   void createBezierCurveUI();
   void createBSplineCurveUI();
   void createInterpolatingSplineCurveUI();
+  void createBezierSurfaceC0UI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
   void createBSplineCurve();
   void createInterpolatingSplineCurve();
+  void createBezierSurfaceC0();
   void renderModelSettings();
 
   void displayEntitiesList();

@@ -43,14 +43,17 @@ public:
     }
     _mesh = generateMesh();
   }
+  void updateMesh() override { _mesh = generateMesh(); }
 
 private:
   std::unique_ptr<BezierSurfaceMesh> generateMesh() {
-    std::vector<algebra::Vec3f> controlPointsPositions(_points.size());
+    std::vector<float> controlPointsPositions(_points.size() * 3);
 
     for (const auto &[i, point] : _points | std::views::enumerate) {
-      controlPointsPositions[i] = point->getPosition();
+      controlPointsPositions[3 * i] = point->getPosition()[0];
+      controlPointsPositions[3 * i + 1] = point->getPosition()[1];
+      controlPointsPositions[3 * i + 2] = point->getPosition()[2];
     }
-    _mesh = BezierSurfaceMesh::create(controlPointsPositions);
+    return BezierSurfaceMesh::create(controlPointsPositions);
   }
 };
