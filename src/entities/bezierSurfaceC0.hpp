@@ -10,6 +10,7 @@
 class BezierSurfaceC0 : public BezierSurface {
 public:
   BezierSurfaceC0() {
+    _name = "BezierCurveC0_" + std::to_string(_id++);
     // generate 4 points in the middle of the
     std::vector<algebra::Vec3f> controlPoints = {
         // Row 0 (v = 0)
@@ -39,6 +40,7 @@ public:
 
     for (const auto &controlPoint : controlPoints) {
       auto point = std::make_unique<PointEntity>(controlPoint);
+      subscribe(*point);
       _points.emplace_back(std::move(point));
     }
     _mesh = generateMesh();
@@ -46,6 +48,7 @@ public:
   void updateMesh() override { _mesh = generateMesh(); }
 
 private:
+  inline static int _id = 0;
   std::unique_ptr<BezierSurfaceMesh> generateMesh() {
     std::vector<float> controlPointsPositions(_points.size() * 3);
 

@@ -5,6 +5,7 @@
 
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
+#include "bezierSurface.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
@@ -67,6 +68,16 @@ bool GuiVisitor::visitBSplineCurve(BSplineCurve &bezierCurve) {
 bool GuiVisitor::visitInterpolatingSplineCurve(
     InterpolatingSplineC2 &interpolatingSpline) {
   return renderCurveGui(interpolatingSpline);
+}
+
+bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
+  ImGui::InputText("Name", &bezierSurface.getName());
+  bool change = false;
+  change |= ImGui::SliderInt("Horizontal Density",
+                             &bezierSurface.getMeshDensity().s, 3, 64);
+  change |= ImGui::SliderInt("Vertical Density",
+                             &bezierSurface.getMeshDensity().t, 3, 64);
+  return change;
 }
 
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {

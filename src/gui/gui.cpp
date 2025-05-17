@@ -342,9 +342,12 @@ void GUI::createInterpolatingSplineCurve() {
 }
 
 void GUI::createBezierSurfaceC0() {
-  std::shared_ptr<IEntity> bezierSurfaceC0 =
+  std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
       std::make_shared<BezierSurfaceC0>();
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
+  for (const auto &point : bezierSurfaceC0->getPoints()) {
+    _scene->addEntity(EntityType::Point, point);
+  }
 }
 
 void GUI::processControllers() {

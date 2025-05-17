@@ -22,6 +22,7 @@ public:
   bool visitVirtualPoint(VirtualPoint &point) override;
   bool visitInterpolatingSplineCurve(
       InterpolatingSplineC2 &interpolatingSpline) override;
+  bool visitBezierSurface(BezierSurface &bezierSurface) override;
 
 private:
   GUI &_gui;

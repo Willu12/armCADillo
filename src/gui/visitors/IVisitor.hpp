@@ -6,6 +6,7 @@ class PointEntity;
 class BezierCurveC0;
 class BSplineCurve;
 class InterpolatingSplineC2;
+class BezierSurface;
 
 class IVisitor {
 public:
@@ -17,4 +18,5 @@ public:
   virtual bool visitBSplineCurve(BSplineCurve &bezierCurve) = 0;
   virtual bool
   visitInterpolatingSplineCurve(InterpolatingSplineC2 &interpolatingSpline) = 0;
+  virtual bool visitBezierSurface(BezierSurface &bezierSurface) = 0;
 };

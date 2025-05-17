@@ -14,7 +14,6 @@ public:
   }
 
   const algebra::Vec3f &getPosition() const { return _point.getPosition(); }
-
   const IRenderable &getPoint() { return _point; }
 
 private:
