@@ -32,8 +32,6 @@ BezierSurfaceC0::createCylinder(const algebra::Vec3f &position, float r,
                                 float h) {
   const uint32_t u_patches = h / 0.5f;
   const uint32_t v_patches = 2;
-  // const uint32_t u_patches = 4; // domyślnie
-  // const uint32_t v_patches = 2; // domyślnie
 
   const uint32_t u_points = 3 * u_patches + 1;
   const uint32_t v_points = 3 * v_patches + 1;
