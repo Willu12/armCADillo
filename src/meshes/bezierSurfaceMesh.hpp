@@ -3,7 +3,9 @@
 #include "IMeshable.hpp"
 #include "glad/gl.h"
 #include "vec.hpp"
+#include <cstdint>
 #include <memory>
+#include <sys/types.h>
 #include <vector>
 
 class BezierSurfaceMesh : public IMeshable {
@@ -14,8 +16,10 @@ public:
   uint32_t getIndicesLength() const override { return _controlPoints.size(); }
 
   static std::unique_ptr<BezierSurfaceMesh>
-  create(const std::vector<float> &points) {
-    auto *bezierSurfaceMesh = new BezierSurfaceMesh(points);
+  create(const std::vector<float> &points, uint32_t u_patches,
+         uint32_t v_patches) {
+    auto *bezierSurfaceMesh =
+        new BezierSurfaceMesh(points, u_patches, v_patches);
     return std::unique_ptr<BezierSurfaceMesh>(bezierSurfaceMesh);
   }
   ~BezierSurfaceMesh() {
@@ -58,8 +62,10 @@ public:
   BezierSurfaceMesh &operator=(const BezierSurfaceMesh &) = delete;
 
 protected:
-  explicit BezierSurfaceMesh(const std::vector<float> &vertices)
-      : _controlPoints(vertices) {
+  explicit BezierSurfaceMesh(const std::vector<float> &vertices,
+                             uint32_t u_patches, uint32_t v_patches) {
+    // here we have to fix it.
+    _controlPoints = createC0MeshData(vertices, u_patches, v_patches);
     initBuffers();
   }
 
@@ -80,5 +86,30 @@ private:
                           (void *)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+  }
+
+  std::vector<float> createC0MeshData(const std::vector<float> &vertices,
+                                      uint32_t u_patches, uint32_t v_patches) {
+    std::vector<float> meshData;
+
+    const uint32_t u_points = 3 * u_patches + 1;
+    const uint32_t v_points = 3 * v_patches + 1;
+    // for(int i = 0; )
+    for (uint32_t u_idx = 0; u_idx < u_patches; ++u_idx) {
+      for (uint32_t v_idx = 0; v_idx < v_patches; ++v_idx) {
+        for (uint32_t i = 0; i < 4; ++i) {
+          for (uint32_t j = 0; j < 4; ++j) {
+            uint32_t u = u_idx * 3 + i;
+            uint32_t v = v_idx * 3 + j;
+            uint32_t idx = 3 * (u * v_points + v);
+
+            meshData.insert(meshData.end(), vertices.begin() + idx,
+                            vertices.begin() + idx + 3);
+          }
+        }
+      }
+    }
+
+    return meshData;
   }
 };

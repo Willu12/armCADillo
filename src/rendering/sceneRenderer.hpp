@@ -104,7 +104,6 @@ private:
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
     _entityRenderers.insert(
         {EntityType::BezierSurfaceC0,
-         std::make_unique<BezierSurfaceRenderer>(
-             *_camera, *_entityRenderers[EntityType::Point])});
+         std::make_unique<BezierSurfaceRenderer>(*_camera)});
   }
 };

@@ -354,7 +354,7 @@ void GUI::createBezierSurfaceC0() {
   const auto &cursorPosition = getCursor()->getPosition();
 
   std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(cursorPosition);
+      std::make_shared<BezierSurfaceC0>(cursorPosition, 2, 3);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
   for (const auto &point : bezierSurfaceC0->getPoints()) {
     _scene->addEntity(EntityType::Point, point);

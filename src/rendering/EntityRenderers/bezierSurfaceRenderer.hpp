@@ -10,8 +10,7 @@
 
 class BezierSurfaceRenderer : public IEntityRenderer {
 public:
-  explicit BezierSurfaceRenderer(const Camera &camera,
-                                 IEntityRenderer &pointRenderer)
+  explicit BezierSurfaceRenderer(const Camera &camera)
       : _shader({ShaderPath{._path = "../resources/shaders/vertexSurface.glsl",
                             ._type = GL_VERTEX_SHADER},
                  ShaderPath{._path = "../resources/shaders/"
@@ -23,15 +22,9 @@ public:
 
                  ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
                             ._type = GL_FRAGMENT_SHADER}}),
-        _camera(camera), _pointRenderer(pointRenderer) {}
+        _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
-
-    for (const auto &entity : entities) {
-      auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
-      _pointRenderer.render(bezierSurface.getPoints());
-    }
-
     if (entities.empty())
       return;
     _shader.use();
@@ -63,5 +56,4 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
-  IEntityRenderer &_pointRenderer;
 };
