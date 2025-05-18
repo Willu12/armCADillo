@@ -173,8 +173,58 @@ void GUI::createInterpolatingSplineCurveUI() {
 }
 
 void GUI::createBezierSurfaceC0UI() {
-  if (ImGui::Button("Create Bezier Surface C0"))
-    createBezierSurfaceC0();
+  static bool openConfigWindow = false;
+  static int surfaceType = 0; // 0 = Flat, 1 = Cylinder
+
+  // Default values
+  static int u_patches = 2;
+  static int v_patches = 2;
+
+  static float radius = 1.0f;
+  static float height = 2.0f;
+
+  if (ImGui::Button("Create Bezier Surface C0")) {
+    openConfigWindow = true;
+  }
+
+  if (openConfigWindow) {
+    ImGui::Begin("Bezier Surface C0 Options", &openConfigWindow);
+
+    ImGui::Text("Surface Type:");
+    ImGui::RadioButton("Flat", &surfaceType, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("Cylinder", &surfaceType, 1);
+
+    ImGui::Separator();
+
+    if (surfaceType == 0) {
+      ImGui::InputInt("U Patches", &u_patches);
+      ImGui::InputInt("V Patches", &v_patches);
+    } else {
+      ImGui::InputFloat("Radius", &radius);
+      ImGui::InputFloat("Height", &height);
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Create")) {
+      if (surfaceType == 0) {
+        createBezierSurfaceC0Flat(u_patches, v_patches);
+      } else {
+        createBezierSurfaceC0Cylinder(radius, height);
+      }
+
+      openConfigWindow = false; // close after creation
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+      openConfigWindow = false;
+    }
+
+    ImGui::End();
+  }
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {
@@ -350,11 +400,22 @@ void GUI::createInterpolatingSplineCurve() {
   _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
 }
 
-void GUI::createBezierSurfaceC0() {
+void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches) {
   const auto &cursorPosition = getCursor()->getPosition();
 
   std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(cursorPosition, 2, 3);
+      BezierSurfaceC0::createFlat(cursorPosition, uPatches, vPatches);
+  _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
+  for (const auto &point : bezierSurfaceC0->getPoints()) {
+    _scene->addEntity(EntityType::Point, point);
+  }
+}
+
+void GUI::createBezierSurfaceC0Cylinder(float r, float h) {
+  const auto &cursorPosition = getCursor()->getPosition();
+
+  std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
+      BezierSurfaceC0::createCylinder(cursorPosition, r, h);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
   for (const auto &point : bezierSurfaceC0->getPoints()) {
     _scene->addEntity(EntityType::Point, point);

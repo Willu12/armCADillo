@@ -91,7 +91,9 @@ private:
   void createBezierCurve();
   void createBSplineCurve();
   void createInterpolatingSplineCurve();
-  void createBezierSurfaceC0();
+  void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches);
+  void createBezierSurfaceC0Cylinder(float r, float h);
+
   void renderModelSettings();
 
   void displayEntitiesList();

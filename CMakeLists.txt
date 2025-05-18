@@ -16,7 +16,8 @@ add_executable(${PROJECT_NAME}
  src/gui/visitors/GuiVisitor.cpp
  src/entities/virtualPoint.cpp
  src/entities/interpolatingSplineC2.cpp
- src/controllers/selectionController.cpp)
+ src/controllers/selectionController.cpp
+ src/entities/bezierSurfaceC0.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/include/
