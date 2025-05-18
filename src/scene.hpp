@@ -1,6 +1,7 @@
 #pragma once
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
+#include "bezierSurface.hpp"
 #include "camera.hpp"
 #include "entitiesTypes.hpp"
 #include "pointEntity.hpp"
@@ -32,6 +33,7 @@ public:
   void removeEntities(std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
 
     filterEntitiesToRemove(entitiesToRemove);
+    EnqueueSurfacePoints(entitiesToRemove);
     for (auto it = _entities.begin(); it != _entities.end();) {
       auto &vec = it->second;
 
@@ -93,5 +95,19 @@ private:
       }
       return false;
     });
+  }
+
+  void EnqueueSurfacePoints(
+      std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+    std::vector<std::shared_ptr<IEntity>> pointsToRemove;
+    for (const auto &entity : entitiesToRemove) {
+      if (auto surface = std::dynamic_pointer_cast<BezierSurface>(entity)) {
+        const auto &surfacePoints = surface->getPoints();
+        pointsToRemove.insert(pointsToRemove.end(), surfacePoints.begin(),
+                              surfacePoints.end());
+      }
+    }
+    entitiesToRemove.insert(entitiesToRemove.end(), pointsToRemove.begin(),
+                            pointsToRemove.end());
   }
 };

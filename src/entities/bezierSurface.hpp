@@ -35,26 +35,6 @@ public:
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(ISubscribable &publisher) override {}
 
-  /*
-    void onSubscribableDestroyed(ISubscribable &publisher) override {
-
-      const auto *point = dynamic_cast<PointEntity *>(&publisher);
-      if (!point) {
-        throw std::runtime_error("Unexpected publisher type: " +
-                                 std::string(typeid(publisher).name()));
-      }
-      auto it = std::ranges::find_if(
-          _points, [&point](const auto &p) { return &p.get() == point; });
-      _points.erase(it);
-
-      auto pub_it = std::ranges::find_if(
-          _publishers, [&point](const auto &p) { return &p.get() == point; });
-      pub_it->get().removeSubscriber(*this);
-      _publishers.erase(pub_it);
-      update();
-    }
-    */
-
 protected:
   std::vector<std::shared_ptr<PointEntity>> _points;
   std::unique_ptr<BezierSurfaceMesh> _mesh;
