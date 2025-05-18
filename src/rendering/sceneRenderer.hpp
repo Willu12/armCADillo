@@ -86,11 +86,11 @@ private:
     _entityRenderers.insert(
         {EntityType::Point,
          std::make_unique<PointRenderer>(
-             *_camera, algebra::Vec4f{0.5f, 0.0f, 0.7f, 1.0f})});
+             *_camera, algebra::Vec4f{0.0f, 0.6f, 0.6f, 1.0f})});
     _entityRenderers.insert(
         {EntityType::VirtualPoint,
          std::make_unique<PointRenderer>(
-             *_camera, algebra::Vec4f{0.0f, 1.0f, 0.0f, 1.0f})});
+             *_camera, algebra::Vec4f{0.0f, 0.8f, 0.0f, 1.0f})});
     _entityRenderers.insert(
         {EntityType::Cursor, std::make_unique<CursorRenderer>(*_camera)});
     _entityRenderers.insert(
@@ -104,6 +104,9 @@ private:
          std::make_unique<BezierCurveRenderer>(*_camera, _window)});
     _entityRenderers.insert(
         {EntityType::BezierSurfaceC0,
+         std::make_unique<BezierSurfaceRenderer>(*_camera)});
+    _entityRenderers.insert(
+        {EntityType::BezierSurfaceC2,
          std::make_unique<BezierSurfaceRenderer>(*_camera)});
   }
 };

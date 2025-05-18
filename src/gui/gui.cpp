@@ -6,6 +6,7 @@
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
 #include "bezierSurfaceC0.hpp"
+#include "bezierSurfaceC2.hpp"
 #include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
@@ -69,6 +70,8 @@ void GUI::displayGUI() {
     createBSplineCurveUI();
     createInterpolatingSplineCurveUI();
     createBezierSurfaceC0UI();
+    createBezierSurfaceC2UI();
+
     removeButtonUI();
 
     processControllers();
@@ -212,6 +215,61 @@ void GUI::createBezierSurfaceC0UI() {
         createBezierSurfaceC0Flat(u_patches, v_patches);
       } else {
         createBezierSurfaceC0Cylinder(radius, height);
+      }
+
+      openConfigWindow = false; // close after creation
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel")) {
+      openConfigWindow = false;
+    }
+
+    ImGui::End();
+  }
+}
+
+void GUI::createBezierSurfaceC2UI() {
+  static bool openConfigWindow = false;
+  static int surfaceType = 0; // 0 = Flat, 1 = Cylinder
+
+  // Default values
+  static int u_patches = 2;
+  static int v_patches = 2;
+
+  static float radius = 1.0f;
+  static float height = 2.0f;
+
+  if (ImGui::Button("Create Bezier Surface C2")) {
+    openConfigWindow = true;
+  }
+
+  if (openConfigWindow) {
+    ImGui::Begin("Bezier Surface C2 Options", &openConfigWindow);
+
+    ImGui::Text("Surface Type:");
+    ImGui::RadioButton("Flat", &surfaceType, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("Cylinder", &surfaceType, 1);
+
+    ImGui::Separator();
+
+    if (surfaceType == 0) {
+      ImGui::InputInt("U Patches", &u_patches);
+      ImGui::InputInt("V Patches", &v_patches);
+    } else {
+      ImGui::InputFloat("Radius", &radius);
+      ImGui::InputFloat("Height", &height);
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Create")) {
+      if (surfaceType == 0) {
+        createBezierSurfaceC2Flat(u_patches, v_patches);
+      } else {
+        // createBezierSurfaceC0Cylinder(radius, height);
       }
 
       openConfigWindow = false; // close after creation
@@ -407,6 +465,17 @@ void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches) {
       BezierSurfaceC0::createFlat(cursorPosition, uPatches, vPatches);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
   for (const auto &point : bezierSurfaceC0->getPoints()) {
+    _scene->addEntity(EntityType::Point, point);
+  }
+}
+
+void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches) {
+  const auto &cursorPosition = getCursor()->getPosition();
+
+  std::shared_ptr<BezierSurfaceC2> bezierSurfaceC2 =
+      BezierSurfaceC2::createFlat(cursorPosition, uPatches, vPatches);
+  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
+  for (const auto &point : bezierSurfaceC2->getPoints()) {
     _scene->addEntity(EntityType::Point, point);
   }
 }

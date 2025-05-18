@@ -18,6 +18,16 @@ public:
   static std::unique_ptr<BezierSurfaceMesh>
   create(const std::vector<float> &points, uint32_t u_patches,
          uint32_t v_patches) {
+    auto vertices = createC0MeshData(points, u_patches, v_patches);
+
+    auto *bezierSurfaceMesh =
+        new BezierSurfaceMesh(vertices, u_patches, v_patches);
+    return std::unique_ptr<BezierSurfaceMesh>(bezierSurfaceMesh);
+  }
+  static std::unique_ptr<BezierSurfaceMesh>
+  createC2(const std::vector<float> &points, uint32_t u_patches,
+           uint32_t v_patches) {
+
     auto *bezierSurfaceMesh =
         new BezierSurfaceMesh(points, u_patches, v_patches);
     return std::unique_ptr<BezierSurfaceMesh>(bezierSurfaceMesh);
@@ -63,9 +73,10 @@ public:
 
 protected:
   explicit BezierSurfaceMesh(const std::vector<float> &vertices,
-                             uint32_t u_patches, uint32_t v_patches) {
+                             uint32_t u_patches, uint32_t v_patches)
+      : _controlPoints(vertices) {
     // here we have to fix it.
-    _controlPoints = createC0MeshData(vertices, u_patches, v_patches);
+    // _controlPoints = createC0MeshData(vertices, u_patches, v_patches);
     initBuffers();
   }
 
@@ -88,8 +99,9 @@ private:
     glBindVertexArray(0);
   }
 
-  std::vector<float> createC0MeshData(const std::vector<float> &vertices,
-                                      uint32_t u_patches, uint32_t v_patches) {
+  static std::vector<float> createC0MeshData(const std::vector<float> &vertices,
+                                             uint32_t u_patches,
+                                             uint32_t v_patches) {
     std::vector<float> meshData;
 
     const uint32_t u_points = 3 * u_patches + 1;

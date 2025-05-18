@@ -36,5 +36,5 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
-  algebra::Vec4f _color{0.5f, 0.f, 0.7f, 1.f};
+  algebra::Vec4f _color{0.7f, 0.f, 0.7f, 1.f};
 };

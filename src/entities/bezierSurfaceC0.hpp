@@ -20,15 +20,5 @@ public:
 private:
   explicit BezierSurfaceC0(const std::vector<algebra::Vec3f> &positions);
   inline static int _id = 0;
-  std::unique_ptr<BezierSurfaceMesh> generateMesh() {
-    std::vector<float> controlPointsPositions(_points.size() * 3);
-
-    for (const auto &[i, point] : _points | std::views::enumerate) {
-      controlPointsPositions[3 * i] = point->getPosition()[0];
-      controlPointsPositions[3 * i + 1] = point->getPosition()[1];
-      controlPointsPositions[3 * i + 2] = point->getPosition()[2];
-    }
-    return BezierSurfaceMesh::create(controlPointsPositions, _patches.sCount,
-                                     _patches.tCount);
-  }
+  std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

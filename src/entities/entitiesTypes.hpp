@@ -9,5 +9,6 @@ enum class EntityType : uint8_t {
   BSplineCurve,
   InterpolatingSplineCurve,
   VirtualPoint,
-  BezierSurfaceC0
+  BezierSurfaceC0,
+  BezierSurfaceC2
 };

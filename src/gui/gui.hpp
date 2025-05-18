@@ -86,12 +86,15 @@ private:
   void createBSplineCurveUI();
   void createInterpolatingSplineCurveUI();
   void createBezierSurfaceC0UI();
+  void createBezierSurfaceC2UI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
   void createBSplineCurve();
   void createInterpolatingSplineCurve();
   void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches);
+  void createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches);
+
   void createBezierSurfaceC0Cylinder(float r, float h);
 
   void renderModelSettings();
