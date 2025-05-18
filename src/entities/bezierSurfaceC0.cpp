@@ -39,7 +39,7 @@ BezierSurfaceC0::createCylinder(const algebra::Vec3f &position, float r,
   const uint32_t v_points = 3 * v_patches + 1;
 
   std::vector<algebra::Vec3f> controlPoints;
-  controlPoints.reserve(u_points * v_points); // prealokacja
+  controlPoints.reserve(u_points * v_points);
 
   for (uint32_t i = 0; i < u_points; ++i) {
     float u_ratio = float(i) / float(3 * u_patches);
@@ -52,7 +52,8 @@ BezierSurfaceC0::createCylinder(const algebra::Vec3f &position, float r,
       float v_ratio = float(j) / float(3 * v_patches);
       float z = v_ratio * h;
 
-      controlPoints.emplace_back(x_circle, y_circle, z);
+      controlPoints.emplace_back(x_circle + position[0], y_circle + position[1],
+                                 z + position[2]);
     }
   }
   auto cylinderSurface = new BezierSurfaceC0(controlPoints);
