@@ -35,6 +35,7 @@ public:
   std::vector<std::shared_ptr<IEntity>> getEntities() const;
   std::vector<std::reference_wrapper<PointEntity>> getPoints() const;
   std::vector<std::shared_ptr<IEntity>> getSelectedEntities() const;
+  std::vector<std::shared_ptr<IEntity>> getSelectedPointsPointers() const;
 
   std::shared_ptr<Cursor> getCursor();
 

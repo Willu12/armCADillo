@@ -30,6 +30,8 @@ public:
   SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture,
                 GLFWwindow *window)
       : _centerPointRenderer(*camera), _pickingRenderer(pickingTexture),
+        _selectedPointsRenderer(*camera,
+                                algebra::Vec4f{0.0f, 0.9f, 0.9f, 1.0f}),
         _camera(camera), _window(window) {
     initEntityRenderers();
   }
@@ -69,6 +71,11 @@ public:
       _selectionBoxRenderer.render(*_camera, mouse, _window);
   }
 
+  void renderSelectedPoints(
+      const std::vector<std::shared_ptr<IEntity>> &selectedPoints) {
+    _selectedPointsRenderer.render(selectedPoints);
+  }
+
 private:
   std::unordered_map<EntityType, std::unique_ptr<IEntityRenderer>>
       _entityRenderers;
@@ -76,6 +83,7 @@ private:
   CenterPointRenderer _centerPointRenderer;
   PickingRenderer _pickingRenderer;
   SelectionBoxRenderer _selectionBoxRenderer;
+  PointRenderer _selectedPointsRenderer;
   std::shared_ptr<Camera> _camera;
   GLFWwindow *_window;
   Grid _grid;
@@ -86,7 +94,7 @@ private:
     _entityRenderers.insert(
         {EntityType::Point,
          std::make_unique<PointRenderer>(
-             *_camera, algebra::Vec4f{0.0f, 0.6f, 0.6f, 1.0f})});
+             *_camera, algebra::Vec4f{0.2f, 0.5f, 0.5f, 1.0f})});
     _entityRenderers.insert(
         {EntityType::VirtualPoint,
          std::make_unique<PointRenderer>(

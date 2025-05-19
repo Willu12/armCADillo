@@ -10,6 +10,7 @@
 #include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
+#include "pointEntity.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
@@ -34,6 +35,15 @@ std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
 
 std::vector<std::shared_ptr<IEntity>> GUI::getSelectedEntities() const {
   return _selectedEntities;
+}
+std::vector<std::shared_ptr<IEntity>> GUI::getSelectedPointsPointers() const {
+  std::vector<std::shared_ptr<IEntity>> selectedPoints;
+  for (const auto &entity : _selectedEntities) {
+    if (std::dynamic_pointer_cast<PointEntity>(entity)) {
+      selectedPoints.emplace_back(entity);
+    }
+  }
+  return selectedPoints;
 }
 
 std::shared_ptr<Cursor> GUI::getCursor() {
