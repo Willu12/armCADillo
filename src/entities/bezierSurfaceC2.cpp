@@ -143,7 +143,7 @@ BezierSurfaceC2::createFlat(const algebra::Vec3f &position, uint32_t u_patches,
                             uint32_t v_patches) {
   std::vector<algebra::Vec3f> controlPoints;
 
-  const float length = 1.0f;
+  const float length = 0.3f;
   const uint32_t u_points = 3 * u_patches + 1;
   const uint32_t v_points = 3 * v_patches + 1;
 

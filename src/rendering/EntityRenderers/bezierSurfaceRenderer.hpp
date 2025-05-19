@@ -17,7 +17,7 @@ public:
                                      "surfaceTesselationControl.glsl",
                             ._type = GL_TESS_CONTROL_SHADER},
                  ShaderPath{._path = "../resources/shaders/"
-                                     "surfaceTesselationEvaluation.glsl",
+                                     "surfaceIsolineTeselationEvaluation.glsl",
                             ._type = GL_TESS_EVALUATION_SHADER},
 
                  ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
@@ -36,19 +36,26 @@ public:
 
       _shader.setUInt("u_subdivisions", bezierSurface.getMeshDensity().s);
       _shader.setUInt("v_subdivisions", bezierSurface.getMeshDensity().t);
-      _shader.setUInt("u_patches", bezierSurface.getPatches().sCount);
       _shader.setUInt("v_patches", bezierSurface.getPatches().tCount);
+      _shader.setUInt("u_patches", bezierSurface.getPatches().sCount);
 
       const auto &mesh = bezierSurface.getMesh();
       glLineWidth(2.0f);
-      if (bezierSurface.wireframe())
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      // if (bezierSurface.wireframe())
+      // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
       glPatchParameteri(GL_PATCH_VERTICES, 16);
       glBindVertexArray(mesh.getVAO());
+      _shader.setUInt("direction", 0);
 
+      // glUniform1ui(direction_loc, 0); // linie wzdłuż v
       glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+      _shader.setUInt("direction", 1);
+      glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
+      //  glDrawArrays(GL_PATCHES, 0,
+      //  static_cast<int>(mesh.getIndicesLength()));
+      //  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glBindVertexArray(0);
     }
   }
