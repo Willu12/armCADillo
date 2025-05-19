@@ -3,7 +3,6 @@
 #include "IEntityRenderer.hpp"
 #include "IRenderable.hpp"
 #include "bezierCurveRenderer.hpp"
-#include "bezierSurfaceC2Renderer.hpp"
 #include "bezierSurfaceRenderer.hpp"
 #include "camera.hpp"
 #include "centerPointRenderer.hpp"

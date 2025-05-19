@@ -5,13 +5,10 @@ layout(isolines, equal_spacing, ccw) in;
 uniform mat4 view;
 uniform mat4 projection;
 uniform uint direction;
-
-uniform uint u_patches;
-uniform uint v_patches;
+uniform bool renderPolyLine;
 
 out vec2 trim_coord;
 
-// dostęp do punktu kontrolnego
 vec3 p(uint up, uint vp) { return gl_in[up * 4 + vp].gl_Position.xyz; }
 
 vec3 bezier3(vec3 b0, vec3 b1, vec3 b2, vec3 b3, float t) {
@@ -37,23 +34,12 @@ void main() {
   float v = gl_TessCoord.y * float(gl_TessLevelOuter[0]) /
             float(gl_TessLevelOuter[0] - 1);
 
-  // Use local mutable copies of patch counts
-  uint u_p = u_patches;
-  uint v_p = v_patches;
-
   if (direction == 1) {
-    // Swap coordinates
-
     float temp = u;
     u = v;
     v = temp;
-    /*
-      // Swap patch counts
-      uint temp_p = u_p;
-      u_p = v_p;
-      v_p = temp_p;
-      */
   }
+
   trim_coord = vec2(u, v);
   vec3 pos = bicubic_bezier(u, v);
   gl_Position = projection * view * vec4(pos, 1.0);

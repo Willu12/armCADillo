@@ -7,6 +7,7 @@
 #include "mesh.hpp"
 #include "pointRenderer.hpp"
 #include "shader.hpp"
+#include "surfaceMeshRenderer.hpp"
 
 class BezierSurfaceRenderer : public IEntityRenderer {
 public:
@@ -22,7 +23,7 @@ public:
 
                  ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
                             ._type = GL_FRAGMENT_SHADER}}),
-        _camera(camera) {}
+        _meshRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
     if (entities.empty())
@@ -36,31 +37,26 @@ public:
 
       _shader.setUInt("u_subdivisions", bezierSurface.getMeshDensity().s);
       _shader.setUInt("v_subdivisions", bezierSurface.getMeshDensity().t);
-      _shader.setUInt("v_patches", bezierSurface.getPatches().tCount);
-      _shader.setUInt("u_patches", bezierSurface.getPatches().sCount);
-
+      _shader.setInt("renderPolyLine",
+                     static_cast<int>(bezierSurface.wireframe()));
       const auto &mesh = bezierSurface.getMesh();
       glLineWidth(2.0f);
-      // if (bezierSurface.wireframe())
-      // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
       glPatchParameteri(GL_PATCH_VERTICES, 16);
       glBindVertexArray(mesh.getVAO());
       _shader.setUInt("direction", 0);
 
-      // glUniform1ui(direction_loc, 0); // linie wzdłuż v
       glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
 
       _shader.setUInt("direction", 1);
       glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
-      //  glDrawArrays(GL_PATCHES, 0,
-      //  static_cast<int>(mesh.getIndicesLength()));
-      //  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glBindVertexArray(0);
     }
+    _meshRenderer.render(entities);
   }
 
 private:
   Shader _shader;
+  SurfaceMeshRenderer _meshRenderer;
   const Camera &_camera;
 };

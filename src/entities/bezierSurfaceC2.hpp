@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <ranges>
+#include <sys/types.h>
 #include <vector>
 
 #include "bezierSurface.hpp"
@@ -21,6 +22,8 @@ public:
   void updateBezierSurface();
   static std::array<std::array<algebra::Vec3f, 4>, 4>
   processPatch(const std::array<std::array<algebra::Vec3f, 4>, 4> &patch);
+  uint32_t getColCount() override { return 3 + _patches.tCount; }
+  uint32_t getRowCount() override { return 3 + _patches.sCount; }
 
 private:
   explicit BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions);

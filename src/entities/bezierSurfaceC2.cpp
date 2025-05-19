@@ -53,6 +53,7 @@ BezierSurfaceC2::BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions) {
     subscribe(*point);
     _points.emplace_back(std::move(point));
   }
+  _polyMesh = createPolyMesh();
 }
 
 std::shared_ptr<BezierSurfaceC2>
@@ -79,6 +80,7 @@ BezierSurfaceC2::createFlat(const algebra::Vec3f &position, uint32_t u_patches,
   flatSurface->updateBezierSurface();
 
   flatSurface->_mesh = flatSurface->generateMesh();
+  flatSurface->update();
 
   return std::shared_ptr<BezierSurfaceC2>(flatSurface);
 }
@@ -86,7 +88,7 @@ BezierSurfaceC2::createFlat(const algebra::Vec3f &position, uint32_t u_patches,
 std::shared_ptr<BezierSurfaceC2>
 BezierSurfaceC2::createCylinder(const algebra::Vec3f &position, float r,
                                 float h) {
-  const uint32_t u_patches = static_cast<uint32_t>(h / 0.5f);
+  const auto u_patches = static_cast<uint32_t>(h / 0.5f);
   const uint32_t v_patches = 2;
 
   const uint32_t u_points = 3 + u_patches;
@@ -118,6 +120,7 @@ BezierSurfaceC2::createCylinder(const algebra::Vec3f &position, float r,
   flatSurface->updateBezierSurface();
 
   flatSurface->_mesh = flatSurface->generateMesh();
+  flatSurface->update();
 
   return std::shared_ptr<BezierSurfaceC2>(flatSurface);
 }

@@ -77,6 +77,7 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
                              &bezierSurface.getMeshDensity().s, 3, 64);
   change |= ImGui::SliderInt("Vertical Density",
                              &bezierSurface.getMeshDensity().t, 3, 64);
+  ImGui::Checkbox("Show Polygonal Line", &bezierSurface.wireframe());
   return change;
 }
 

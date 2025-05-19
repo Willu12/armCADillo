@@ -1,11 +1,13 @@
 #pragma once
 
 #include "IEntity.hpp"
+#include "IMeshable.hpp"
 #include "ISubscriber.hpp"
 #include "bezierSurfaceMesh.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
+#include <memory>
 #include <vector>
 
 struct Patches {
@@ -20,6 +22,7 @@ public:
 
   const Patches &getPatches() const { return _patches; }
   const IMeshable &getMesh() const override { return *_mesh; }
+  const IMeshable &getPolyMesh() const { return *_polyMesh; }
   std::vector<std::shared_ptr<IEntity>> getPoints() {
     std::vector<std::shared_ptr<IEntity>> points;
     points.reserve(_points.size());
@@ -28,21 +31,28 @@ public:
     }
     return points;
   }
+  bool &wireframe() { return _wireframe; }
   const bool &wireframe() const { return _wireframe; }
 
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierSurface(*this);
   };
 
-  void update() override { updateMesh(); }
+  void update() override {
+    _polyMesh = createPolyMesh();
+    updateMesh();
+  }
   void onSubscribableDestroyed(ISubscribable &publisher) override {}
+  virtual uint32_t getColCount() = 0;
+  virtual uint32_t getRowCount() = 0;
 
 protected:
   std::vector<std::shared_ptr<PointEntity>> _points;
   std::unique_ptr<BezierSurfaceMesh> _mesh;
+  std::unique_ptr<Mesh> _polyMesh;
   MeshDensity _meshDensity = MeshDensity{.s = 4, .t = 4};
   Patches _patches = Patches{.sCount = 1, .tCount = 1};
-  bool _wireframe = true;
+  bool _wireframe = false;
 
   static std::vector<algebra::Vec3f>
   createCylinderPoints(const algebra::Vec3f &position, float r, float h) {
@@ -92,4 +102,43 @@ protected:
     }
     return controlPoints;
   }
+
+  std::unique_ptr<Mesh> createPolyMesh() {
+    std::vector<float> vertices(3 * _points.size());
+
+    for (int i = 0; i < _points.size(); ++i) {
+      vertices[3 * i] = _points[i]->getPosition()[0];
+      vertices[3 * i + 1] = _points[i]->getPosition()[1];
+      vertices[3 * i + 2] = _points[i]->getPosition()[2];
+    }
+
+    auto rowCount = getRowCount();
+    // 3 * _patches.sCount + 1;
+    auto colCount = getColCount();
+    //  3 * _patches.tCount + 1;
+    std::vector<unsigned int> indices;
+
+    // Horizontal lines (rows)
+    for (int row = 0; row < rowCount; ++row) {
+      for (int col = 0; col < colCount - 1; ++col) {
+        int a = row * colCount + col;
+        int b = a + 1;
+        indices.push_back(a);
+        indices.push_back(b); // horizontal line: a — b
+      }
+    }
+
+    // Vertical lines (columns)
+    for (int col = 0; col < colCount; ++col) {
+      for (int row = 0; row < rowCount - 1; ++row) {
+        int a = row * colCount + col;
+        int b = a + colCount;
+        indices.push_back(a);
+        indices.push_back(b); // vertical line: a — b
+      }
+    }
+    return Mesh::create(vertices, indices);
+  }
+
+  // Vertical lines (columns)
 };
