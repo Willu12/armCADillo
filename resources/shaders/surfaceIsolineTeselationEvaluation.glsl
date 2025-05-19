@@ -34,7 +34,8 @@ vec3 bicubic_bezier(float u, float v) {
 
 void main() {
   float u = gl_TessCoord.x;
-  float v = gl_TessCoord.y;
+  float v = gl_TessCoord.y * float(gl_TessLevelOuter[0]) /
+            float(gl_TessLevelOuter[0] - 1);
 
   // Use local mutable copies of patch counts
   uint u_p = u_patches;
@@ -42,24 +43,17 @@ void main() {
 
   if (direction == 1) {
     // Swap coordinates
+
     float temp = u;
     u = v;
     v = temp;
-
-    // Swap patch counts
-    uint temp_p = u_p;
-    u_p = v_p;
-    v_p = temp_p;
+    /*
+      // Swap patch counts
+      uint temp_p = u_p;
+      u_p = v_p;
+      v_p = temp_p;
+      */
   }
-
-  // Compute global coordinates
-  float u_glob = (gl_PrimitiveID / v_p + u) / float(u_p);
-  float v_glob = (gl_PrimitiveID % v_p + v) / float(v_p);
-
-  // Clamp to [0, 1]
-  u_glob = min(u_glob, 1.0);
-  v_glob = min(v_glob, 1.0);
-
   trim_coord = vec2(u, v);
   vec3 pos = bicubic_bezier(u, v);
   gl_Position = projection * view * vec4(pos, 1.0);
