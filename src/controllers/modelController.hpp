@@ -52,9 +52,13 @@ private:
     auto &window = _camera.getWindow();
     x = (2.f * x) / static_cast<float>(GLFWHelper::getWidth(&window)) - 1.f;
     y = 1.f - (2.f * y) / static_cast<float>(GLFWHelper::getHeight(&window));
-    for (const auto &entity : _entites) {
+    if (_entites.size() == 1) {
+      updateFromCamera(_entites.front(), x, y);
+    } else {
+      updateCenterPoint(x, y);
+      // for (const auto &entity : _entites) {
 
-      updateFromCamera(entity, x, y);
+      //  }
     }
   }
 
@@ -111,5 +115,27 @@ private:
     viewPosition = viewPosition * (1.f / viewPosition[3]);
     auto worldPos = _camera.inverseViewMatrix() * viewPosition;
     entity->updatePosition(worldPos.fromHomogenous());
+  }
+
+  void updateCenterPoint(float x, float y) {
+    auto projection = _camera.projectionMatrix();
+    auto basePosition = _centerPoint.getPosition();
+    auto sceneCursorPosition =
+        projection *
+        (_camera.viewMatrix() * _centerPoint.getPosition().toHomogenous());
+
+    sceneCursorPosition = sceneCursorPosition * (1.0f / sceneCursorPosition[3]);
+    float z_ndc = sceneCursorPosition[2];
+
+    auto screenPosition = algebra::Vec3f(x, y, z_ndc).toHomogenous();
+
+    auto viewPosition = _camera.inverseProjectionMatrix() * screenPosition;
+    viewPosition = viewPosition * (1.f / viewPosition[3]);
+    auto worldPos = _camera.inverseViewMatrix() * viewPosition;
+    auto diff = worldPos.fromHomogenous() - basePosition;
+
+    for (auto entity : _entites) {
+      entity->updatePosition(entity->getPosition() + diff);
+    }
   }
 };
