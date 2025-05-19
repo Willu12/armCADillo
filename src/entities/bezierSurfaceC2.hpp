@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <ranges>
 #include <vector>
 
@@ -18,14 +19,13 @@ public:
     _mesh = generateMesh();
   }
   void updateBezierSurface();
-  static std::array<algebra::Vec3f, 16> convertDeBoorPatchToBernstein(
-      const std::array<algebra::Vec3f, 16> &deBoorPatch);
+  static std::array<std::array<algebra::Vec3f, 4>, 4>
+  processPatch(const std::array<std::array<algebra::Vec3f, 4>, 4> &patch);
 
 private:
   explicit BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions);
   std::vector<algebra::Vec3f> _bezierControlPoints;
   inline static int _id = 0;
 
-  std::vector<algebra::Vec3f> getRepeatingDeBoorPoints();
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

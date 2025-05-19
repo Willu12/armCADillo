@@ -116,6 +116,6 @@ private:
          std::make_unique<BezierSurfaceRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::BezierSurfaceC2,
-         std::make_unique<BezierSurfaceC2Renderer>(*_camera)});
+         std::make_unique<BezierSurfaceRenderer>(*_camera)});
   }
 };
