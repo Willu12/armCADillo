@@ -3,6 +3,7 @@
 #include "IEntityRenderer.hpp"
 #include "IRenderable.hpp"
 #include "bezierCurveRenderer.hpp"
+#include "bezierSurfaceC2Renderer.hpp"
 #include "bezierSurfaceRenderer.hpp"
 #include "camera.hpp"
 #include "centerPointRenderer.hpp"
@@ -115,6 +116,6 @@ private:
          std::make_unique<BezierSurfaceRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::BezierSurfaceC2,
-         std::make_unique<BezierSurfaceRenderer>(*_camera)});
+         std::make_unique<BezierSurfaceC2Renderer>(*_camera)});
   }
 };

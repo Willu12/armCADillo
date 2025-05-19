@@ -279,7 +279,7 @@ void GUI::createBezierSurfaceC2UI() {
       if (surfaceType == 0) {
         createBezierSurfaceC2Flat(u_patches, v_patches);
       } else {
-        // createBezierSurfaceC0Cylinder(radius, height);
+        createBezierSurfaceC2Cylinder(radius, height);
       }
 
       openConfigWindow = false; // close after creation
@@ -497,6 +497,17 @@ void GUI::createBezierSurfaceC0Cylinder(float r, float h) {
       BezierSurfaceC0::createCylinder(cursorPosition, r, h);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
   for (const auto &point : bezierSurfaceC0->getPoints()) {
+    _scene->addEntity(EntityType::Point, point);
+  }
+}
+
+void GUI::createBezierSurfaceC2Cylinder(float r, float h) {
+  const auto &cursorPosition = getCursor()->getPosition();
+
+  std::shared_ptr<BezierSurfaceC2> bezierSurface =
+      BezierSurfaceC2::createCylinder(cursorPosition, r, h);
+  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurface);
+  for (const auto &point : bezierSurface->getPoints()) {
     _scene->addEntity(EntityType::Point, point);
   }
 }

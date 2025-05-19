@@ -10,8 +10,8 @@ public:
   createFlat(const algebra::Vec3f &position, uint32_t u_patches,
              uint32_t v_patches);
 
-  //  static std::shared_ptr<BezierSurfaceC2>
-  // createCylinder(const algebra::Vec3f &position, float r, float h);
+  static std::shared_ptr<BezierSurfaceC2>
+  createCylinder(const algebra::Vec3f &position, float r, float h);
 
   void updateMesh() override {
     updateBezierSurface();

@@ -4,8 +4,7 @@ layout(isolines, equal_spacing, ccw) in;
 
 uniform mat4 view;
 uniform mat4 projection;
-uniform uint
-    direction; // 0 = linie wzdłuż v (stałe u), 1 = linie wzdłuż u (stałe v)
+uniform uint direction;
 
 uniform uint u_patches;
 uniform uint v_patches;
@@ -34,23 +33,32 @@ vec3 bicubic_bezier(float u, float v) {
 }
 
 void main() {
-  // float t = gl_TessCoord.x;
   float u = gl_TessCoord.x;
   float v = gl_TessCoord.y;
+
+  // Use local mutable copies of patch counts
+  uint u_p = u_patches;
+  uint v_p = v_patches;
+
   if (direction == 1) {
+    // Swap coordinates
     float temp = u;
     u = v;
     v = temp;
+
+    // Swap patch counts
+    uint temp_p = u_p;
+    u_p = v_p;
+    v_p = temp_p;
   }
-  // wylicz indeksy patcha
-  // uint patch_u = gl_PrimitiveID / v_patches;
-  // uint patch_v = gl_PrimitiveID % v_patches;
-  float u_glob = (gl_PrimitiveID / v_patches + u) / u_patches;
-  float v_glob = (gl_PrimitiveID % v_patches + v) / v_patches;
+
+  // Compute global coordinates
+  float u_glob = (gl_PrimitiveID / v_p + u) / float(u_p);
+  float v_glob = (gl_PrimitiveID % v_p + v) / float(v_p);
+
+  // Clamp to [0, 1]
   u_glob = min(u_glob, 1.0);
   v_glob = min(v_glob, 1.0);
-  // float u = (patch_u + (direction == 0 ? t : 0.0)) / float(u_patches);
-  // float v = (patch_v + (direction == 1 ? t : 0.0)) / float(v_patches);
 
   trim_coord = vec2(u, v);
   vec3 pos = bicubic_bezier(u, v);
