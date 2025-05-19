@@ -86,9 +86,32 @@ BezierSurfaceC2::createFlat(const algebra::Vec3f &position, uint32_t u_patches,
 std::shared_ptr<BezierSurfaceC2>
 BezierSurfaceC2::createCylinder(const algebra::Vec3f &position, float r,
                                 float h) {
-  const uint32_t u_patches = h / 0.5f;
+  const uint32_t u_patches = static_cast<uint32_t>(h / 0.5f);
   const uint32_t v_patches = 2;
-  auto flatSurface = new BezierSurfaceC2(createCylinderPoints(position, r, h));
+
+  const uint32_t u_points = 3 + u_patches;
+  const uint32_t v_points = 3 + v_patches;
+
+  std::vector<algebra::Vec3f> controlPoints;
+  controlPoints.reserve(u_points * v_points);
+
+  for (uint32_t i = 0; i < u_points; ++i) {
+    float u_ratio = float(i) / float(u_points - 3);
+    float angle = u_ratio * 2.0f * M_PI;
+
+    float x_circle = std::cos(angle) * r;
+    float y_circle = std::sin(angle) * r;
+
+    for (uint32_t j = 0; j < v_points; ++j) {
+      float v_ratio = float(j) / float(v_points - 1);
+      float z = v_ratio * h;
+
+      controlPoints.emplace_back(x_circle + position[0], y_circle + position[1],
+                                 z + position[2]);
+    }
+  }
+
+  auto flatSurface = new BezierSurfaceC2(controlPoints);
 
   flatSurface->_patches.sCount = u_patches;
   flatSurface->_patches.tCount = v_patches;
