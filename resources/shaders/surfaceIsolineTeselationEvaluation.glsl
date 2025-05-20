@@ -31,7 +31,7 @@ vec3 bicubic_bezier(float u, float v) {
 
 void main() {
   float u = gl_TessCoord.x;
-  float v = gl_TessCoord.y * float(gl_TessLevelOuter[0]) /
+  float v = float(gl_TessCoord.y) * float(gl_TessLevelOuter[0]) /
             float(gl_TessLevelOuter[0] - 1);
 
   if (direction == 1) {
