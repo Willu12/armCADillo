@@ -19,6 +19,9 @@ add_subdirectory(glfw)
 add_subdirectory(algebra)
 add_subdirectory(glad)
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json)
+
 target_include_directories(imgui PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui/backends

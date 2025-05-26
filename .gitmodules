@@ -10,3 +10,6 @@
 [submodule "external/stb_image"]
 	path = external/stb_image
 	url = git@github.com:nothings/stb.git
+[submodule "external/json"]
+	path = external/json
+	url = https://github.com/nlohmann/json.git
