@@ -298,6 +298,7 @@ void GUI::createBezierSurfaceC2UI() {
 }
 
 void GUI::createSerializeUI() {
+
   static bool openConfigWindow = false;
   if (ImGui::Button("Serialize Scene")) {
     openConfigWindow = true;
@@ -305,7 +306,19 @@ void GUI::createSerializeUI() {
   if (!openConfigWindow)
     return;
   ImGui::Begin("Serialize Options", &openConfigWindow);
-  ImGui::InputText("Name", &_jsonSerializer.getSavePath());
+  if (ImGui::Button("Choose save file")) {
+    NFD_Init();
+    nfdu8char_t *outPath = nullptr;
+    // nfdu8filteritem_t filters[1] = {{"serializedFile", "json"}};
+    nfdopendialogu8args_t args = {0};
+    nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+    if (result == NFD_OKAY) {
+      _jsonSerializer.getSavePath() = std::string(outPath);
+      NFD_FreePathU8(outPath);
+    }
+    NFD_Quit();
+  }
+  // ImGui::InputText("Name", &_jsonSerializer.getSavePath());
   if (ImGui::Button("Save")) {
     _jsonSerializer.serializeScene(*_scene);
   }
