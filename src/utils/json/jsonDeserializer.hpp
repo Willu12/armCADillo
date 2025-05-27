@@ -1,4 +1,5 @@
 #pragma once
+#include "bezierCurveC0Deserializer.hpp"
 #include "entitiesTypes.hpp"
 #include "entityDeserializer.hpp"
 #include "nlohmann/json.hpp"
@@ -25,14 +26,14 @@ public:
 
     for (const auto &json : pointJson) {
       const auto &deserializer = _deserializerMap.at(EntityType::Point);
-      const auto &entity = deserializer->deserializeEntity(json);
+      const auto &entity = deserializer->deserializeEntity(json, scene);
       scene.addEntity(EntityType::Point, entity);
     }
 
     for (const auto &json : geometryJson) {
       const auto entityType = _typeMap.at(json.at("objectType"));
       const auto &deserializer = _deserializerMap.at(entityType);
-      const auto &entity = deserializer->deserializeEntity(json);
+      const auto &entity = deserializer->deserializeEntity(json, scene);
       scene.addEntity(entityType, entity);
     }
   }
@@ -56,6 +57,8 @@ private:
         {EntityType::Torus, std::make_unique<TorusDeserializer>()});
     _deserializerMap.insert(
         {EntityType::Point, std::make_unique<PointDeserializer>()});
+    _deserializerMap.insert({EntityType::BezierCurveC0,
+                             std::make_unique<BezierCurveC0Deserializer>()});
   }
 
   json readJson(const std::string &path) const {

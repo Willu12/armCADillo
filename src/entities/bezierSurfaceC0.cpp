@@ -30,7 +30,8 @@ BezierSurfaceC0::createCylinder(const algebra::Vec3f &position, float r,
 }
 
 BezierSurfaceC0::BezierSurfaceC0(const std::vector<algebra::Vec3f> &positions) {
-  _name = "BezierSurfaceC0_" + std::to_string(_id++);
+  _id = _classId++;
+  _name = "BezierSurfaceC0_" + std::to_string(_id);
 
   for (const auto &controlPoint : positions) {
     auto point = std::make_unique<PointEntity>(controlPoint);

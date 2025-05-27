@@ -2,7 +2,8 @@
 
 #include "entityDeserializer.hpp"
 #include <memory>
-class TorusDeserializer : public EntityDeserializer {
+
+class BezierCurveC0Deserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
 public:

@@ -9,7 +9,8 @@
 class VirtualPoint : public IEntity, public ISubscribable {
 public:
   explicit VirtualPoint(algebra::Vec3f position) : _mesh(generateMesh()) {
-    _name = "BezierPoint" + std::to_string(_id++);
+    _id = _classId++;
+    _name = "BezierPoint" + std::to_string(_id);
     _position = position;
     _meshKind = MeshKind::Triangles;
     _scale = 0.02f;
@@ -30,10 +31,9 @@ public:
 
   void updateMesh() override { _mesh = generateMesh(); };
   const Mesh &getMesh() const override { return *_mesh; }
-  uint32_t getId() const override { return _id; }
 
 private:
-  inline static int _id;
+  inline static int _classId;
   std::shared_ptr<Mesh> _mesh;
 
   std::shared_ptr<Mesh> generateMesh() {

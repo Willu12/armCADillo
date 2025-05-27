@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME}
  src/entities/bezierSurfaceC2.cpp
  src/utils/json/entityDeserializer.cpp
  src/utils/json/torusDeserializer.cpp
+ src/utils/json/bezierCurveC0Deseralizer.cpp
 
  )
 

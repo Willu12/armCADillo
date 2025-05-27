@@ -24,12 +24,11 @@ public:
   processPatch(const std::array<std::array<algebra::Vec3f, 4>, 4> &patch);
   uint32_t getColCount() override { return 3 + _patches.tCount; }
   uint32_t getRowCount() override { return 3 + _patches.sCount; }
-  uint32_t getId() const override { return _id; }
 
 private:
   explicit BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions);
   std::vector<algebra::Vec3f> _bezierControlPoints;
-  inline static int _id = 0;
+  inline static int _classId = 0;
 
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

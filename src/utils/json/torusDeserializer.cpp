@@ -1,7 +1,7 @@
 #include "torusDeserializer.hpp"
 #include "torusEntity.hpp"
 std::shared_ptr<IEntity>
-TorusDeserializer::deserializeEntity(const json &j) const {
+TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   std::string name;
   int id = -1;
   MeshDensity meshDensity;

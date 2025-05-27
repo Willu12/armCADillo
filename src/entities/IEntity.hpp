@@ -70,7 +70,7 @@ public:
     _position = translatedPosition + centerPoint;
   }
 
-  virtual uint32_t getId() const = 0;
+  uint32_t getId() const { return _id; }
 
 protected:
   algebra::Vec3f _position;
@@ -78,4 +78,5 @@ protected:
   float _scale = 1.f;
   // algrebra::Vec3f _scale = algebra::Vec3f(1.f,1.f,1.f);
   std::string _name;
+  uint32_t _id;
 };

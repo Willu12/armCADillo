@@ -41,7 +41,6 @@ public:
   }
   const IMeshable &getMesh() const override { return *_mesh; }
   bool &showPolyLine() { return _showPolyLine; }
-  uint32_t getId() const override { return 0; }
   std::vector<std::reference_wrapper<const PointEntity>>
   getPointsReferences() const override {
     std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;

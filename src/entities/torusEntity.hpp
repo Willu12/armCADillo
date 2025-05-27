@@ -9,7 +9,8 @@ public:
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _mesh(generateMesh()) {
     _position = position;
-    _name = ("Torus_" + std::to_string(TorusEntity::_id++));
+    _id = _classId++;
+    _name = ("Torus_" + std::to_string(TorusEntity::_id));
   }
 
   bool acceptVisitor(IVisitor &visitor) override {
@@ -37,14 +38,13 @@ public:
 
     return change;
   }
-  uint32_t getId() const override { return _id; }
 
 private:
   algebra::Torus<float> _torus;
 
   MeshDensity _meshDensity;
   std::shared_ptr<Mesh> _mesh;
-  static inline int _id;
+  static inline int _classId;
 
   std::shared_ptr<Mesh> generateMesh() {
     return Mesh::fromParametrization(_torus, _meshDensity);

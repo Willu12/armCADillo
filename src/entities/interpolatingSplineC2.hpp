@@ -9,10 +9,9 @@ public:
   explicit InterpolatingSplineC2(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
   bool acceptVisitor(IVisitor &visitor) override;
-  uint32_t getId() const override { return _id; }
 
 private:
-  inline static int _id;
+  inline static int _classId;
 
   std::vector<algebra::Vec3f>
   solveTridiagonalMatrix(std::vector<float> &alpha, std::vector<float> &beta,

@@ -1,6 +1,10 @@
 #include "entityDeserializer.hpp"
 #include "IEntity.hpp"
+#include "pointEntity.hpp"
+#include "scene.hpp"
 #include "vec.hpp"
+#include <functional>
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -28,4 +32,22 @@ EntityDeserializer::deserializeRotation(const json &j) const {
   jQ.at("z").get_to(Q.z());
   jQ.at("w").get_to(Q.w());
   return Q;
+}
+
+std::vector<std::reference_wrapper<PointEntity>>
+EntityDeserializer::getPoints(const json &j, const Scene &scene) const {
+  const auto &controlPointsJson = j.at("controlPoints");
+  const auto &points = scene.getPoints();
+  std::vector<std::reference_wrapper<PointEntity>> pointsRef;
+
+  for (const auto &point : controlPointsJson) {
+    const auto &Id = point.at("id");
+    const auto iter = std::ranges::find_if(
+        points, [Id](const auto &p) { return p->getId() == Id; });
+
+    if (iter != points.end()) {
+      pointsRef.emplace_back(*std::dynamic_pointer_cast<PointEntity>(*iter));
+    }
+  }
+  return pointsRef;
 }

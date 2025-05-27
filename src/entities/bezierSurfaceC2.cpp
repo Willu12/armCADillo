@@ -46,7 +46,8 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
 }
 
 BezierSurfaceC2::BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions) {
-  _name = "BezierCurveC2_" + std::to_string(_id++);
+  _id = _classId++;
+  _name = "BezierCurveC2_" + std::to_string(_id);
 
   for (const auto &controlPoint : positions) {
     auto point = std::make_unique<PointEntity>(controlPoint);

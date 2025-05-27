@@ -15,7 +15,8 @@ class BezierCurveC0 : public BezierCurve {
 public:
   explicit BezierCurveC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points) {
-    _name = "BezierCurveC0_" + std::to_string(_id++);
+    _id = _classId++;
+    _name = "BezierCurveC0_" + std::to_string(_id);
     for (const auto &p : points) {
       _points.emplace_back(p);
       subscribe(p);
@@ -26,10 +27,9 @@ public:
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierCurve(*this);
   }
-  uint32_t getId() const override { return _id; }
 
 private:
-  inline static int _id;
+  inline static int _classId = 0;
 
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> vertices;
