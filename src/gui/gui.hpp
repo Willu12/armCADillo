@@ -7,6 +7,7 @@
 #include "controllers.hpp"
 #include "cursor.hpp"
 #include "entitiesTypes.hpp"
+#include "jsonDeserializer.hpp"
 #include "jsonSerializer.hpp"
 #include "mouse.hpp"
 #include "optional"
@@ -67,6 +68,7 @@ private:
   Mouse _mouse;
   GuiVisitor _guiSettingsVisitor;
   JsonSerializer _jsonSerializer;
+  jsonDeserializer _jsonDeserializer;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;

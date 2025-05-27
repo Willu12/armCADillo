@@ -20,6 +20,9 @@ add_executable(${PROJECT_NAME}
  src/controllers/selectionController.cpp
  src/entities/bezierSurfaceC0.cpp
  src/entities/bezierSurfaceC2.cpp
+ src/utils/json/entityDeserializer.cpp
+ src/utils/json/torusDeserializer.cpp
+
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -29,6 +32,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/controllers/
     src/entities/
     src/utils/
+    src/utils/json
     src/
     src/rendering/
     src/meshes/
