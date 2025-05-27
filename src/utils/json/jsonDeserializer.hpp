@@ -1,7 +1,9 @@
 #pragma once
 #include "bezierCurveC0Deserializer.hpp"
+#include "bsplineDeserializer.hpp"
 #include "entitiesTypes.hpp"
 #include "entityDeserializer.hpp"
+#include "interpolatingSplineDeserializer.hpp"
 #include "nlohmann/json.hpp"
 #include "pointDeserializer.hpp"
 #include "scene.hpp"
@@ -59,6 +61,11 @@ private:
         {EntityType::Point, std::make_unique<PointDeserializer>()});
     _deserializerMap.insert({EntityType::BezierCurveC0,
                              std::make_unique<BezierCurveC0Deserializer>()});
+    _deserializerMap.insert(
+        {EntityType::BSplineCurve, std::make_unique<BSplineDeserializer>()});
+    _deserializerMap.insert(
+        {EntityType::InterpolatingSplineCurve,
+         std::make_unique<InterpolatingSplineDeserializer>()});
   }
 
   json readJson(const std::string &path) const {
