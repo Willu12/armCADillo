@@ -90,8 +90,7 @@ private:
   void createBezierCurveUI();
   void createBSplineCurveUI();
   void createInterpolatingSplineCurveUI();
-  void createBezierSurfaceC0UI();
-  void createBezierSurfaceC2UI();
+  void createBezierSurfaceUI();
   void createSerializeUI();
   void createLoadSceneUI();
 

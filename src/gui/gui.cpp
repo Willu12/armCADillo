@@ -83,8 +83,7 @@ void GUI::displayGUI() {
     createBezierCurveUI();
     createBSplineCurveUI();
     createInterpolatingSplineCurveUI();
-    createBezierSurfaceC0UI();
-    createBezierSurfaceC2UI();
+    createBezierSurfaceUI();
 
     removeButtonUI();
     createSerializeUI();
@@ -190,119 +189,65 @@ void GUI::createInterpolatingSplineCurveUI() {
     createInterpolatingSplineCurve();
 }
 
-void GUI::createBezierSurfaceC0UI() {
+void GUI::createBezierSurfaceUI() {
   static bool openConfigWindow = false;
-  static int surfaceType = 0; // 0 = Flat, 1 = Cylinder
-
-  // Default values
-  static int u_patches = 2;
-  static int v_patches = 2;
-
-  static float radius = 1.0f;
-  static float height = 2.0f;
-  static float uLength = 1.0f;
-  static float vLength = 2.0f;
-
-  if (ImGui::Button("Create Bezier Surface C0")) {
+  if (ImGui::Button("Create Bezier Surface")) {
     openConfigWindow = true;
   }
+  if (!openConfigWindow)
+    return;
+  static int c0 = 1;
+  static int surfaceType = 0;
+  static int uPatches = 2;
+  static int vPatches = 2;
 
-  if (openConfigWindow) {
-    ImGui::Begin("Bezier Surface C0 Options", &openConfigWindow);
+  static float x = 1.0f;
+  static float y = 2.0f;
 
-    ImGui::Text("Surface Type:");
-    ImGui::RadioButton("Flat", &surfaceType, 0);
-    ImGui::SameLine();
-    ImGui::RadioButton("Cylinder", &surfaceType, 1);
+  ImGui::Begin("Bezier Surface Options", &openConfigWindow);
 
-    ImGui::Separator();
-    ImGui::InputInt("U Patches", &u_patches);
-    ImGui::InputInt("V Patches", &v_patches);
+  ImGui::Text("Surface Type:");
+
+  ImGui::RadioButton("C0", &c0, 1);
+  ImGui::SameLine();
+  ImGui::RadioButton("C2", &c0, 0);
+  ImGui::Separator();
+  ImGui::RadioButton("Flat", &surfaceType, 0);
+  ImGui::SameLine();
+  ImGui::RadioButton("Cylinder", &surfaceType, 1);
+  ImGui::Separator();
+  ImGui::InputInt("U Patches", &uPatches);
+  ImGui::InputInt("V Patches", &vPatches);
+  if (surfaceType == 0) {
+    ImGui::InputFloat("uLen", &x);
+    ImGui::InputFloat("VLen", &y);
+  } else {
+    ImGui::InputFloat("Radius", &x);
+    ImGui::InputFloat("Height", &y);
+  }
+  ImGui::Separator();
+
+  if (ImGui::Button("Create")) {
     if (surfaceType == 0) {
-      ImGui::InputFloat("uLen", &uLength);
-      ImGui::InputFloat("VLen", &vLength);
+      if (c0)
+        createBezierSurfaceC0Flat(uPatches, vPatches, x, y);
+      else
+        createBezierSurfaceC2Flat(uPatches, vPatches, x, y);
     } else {
-      ImGui::InputFloat("Radius", &radius);
-      ImGui::InputFloat("Height", &height);
+      if (c0)
+        createBezierSurfaceC0Cylinder(uPatches, vPatches, x, y);
+      else
+        createBezierSurfaceC2Cylinder(uPatches, vPatches, x, y);
     }
 
-    ImGui::Separator();
-
-    if (ImGui::Button("Create")) {
-      if (surfaceType == 0) {
-        createBezierSurfaceC0Flat(u_patches, v_patches, uLength, vLength);
-      } else {
-        createBezierSurfaceC0Cylinder(u_patches, v_patches, radius, height);
-      }
-
-      openConfigWindow = false; // close after creation
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Cancel")) {
-      openConfigWindow = false;
-    }
-
-    ImGui::End();
+    openConfigWindow = false;
   }
-}
+  ImGui::SameLine();
 
-void GUI::createBezierSurfaceC2UI() {
-  static bool openConfigWindow = false;
-  static int surfaceType = 0; // 0 = Flat, 1 = Cylinder
-
-  // Default values
-  static int u_patches = 2;
-  static int v_patches = 2;
-
-  static float radius = 1.0f;
-  static float height = 2.0f;
-  static float uLength = 1.0f;
-  static float vLength = 2.0f;
-  if (ImGui::Button("Create Bezier Surface C2")) {
-    openConfigWindow = true;
+  if (ImGui::Button("Cancel")) {
+    openConfigWindow = false;
   }
-
-  if (openConfigWindow) {
-    ImGui::Begin("Bezier Surface C2 Options", &openConfigWindow);
-
-    ImGui::Text("Surface Type:");
-    ImGui::RadioButton("Flat", &surfaceType, 0);
-    ImGui::SameLine();
-    ImGui::RadioButton("Cylinder", &surfaceType, 1);
-
-    ImGui::Separator();
-    ImGui::InputInt("U Patches", &u_patches);
-    ImGui::InputInt("V Patches", &v_patches);
-    if (surfaceType == 0) {
-      ImGui::InputFloat("uLen", &uLength);
-      ImGui::InputFloat("VLen", &vLength);
-    } else {
-      ImGui::InputFloat("Radius", &radius);
-      ImGui::InputFloat("Height", &height);
-    }
-
-    ImGui::Separator();
-
-    if (ImGui::Button("Create")) {
-      if (surfaceType == 0) {
-        createBezierSurfaceC2Flat(u_patches, v_patches, uLength, vLength);
-      } else {
-        createBezierSurfaceC2Cylinder(u_patches, v_patches, radius, height);
-      }
-
-      openConfigWindow = false; // close after creation
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Cancel")) {
-      openConfigWindow = false;
-    }
-
-    ImGui::End();
-  }
+  ImGui::End();
 }
 
 void GUI::createLoadSceneUI() {
