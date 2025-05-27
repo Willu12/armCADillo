@@ -11,6 +11,7 @@
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
 #include "jsonSerializer.hpp"
+#include "nfd.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"

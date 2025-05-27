@@ -21,6 +21,7 @@ add_subdirectory(glad)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(json)
+add_subdirectory(nativefiledialog-extended)
 
 target_include_directories(imgui PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui

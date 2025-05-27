@@ -43,4 +43,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 )
 
-target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json nfd)
