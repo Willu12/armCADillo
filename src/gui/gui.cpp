@@ -10,6 +10,7 @@
 #include "entitiesTypes.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
+#include "jsonSerializer.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
 #include "virtualPoint.hpp"
@@ -83,7 +84,7 @@ void GUI::displayGUI() {
     createBezierSurfaceC2UI();
 
     removeButtonUI();
-
+    createSerializeUI();
     processControllers();
 
     ImGui::End();
@@ -293,6 +294,26 @@ void GUI::createBezierSurfaceC2UI() {
 
     ImGui::End();
   }
+}
+
+void GUI::createSerializeUI() {
+  static bool openConfigWindow = false;
+  if (ImGui::Button("Serialize Scene")) {
+    openConfigWindow = true;
+  }
+  if (!openConfigWindow)
+    return;
+  ImGui::Begin("Serialize Options", &openConfigWindow);
+  ImGui::InputText("Name", &_jsonSerializer.getSavePath());
+  if (ImGui::Button("Save")) {
+    _jsonSerializer.serializeScene(*_scene);
+  }
+  ImGui::SameLine();
+
+  if (ImGui::Button("Cancel")) {
+    openConfigWindow = false;
+  }
+  ImGui::End();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {

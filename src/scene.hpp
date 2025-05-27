@@ -50,7 +50,7 @@ public:
   }
 
   const std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>> &
-  getGroupedEntities() {
+  getGroupedEntities() const {
     return _entities;
   }
 

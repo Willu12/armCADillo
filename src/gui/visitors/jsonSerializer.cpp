@@ -9,8 +9,40 @@
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
+#include <fstream>
 
 using json = nlohmann::json;
+
+void JsonSerializer::serializeScene(const Scene &scene) {
+  createSceneJson(scene);
+  std::ofstream file(_savePath);
+  if (file.is_open()) {
+    file << std::setw(4) << _sceneJson << std::endl;
+    file.close();
+  } else {
+    throw std::runtime_error("Unable to open file: " + _savePath);
+  }
+}
+
+void JsonSerializer::createSceneJson(const Scene &scene) {
+  json sceneJson;
+  const auto &points = scene.getPoints();
+  _pointsJson.clear();
+  for (const auto &point : points) {
+    point->acceptVisitor(*this);
+  }
+  _geometryJson.clear();
+  const auto &groupedEntites = scene.getGroupedEntities();
+  for (const auto &pair : groupedEntites) {
+    for (const auto &entity : pair.second) {
+      entity->acceptVisitor(*this);
+    }
+  }
+
+  sceneJson["points"] = _pointsJson;
+  sceneJson["geometry"] = _geometryJson;
+  _sceneJson = sceneJson;
+}
 
 bool JsonSerializer::visitTorus(TorusEntity &torus) {
   json j;
@@ -24,6 +56,8 @@ bool JsonSerializer::visitTorus(TorusEntity &torus) {
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
   j["smallRadius"] = {torus.getTubeRadius()};
   j["largeRadius"] = {torus.getInnerRadius()};
+  _geometryJson.push_back(j);
+
   return true;
 };
 
@@ -32,6 +66,7 @@ bool JsonSerializer::visitPoint(PointEntity &point) {
   j["id"] = point.getId();
   j["name"] = point.getName();
   serializePosition(j, point);
+  _pointsJson.push_back(j);
   return true;
 }
 
@@ -41,6 +76,7 @@ bool JsonSerializer::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   j["id"] = bezierCurve.getId();
   j["name"] = bezierCurve.getName();
   serializeControlPoints(j, bezierCurve);
+  _geometryJson.push_back(j);
   return true;
 }
 
@@ -50,6 +86,7 @@ bool JsonSerializer::visitBSplineCurve(BSplineCurve &bSplineCurve) {
   j["id"] = bSplineCurve.getId();
   j["name"] = bSplineCurve.getName();
   serializeControlPoints(j, bSplineCurve);
+  _geometryJson.push_back(j);
   return true;
 }
 
@@ -60,6 +97,7 @@ bool JsonSerializer::visitInterpolatingSplineCurve(
   j["id"] = interpolatingSpline.getId();
   j["name"] = interpolatingSpline.getName();
   serializeControlPoints(j, interpolatingSpline);
+  _geometryJson.push_back(j);
   return true;
 }
 
@@ -73,6 +111,7 @@ bool JsonSerializer::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) {
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
   j["size"] = {{"u", bezierSurfaceC0.getColCount()},
                {"v", bezierSurfaceC0.getRowCount()}};
+  _geometryJson.push_back(j);
   return true;
 }
 
@@ -86,6 +125,8 @@ bool JsonSerializer::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) {
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
   j["size"] = {{"u", bezierSurfaceC2.getColCount()},
                {"v", bezierSurfaceC2.getRowCount()}};
+  _geometryJson.push_back(j);
+
   return true;
 }
 

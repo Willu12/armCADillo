@@ -7,6 +7,7 @@
 #include "controllers.hpp"
 #include "cursor.hpp"
 #include "entitiesTypes.hpp"
+#include "jsonSerializer.hpp"
 #include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
@@ -65,6 +66,7 @@ private:
   CenterPoint _centerPoint;
   Mouse _mouse;
   GuiVisitor _guiSettingsVisitor;
+  JsonSerializer _jsonSerializer;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;
@@ -88,6 +90,7 @@ private:
   void createInterpolatingSplineCurveUI();
   void createBezierSurfaceC0UI();
   void createBezierSurfaceC2UI();
+  void createSerializeUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
