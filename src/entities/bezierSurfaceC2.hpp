@@ -8,13 +8,16 @@
 #include "vec.hpp"
 class BezierSurfaceC2 : public BezierSurface {
 public:
-  static std::shared_ptr<BezierSurfaceC2>
-  createFlat(const algebra::Vec3f &position, uint32_t u_patches,
-             uint32_t v_patches);
+  explicit BezierSurfaceC2(
+      const std::vector<std::reference_wrapper<PointEntity>> &points,
+      uint32_t uCount, uint32_t vCount);
 
-  static std::shared_ptr<BezierSurfaceC2>
-  createCylinder(const algebra::Vec3f &position, float r, float h);
-
+  static std::vector<algebra::Vec3f>
+  createFlatPositions(const algebra::Vec3f &position, uint32_t uPatches,
+                      uint32_t vPatches, float uLength, float vLength);
+  static std::vector<algebra::Vec3f>
+  createCyllinderPositions(const algebra::Vec3f &position, uint32_t uPatches,
+                           uint32_t vPatches, float r, float h);
   void updateMesh() override {
     updateBezierSurface();
     _mesh = generateMesh();
@@ -26,7 +29,6 @@ public:
   uint32_t getRowCount() override { return 3 + _patches.sCount; }
 
 private:
-  explicit BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions);
   std::vector<algebra::Vec3f> _bezierControlPoints;
   inline static int _classId = 0;
 

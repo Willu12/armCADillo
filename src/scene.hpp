@@ -98,16 +98,21 @@ private:
   }
 
   void EnqueueSurfacePoints(
-      std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
-    std::vector<std::shared_ptr<IEntity>> pointsToRemove;
+      std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) const {
+    const auto &points = getPoints();
+
     for (const auto &entity : entitiesToRemove) {
       if (auto surface = std::dynamic_pointer_cast<BezierSurface>(entity)) {
         const auto &surfacePoints = surface->getPoints();
-        pointsToRemove.insert(pointsToRemove.end(), surfacePoints.begin(),
-                              surfacePoints.end());
+        for (const auto &surfacePoint : surfacePoints) {
+          const auto it =
+              std::ranges::find_if(points, [&surfacePoint](const auto &point) {
+                return point->getId() == surfacePoint.get().getId();
+              });
+          if (it != points.end())
+            entitiesToRemove.push_back(*it);
+        }
       }
     }
-    entitiesToRemove.insert(entitiesToRemove.end(), pointsToRemove.begin(),
-                            pointsToRemove.end());
   }
 };

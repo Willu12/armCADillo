@@ -18,7 +18,7 @@ void BezierSurfaceC2::updateBezierSurface() {
       for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
           patch[i][j] =
-              _points[(uPatch + i) * vPoints + vPatch + j]->getPosition();
+              _points[(uPatch + i) * vPoints + vPatch + j].get().getPosition();
         }
       }
 
@@ -45,89 +45,71 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
                                      _patches.tCount);
 }
 
-BezierSurfaceC2::BezierSurfaceC2(const std::vector<algebra::Vec3f> &positions) {
+BezierSurfaceC2::BezierSurfaceC2(
+    const std::vector<std::reference_wrapper<PointEntity>> &points,
+    uint32_t uCount, uint32_t vCount) {
   _id = _classId++;
   _name = "BezierCurveC2_" + std::to_string(_id);
 
-  for (const auto &controlPoint : positions) {
-    auto point = std::make_unique<PointEntity>(controlPoint);
-    point->surfacePoint() = true;
-    subscribe(*point);
-    _points.emplace_back(std::move(point));
+  for (const auto &point : points) {
+    point.get().surfacePoint() = true;
+    subscribe(point);
   }
+  _points = points;
   _polyMesh = createPolyMesh();
+  _patches = {.sCount = uCount, .tCount = vCount};
+  updateMesh();
 }
 
-std::shared_ptr<BezierSurfaceC2>
-BezierSurfaceC2::createFlat(const algebra::Vec3f &position, uint32_t u_patches,
-                            uint32_t v_patches) {
+std::vector<algebra::Vec3f>
+BezierSurfaceC2::createFlatPositions(const algebra::Vec3f &position,
+                                     uint32_t uPatches, uint32_t vPatches,
+                                     float uLength, float vLength) {
 
   std::vector<algebra::Vec3f> controlPoints;
-
-  const float length = 0.3f;
-  const uint32_t u_points = 3 + u_patches;
-  const uint32_t v_points = 3 + v_patches;
+  const uint32_t u_points = 3 + uPatches;
+  const uint32_t v_points = 3 + vPatches;
 
   controlPoints.reserve(u_points * v_points);
   for (uint32_t i = 0; i < u_points; ++i) {
     for (uint32_t j = 0; j < v_points; ++j) {
-      controlPoints.emplace_back(position[0] + float(i) / 3.f * length,
-                                 position[1] + float(j) / 3.f * length,
+      controlPoints.emplace_back(position[0] + float(i) / 3.f * uLength,
+                                 position[1] + float(j) / 3.f * vLength,
                                  position[2]);
     }
   }
-  auto flatSurface = new BezierSurfaceC2(controlPoints);
-  flatSurface->_patches.sCount = u_patches;
-  flatSurface->_patches.tCount = v_patches;
-  flatSurface->updateBezierSurface();
-
-  flatSurface->_mesh = flatSurface->generateMesh();
-  flatSurface->update();
-
-  return std::shared_ptr<BezierSurfaceC2>(flatSurface);
+  return controlPoints;
 }
 
-std::shared_ptr<BezierSurfaceC2>
-BezierSurfaceC2::createCylinder(const algebra::Vec3f &position, float r,
-                                float h) {
-  const auto u_patches = static_cast<uint32_t>(h / 0.5f);
-  const uint32_t v_patches = 2;
-
-  const uint32_t u_points = 3 + u_patches;
-  const uint32_t v_points = 3 + v_patches;
-
+std::vector<algebra::Vec3f>
+BezierSurfaceC2::createCyllinderPositions(const algebra::Vec3f &position,
+                                          uint32_t uPatches, uint32_t vPatches,
+                                          float r, float h) {
+  const uint32_t u_points = 3 + uPatches;
+  const uint32_t v_points = 3 + vPatches;
   std::vector<algebra::Vec3f> controlPoints;
 
   controlPoints.reserve(u_points * v_points);
-  const float angleBetweenPoints = 1.f / float(u_points - 3) * 2.0 * M_PI;
+  const float angleBetweenPoints =
+      1.f / static_cast<float>(u_points - 3) * 2.0 * M_PI;
   float newR = 3 * r / (std::cos(angleBetweenPoints) + 2);
 
   for (uint32_t i = 0; i < u_points; ++i) {
-    float u_ratio = float(i) / float(u_points - 3);
+    float u_ratio = static_cast<float>(i) / static_cast<float>(u_points - 3);
     float angle = u_ratio * 2.0f * M_PI;
 
     float x_circle = std::cos(angle) * newR;
     float y_circle = std::sin(angle) * newR;
 
     for (uint32_t j = 0; j < v_points; ++j) {
-      float v_ratio = float(j) / float(v_points - 1);
+      float v_ratio = static_cast<float>(j) / static_cast<float>(v_points - 1);
       float z = v_ratio * h;
 
       controlPoints.emplace_back(x_circle + position[0], y_circle + position[1],
                                  z + position[2]);
     }
   }
-
-  auto flatSurface = new BezierSurfaceC2(controlPoints);
-
-  flatSurface->_patches.sCount = u_patches;
-  flatSurface->_patches.tCount = v_patches;
-  flatSurface->updateBezierSurface();
-
-  flatSurface->_mesh = flatSurface->generateMesh();
-  flatSurface->update();
-
-  return std::shared_ptr<BezierSurfaceC2>(flatSurface);
+  return controlPoints;
 }
 
 std::array<std::array<algebra::Vec3f, 4>, 4> BezierSurfaceC2::processPatch(

@@ -14,9 +14,11 @@
 #include "nfd.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "vec.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
 #include <cstdio>
+#include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -198,6 +200,8 @@ void GUI::createBezierSurfaceC0UI() {
 
   static float radius = 1.0f;
   static float height = 2.0f;
+  static float uLength = 1.0f;
+  static float vLength = 2.0f;
 
   if (ImGui::Button("Create Bezier Surface C0")) {
     openConfigWindow = true;
@@ -212,10 +216,11 @@ void GUI::createBezierSurfaceC0UI() {
     ImGui::RadioButton("Cylinder", &surfaceType, 1);
 
     ImGui::Separator();
-
+    ImGui::InputInt("U Patches", &u_patches);
+    ImGui::InputInt("V Patches", &v_patches);
     if (surfaceType == 0) {
-      ImGui::InputInt("U Patches", &u_patches);
-      ImGui::InputInt("V Patches", &v_patches);
+      ImGui::InputFloat("uLen", &uLength);
+      ImGui::InputFloat("VLen", &vLength);
     } else {
       ImGui::InputFloat("Radius", &radius);
       ImGui::InputFloat("Height", &height);
@@ -225,9 +230,9 @@ void GUI::createBezierSurfaceC0UI() {
 
     if (ImGui::Button("Create")) {
       if (surfaceType == 0) {
-        createBezierSurfaceC0Flat(u_patches, v_patches);
+        createBezierSurfaceC0Flat(u_patches, v_patches, uLength, vLength);
       } else {
-        createBezierSurfaceC0Cylinder(radius, height);
+        createBezierSurfaceC0Cylinder(u_patches, v_patches, radius, height);
       }
 
       openConfigWindow = false; // close after creation
@@ -253,7 +258,8 @@ void GUI::createBezierSurfaceC2UI() {
 
   static float radius = 1.0f;
   static float height = 2.0f;
-
+  static float uLength = 1.0f;
+  static float vLength = 2.0f;
   if (ImGui::Button("Create Bezier Surface C2")) {
     openConfigWindow = true;
   }
@@ -267,10 +273,11 @@ void GUI::createBezierSurfaceC2UI() {
     ImGui::RadioButton("Cylinder", &surfaceType, 1);
 
     ImGui::Separator();
-
+    ImGui::InputInt("U Patches", &u_patches);
+    ImGui::InputInt("V Patches", &v_patches);
     if (surfaceType == 0) {
-      ImGui::InputInt("U Patches", &u_patches);
-      ImGui::InputInt("V Patches", &v_patches);
+      ImGui::InputFloat("uLen", &uLength);
+      ImGui::InputFloat("VLen", &vLength);
     } else {
       ImGui::InputFloat("Radius", &radius);
       ImGui::InputFloat("Height", &height);
@@ -280,9 +287,9 @@ void GUI::createBezierSurfaceC2UI() {
 
     if (ImGui::Button("Create")) {
       if (surfaceType == 0) {
-        createBezierSurfaceC2Flat(u_patches, v_patches);
+        createBezierSurfaceC2Flat(u_patches, v_patches, uLength, vLength);
       } else {
-        createBezierSurfaceC2Cylinder(radius, height);
+        createBezierSurfaceC2Cylinder(u_patches, v_patches, radius, height);
       }
 
       openConfigWindow = false; // close after creation
@@ -501,48 +508,62 @@ void GUI::createInterpolatingSplineCurve() {
   _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
 }
 
-void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches) {
-  const auto &cursorPosition = getCursor()->getPosition();
+void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
+                                    float uLength, float vLength) {
 
-  std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
-      BezierSurfaceC0::createFlat(cursorPosition, uPatches, vPatches);
+  const auto &cursorPosition = getCursor()->getPosition();
+  const auto &positions = BezierSurfaceC0::createFlatPositions(
+      cursorPosition, uPatches, vPatches, uLength, vLength);
+
+  std::vector<std::reference_wrapper<PointEntity>> points =
+      createSurfacePoints(positions);
+
+  auto bezierSurfaceC0 =
+      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
-  for (const auto &point : bezierSurfaceC0->getPoints()) {
-    _scene->addEntity(EntityType::Point, point);
-  }
 }
 
-void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches) {
-  const auto &cursorPosition = getCursor()->getPosition();
+void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
+                                    float uLength, float vLength) {
 
-  std::shared_ptr<BezierSurfaceC2> bezierSurfaceC2 =
-      BezierSurfaceC2::createFlat(cursorPosition, uPatches, vPatches);
+  const auto &cursorPosition = getCursor()->getPosition();
+  const auto &positions = BezierSurfaceC2::createFlatPositions(
+      cursorPosition, uPatches, vPatches, uLength, vLength);
+
+  std::vector<std::reference_wrapper<PointEntity>> points =
+      createSurfacePoints(positions);
+
+  auto bezierSurfaceC2 =
+      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches);
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
-  for (const auto &point : bezierSurfaceC2->getPoints()) {
-    _scene->addEntity(EntityType::Point, point);
-  }
 }
 
-void GUI::createBezierSurfaceC0Cylinder(float r, float h) {
+void GUI::createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
+                                        float r, float h) {
   const auto &cursorPosition = getCursor()->getPosition();
+  const auto &positions = BezierSurfaceC0::createCyllinderPositions(
+      cursorPosition, uPatches, vPatches, r, h);
 
-  std::shared_ptr<BezierSurfaceC0> bezierSurfaceC0 =
-      BezierSurfaceC0::createCylinder(cursorPosition, r, h);
+  std::vector<std::reference_wrapper<PointEntity>> points =
+      createSurfacePoints(positions);
+
+  auto bezierSurfaceC0 =
+      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
-  for (const auto &point : bezierSurfaceC0->getPoints()) {
-    _scene->addEntity(EntityType::Point, point);
-  }
 }
 
-void GUI::createBezierSurfaceC2Cylinder(float r, float h) {
+void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
+                                        float r, float h) {
   const auto &cursorPosition = getCursor()->getPosition();
+  const auto &positions = BezierSurfaceC2::createCyllinderPositions(
+      cursorPosition, uPatches, vPatches, r, h);
 
-  std::shared_ptr<BezierSurfaceC2> bezierSurface =
-      BezierSurfaceC2::createCylinder(cursorPosition, r, h);
-  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurface);
-  for (const auto &point : bezierSurface->getPoints()) {
-    _scene->addEntity(EntityType::Point, point);
-  }
+  std::vector<std::reference_wrapper<PointEntity>> points =
+      createSurfacePoints(positions);
+
+  auto bezierSurfaceC2 =
+      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches);
+  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 
 void GUI::processControllers() {
@@ -604,4 +625,16 @@ std::vector<std::shared_ptr<IEntity>> GUI::getVirtualPoints() const {
 void GUI::clearVirtualPoints() {
   _selectedVirtualPoints.clear();
   _virtualPoints.clear();
+}
+
+std::vector<std::reference_wrapper<PointEntity>>
+GUI::createSurfacePoints(const std::vector<algebra::Vec3f> &positions) {
+  std::vector<std::reference_wrapper<PointEntity>> points;
+  points.reserve(positions.size());
+  for (const auto &pos : positions) {
+    std::shared_ptr<PointEntity> point = std::make_shared<PointEntity>(pos);
+    points.emplace_back(*point);
+    _scene->addEntity(EntityType::Point, point);
+  }
+  return points;
 }

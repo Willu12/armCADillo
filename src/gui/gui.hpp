@@ -99,11 +99,15 @@ private:
   void createBezierCurve();
   void createBSplineCurve();
   void createInterpolatingSplineCurve();
-  void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches);
-  void createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches);
+  void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
+                                 float uLength, float vLength);
+  void createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
+                                 float uLength, float vLength);
 
-  void createBezierSurfaceC0Cylinder(float r, float h);
-  void createBezierSurfaceC2Cylinder(float r, float h);
+  void createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
+                                     float r, float h);
+  void createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
+                                     float r, float h);
 
   void renderModelSettings();
 
@@ -121,4 +125,6 @@ private:
 
   std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints();
   std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
+  std::vector<std::reference_wrapper<PointEntity>>
+  createSurfacePoints(const std::vector<algebra::Vec3f> &positions);
 };

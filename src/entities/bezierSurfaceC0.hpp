@@ -3,24 +3,29 @@
 #include "bezierSurfaceMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
+#include <functional>
 #include <memory>
 #include <ranges>
 #include <vector>
 
 class BezierSurfaceC0 : public BezierSurface {
 public:
-  static std::shared_ptr<BezierSurfaceC0>
-  createFlat(const algebra::Vec3f &position, uint32_t u_patches,
-             uint32_t v_patches);
-  static std::shared_ptr<BezierSurfaceC0>
-  createCylinder(const algebra::Vec3f &position, float r, float h);
+  explicit BezierSurfaceC0(
+      const std::vector<std::reference_wrapper<PointEntity>> &points,
+      uint32_t uCount, uint32_t vCount);
+
+  static std::vector<algebra::Vec3f>
+  createFlatPositions(const algebra::Vec3f &position, uint32_t uPatches,
+                      uint32_t vPatches, float uLength, float vLength);
+  static std::vector<algebra::Vec3f>
+  createCyllinderPositions(const algebra::Vec3f &position, uint32_t uPatches,
+                           uint32_t vPatches, float r, float h);
 
   void updateMesh() override { _mesh = generateMesh(); }
   uint32_t getColCount() override { return 3 * _patches.tCount + 1; }
   uint32_t getRowCount() override { return 3 * _patches.sCount + 1; }
 
 private:
-  explicit BezierSurfaceC0(const std::vector<algebra::Vec3f> &positions);
   inline static int _classId = 0;
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };
