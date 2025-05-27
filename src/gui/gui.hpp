@@ -68,7 +68,7 @@ private:
   Mouse _mouse;
   GuiVisitor _guiSettingsVisitor;
   JsonSerializer _jsonSerializer;
-  jsonDeserializer _jsonDeserializer;
+  JsonDeserializer _jsonDeserializer;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;
@@ -93,6 +93,7 @@ private:
   void createBezierSurfaceC0UI();
   void createBezierSurfaceC2UI();
   void createSerializeUI();
+  void createLoadSceneUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();

@@ -54,8 +54,8 @@ bool JsonSerializer::visitTorus(TorusEntity &torus) {
   serializeScale(j, torus);
   const auto &meshDensity = torus.getMeshDensity();
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
-  j["smallRadius"] = {torus.getTubeRadius()};
-  j["largeRadius"] = {torus.getInnerRadius()};
+  j["smallRadius"] = torus.getTubeRadius();
+  j["largeRadius"] = torus.getInnerRadius();
   _geometryJson.push_back(j);
 
   return true;

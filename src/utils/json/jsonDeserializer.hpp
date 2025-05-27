@@ -2,16 +2,31 @@
 #include "entitiesTypes.hpp"
 #include "entityDeserializer.hpp"
 #include "nlohmann/json.hpp"
+#include "scene.hpp"
 #include "torusDeserializer.hpp"
-#include "torusEntity.hpp"
+#include <fstream>
 #include <memory>
 #include <unordered_map>
 
-class jsonDeserializer {
+class JsonDeserializer {
+  using json = nlohmann::json;
+
 public:
-  jsonDeserializer() {
+  JsonDeserializer() {
     initTypeMap();
     initDeserializerMap();
+  }
+
+  void loadScence(const std::string &path, Scene &scene) const {
+    auto json = readJson(path);
+    auto geometryJson = json.at("geometry");
+
+    for (const auto &json : geometryJson) {
+      const auto entityType = _typeMap.at(json.at("objectType"));
+      const auto &deserializer = _deserializerMap.at(entityType);
+      const auto &entity = deserializer->deserializeEntity(json);
+      scene.addEntity(entityType, entity);
+    }
   }
 
 private:
@@ -31,5 +46,12 @@ private:
   void initDeserializerMap() {
     _deserializerMap.insert(
         {EntityType::Torus, std::make_unique<TorusDeserializer>()});
+  }
+
+  json readJson(const std::string &path) const {
+    std::ifstream i(path);
+    json j;
+    i >> j;
+    return j;
   }
 };

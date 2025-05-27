@@ -86,6 +86,7 @@ void GUI::displayGUI() {
 
     removeButtonUI();
     createSerializeUI();
+    createLoadSceneUI();
     processControllers();
 
     ImGui::End();
@@ -297,37 +298,34 @@ void GUI::createBezierSurfaceC2UI() {
   }
 }
 
-void GUI::createSerializeUI() {
-
-  static bool openConfigWindow = false;
-  if (ImGui::Button("Serialize Scene")) {
-    openConfigWindow = true;
-  }
-  if (!openConfigWindow)
-    return;
-  ImGui::Begin("Serialize Options", &openConfigWindow);
-  if (ImGui::Button("Choose save file")) {
+void GUI::createLoadSceneUI() {
+  if (ImGui::Button("Load Scene")) {
     NFD_Init();
     nfdu8char_t *outPath = nullptr;
     // nfdu8filteritem_t filters[1] = {{"serializedFile", "json"}};
-    nfdopendialogu8args_t args = {0};
+    nfdopendialogu8args_t args = {nullptr};
     nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
     if (result == NFD_OKAY) {
-      _jsonSerializer.getSavePath() = std::string(outPath);
+      _jsonDeserializer.loadScence(std::string(outPath), *_scene);
       NFD_FreePathU8(outPath);
     }
     NFD_Quit();
   }
-  // ImGui::InputText("Name", &_jsonSerializer.getSavePath());
-  if (ImGui::Button("Save")) {
-    _jsonSerializer.serializeScene(*_scene);
-  }
-  ImGui::SameLine();
+}
 
-  if (ImGui::Button("Cancel")) {
-    openConfigWindow = false;
+void GUI::createSerializeUI() {
+  if (ImGui::Button("Save scene")) {
+    NFD_Init();
+    nfdu8char_t *outPath = nullptr;
+    nfdsavedialogu8args_t args = {nullptr};
+    nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args);
+    if (result == NFD_OKAY) {
+      _jsonSerializer.getSavePath() = std::string(outPath);
+      NFD_FreePathU8(outPath);
+      _jsonSerializer.serializeScene(*_scene);
+    }
+    NFD_Quit();
   }
-  ImGui::End();
 }
 
 IEntity &GUI::createEntity(EntityType entityType) {

@@ -12,13 +12,13 @@ TorusDeserializer::deserializeEntity(const json &j) const {
   j.at("samples").at("u").get_to(meshDensity.s);
   j.at("samples").at("v").get_to(meshDensity.t);
   j.at("smallRadius").get_to(smallRadius);
-  j.at("bigRadius").get_to(bigRadius);
+  j.at("largeRadius").get_to(bigRadius);
 
   auto pos = deserializePosition(j);
   auto scale = deserializeScale(j);
   auto rotation = deserializeRotation(j);
 
-  auto torus = TorusEntity(smallRadius, bigRadius, pos);
+  auto torus = TorusEntity(bigRadius, smallRadius, pos);
   torus.getRotation() = rotation;
   torus.getScale() = scale;
 
