@@ -1,5 +1,7 @@
 #pragma once
 #include "bezierCurveC0Deserializer.hpp"
+#include "bezierSurfaceC0Deserializer.hpp"
+#include "bezierSurfaceC2Deserializer.hpp"
 #include "bsplineDeserializer.hpp"
 #include "entitiesTypes.hpp"
 #include "entityDeserializer.hpp"
@@ -66,6 +68,10 @@ private:
     _deserializerMap.insert(
         {EntityType::InterpolatingSplineCurve,
          std::make_unique<InterpolatingSplineDeserializer>()});
+    _deserializerMap.insert({EntityType::BezierSurfaceC0,
+                             std::make_unique<BezierSurfaceC0Deserializer>()});
+    _deserializerMap.insert({EntityType::BezierSurfaceC2,
+                             std::make_unique<BezierSurfaceC2Deserializer>()});
   }
 
   json readJson(const std::string &path) const {

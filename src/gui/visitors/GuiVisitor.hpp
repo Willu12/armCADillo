@@ -3,6 +3,7 @@
 #include "IEntity.hpp"
 #include "IVisitor.hpp"
 #include "bezierCurve.hpp"
+#include "bezierSurface.hpp"
 #include "interpolatingSplineC2.hpp"
 #include <functional>
 #include <vector>
@@ -23,12 +24,8 @@ public:
   bool visitInterpolatingSplineCurve(
       InterpolatingSplineC2 &interpolatingSpline) override;
   bool visitBezierSurface(BezierSurface &bezierSurface) override;
-  bool visitBezierSurfaceC0(BezierSurfaceC0 & /*bezierSurface*/) override {
-    return false;
-  }
-  bool visitBezierSurfaceC2(BezierSurfaceC2 & /*bezierSurface*/) override {
-    return false;
-  }
+  bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) override;
+  bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) override;
 
 private:
   GUI &_gui;

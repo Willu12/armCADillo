@@ -81,6 +81,19 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
   return change;
 }
 
+bool GuiVisitor::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) {
+  if (auto *p = dynamic_cast<BezierSurface *>(&bezierSurface)) {
+    return visitBezierSurface(*p);
+  }
+  return false;
+}
+bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
+  if (auto *p = dynamic_cast<BezierSurface *>(&bezierSurface)) {
+    return visitBezierSurface(*p);
+  }
+  return false;
+}
+
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
   const auto &position = entity.getPosition();

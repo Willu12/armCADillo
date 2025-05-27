@@ -23,6 +23,9 @@ public:
     _mesh = generateMesh();
   }
   void updateBezierSurface();
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitBezierSurfaceC2(*this);
+  };
   static std::array<std::array<algebra::Vec3f, 4>, 4>
   processPatch(const std::array<std::array<algebra::Vec3f, 4>, 4> &patch);
   uint32_t getColCount() override { return 3 + _patches.tCount; }

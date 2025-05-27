@@ -24,6 +24,9 @@ public:
   void updateMesh() override { _mesh = generateMesh(); }
   uint32_t getColCount() override { return 3 * _patches.tCount + 1; }
   uint32_t getRowCount() override { return 3 * _patches.sCount + 1; }
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitBezierSurfaceC0(*this);
+  };
 
 private:
   inline static int _classId = 0;
