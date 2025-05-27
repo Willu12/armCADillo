@@ -7,7 +7,6 @@ TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   MeshDensity meshDensity;
   float smallRadius = 0.f;
   float bigRadius = 0.f;
-  j.at("name").get_to(name);
   j.at("id").get_to(id);
   j.at("samples").at("u").get_to(meshDensity.s);
   j.at("samples").at("v").get_to(meshDensity.t);
@@ -21,7 +20,10 @@ TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   auto torus = TorusEntity(bigRadius, smallRadius, pos);
   torus.getRotation() = rotation;
   torus.getScale() = scale;
-  torus.getName() = name;
+  if (j.contains("name")) {
+    j.at("name").get_to(name);
+    torus.getName() = name;
+  }
 
   return std::make_shared<TorusEntity>(torus);
 }

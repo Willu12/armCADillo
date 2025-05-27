@@ -12,13 +12,15 @@ public:
                                              Scene &scene) const final {
     std::string name;
     int id = -1;
-    j.at("name").get_to(name);
     j.at("id").get_to(id);
 
     auto pos = deserializePosition(j);
 
     auto point = PointEntity(pos);
-    point.getName() = name;
+    if (j.contains("name")) {
+      j.at("name").get_to(name);
+      point.getName() = name;
+    }
     return std::make_shared<PointEntity>(point);
   }
 
