@@ -25,13 +25,6 @@ void JsonSerializer::serializeScene(const Scene &scene) {
 }
 
 void JsonSerializer::createSceneJson(const Scene &scene) {
-  json sceneJson;
-  const auto &points = scene.getPoints();
-  _pointsJson.clear();
-  for (const auto &point : points) {
-    point->acceptVisitor(*this);
-  }
-  _geometryJson.clear();
   const auto &groupedEntites = scene.getGroupedEntities();
   for (const auto &pair : groupedEntites) {
     for (const auto &entity : pair.second) {
@@ -39,9 +32,8 @@ void JsonSerializer::createSceneJson(const Scene &scene) {
     }
   }
 
-  sceneJson["points"] = _pointsJson;
-  sceneJson["geometry"] = _geometryJson;
-  _sceneJson = sceneJson;
+  _sceneJson["points"] = _pointsJson;
+  _sceneJson["geometry"] = _geometryJson;
 }
 
 bool JsonSerializer::visitTorus(TorusEntity &torus) {

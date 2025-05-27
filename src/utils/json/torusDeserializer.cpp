@@ -21,6 +21,7 @@ TorusDeserializer::deserializeEntity(const json &j) const {
   auto torus = TorusEntity(bigRadius, smallRadius, pos);
   torus.getRotation() = rotation;
   torus.getScale() = scale;
+  torus.getName() = name;
 
   return std::make_shared<TorusEntity>(torus);
 }
