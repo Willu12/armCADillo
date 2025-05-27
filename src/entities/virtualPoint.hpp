@@ -30,6 +30,7 @@ public:
 
   void updateMesh() override { _mesh = generateMesh(); };
   const Mesh &getMesh() const override { return *_mesh; }
+  uint32_t getId() const override { return _id; }
 
 private:
   inline static int _id;

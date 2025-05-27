@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}
  src/notifications/ISubsriber.cpp
  src/gui/gui.cpp
  src/gui/visitors/GuiVisitor.cpp
+ src/gui/visitors/jsonSerializer.cpp
  src/entities/virtualPoint.cpp
  src/entities/interpolatingSplineC2.cpp
  src/controllers/selectionController.cpp
@@ -38,4 +39,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 )
 
-target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image)
+target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json)

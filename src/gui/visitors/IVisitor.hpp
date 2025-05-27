@@ -7,6 +7,8 @@ class BezierCurveC0;
 class BSplineCurve;
 class InterpolatingSplineC2;
 class BezierSurface;
+class BezierSurfaceC0;
+class BezierSurfaceC2;
 
 class IVisitor {
 public:
@@ -19,4 +21,6 @@ public:
   virtual bool
   visitInterpolatingSplineCurve(InterpolatingSplineC2 &interpolatingSpline) = 0;
   virtual bool visitBezierSurface(BezierSurface &bezierSurface) = 0;
+  virtual bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) = 0;
+  virtual bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) = 0;
 };

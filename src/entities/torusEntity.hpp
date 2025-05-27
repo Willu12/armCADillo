@@ -37,6 +37,7 @@ public:
 
     return change;
   }
+  uint32_t getId() const override { return _id; }
 
 private:
   algebra::Torus<float> _torus;

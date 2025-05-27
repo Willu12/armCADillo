@@ -36,6 +36,7 @@ public:
   }
 
   void updateMesh() override { _mesh = generateMesh(); }
+  uint32_t getId() const override { return 0; }
 
 private:
   algebra::Vec3f _position = algebra::Vec3f(0.0f, 0.0f, 0.0f);

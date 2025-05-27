@@ -26,6 +26,7 @@ public:
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierCurve(*this);
   }
+  uint32_t getId() const override { return _id; }
 
 private:
   inline static int _id;

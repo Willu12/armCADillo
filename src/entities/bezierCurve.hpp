@@ -1,14 +1,15 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <stdexcept>
 
-#include "IEntity.hpp"
+#include "IGroupedEntity.hpp"
 #include "ISubscriber.hpp"
 #include "bezierCurveMesh.hpp"
 #include "pointEntity.hpp"
 
-class BezierCurve : public IEntity, public ISubscriber {
+class BezierCurve : public IGroupedEntity, public ISubscriber {
 public:
   virtual void addPoint(PointEntity &point) {
     subscribe(point);
@@ -40,6 +41,16 @@ public:
   }
   const IMeshable &getMesh() const override { return *_mesh; }
   bool &showPolyLine() { return _showPolyLine; }
+  uint32_t getId() const override { return 0; }
+  std::vector<std::reference_wrapper<const PointEntity>>
+  getPointsReferences() const override {
+    std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;
+    pointsReferences.reserve(_points.size());
+    for (const auto &point : _points) {
+      pointsReferences.emplace_back(point);
+    }
+    return pointsReferences;
+  }
 
 protected:
   std::vector<std::reference_wrapper<PointEntity>> _points;

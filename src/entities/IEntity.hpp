@@ -70,6 +70,8 @@ public:
     _position = translatedPosition + centerPoint;
   }
 
+  virtual uint32_t getId() const = 0;
+
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;

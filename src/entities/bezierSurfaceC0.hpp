@@ -18,6 +18,7 @@ public:
   void updateMesh() override { _mesh = generateMesh(); }
   uint32_t getColCount() override { return 3 * _patches.tCount + 1; }
   uint32_t getRowCount() override { return 3 * _patches.sCount + 1; }
+  uint32_t getId() const override { return _id; }
 
 private:
   explicit BezierSurfaceC0(const std::vector<algebra::Vec3f> &positions);

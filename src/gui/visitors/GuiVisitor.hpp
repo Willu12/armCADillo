@@ -23,6 +23,12 @@ public:
   bool visitInterpolatingSplineCurve(
       InterpolatingSplineC2 &interpolatingSpline) override;
   bool visitBezierSurface(BezierSurface &bezierSurface) override;
+  bool visitBezierSurfaceC0(BezierSurfaceC0 & /*bezierSurface*/) override {
+    return false;
+  }
+  bool visitBezierSurfaceC2(BezierSurfaceC2 & /*bezierSurface*/) override {
+    return false;
+  }
 
 private:
   GUI &_gui;

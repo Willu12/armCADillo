@@ -11,6 +11,7 @@ public:
   const Mesh &getMesh() const override { return *_mesh; }
   void updateMesh() override { _mesh = generateMesh(); }
   bool renderSettings(const GUI &gui) override { return false; }
+  uint32_t getId() const override { return 0; }
 
 protected:
   float _radius;

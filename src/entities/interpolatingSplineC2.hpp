@@ -9,6 +9,7 @@ public:
   explicit InterpolatingSplineC2(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
   bool acceptVisitor(IVisitor &visitor) override;
+  uint32_t getId() const override { return _id; }
 
 private:
   inline static int _id;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IEntity.hpp"
+#include "IGroupedEntity.hpp"
 #include "IMeshable.hpp"
 #include "ISubscriber.hpp"
 #include "bezierSurfaceMesh.hpp"
@@ -15,7 +16,7 @@ struct Patches {
   uint32_t tCount;
 };
 
-class BezierSurface : public IEntity, public ISubscriber {
+class BezierSurface : public IGroupedEntity, public ISubscriber {
 public:
   const MeshDensity &getMeshDensity() const { return _meshDensity; }
   MeshDensity &getMeshDensity() { return _meshDensity; }
@@ -45,6 +46,16 @@ public:
   void onSubscribableDestroyed(ISubscribable &publisher) override {}
   virtual uint32_t getColCount() = 0;
   virtual uint32_t getRowCount() = 0;
+  uint32_t getId() const override { return 0; }
+  std::vector<std::reference_wrapper<const PointEntity>>
+  getPointsReferences() const override {
+    std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;
+    pointsReferences.reserve(_points.size());
+    for (const auto &point : _points) {
+      pointsReferences.emplace_back(*point);
+    }
+    return pointsReferences;
+  }
 
 protected:
   std::vector<std::shared_ptr<PointEntity>> _points;
