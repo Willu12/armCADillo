@@ -50,16 +50,14 @@ private:
 
   void translate(float x, float y) {
     auto &window = _camera.getWindow();
+    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+      return;
     x = (2.f * x) / static_cast<float>(GLFWHelper::getWidth(&window)) - 1.f;
     y = 1.f - (2.f * y) / static_cast<float>(GLFWHelper::getHeight(&window));
-    if (_entites.size() == 1) {
+    if (_entites.size() == 1)
       updateFromCamera(_entites.front(), x, y);
-    } else {
+    else
       updateCenterPoint(x, y);
-      // for (const auto &entity : _entites) {
-
-      //  }
-    }
   }
 
   void rotateAroundCenterPoint(float deltaY) {

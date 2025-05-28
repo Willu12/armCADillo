@@ -25,18 +25,24 @@ void SelectionController::process(const Mouse &mouse) {
     return; // This maybe unnecessary
 
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-    if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-      _selectedEntities.clear();
+    //   if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+    // _selectedEntities.clear();
 
     // check if something was clicked;
     const auto &currentMousePos = ImGui::GetMousePos();
     if (auto entity = getEntity(currentMousePos[0], currentMousePos[1])) {
       mouse._isSelectionBoxActive = false;
-      if (std::ranges::find(_selectedEntities, *entity) ==
-          _selectedEntities.end())
+      const auto iter = std::ranges::find(_selectedEntities, *entity);
+      if (iter == _selectedEntities.end())
         _selectedEntities.emplace_back(*entity);
-    } else
+      else
+        _selectedEntities.erase(iter);
+    } else {
       mouse._isSelectionBoxActive = true;
+      if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+        _selectedEntities.clear();
+    }
+
   }
 
   else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
@@ -45,7 +51,8 @@ void SelectionController::process(const Mouse &mouse) {
     const auto &entities =
         getEntities(mouse.getLastClickedPosition(), mouse.getCurrentPosition());
     if (!ImGui::GetIO().KeyCtrl) {
-      _selectedEntities = entities;
+      if (_selectedEntities.empty())
+        _selectedEntities = entities;
     } else {
       for (const auto &entity : entities) {
         if (std::ranges::find(_selectedEntities, entity) ==

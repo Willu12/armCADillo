@@ -131,6 +131,6 @@ private:
   float static constexpr kFarDist = 100.f;
 
   float _zoom = 45.f;
-  float _eyeDistance = 0.01f;
+  float _eyeDistance = 0.1f;
   float _convergence = 120.0f;
 };
