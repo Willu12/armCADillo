@@ -17,9 +17,11 @@ algebra::Vec3f EntityDeserializer::deserializePosition(const json &j) const {
   return pos;
 }
 
-float EntityDeserializer::deserializeScale(const json &j) const {
-  float scale = 0.f;
-  j.at("scale").at("x").get_to(scale);
+algebra::Vec3f EntityDeserializer::deserializeScale(const json &j) const {
+  algebra::Vec3f scale;
+  j.at("scale").at("x").get_to(scale[0]);
+  j.at("scale").at("y").get_to(scale[1]);
+  j.at("scale").at("z").get_to(scale[2]);
   return scale;
 }
 

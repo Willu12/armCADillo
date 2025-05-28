@@ -136,7 +136,7 @@ void JsonSerializer::serializeRotation(json &j, const IEntity &entity) {
 }
 void JsonSerializer::serializeScale(json &j, const IEntity &entity) {
   const auto &scale = entity.getScale();
-  j["scale"] = {{"x", scale}, {"y", scale}};
+  j["scale"] = {{"x", scale[0]}, {"y", scale[1]}, {"z", scale[2]}};
 }
 
 void JsonSerializer::serializeControlPoints(

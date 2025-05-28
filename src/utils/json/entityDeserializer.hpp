@@ -19,7 +19,7 @@ public:
 
 protected:
   algebra::Vec3f deserializePosition(const json &j) const;
-  float deserializeScale(const json &j) const;
+  algebra::Vec3f deserializeScale(const json &j) const;
   algebra::Quaternion<float> deserializeRotation(const json &j) const;
 
   std::vector<std::reference_wrapper<PointEntity>>

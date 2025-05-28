@@ -29,8 +29,8 @@ public:
     return false;
   }
 
-  float &getScale() { return _scale; }
-  const float &getScale() const { return _scale; }
+  algebra::Vec3f &getScale() { return _scale; }
+  const algebra::Vec3f &getScale() const { return _scale; }
 
   // algebra::Vec3f &getPosition() override { return _position; }
   void updatePosition(const algebra::Vec3f &position) override {
@@ -46,8 +46,7 @@ public:
 
   algebra::Mat4f getModelMatrix() const override {
     auto scale = getScale();
-    auto scaleMatrix =
-        algebra::transformations::scaleMatrix(scale, scale, scale);
+    auto scaleMatrix = algebra::transformations::scaleMatrix(scale);
     auto rotationMatrix = getRotation().getRotationMatrix();
     auto translationMatrix =
         algebra::transformations::translationMatrix(getPosition());
@@ -66,7 +65,7 @@ public:
     auto translatedPosition = _position - centerPoint;
     translatedPosition = translatedPosition * scaleFactor;
 
-    _scale *= scaleFactor;
+    _scale = _scale * scaleFactor;
     _position = translatedPosition + centerPoint;
   }
 
@@ -76,8 +75,8 @@ public:
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;
-  float _scale = 1.f;
-  // algrebra::Vec3f _scale = algebra::Vec3f(1.f,1.f,1.f);
+  // float _scale = 1.f;
+  algebra::Vec3f _scale = algebra::Vec3f(1.f, 1.f, 1.f);
   std::string _name;
   uint32_t _id;
 };

@@ -76,7 +76,7 @@ private:
     if (deltaY < 0.f)
       scaleFactor = 0.95f;
     for (const auto &entity : _entites) {
-      if (entity->getScale() * scaleFactor > 0.01f) {
+      if (entity->getScale()[0] * scaleFactor > 0.01f) {
         entity->scaleAroundPoint(scaleFactor, getTransformationPoint());
       }
     }
