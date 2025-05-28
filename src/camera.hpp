@@ -38,11 +38,11 @@ public:
     float fovRad = algebra::rotations::toRadians(_zoom);
     float top = kNearDist * std::tan(fovRad / 2.f);
     float bottom = -top;
-    float a = aspectRatio * std::tan(fovRad / 2) * _focus;
+    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
     float b = a - halfDistance;
     float c = a + halfDistance;
-    float left = -b * kNearDist / _focus;
-    float right = c * kNearDist / _focus;
+    float left = -b * kNearDist / _convergence;
+    float right = c * kNearDist / _convergence;
 
     return algebra::transformations::translationMatrix(halfDistance, 0.f, 0.f) *
            algebra::transformations::projectionOffCenter(
@@ -55,11 +55,11 @@ public:
     float fovRad = algebra::rotations::toRadians(_zoom);
     float top = kNearDist * std::tan(fovRad / 2.f);
     float bottom = -top;
-    float a = aspectRatio * std::tan(fovRad / 2) * _focus;
+    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
     float b = a - halfDistance;
     float c = a + halfDistance;
-    float left = -c * kNearDist / _focus;
-    float right = b * kNearDist / _focus;
+    float left = -c * kNearDist / _convergence;
+    float right = b * kNearDist / _convergence;
 
     return algebra::transformations::translationMatrix(-halfDistance, 0.f,
                                                        0.f) *
@@ -116,7 +116,7 @@ public:
   float &getZoom() { return _zoom; }
   const float &getZoom() const { return _zoom; }
   float &getEyeDistance() { return _eyeDistance; }
-  float &getFocus() { return _focus; }
+  float &getConvergence() { return _convergence; }
   GLFWwindow &getWindow() const { return *_window; }
 
 private:
@@ -132,5 +132,5 @@ private:
 
   float _zoom = 45.f;
   float _eyeDistance = 0.01f;
-  float _focus = 120.0f;
+  float _convergence = 120.0f;
 };
