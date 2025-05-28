@@ -15,5 +15,6 @@ BezierCurveC0Deserializer::deserializeEntity(const json &j,
     j.at("name").get_to(name);
     bezierCurveC0->getName() = name;
   }
+  bezierCurveC0->getId() = id;
   return bezierCurveC0;
 }

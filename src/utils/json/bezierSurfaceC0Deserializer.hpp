@@ -16,20 +16,19 @@ public:
 
     const auto points = getPoints(j, scene);
 
-    uint32_t uPatches{};
-    uint32_t vPatches{};
-    j.at("size").at("u").get_to(uPatches);
-    j.at("size").at("v").get_to(vPatches);
-
-    auto bezierSurfaceC0 =
-        std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
+    uint32_t uPoints{};
+    uint32_t vPoints{};
+    j.at("size").at("u").get_to(vPoints);
+    j.at("size").at("v").get_to(uPoints);
+    auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
+        points, (uPoints - 1) / 3, (vPoints - 1) / 3);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC0->getName() = name;
     }
     j.at("samples").at("u").get_to(bezierSurfaceC0->getMeshDensity().s);
     j.at("samples").at("v").get_to(bezierSurfaceC0->getMeshDensity().t);
-
+    bezierSurfaceC0->getId() = id;
     return bezierSurfaceC0;
   }
 

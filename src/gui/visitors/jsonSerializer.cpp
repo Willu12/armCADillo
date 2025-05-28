@@ -101,8 +101,8 @@ bool JsonSerializer::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) {
   serializeControlPoints(j, bezierSurfaceC0);
   const auto &meshDensity = bezierSurfaceC0.getMeshDensity();
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
-  j["size"] = {{"u", bezierSurfaceC0.getPatches().sCount},
-               {"v", bezierSurfaceC0.getPatches().tCount}};
+  j["size"] = {{"u", bezierSurfaceC0.getColCount()},
+               {"v", bezierSurfaceC0.getRowCount()}};
   _geometryJson.push_back(j);
   return true;
 }
@@ -115,8 +115,8 @@ bool JsonSerializer::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) {
   serializeControlPoints(j, bezierSurfaceC2);
   const auto &meshDensity = bezierSurfaceC2.getMeshDensity();
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
-  j["size"] = {{"u", bezierSurfaceC2.getPatches().sCount},
-               {"v", bezierSurfaceC2.getPatches().tCount}};
+  j["size"] = {{"u", bezierSurfaceC2.getColCount()},
+               {"v", bezierSurfaceC2.getRowCount()}};
   _geometryJson.push_back(j);
 
   return true;

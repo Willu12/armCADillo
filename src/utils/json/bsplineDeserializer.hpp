@@ -21,6 +21,7 @@ public:
       j.at("name").get_to(name);
       bSplineCurve->getName() = name;
     }
+    bSplineCurve->getId() = id;
     return bSplineCurve;
   }
 

@@ -33,10 +33,12 @@ void SelectionController::process(const Mouse &mouse) {
     if (auto entity = getEntity(currentMousePos[0], currentMousePos[1])) {
       mouse._isSelectionBoxActive = false;
       const auto iter = std::ranges::find(_selectedEntities, *entity);
-      if (iter == _selectedEntities.end())
-        _selectedEntities.emplace_back(*entity);
-      else
-        _selectedEntities.erase(iter);
+      if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+        if (iter == _selectedEntities.end())
+          _selectedEntities.emplace_back(*entity);
+        else
+          _selectedEntities.erase(iter);
+      }
     } else {
       mouse._isSelectionBoxActive = true;
       if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))

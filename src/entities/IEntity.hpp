@@ -70,7 +70,8 @@ public:
     _position = translatedPosition + centerPoint;
   }
 
-  uint32_t getId() const { return _id; }
+  const uint32_t &getId() const { return _id; }
+  uint32_t &getId() { return _id; }
 
 protected:
   algebra::Vec3f _position;

@@ -21,6 +21,7 @@ public:
       j.at("name").get_to(name);
       interpolatingSpline->getName() = name;
     }
+    interpolatingSpline->getId() = id;
     return interpolatingSpline;
   }
 

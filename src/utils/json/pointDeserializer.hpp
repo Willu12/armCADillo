@@ -21,7 +21,9 @@ public:
       j.at("name").get_to(name);
       point.getName() = name;
     }
-    return std::make_shared<PointEntity>(point);
+    auto p = std::make_shared<PointEntity>(point);
+    p->getId() = id;
+    return p;
   }
 
 private:
