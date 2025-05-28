@@ -1,5 +1,6 @@
 #pragma once
 #include "glfwHelper.hpp"
+#include "matrix.hpp"
 #include "spherical.hpp"
 #include "transformations.hpp"
 #include "utils.hpp"
@@ -26,6 +27,55 @@ public:
         _target[0], _target[1], _target[2]);
 
     return Tp * R.transpose() * Tx;
+  }
+
+  algebra::Mat4f leftEyeProjectionMatrix() const {
+    auto aspectRatio = GLFWHelper::getAspectRatio(_window);
+    float halfDistance = _eyeDistance / 2.f;
+    float fovRad = algebra::rotations::toRadians(_zoom);
+    float top = _focus * std::tan(fovRad / 2.f);
+    float bottom = -top;
+    float right = top * aspectRatio;
+    float left = -right;
+
+    // Project bounds from focus plane to near plane
+    float topNear = top * 0.1f / _focus;
+    float bottomNear = bottom * 0.1f / _focus;
+
+    float leftL = (left + halfDistance) * 0.1f / _focus + halfDistance;
+    float leftR = (right + halfDistance) * 0.1f / _focus + halfDistance;
+
+    float rightL = (left - halfDistance) * 0.1f / _focus - halfDistance;
+    float rightR = (right - halfDistance) * 0.1f / _focus - halfDistance;
+
+    return algebra::transformations::translationMatrix(halfDistance, 0.f, 0.f) *
+           algebra::transformations::projectionOffCenter(
+               leftL, leftR, bottomNear, topNear, 0.1f, 100.f);
+  }
+
+  algebra::Mat4f RightEyeProjectionMatrix() const {
+    auto aspectRatio = GLFWHelper::getAspectRatio(_window);
+    float halfDistance = _eyeDistance / 2.f;
+    float fovRad = algebra::rotations::toRadians(_zoom);
+    float top = _focus * std::tan(fovRad / 2.f);
+    float bottom = -top;
+    float right = top * aspectRatio;
+    float left = -right;
+
+    // Project bounds from focus plane to near plane
+    float topNear = top * 0.1f / _focus;
+    float bottomNear = bottom * 0.1f / _focus;
+
+    float leftL = (left + halfDistance) * 0.1f / _focus + halfDistance;
+    float LeftR = (right + halfDistance) * 0.1f / _focus + halfDistance;
+
+    float rightL = (left - halfDistance) * 0.1f / _focus - halfDistance;
+    float rightR = (right - halfDistance) * 0.1f / _focus - halfDistance;
+
+    return algebra::transformations::translationMatrix(-halfDistance, 0.f,
+                                                       0.f) *
+           algebra::transformations::projectionOffCenter(
+               rightL, rightR, bottomNear, topNear, 0.1f, 100.f);
   }
 
   algebra::Mat4f projectionMatrix() const {
@@ -69,6 +119,10 @@ public:
   float &getZoom() { return _zoom; }
   const float &getZoom() const { return _zoom; }
 
+  float &getEyeDistance() { return _eyeDistance; }
+  float &getFocus() { return _focus; }
+  bool &getStereoscopic() { return _stereoscopic; }
+
   GLFWwindow &getWindow() const { return *_window; }
 
 private:
@@ -78,4 +132,8 @@ private:
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
   algebra::Vec3f _up = algebra::Vec3f(0.f, 1.0f, 0.f);
   float _zoom = 45.f;
+
+  float _eyeDistance = 0.01f;
+  float _focus = 120.0f;
+  bool _stereoscopic = false;
 };

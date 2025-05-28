@@ -88,6 +88,8 @@ void GUI::displayGUI() {
     removeButtonUI();
     createSerializeUI();
     createLoadSceneUI();
+    ImGui::Separator();
+    stereoscopicSettings();
     processControllers();
 
     ImGui::End();
@@ -582,4 +584,13 @@ GUI::createSurfacePoints(const std::vector<algebra::Vec3f> &positions) {
     _scene->addEntity(EntityType::Point, point);
   }
   return points;
+}
+
+void GUI::stereoscopicSettings() {
+  auto &camera = *_scene->getCamera();
+  ImGui::Checkbox("Steroscopic Vision", &camera.getStereoscopic());
+  if (camera.getStereoscopic()) {
+    ImGui::SliderFloat("eye distance", &camera.getEyeDistance(), 0.f, 0.2f);
+    ImGui::SliderFloat("focus", &camera.getFocus(), 0.1f, 10.f);
+  }
 }

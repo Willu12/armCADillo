@@ -109,7 +109,7 @@ private:
                                      float r, float h);
 
   void renderModelSettings();
-
+  void stereoscopicSettings();
   void displayEntitiesList();
   void deleteSelectedEntities();
   void selectEntity(int entityIndex);

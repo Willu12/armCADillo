@@ -16,15 +16,23 @@ public:
       return;
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    //_shader.setProjectionMatrix(_camera.projectionMatrix());
 
     for (auto &entity : entities) {
       const auto &mesh = entity->getMesh();
-      _shader.setModelMatrix(entity->getModelMatrix());
       glBindVertexArray(mesh.getVAO());
+      _shader.setModelMatrix(entity->getModelMatrix());
+      _shader.setProjectionMatrix(_camera.leftEyeProjectionMatrix());
+      glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE); // Red only
+      glDrawElements(GL_LINES, mesh.getIndicesLength(), GL_UNSIGNED_INT, 0);
+      glClear(GL_DEPTH_BUFFER_BIT);
+
+      _shader.setProjectionMatrix(_camera.RightEyeProjectionMatrix());
+      glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE); // Red only
       glDrawElements(GL_LINES, mesh.getIndicesLength(), GL_UNSIGNED_INT, 0);
       glBindVertexArray(0);
     }
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   }
 
 private:
