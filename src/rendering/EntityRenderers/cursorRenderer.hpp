@@ -29,7 +29,7 @@ public:
       _shader.setModelMatrix(
           entity->getModelMatrix() * scaleMatrix *
           _camera.getSphericalPosition().getRotationMatrix().transpose());
-      _shader.setProjectionMatrix(_camera.projectionMatrix());
+      _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
       const auto &mesh = entity->getMesh();
 

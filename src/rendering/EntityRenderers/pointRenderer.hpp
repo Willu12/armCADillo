@@ -18,7 +18,7 @@ public:
 
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setProjectionMatrix(_camera.getProjectionMatrix());
     _shader.setVec4f("Color", _color);
 
     const auto &sampleMesh = entities[0]->getMesh();

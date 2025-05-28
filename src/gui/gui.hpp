@@ -55,6 +55,7 @@ public:
   std::vector<std::shared_ptr<IEntity>> getSelectedVirtualPoints() const;
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
   void clearVirtualPoints();
+  bool &stereographicVision() { return _stereographicVision; }
 
 private:
   GLFWwindow *_window;
@@ -76,6 +77,7 @@ private:
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
   double _fps = 0.0;
+  bool _stereographicVision = false;
 
   void initEnitityFactories();
   void initControllers();

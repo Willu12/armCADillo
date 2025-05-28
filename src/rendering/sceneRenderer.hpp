@@ -39,12 +39,35 @@ public:
   void
   render(const std::unordered_map<
          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+    _camera->updateProjectionMatrix(_camera->projectionMatrix());
     _grid.render(_camera);
+    for (const auto &entityGroup : groupedEntities) {
+      auto &renderer = _entityRenderers.at(entityGroup.first);
+      renderer->render(entityGroup.second);
+    }
+  }
+
+  void stereoscopicRender(
+      const std::unordered_map<
+          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+    _grid.render(_camera);
+    _camera->updateProjectionMatrix(_camera->leftEyeProjectionMatrix());
+    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE);
 
     for (const auto &entityGroup : groupedEntities) {
       auto &renderer = _entityRenderers.at(entityGroup.first);
       renderer->render(entityGroup.second);
     }
+    glClear(GL_DEPTH_BUFFER_BIT);
+    _camera->updateProjectionMatrix(_camera->RightEyeProjectionMatrix());
+
+    glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_FALSE);
+    for (const auto &entityGroup : groupedEntities) {
+      auto &renderer = _entityRenderers.at(entityGroup.first);
+      renderer->render(entityGroup.second);
+    }
+    _camera->updateProjectionMatrix(_camera->projectionMatrix());
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
   }
 
   void

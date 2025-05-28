@@ -24,7 +24,7 @@ public:
       return;
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setProjectionMatrix(_camera.getProjectionMatrix());
     _shader.setVec4f("Color", _color);
 
     for (const auto &entity : entities) {

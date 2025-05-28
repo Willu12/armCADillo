@@ -96,9 +96,12 @@ int main(int, char **) {
 
     setupViewPortAndClear(window, clear_color);
 
-    sceneRenderer.render(scene->getGroupedEntities());
-    sceneRenderer.renderSelectedPoints(gui.getSelectedPointsPointers());
+    if (gui.stereographicVision())
+      sceneRenderer.stereoscopicRender(scene->getGroupedEntities());
+    else
+      sceneRenderer.render(scene->getGroupedEntities());
 
+    sceneRenderer.renderSelectedPoints(gui.getSelectedPointsPointers());
     if (gui.getCenterPoint())
       sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
 

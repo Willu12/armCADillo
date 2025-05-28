@@ -4,10 +4,13 @@
 #include "spherical.hpp"
 #include "transformations.hpp"
 #include "utils.hpp"
+#include <memory>
 
 class Camera {
 public:
-  explicit Camera(GLFWwindow *window) : _window(window) {}
+  explicit Camera(GLFWwindow *window)
+      : _window(window), _projectionMatrix(std::make_unique<algebra::Mat4f>(
+                             projectionMatrix())) {}
 
   algebra::Mat4f viewMatrix() const {
     auto Tx =
@@ -38,7 +41,6 @@ public:
     float right = top * aspectRatio;
     float left = -right;
 
-    // Project bounds from focus plane to near plane
     float topNear = top * 0.1f / _focus;
     float bottomNear = bottom * 0.1f / _focus;
 
@@ -62,7 +64,6 @@ public:
     float right = top * aspectRatio;
     float left = -right;
 
-    // Project bounds from focus plane to near plane
     float topNear = top * 0.1f / _focus;
     float bottomNear = bottom * 0.1f / _focus;
 
@@ -88,6 +89,14 @@ public:
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
     return algebra::transformations::inverseProjection(
         algebra::rotations::toRadians(_zoom), aspectRatio, 0.1f, 100.f);
+  }
+
+  const algebra::Mat4f &getProjectionMatrix() const {
+    return *_projectionMatrix;
+  }
+
+  void updateProjectionMatrix(const algebra::Mat4f proj) {
+    _projectionMatrix = std::make_unique<algebra::Mat4f>(proj);
   }
 
   void rotateHorizontal(float angle) {
@@ -118,22 +127,19 @@ public:
 
   float &getZoom() { return _zoom; }
   const float &getZoom() const { return _zoom; }
-
   float &getEyeDistance() { return _eyeDistance; }
   float &getFocus() { return _focus; }
-  bool &getStereoscopic() { return _stereoscopic; }
-
   GLFWwindow &getWindow() const { return *_window; }
 
 private:
   GLFWwindow *_window;
   algebra::SphericalPosition<float> _position =
       algebra::SphericalPosition((algebra::Vec3f(0.0f, 0.1f, -1.f)));
+
+  std::unique_ptr<algebra::Mat4f> _projectionMatrix;
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
   algebra::Vec3f _up = algebra::Vec3f(0.f, 1.0f, 0.f);
   float _zoom = 45.f;
-
   float _eyeDistance = 0.01f;
   float _focus = 120.0f;
-  bool _stereoscopic = false;
 };

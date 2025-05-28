@@ -22,7 +22,7 @@ public:
       return;
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setProjectionMatrix(_camera.getProjectionMatrix());
     _shader.setInt(
         "screenResolution",
         static_cast<int>(0.5f *

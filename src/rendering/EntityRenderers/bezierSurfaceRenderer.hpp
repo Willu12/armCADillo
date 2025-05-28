@@ -30,7 +30,7 @@ public:
       return;
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
     for (const auto &entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);

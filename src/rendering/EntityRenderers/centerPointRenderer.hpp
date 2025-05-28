@@ -21,7 +21,7 @@ public:
     _shader.setModelMatrix(
         renderable.getModelMatrix() *
         _camera.getSphericalPosition().getRotationMatrix().transpose());
-    _shader.setProjectionMatrix(_camera.projectionMatrix());
+    _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
     const auto &mesh = renderable.getMesh();
 
