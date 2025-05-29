@@ -34,37 +34,26 @@ public:
 
   algebra::Mat4f leftEyeProjectionMatrix() const {
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
-    float halfDistance = _eyeDistance / 2.f;
     float fovRad = algebra::rotations::toRadians(_zoom);
-    float top = kNearDist * std::tan(fovRad / 2.f);
-    float bottom = -top;
-    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
-    float b = a - halfDistance;
-    float c = a + halfDistance;
-    float left = -b * kNearDist / _convergence;
-    float right = c * kNearDist / _convergence;
-
-    return algebra::transformations::translationMatrix(halfDistance, 0.f, 0.f) *
-           algebra::transformations::projectionOffCenter(
-               left, right, bottom, top, kNearDist, kFarDist);
+    float halfDistance = _eyeDistance / 2.f;
+    float val =
+        halfDistance / (aspectRatio * std::tan(fovRad / 2.f) * _convergence);
+    auto projection = projectionMatrix();
+    projection[0, 2] = val;
+    return projection *
+           algebra::transformations::translationMatrix(halfDistance, 0.f, 0.f);
   }
 
   algebra::Mat4f RightEyeProjectionMatrix() const {
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
-    float halfDistance = _eyeDistance / 2.f;
     float fovRad = algebra::rotations::toRadians(_zoom);
-    float top = kNearDist * std::tan(fovRad / 2.f);
-    float bottom = -top;
-    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
-    float b = a - halfDistance;
-    float c = a + halfDistance;
-    float left = -c * kNearDist / _convergence;
-    float right = b * kNearDist / _convergence;
-
-    return algebra::transformations::translationMatrix(-halfDistance, 0.f,
-                                                       0.f) *
-           algebra::transformations::projectionOffCenter(
-               left, right, bottom, top, kNearDist, kFarDist);
+    float halfDistance = _eyeDistance / 2.f;
+    float val =
+        -halfDistance / (aspectRatio * std::tan(fovRad / 2.f) * _convergence);
+    auto projection = projectionMatrix();
+    projection[0, 2] = val;
+    return projection *
+           algebra::transformations::translationMatrix(-halfDistance, 0.f, 0.f);
   }
 
   algebra::Mat4f projectionMatrix() const {
@@ -98,7 +87,7 @@ public:
   }
 
   void changeZoom(float zoom) {
-    if (_position._r + zoom < 45.f && _position._r + zoom > 1.f)
+    if (_position._r + zoom < 45.f && _position._r + zoom > 0.1f)
       _position._r += zoom;
   }
 
@@ -132,5 +121,5 @@ private:
 
   float _zoom = 45.f;
   float _eyeDistance = 0.1f;
-  float _convergence = 120.0f;
+  float _convergence = 1.5f;
 };
