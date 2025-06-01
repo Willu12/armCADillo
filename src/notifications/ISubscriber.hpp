@@ -8,6 +8,7 @@ class ISubscriber {
 public:
   virtual ~ISubscriber();
   void subscribe(ISubscribable &publisher);
+  void unsubscribe(const ISubscribable &publisher);
   virtual void onSubscribableDestroyed(ISubscribable &publisher) = 0;
   virtual void update() = 0;
 

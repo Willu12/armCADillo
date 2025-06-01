@@ -3,6 +3,7 @@
 
 #include "camera.hpp"
 #include "entitiesTypes.hpp"
+#include "pointEntity.hpp"
 
 #include <memory>
 #include <unordered_map>
@@ -23,6 +24,8 @@ public:
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
   std::vector<std::shared_ptr<IEntity>> getPoints() const;
 
+  friend class GUI;
+
 private:
   std::shared_ptr<Camera> _camera;
   std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
@@ -33,4 +36,7 @@ private:
 
   void enqueueSurfacePoints(
       std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) const;
+  std::shared_ptr<IEntity> contractEdge(const PointEntity &p1,
+                                        const PointEntity &p2);
+  void rebindReferences(const PointEntity &oldPoint, PointEntity &newPoint);
 };

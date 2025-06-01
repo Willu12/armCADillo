@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <functional>
+#include <string>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
   return torus.renderSettings(_gui);
@@ -125,11 +126,17 @@ void GuiVisitor::renderPointList(
     const std::vector<std::reference_wrapper<PointEntity>> &entities,
     const std::string &label) {
 
+  std::unordered_map<uint32_t, uint32_t> pointCount;
   ImGui::LabelText("##", "%s", label.c_str());
   for (const auto &entity : entities) {
     bool isSelected = isEntitySelected(entity);
-    if (ImGui::Selectable((entity.get().getName() + "##").c_str(), isSelected,
-                          ImGuiSelectableFlags_AllowDoubleClick)) {
+    auto id = entity.get().getId();
+    pointCount[id]++;
+
+    if (ImGui::Selectable(
+            (entity.get().getName() + "##" + std::to_string(pointCount[id]))
+                .c_str(),
+            isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
         if (isSelected)
           unselectEntity(entity);

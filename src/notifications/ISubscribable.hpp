@@ -23,6 +23,11 @@ public:
     });
   }
 
+  const std::vector<std::reference_wrapper<ISubscriber>> &
+  getSubscribers() const {
+    return _subscribers;
+  }
+
 protected:
   mutable std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
 };

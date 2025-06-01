@@ -25,16 +25,23 @@ public:
   void onSubscribableDestroyed(ISubscribable &publisher) override {
 
     const auto *point = dynamic_cast<PointEntity *>(&publisher);
-    if (!point) {
+    if (!point)
       throw std::runtime_error("Unexpected publisher type: " +
                                std::string(typeid(publisher).name()));
+
+    auto it = std::ranges::find_if(_points, [&point](const auto &p) {
+      return p.get().getId() == point->getId();
+    });
+    if (it == _points.end()) {
+      update();
+      return;
     }
-    auto it = std::ranges::find_if(
-        _points, [&point](const auto &p) { return &p.get() == point; });
     _points.erase(it);
 
-    auto pub_it = std::ranges::find_if(
-        _publishers, [&point](const auto &p) { return &p.get() == point; });
+    auto pub_it = std::ranges::find_if(_publishers, [&point](auto &p) {
+      const auto *pub = dynamic_cast<PointEntity *>(&p.get());
+      return pub->getId() == point->getId();
+    });
     pub_it->get().removeSubscriber(*this);
     _publishers.erase(pub_it);
     update();
@@ -49,6 +56,10 @@ public:
       pointsReferences.emplace_back(point);
     }
     return pointsReferences;
+  }
+  std::vector<std::reference_wrapper<PointEntity>> &
+  getPointsReferences() override {
+    return _points;
   }
 
 protected:

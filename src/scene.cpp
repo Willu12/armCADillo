@@ -1,8 +1,13 @@
 #include "scene.hpp"
+#include "IEntity.hpp"
+#include "IGroupedEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierSurface.hpp"
+#include "entitiesTypes.hpp"
 #include "pointEntity.hpp"
 #include <algorithm>
+#include <functional>
+#include <memory>
 
 std::vector<std::shared_ptr<IEntity>> Scene::getEntites() {
   std::vector<std::shared_ptr<IEntity>> entities;
@@ -98,5 +103,43 @@ void Scene::enqueueSurfacePoints(
           entitiesToRemove.push_back(*it);
       }
     }
+  }
+}
+
+std::shared_ptr<IEntity> Scene::contractEdge(const PointEntity &p1,
+                                             const PointEntity &p2) {
+  const auto avgPos = (p1.getPosition() + p2.getPosition()) / 2.f;
+  const auto centerPoint = std::make_shared<PointEntity>(avgPos);
+
+  rebindReferences(p1, *centerPoint);
+  rebindReferences(p2, *centerPoint);
+  addEntity(EntityType::Point, centerPoint);
+  auto &points = _entities.at(EntityType::Point);
+  std::erase_if(points, [&p1, &p2](const auto &p) {
+    return p->getId() == p1.getId() || p->getId() == p2.getId();
+  });
+  return centerPoint;
+}
+
+void Scene::rebindReferences(const PointEntity &oldPoint,
+                             PointEntity &newPoint) {
+  for (auto &pair : _entities) {
+    if (pair.first == EntityType::Point || pair.first == EntityType::Torus)
+      continue;
+
+    auto &entities = pair.second;
+    for (auto &entitity : entities) {
+      auto groupedEntity = std::dynamic_pointer_cast<IGroupedEntity>(entitity);
+      auto &points = groupedEntity->getPointsReferences();
+      auto it = std::ranges::find_if(points, [&oldPoint](const auto &point) {
+        return point.get().getId() == oldPoint.getId();
+      });
+      if (it != points.end())
+        *it = std::ref(newPoint);
+    }
+  }
+  for (const auto &sub : oldPoint.getSubscribers()) {
+    sub.get().subscribe(newPoint);
+    sub.get().unsubscribe(oldPoint);
   }
 }

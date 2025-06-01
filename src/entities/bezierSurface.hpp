@@ -39,11 +39,10 @@ public:
     _polyMesh = createPolyMesh();
     updateMesh();
   }
-  void onSubscribableDestroyed(ISubscribable &publisher) override {}
+  void onSubscribableDestroyed(ISubscribable &publisher) override { update(); }
   virtual uint32_t getColCount() = 0;
   virtual uint32_t getRowCount() = 0;
   std::vector<std::reference_wrapper<const PointEntity>>
-
   getPointsReferences() const override {
     std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;
     pointsReferences.reserve(_points.size());
@@ -51,6 +50,10 @@ public:
       pointsReferences.emplace_back(point);
     }
     return pointsReferences;
+  }
+  std::vector<std::reference_wrapper<PointEntity>> &
+  getPointsReferences() override {
+    return _points;
   }
 
 protected:

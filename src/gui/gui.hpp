@@ -95,6 +95,7 @@ private:
   void createBezierSurfaceUI();
   void createSerializeUI();
   void createLoadSceneUI();
+  void contractEdgeUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
@@ -116,8 +117,7 @@ private:
   void deleteSelectedEntities();
   void selectEntity(int entityIndex);
   void unselectEntity(int entityIndex);
-  void contractEdge(const IEntity &p1,
-                    const IEntity &p2); // here the logic maybe seperated;
+  void contractSelectedEdge();
 
   void calculateFPS();
   void showFPSCounter();

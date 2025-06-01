@@ -86,6 +86,8 @@ void GUI::displayGUI() {
     createBezierSurfaceUI();
 
     removeButtonUI();
+    contractEdgeUI();
+    ImGui::Separator();
     createSerializeUI();
     createLoadSceneUI();
     ImGui::Separator();
@@ -592,5 +594,18 @@ void GUI::stereoscopicSettings() {
   if (_stereographicVision) {
     ImGui::SliderFloat("eye distance", &camera.getEyeDistance(), 0.f, 1.f);
     ImGui::SliderFloat("convergence", &camera.getConvergence(), 0.1f, 10.f);
+  }
+}
+
+void GUI::contractSelectedEdge() {
+  const auto &points = getSelectedPoints();
+  if (points.size() != 2)
+    return;
+  _selectedEntities = {_scene->contractEdge(points[0], points[1])};
+}
+
+void GUI::contractEdgeUI() {
+  if (ImGui::Button("Contract Selected Edge")) {
+    contractSelectedEdge();
   }
 }
