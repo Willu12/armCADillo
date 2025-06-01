@@ -116,6 +116,8 @@ private:
   void deleteSelectedEntities();
   void selectEntity(int entityIndex);
   void unselectEntity(int entityIndex);
+  void contractEdge(const IEntity &p1,
+                    const IEntity &p2); // here the logic maybe seperated;
 
   void calculateFPS();
   void showFPSCounter();

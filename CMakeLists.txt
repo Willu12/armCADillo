@@ -23,6 +23,7 @@ add_executable(${PROJECT_NAME}
  src/utils/json/entityDeserializer.cpp
  src/utils/json/torusDeserializer.cpp
  src/utils/json/bezierCurveC0Deseralizer.cpp
+ src/scene.cpp
 
  )
 
@@ -41,7 +42,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/rendering/EntityRenderers/
     src/notifications/
     src/gui/visitors/
-
 )
 
 target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json nfd)
