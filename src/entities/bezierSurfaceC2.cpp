@@ -3,13 +3,13 @@
 #include <array>
 #include <cmath>
 #include <numbers>
+#include <ranges>
 
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
 
   const uint32_t uPatches = _patches.sCount;
   const uint32_t vPatches = _patches.tCount;
-  const uint32_t uPoints = 3 + uPatches;
   const uint32_t vPoints = 3 + vPatches;
 
   for (uint32_t uPatch = 0; uPatch < uPatches; ++uPatch) {
@@ -49,7 +49,7 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
 BezierSurfaceC2::BezierSurfaceC2(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
     uint32_t uCount, uint32_t vCount) {
-  _id = _classId++;
+  _id = kClassId++;
   _name = "BezierCurveC2_" + std::to_string(_id);
 
   for (const auto &point : points) {
@@ -74,9 +74,9 @@ BezierSurfaceC2::createFlatPositions(const algebra::Vec3f &position,
   controlPoints.reserve(u_points * v_points);
   for (uint32_t i = 0; i < u_points; ++i) {
     for (uint32_t j = 0; j < v_points; ++j) {
-      controlPoints.emplace_back(position[0] + float(i) / 3.f * uLength,
-                                 position[1] + float(j) / 3.f * vLength,
-                                 position[2]);
+      controlPoints.emplace_back(
+          position[0] + static_cast<float>(i) / 3.f * uLength,
+          position[1] + static_cast<float>(j) / 3.f * vLength, position[2]);
     }
   }
   return controlPoints;

@@ -9,7 +9,7 @@ public:
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _mesh(generateMesh()) {
     _position = position;
-    _id = _classId++;
+    _id = kClassId++;
     _name = ("Torus_" + std::to_string(TorusEntity::_id));
   }
 
@@ -44,7 +44,7 @@ private:
 
   MeshDensity _meshDensity;
   std::shared_ptr<Mesh> _mesh;
-  static inline int _classId;
+  static inline int kClassId;
 
   std::shared_ptr<Mesh> generateMesh() {
     return Mesh::fromParametrization(_torus, _meshDensity);

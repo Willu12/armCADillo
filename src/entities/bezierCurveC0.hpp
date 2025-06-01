@@ -15,7 +15,7 @@ class BezierCurveC0 : public BezierCurve {
 public:
   explicit BezierCurveC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points) {
-    _id = _classId++;
+    _id = kClassId++;
     _name = "BezierCurveC0_" + std::to_string(_id);
     for (const auto &p : points) {
       _points.emplace_back(p);
@@ -29,7 +29,7 @@ public:
   }
 
 private:
-  inline static int _classId = 0;
+  inline static int kClassId = 0;
 
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> vertices;

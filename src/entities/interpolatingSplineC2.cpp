@@ -3,7 +3,7 @@
 
 InterpolatingSplineC2::InterpolatingSplineC2(
     const std::vector<std::reference_wrapper<PointEntity>> &points) {
-  _id = _classId++;
+  _id = kClassId++;
   _name = "InterpolatingSplineC2_" + std::to_string(_id);
   for (const auto &p : points) {
     _points.emplace_back(p);

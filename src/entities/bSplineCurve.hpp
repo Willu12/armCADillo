@@ -13,7 +13,7 @@ class BSplineCurve : public BezierCurve {
 public:
   explicit BSplineCurve(
       const std::vector<std::reference_wrapper<PointEntity>> &points) {
-    _id = _classId++;
+    _id = kClassId++;
     _name = "BSplineCurve_" + std::to_string(_id++);
     for (const auto &p : points) {
       _points.emplace_back(p);
@@ -92,7 +92,7 @@ public:
   }
 
 private:
-  inline static int _classId;
+  inline static int kClassId;
   std::vector<std::shared_ptr<VirtualPoint>> _bezierPoints;
   bool _showBezierPoints = false;
 

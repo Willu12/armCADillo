@@ -1,6 +1,7 @@
 #include "bezierSurfaceC0.hpp"
 #include "vec.hpp"
 #include <memory>
+#include <ranges>
 
 std::vector<algebra::Vec3f>
 BezierSurfaceC0::createFlatPositions(const algebra::Vec3f &position,
@@ -51,10 +52,10 @@ BezierSurfaceC0::createCyllinderPositions(const algebra::Vec3f &position,
 BezierSurfaceC0::BezierSurfaceC0(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
     uint32_t uCount, uint32_t vCount) {
-  _id = _classId++;
+  _id = kClassId++;
   _name = "BezierSurfaceC0_" + std::to_string(_id);
 
-  for (auto &controlPoint : points) {
+  for (const auto &controlPoint : points) {
     controlPoint.get().surfacePoint() = true;
     subscribe(controlPoint);
   }

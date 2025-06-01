@@ -11,7 +11,7 @@ public:
   bool acceptVisitor(IVisitor &visitor) override;
 
 private:
-  inline static int _classId;
+  inline static int kClassId;
 
   std::vector<algebra::Vec3f>
   solveTridiagonalMatrix(std::vector<float> &alpha, std::vector<float> &beta,

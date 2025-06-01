@@ -1,6 +1,5 @@
 #pragma once
 #include <array>
-#include <ranges>
 #include <sys/types.h>
 #include <vector>
 
@@ -33,7 +32,7 @@ public:
 
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;
-  inline static int _classId = 0;
+  inline static int kClassId = 0;
 
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

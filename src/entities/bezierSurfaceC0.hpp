@@ -5,7 +5,6 @@
 #include "vec.hpp"
 #include <functional>
 #include <memory>
-#include <ranges>
 #include <vector>
 
 class BezierSurfaceC0 : public BezierSurface {
@@ -29,6 +28,6 @@ public:
   };
 
 private:
-  inline static int _classId = 0;
+  inline static int kClassId = 0;
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IEntity.hpp"
 #include "IGroupedEntity.hpp"
 #include "IMeshable.hpp"
 #include "ISubscriber.hpp"

@@ -9,7 +9,7 @@
 class PointEntity : public IEntity, public ISubscribable {
 public:
   explicit PointEntity(algebra::Vec3f position) : _mesh(generateMesh()) {
-    _id = _classid++;
+    _id = kClassId++;
     _name = "Point_" + std::to_string(_id);
     _position = position;
     _meshKind = MeshKind::Triangles;
@@ -48,7 +48,7 @@ public:
   bool &surfacePoint() { return _surfacePoint; }
 
 private:
-  inline static int _classid;
+  inline static int kClassId;
   std::shared_ptr<Mesh> _mesh;
   bool _surfacePoint = false;
 
