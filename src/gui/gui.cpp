@@ -590,7 +590,7 @@ void GUI::stereoscopicSettings() {
   auto &camera = *_scene->getCamera();
   ImGui::Checkbox("Steroscopic Vision", &_stereographicVision);
   if (_stereographicVision) {
-    ImGui::SliderFloat("eye distance", &camera.getEyeDistance(), 0.f, 0.5f);
+    ImGui::SliderFloat("eye distance", &camera.getEyeDistance(), 0.f, 1.f);
     ImGui::SliderFloat("convergence", &camera.getConvergence(), 0.1f, 10.f);
   }
 }

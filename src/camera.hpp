@@ -34,25 +34,35 @@ public:
 
   algebra::Mat4f leftEyeProjectionMatrix() const {
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
-    float fovRad = algebra::rotations::toRadians(_zoom);
     float halfDistance = _eyeDistance / 2.f;
-    float val =
-        halfDistance / (aspectRatio * std::tan(fovRad / 2.f) * _convergence);
-    auto projection = projectionMatrix();
-    projection[0, 2] = val;
-    return projection *
+    float fovRad = algebra::rotations::toRadians(_zoom);
+    float top = kNearDist * std::tan(fovRad / 2.f);
+    float bottom = -top;
+    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
+    float b = a - halfDistance;
+    float c = a + halfDistance;
+    float left = -b * kNearDist / _convergence;
+    float right = c * kNearDist / _convergence;
+
+    return algebra::transformations::projectionOffCenter(
+               left, right, bottom, top, kNearDist, kFarDist) *
            algebra::transformations::translationMatrix(halfDistance, 0.f, 0.f);
   }
 
   algebra::Mat4f RightEyeProjectionMatrix() const {
     auto aspectRatio = GLFWHelper::getAspectRatio(_window);
-    float fovRad = algebra::rotations::toRadians(_zoom);
     float halfDistance = _eyeDistance / 2.f;
-    float val =
-        -halfDistance / (aspectRatio * std::tan(fovRad / 2.f) * _convergence);
-    auto projection = projectionMatrix();
-    projection[0, 2] = val;
-    return projection *
+    float fovRad = algebra::rotations::toRadians(_zoom);
+    float top = kNearDist * std::tan(fovRad / 2.f);
+    float bottom = -top;
+    float a = aspectRatio * std::tan(fovRad / 2) * _convergence;
+    float b = a - halfDistance;
+    float c = a + halfDistance;
+    float left = -c * kNearDist / _convergence;
+    float right = b * kNearDist / _convergence;
+
+    return algebra::transformations::projectionOffCenter(
+               left, right, bottom, top, kNearDist, kFarDist) *
            algebra::transformations::translationMatrix(-halfDistance, 0.f, 0.f);
   }
 
