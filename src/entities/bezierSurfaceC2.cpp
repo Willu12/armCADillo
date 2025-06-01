@@ -2,6 +2,7 @@
 #include "vec.hpp"
 #include <array>
 #include <cmath>
+#include <numbers>
 
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
@@ -91,12 +92,12 @@ BezierSurfaceC2::createCyllinderPositions(const algebra::Vec3f &position,
 
   controlPoints.reserve(u_points * v_points);
   const float angleBetweenPoints =
-      1.f / static_cast<float>(u_points - 3) * 2.0 * M_PI;
+      1.f / static_cast<float>(u_points - 3) * 2.0f * std::numbers::pi_v<float>;
   float newR = 3 * r / (std::cos(angleBetweenPoints) + 2);
 
   for (uint32_t i = 0; i < u_points; ++i) {
     float u_ratio = static_cast<float>(i) / static_cast<float>(u_points - 3);
-    float angle = u_ratio * 2.0f * M_PI;
+    float angle = u_ratio * 2.0f * std::numbers::pi_v<float>;
 
     float x_circle = std::cos(angle) * newR;
     float y_circle = std::sin(angle) * newR;

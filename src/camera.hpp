@@ -5,6 +5,7 @@
 #include "transformations.hpp"
 #include "utils.hpp"
 #include <memory>
+#include <numbers>
 
 class Camera {
 public:
@@ -87,12 +88,12 @@ public:
   }
 
   void rotateHorizontal(float angle) {
-    if (std::abs(_position._phi + angle) < M_PI_2)
+    if (std::abs(_position._phi + angle) < std::numbers::pi_v<float> / 2.f)
       _position._phi += angle;
   }
 
   void rotateVertical(float angle) {
-    if (std::abs(_position._theta + angle) < M_PI_2)
+    if (std::abs(_position._theta + angle) < std::numbers::pi_v<float> / 2.f)
       _position._theta += angle;
   }
 
