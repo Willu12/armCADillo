@@ -16,12 +16,14 @@ add_executable(${PROJECT_NAME}
  src/gui/visitors/GuiVisitor.cpp
  src/gui/visitors/jsonSerializer.cpp
  src/entities/virtualPoint.cpp
+ src/entities/gregorySurface.cpp
  src/entities/interpolatingSplineC2.cpp
  src/controllers/selectionController.cpp
  src/entities/bezierSurfaceC0.cpp
  src/entities/bezierSurfaceC2.cpp
  src/utils/json/entityDeserializer.cpp
  src/utils/json/torusDeserializer.cpp
+ src/utils/borderGraph.cpp
  src/utils/json/bezierCurveC0Deseralizer.cpp
  src/scene.cpp
 

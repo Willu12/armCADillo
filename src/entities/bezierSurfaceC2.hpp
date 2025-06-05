@@ -27,8 +27,8 @@ public:
   };
   static std::array<std::array<algebra::Vec3f, 4>, 4>
   processPatch(const std::array<std::array<algebra::Vec3f, 4>, 4> &patch);
-  uint32_t getColCount() override { return 3 + _patches.tCount; }
-  uint32_t getRowCount() override { return 3 + _patches.sCount; }
+  uint32_t getColCount() const override { return 3 + _patches.tCount; }
+  uint32_t getRowCount() const override { return 3 + _patches.sCount; }
 
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;

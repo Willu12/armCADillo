@@ -39,8 +39,8 @@ public:
     updateMesh();
   }
   void onSubscribableDestroyed(ISubscribable &publisher) override { update(); }
-  virtual uint32_t getColCount() = 0;
-  virtual uint32_t getRowCount() = 0;
+  virtual uint32_t getColCount() const = 0;
+  virtual uint32_t getRowCount() const = 0;
   std::vector<std::reference_wrapper<const PointEntity>>
   getPointsReferences() const override {
     std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;

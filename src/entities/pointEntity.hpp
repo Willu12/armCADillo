@@ -13,7 +13,7 @@ public:
     _name = "Point_" + std::to_string(_id);
     _position = position;
     _meshKind = MeshKind::Triangles;
-    _scale = algebra::Vec3f(0.01f, 0.01f, 0.01f);
+    _scale = algebra::Vec3f(0.02f, 0.02f, 0.02f);
   }
 
   ~PointEntity() {
