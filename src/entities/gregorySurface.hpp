@@ -21,4 +21,8 @@ private:
                           &surfaces) const;
   std::vector<std::reference_wrapper<const PointEntity>>
   getBorder(const BezierSurfaceC0 &surface) const;
+
+  BezierSurfaceC0 &findSurfaceForEdge(
+      const PointEntity &p1, const PointEntity &p2,
+      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
 };

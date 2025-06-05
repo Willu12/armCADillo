@@ -1,10 +1,12 @@
 #pragma once
 
 #include "gregorySurface.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "borderGraph.hpp"
 #include "pointEntity.hpp"
 #include <cstdint>
 #include <functional>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -23,8 +25,10 @@ GregorySurface::createSurfacesGraph(
                .uLen = surface.get().getColCount(),
                .vLen = surface.get().getRowCount()});
   BorderGraph borderGraph(borders);
-  auto intersectionPoints = borderGraph.findHoles();
+  auto cornerPointsTriangles = borderGraph.findHoles();
 
+  for (const auto &cornerPointsTriangle : cornerPointsTriangles) {
+  }
   // function that will create gregorySurfaces based on intersection points;
 }
 
@@ -39,4 +43,25 @@ GregorySurface::getBorder(const BezierSurfaceC0 &surface) const {
       borderPoints.push_back(points[u * surface.getColCount() + v]);
     }
   return borderPoints;
+}
+
+BezierSurfaceC0 &GregorySurface::findSurfaceForEdge(
+    const PointEntity &p1, const PointEntity &p2,
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
+  auto has_both_points = [&](BezierSurfaceC0 &surface) {
+    auto points =
+        surface.getPointsReferences() |
+        std::ranges::views::transform(
+            [](auto &ref) -> const PointEntity * { return &ref.get(); });
+    return std::ranges::find(points, &p1) != points.end() &&
+           std::ranges::find(points, &p2) != points.end();
+  };
+
+  auto it = std::ranges::find_if(
+      surfaces, [&](auto &s) { return has_both_points(s.get()); });
+
+  if (it != surfaces.end()) {
+    return it->get();
+  }
+  throw std::runtime_error("No surface found that contains both given points.");
 }
