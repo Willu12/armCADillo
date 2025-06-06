@@ -5,9 +5,19 @@
 #include "graph.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
+#include <array>
 #include <functional>
 #include <unordered_map>
 #include <vector>
+
+struct GregoryQuad {
+  std::array<algebra::Vec3f, 4> top;
+  std::array<algebra::Vec3f, 4> bottom;
+  std::array<algebra::Vec3f, 2> topSides;
+  std::array<algebra::Vec3f, 2> bottomSides;
+  std::array<algebra::Vec3f, 4> uInner;
+  std::array<algebra::Vec3f, 4> vInner;
+};
 class GregorySurface : public BezierSurface {
 public:
   explicit GregorySurface(
@@ -29,4 +39,6 @@ private:
   findSurfaceForEdge(const PointEntity &p1, const PointEntity &p2,
                      const std::vector<std::reference_wrapper<BezierSurfaceC0>>
                          &surfaces) const;
+  std::array<GregoryQuad, 3> GetGregoryQuadsFromEdges(
+      const std::array<std::reference_wrapper<const Edge>, 3> &edges) const;
 };

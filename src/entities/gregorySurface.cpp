@@ -3,6 +3,7 @@
 #include "bezierSurfaceC0.hpp"
 #include "borderGraph.hpp"
 #include "pointEntity.hpp"
+#include "vec.hpp"
 #include <cstdint>
 #include <functional>
 #include <ranges>
@@ -89,4 +90,51 @@ BezierSurfaceC0 &GregorySurface::findSurfaceForEdge(
     return it->get();
   }
   throw std::runtime_error("No surface found that contains both given points.");
+}
+
+std::array<GregoryQuad, 3> GregorySurface::GetGregoryQuadsFromEdges(
+    const std::array<std::reference_wrapper<const Edge>, 3> &edges) const {
+  const auto &p0 = edges[0].get()._points[0].get().getPosition();
+  const auto &p1 = edges[1].get()._points[0].get().getPosition();
+  const auto &p2 = edges[2].get()._points[0].get().getPosition();
+
+  const auto centerPos = (p0 + p1 + p2) / 3.f;
+
+  // create first point
+  const auto &p01 = (p0 + p1) / 2.f;
+  const auto &p12 = (p1 + p2) / 2.f;
+  const auto &p02 = (p2 + p0) / 2.f;
+
+  std::array<algebra::Vec3f, 4> top = {p01, 2.f / 3.f * p01 + centerPos / 3.f,
+                                       1.f / 3.f * p01 + centerPos * 2.f / 3.f,
+                                       centerPos};
+
+  std::array<algebra::Vec3f, 4> bottom = {
+      p0, 2.f / 3.f * p0 + p02 / 3.f, 1.f / 3.f * p0 + p02 * 2.f / 3.f, p02};
+
+  std::array<algebra::Vec3f, 2> topSides = {p01 * 2.f / 3.f + p0 / 3.f,
+                                            centerPos * 2.f / 3.f + p02 / 3.f};
+
+  std::array<algebra::Vec3f, 2> bottomSides = {
+      p01 / 3.f + p0 * 2.f / 3.f, centerPos / 3.f + p02 * 2.f / 3.f};
+
+  // how to calcluatge tangent points;
+  std::array<algebra::Vec3f, 4> uInner = {
+      (p0 + p01 + centerPos) / 3.f, // between p0-p01-center
+      (p1 + p01 + centerPos) / 3.f, // between p1-p01-center
+      (p2 + p12 + centerPos) / 3.f, // between p2-p12-center
+      (p0 + p02 + centerPos) / 3.f  // between p0-p02-center
+  };
+
+  std::array<algebra::Vec3f, 4> vInner = {
+      (p0 + centerPos + p01) / 3.f, (p1 + centerPos + p12) / 3.f,
+      (p2 + centerPos + p02) / 3.f, (p0 + centerPos + p01) / 3.f};
+
+  GregoryQuad patch1 = {
+      .top = top,
+      .bottom = bottom,
+      .bottomSides = bottomSides,
+      .uInner = uInner,
+      .vInner = vInner,
+  };
 }
