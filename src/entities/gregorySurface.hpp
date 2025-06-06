@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bezierSurfaceC0.hpp"
+#include "borderGraph.hpp"
 #include "graph.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
@@ -19,10 +20,13 @@ private:
                                std::reference_wrapper<const PointEntity>>>
   createSurfacesGraph(const std::vector<std::reference_wrapper<BezierSurfaceC0>>
                           &surfaces) const;
-  std::vector<std::reference_wrapper<const PointEntity>>
-  getBorder(const BezierSurfaceC0 &surface) const;
+  Border getBorder(const BezierSurfaceC0 &surface) const;
 
-  BezierSurfaceC0 &findSurfaceForEdge(
-      const PointEntity &p1, const PointEntity &p2,
-      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
+  BorderGraph createBorderGraph(
+      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
+      const;
+  BezierSurfaceC0 &
+  findSurfaceForEdge(const PointEntity &p1, const PointEntity &p2,
+                     const std::vector<std::reference_wrapper<BezierSurfaceC0>>
+                         &surfaces) const;
 };

@@ -1,6 +1,5 @@
-#pragma once
-
 #include "gregorySurface.hpp"
+#include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "borderGraph.hpp"
 #include "pointEntity.hpp"
@@ -16,38 +15,64 @@ std::pair<
 GregorySurface::createSurfacesGraph(
     const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
     const {
-  // create Graph from points.
-  std::vector<Border> borders;
-  borders.reserve(surfaces.size());
-  for (const auto &surface : surfaces)
-    borders.push_back(
-        Border{.points_ = std::as_const(surface.get()).getPointsReferences(),
-               .uLen = surface.get().getColCount(),
-               .vLen = surface.get().getRowCount()});
-  BorderGraph borderGraph(borders);
-  auto cornerPointsTriangles = borderGraph.findHoles();
 
-  for (const auto &cornerPointsTriangle : cornerPointsTriangles) {
-  }
+  const auto borderGraph = createBorderGraph(surfaces);
+
+  auto cornerEdges = borderGraph.findHoles();
   // function that will create gregorySurfaces based on intersection points;
 }
 
-std::vector<std::reference_wrapper<const PointEntity>>
-GregorySurface::getBorder(const BezierSurfaceC0 &surface) const {
+BorderGraph GregorySurface::createBorderGraph(
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
+    const {
+  std::vector<Border> borders;
+  borders.reserve(surfaces.size());
+
+  for (const auto &surface : surfaces) {
+    borders.push_back(getBorder(surface));
+  }
+  return BorderGraph(borders);
+}
+
+Border GregorySurface::getBorder(const BezierSurfaceC0 &surface) const {
   std::vector<std::reference_wrapper<const PointEntity>> borderPoints;
   const auto &points = surface.getPointsReferences();
+  std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual>
+      pointsEdgeMap;
   borderPoints.reserve((surface.getPatches().sCount + 1) *
                        (surface.getPatches().tCount + 1));
   for (uint32_t u = 0; u < surface.getColCount(); u += 3)
     for (uint32_t v = 0; v < surface.getRowCount(); v += 3) {
       borderPoints.push_back(points[u * surface.getColCount() + v]);
+      if (u == surface.getColCount() - 1 || v == surface.getRowCount() - 1)
+        continue;
+      Edge rightEdge{points[u * surface.getColCount() + v],
+                     points[u * surface.getColCount() + v + 1],
+                     points[u * surface.getColCount() + v + 2],
+                     points[u * surface.getColCount() + v + 3]};
+      Edge downEdge{points[u * surface.getColCount() + v],
+                    points[(u + 1) * surface.getColCount() + v],
+                    points[(u + 2) * surface.getColCount() + v],
+                    points[(u + 3) * surface.getColCount() + v]};
+
+      pointsEdgeMap.insert(
+          {std::tie(rightEdge._points[0], rightEdge._points[3]), rightEdge});
+      pointsEdgeMap.insert(
+          {std::tie(downEdge._points[0], downEdge._points[3]), downEdge});
     }
-  return borderPoints;
+
+  return Border{
+      .points_ = borderPoints,
+      .pointsEdgeMap_ = pointsEdgeMap,
+      .uLen = surface.getPatches().sCount,
+      .vLen = surface.getPatches().tCount,
+  };
 }
 
 BezierSurfaceC0 &GregorySurface::findSurfaceForEdge(
     const PointEntity &p1, const PointEntity &p2,
-    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
+    const {
   auto has_both_points = [&](BezierSurfaceC0 &surface) {
     auto points =
         surface.getPointsReferences() |
