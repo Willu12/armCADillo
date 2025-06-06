@@ -3,6 +3,7 @@
 #include "EntityFactories/IEntityFactory.hpp"
 #include "GuiVisitor.hpp"
 #include "IEntity.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
 #include "cursor.hpp"
@@ -36,8 +37,10 @@ public:
 
   std::vector<std::shared_ptr<IEntity>> getEntities() const;
   std::vector<std::reference_wrapper<PointEntity>> getPoints() const;
-  std::vector<std::shared_ptr<IEntity>> getSelectedEntities() const;
+  const std::vector<std::shared_ptr<IEntity>> &getSelectedEntities() const;
   std::vector<std::shared_ptr<IEntity>> getSelectedPointsPointers() const;
+  std::vector<std::reference_wrapper<BezierSurfaceC0>>
+  getSelectedSurfacesC0() const;
 
   std::shared_ptr<Cursor> getCursor();
 
@@ -96,6 +99,7 @@ private:
   void createSerializeUI();
   void createLoadSceneUI();
   void contractEdgeUI();
+  void createGregoryPatchUI();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
@@ -110,6 +114,7 @@ private:
                                      float r, float h);
   void createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
                                      float r, float h);
+  void createGregoryPatch();
 
   void renderModelSettings();
   void stereoscopicSettings();

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "IEntity.hpp"
 #include "bezierSurfaceC0.hpp"
+#include "bezierSurfaceMesh.hpp"
 #include "borderGraph.hpp"
 #include "graph.hpp"
 #include "pointEntity.hpp"
@@ -18,18 +20,18 @@ struct GregoryQuad {
   std::array<algebra::Vec3f, 4> uInner;
   std::array<algebra::Vec3f, 4> vInner;
 };
-class GregorySurface : public BezierSurface {
+class GregorySurface : public IEntity {
 public:
   explicit GregorySurface(
-      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {}
+      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
+  const IMeshable &getMesh() const override { return *_mesh; };
 
 private:
+  std::array<GregoryQuad, 3> _gregoryPatches;
+  std::unique_ptr<BezierSurfaceMesh> _mesh;
   std::vector<std::array<algebra::Vec3f, 16>> calculateGregoryPoints();
-  std::pair<algebra::Graph,
-            std::unordered_map<std::size_t,
-                               std::reference_wrapper<const PointEntity>>>
-  createSurfacesGraph(const std::vector<std::reference_wrapper<BezierSurfaceC0>>
-                          &surfaces) const;
+  void updateMesh() override { _mesh = generateMesh(); };
+
   Border getBorder(const BezierSurfaceC0 &surface) const;
 
   BorderGraph createBorderGraph(
@@ -39,6 +41,12 @@ private:
   findSurfaceForEdge(const PointEntity &p1, const PointEntity &p2,
                      const std::vector<std::reference_wrapper<BezierSurfaceC0>>
                          &surfaces) const;
-  std::array<GregoryQuad, 3> GetGregoryQuadsFromEdges(
-      const std::array<std::reference_wrapper<const Edge>, 3> &edges) const;
+  std::array<GregoryQuad, 3> calculateGregoryPatchesForHole(
+      const std::array<std::reference_wrapper<const Edge>, 3> &edges,
+      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
+      const;
+  std::optional<std::array<algebra::Vec3f, 4>>
+  findInnerPointsForEdge(const Edge &edge,
+                         const BezierSurfaceC0 &surface) const;
+  std::unique_ptr<BezierSurfaceMesh> generateMesh();
 };

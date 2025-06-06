@@ -8,6 +8,7 @@
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
 #include "entitiesTypes.hpp"
+#include "gregorySurface.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
 #include "jsonSerializer.hpp"
@@ -37,7 +38,7 @@ std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
   return _scene->getEntites();
 }
 
-std::vector<std::shared_ptr<IEntity>> GUI::getSelectedEntities() const {
+const std::vector<std::shared_ptr<IEntity>> &GUI::getSelectedEntities() const {
   return _selectedEntities;
 }
 std::vector<std::shared_ptr<IEntity>> GUI::getSelectedPointsPointers() const {
@@ -84,6 +85,7 @@ void GUI::displayGUI() {
     createBSplineCurveUI();
     createInterpolatingSplineCurveUI();
     createBezierSurfaceUI();
+    createGregoryPatchUI();
 
     removeButtonUI();
     contractEdgeUI();
@@ -515,6 +517,12 @@ void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 
+void GUI::createGregoryPatch() {
+  const auto selectedSurfaces = getSelectedSurfacesC0();
+  auto gregorySurface = std::make_shared<GregorySurface>(selectedSurfaces);
+  _scene->addEntity(EntityType::GregorySurface, gregorySurface);
+}
+
 void GUI::processControllers() {
 
   auto selectedEntities = getSelectedEntities();
@@ -608,4 +616,20 @@ void GUI::contractEdgeUI() {
   if (ImGui::Button("Contract Selected Edge")) {
     contractSelectedEdge();
   }
+}
+
+std::vector<std::reference_wrapper<BezierSurfaceC0>>
+GUI::getSelectedSurfacesC0() const {
+  std::vector<std::reference_wrapper<BezierSurfaceC0>> surfaces;
+
+  for (const auto &entity : _selectedEntities)
+    if (auto surface = std::dynamic_pointer_cast<BezierSurfaceC0>(entity))
+      surfaces.push_back(*surface);
+
+  return surfaces;
+}
+
+void GUI::createGregoryPatchUI() {
+  if (ImGui::Button("Create Gregory Patch"))
+    createGregoryPatch();
 }

@@ -9,6 +9,7 @@
 #include "cursor.hpp"
 #include "cursorRenderer.hpp"
 #include "entitiesTypes.hpp"
+#include "gregorySurfaceRenderer.hpp"
 #include "grid.hpp"
 #include "imgui.h"
 #include "pickingRenderer.hpp"
@@ -139,5 +140,8 @@ private:
     _entityRenderers.insert(
         {EntityType::BezierSurfaceC2,
          std::make_unique<BezierSurfaceRenderer>(*_camera)});
+    _entityRenderers.insert(
+        {EntityType::GregorySurface,
+         std::make_unique<GregorySurfaceRenderer>(*_camera)});
   }
 };
