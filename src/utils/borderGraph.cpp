@@ -28,10 +28,9 @@ void BorderGraph::addBorder(const Border &border) {
   }
 }
 
-std::vector<std::array<std::reference_wrapper<const Edge>, 3>>
-BorderGraph::findHoles() const {
+std::vector<std::array<Edge, 3>> BorderGraph::findHoles() const {
   const auto triangles = _graph.findAllTriangles();
-  std::vector<std::array<std::reference_wrapper<const Edge>, 3>> holes;
+  std::vector<std::array<Edge, 3>> holes;
   holes.reserve(triangles.size());
   for (const auto &triangle : triangles) {
     holes.push_back(getEdge(triangle));
@@ -39,7 +38,7 @@ BorderGraph::findHoles() const {
   return holes;
 }
 
-std::array<std::reference_wrapper<const Edge>, 3>
+std::array<Edge, 3>
 BorderGraph::getEdge(const std::array<std::size_t, 3> triangle) const {
 
   Edge e1 = _edgeMap.at(std::tie(_vertexPointMap.at(triangle[0]),

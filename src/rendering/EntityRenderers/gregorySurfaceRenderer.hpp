@@ -47,7 +47,7 @@ public:
       glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
       glBindVertexArray(0);
     }
-    _meshRenderer.render(entities);
+    // _meshRenderer.render(entities);
   }
 
 private:

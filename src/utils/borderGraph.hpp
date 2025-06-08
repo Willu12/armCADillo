@@ -53,8 +53,7 @@ struct Border {
 class BorderGraph {
 public:
   explicit BorderGraph(const std::vector<Border> &borders);
-  std::vector<std::array<std::reference_wrapper<const Edge>, 3>>
-  findHoles() const;
+  std::vector<std::array<Edge, 3>> findHoles() const;
 
 private:
   algebra::Graph _graph;
@@ -65,6 +64,5 @@ private:
       _pointVertexMap;
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual> _edgeMap;
   void addBorder(const Border &border);
-  std::array<std::reference_wrapper<const Edge>, 3>
-  getEdge(const std::array<std::size_t, 3> triangle) const;
+  std::array<Edge, 3> getEdge(const std::array<std::size_t, 3> triangle) const;
 };

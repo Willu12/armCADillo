@@ -519,8 +519,11 @@ void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
 
 void GUI::createGregoryPatch() {
   const auto selectedSurfaces = getSelectedSurfacesC0();
-  auto gregorySurface = std::make_shared<GregorySurface>(selectedSurfaces);
-  _scene->addEntity(EntityType::GregorySurface, gregorySurface);
+
+  auto gregorySurfaces =
+      GregorySurface::createGregorySurfaces(selectedSurfaces);
+  for (const auto &gregorySurface : gregorySurfaces)
+    _scene->addEntity(EntityType::GregorySurface, gregorySurface);
 }
 
 void GUI::processControllers() {

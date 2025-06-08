@@ -6,37 +6,36 @@
 #include "vec.hpp"
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <ranges>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
-GregorySurface::GregorySurface(
+std::vector<std::shared_ptr<GregorySurface>>
+GregorySurface::createGregorySurfaces(
     const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
+  std::vector<std::shared_ptr<GregorySurface>> gregorySurfaces;
   const auto borderGraph = createBorderGraph(surfaces);
-  auto holes =
-      borderGraph.findHoles(); // Assuming this returns a vector of holes
+  auto holes = borderGraph.findHoles();
+  if (holes.empty())
+    return gregorySurfaces;
 
-  if (holes.empty()) {
-    // No hole to fill, or handle error
-    return;
+  for (const auto &hole : holes) {
+    gregorySurfaces.emplace_back(std::make_shared<GregorySurface>(
+        calculateGregoryPatchesForHole(hole, surfaces)));
   }
+  return gregorySurfaces;
+}
 
-  // We will fill the first triangular hole found
-  const auto &holeEdges = holes[0];
-
-  // Check if it's a triangle
-  if (holeEdges.size() != 3) {
-    throw std::runtime_error(
-        "Gregory patch filling only supports triangular holes.");
-  }
-
-  // This is the core logic that was missing
-  _gregoryPatches = calculateGregoryPatchesForHole(holeEdges, surfaces);
+GregorySurface::GregorySurface(
+    const std::array<GregoryQuad, 3> &gregoryPatches) {
+  _gregoryPatches = gregoryPatches;
+  updateMesh();
 }
 
 BorderGraph GregorySurface::createBorderGraph(
-    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
-    const {
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
   std::vector<Border> borders;
   borders.reserve(surfaces.size());
 
@@ -45,33 +44,52 @@ BorderGraph GregorySurface::createBorderGraph(
   }
   return BorderGraph(borders);
 }
-
-Border GregorySurface::getBorder(const BezierSurfaceC0 &surface) const {
+Border GregorySurface::getBorder(const BezierSurfaceC0 &surface) {
   std::vector<std::reference_wrapper<const PointEntity>> borderPoints;
   const auto &points = surface.getPointsReferences();
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual>
       pointsEdgeMap;
-  borderPoints.reserve((surface.getPatches().sCount + 1) *
-                       (surface.getPatches().tCount + 1));
-  for (uint32_t u = 0; u < surface.getColCount(); u += 3)
-    for (uint32_t v = 0; v < surface.getRowCount(); v += 3) {
-      borderPoints.push_back(points[u * surface.getColCount() + v]);
-      if (u == surface.getColCount() - 1 || v == surface.getRowCount() - 1)
-        continue;
-      Edge rightEdge{points[u * surface.getColCount() + v],
-                     points[u * surface.getColCount() + v + 1],
-                     points[u * surface.getColCount() + v + 2],
-                     points[u * surface.getColCount() + v + 3]};
-      Edge downEdge{points[u * surface.getColCount() + v],
-                    points[(u + 1) * surface.getColCount() + v],
-                    points[(u + 2) * surface.getColCount() + v],
-                    points[(u + 3) * surface.getColCount() + v]};
 
-      pointsEdgeMap.insert(
-          {std::tie(rightEdge._points[0], rightEdge._points[3]), rightEdge});
-      pointsEdgeMap.insert(
-          {std::tie(downEdge._points[0], downEdge._points[3]), downEdge});
-    }
+  const uint32_t cols = surface.getColCount();
+  const uint32_t rows = surface.getRowCount();
+
+  // Top border (v = 0)
+  for (uint32_t u = 0; u <= cols - 4; u += 3) {
+    uint32_t base = u;
+    borderPoints.push_back(points[base]);
+    pointsEdgeMap.insert({{points[base], points[base + 3]},
+                          Edge{points[base], points[base + 1], points[base + 2],
+                               points[base + 3]}});
+  }
+
+  // Right border (u = cols - 1)
+  for (uint32_t v = 0; v <= rows - 4; v += 3) {
+    uint32_t base = (v * cols) + (cols - 1);
+    borderPoints.push_back(points[base]);
+    pointsEdgeMap.insert(
+        {{points[base], points[base + 3 * cols]},
+         Edge{points[base], points[base + cols], points[base + 2 * cols],
+              points[base + 3 * cols]}});
+  }
+
+  // Bottom border (v = rows - 1)
+  for (int32_t u = cols - 1; u >= 3; u -= 3) {
+    uint32_t base = (rows - 1) * cols + u;
+    borderPoints.push_back(points[base]);
+    pointsEdgeMap.insert({{points[base], points[base - 3]},
+                          Edge{points[base], points[base - 1], points[base - 2],
+                               points[base - 3]}});
+  }
+
+  // Left border (u = 0)
+  for (int32_t v = rows - 1; v >= 3; v -= 3) {
+    uint32_t base = v * cols;
+    borderPoints.push_back(points[base]);
+    pointsEdgeMap.insert(
+        {{points[base], points[base - 3 * cols]},
+         Edge{points[base], points[base - cols], points[base - 2 * cols],
+              points[base - 3 * cols]}});
+  }
 
   return Border{
       .points_ = borderPoints,
@@ -82,10 +100,12 @@ Border GregorySurface::getBorder(const BezierSurfaceC0 &surface) const {
 }
 
 BezierSurfaceC0 &GregorySurface::findSurfaceForEdge(
-    const PointEntity &p1, const PointEntity &p2,
-    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
-    const {
+    const Edge &edge,
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
   auto has_both_points = [&](BezierSurfaceC0 &surface) {
+    const PointEntity &p1 = edge._points[0];
+    const PointEntity &p2 = edge._points[3];
+
     auto points =
         surface.getPointsReferences() |
         std::ranges::views::transform(
@@ -104,9 +124,8 @@ BezierSurfaceC0 &GregorySurface::findSurfaceForEdge(
 }
 
 std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
-    const std::array<std::reference_wrapper<const Edge>, 3> &edges,
-    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces)
-    const {
+    const std::array<Edge, 3> &edges,
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
   std::array<GregoryQuad, 3> quads;
 
   // 1. Get corner points and adjacent surfaces/inner points
@@ -115,10 +134,9 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
   std::array<std::array<algebra::Vec3f, 4>, 3> innerPoints;
 
   for (int i = 0; i < 3; ++i) {
-    const Edge &edge = edges[i].get();
+    const Edge &edge = edges[i];
     corners[i] = edge._points[0].get().getPosition();
-    adjSurfaces[i] =
-        &findSurfaceForEdge(edge._points[0], edge._points[3], surfaces);
+    adjSurfaces[i] = &findSurfaceForEdge(edge, surfaces);
 
     auto inner = findInnerPointsForEdge(edge, *adjSurfaces[i]);
     if (!inner) {
@@ -150,7 +168,7 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
   // 4. Construct each of the 3 Gregory Quads
   for (int i = 0; i < 3; ++i) {
     int prev_i = (i + 2) % 3; // (i-1+3)%3
-    const Edge &edge = edges[i].get();
+    const Edge &edge = edges[i];
 
     // Corner points for this quad: P_i, P_{i+1}, center, center
     const auto &p0 = corners[i];
@@ -274,56 +292,72 @@ GregorySurface::calculateGregoryPoints() {
 
 std::optional<std::array<algebra::Vec3f, 4>>
 GregorySurface::findInnerPointsForEdge(const Edge &edge,
-                                       const BezierSurfaceC0 &surface) const {
-  const auto &surfacePoints = surface.getPointsReferences();
+                                       const BezierSurfaceC0 &surface) {
+  const auto &points = surface.getPointsReferences();
   const int rows = surface.getRowCount();
   const int cols = surface.getColCount();
 
-  // Find the starting point of the edge in the surface's grid
-  for (int r = 0; r < rows; ++r) {
-    for (int c = 0; c < cols; ++c) {
-      if (&surfacePoints[r * cols + c].get() == &edge._points[0].get()) {
-        // Found the start point. Now check if it's a known boundary edge.
-        // Check right
-        if (c + 3 < cols &&
-            &surfacePoints[r * cols + c + 3].get() == &edge._points[3].get()) {
-          if (r + 1 < rows) { // Inner points are below
-            return std::array<algebra::Vec3f, 4>{
-                surfacePoints[(r + 1) * cols + c].get().getPosition(),
-                surfacePoints[(r + 1) * cols + c + 1].get().getPosition(),
-                surfacePoints[(r + 1) * cols + c + 2].get().getPosition(),
-                surfacePoints[(r + 1) * cols + c + 3].get().getPosition()};
-          }
-          if (r - 1 >= 0) { // Inner points are above
-            return std::array<algebra::Vec3f, 4>{
-                surfacePoints[(r - 1) * cols + c].get().getPosition(),
-                surfacePoints[(r - 1) * cols + c + 1].get().getPosition(),
-                surfacePoints[(r - 1) * cols + c + 2].get().getPosition(),
-                surfacePoints[(r - 1) * cols + c + 3].get().getPosition()};
-          }
-        }
-        // Check down
-        if (r + 3 < rows && &surfacePoints[(r + 3) * cols + c].get() ==
-                                &edge._points[3].get()) {
-          if (c + 1 < cols) { // Inner points are to the right
-            return std::array<algebra::Vec3f, 4>{
-                surfacePoints[r * cols + c + 1].get().getPosition(),
-                surfacePoints[(r + 1) * cols + c + 1].get().getPosition(),
-                surfacePoints[(r + 2) * cols + c + 1].get().getPosition(),
-                surfacePoints[(r + 3) * cols + c + 1].get().getPosition()};
-          }
-          if (c - 1 >= 0) { // Inner points are to the left
-            return std::array<algebra::Vec3f, 4>{
-                surfacePoints[r * cols + c - 1].get().getPosition(),
-                surfacePoints[(r + 1) * cols + c - 1].get().getPosition(),
-                surfacePoints[(r + 2) * cols + c - 1].get().getPosition(),
-                surfacePoints[(r + 3) * cols + c - 1].get().getPosition()};
-          }
-        }
+  const auto &e = edge._points;
+
+  auto match = [&](int u0, int v0, int du, int dv) -> bool {
+    for (int i = 0; i < 4; ++i) {
+      int u = u0 + du * i;
+      int v = v0 + dv * i;
+      if (e[i].get().getId() != points[u * cols + v].get().getId())
+        return false;
+    }
+    return true;
+  };
+
+  auto matchReversed = [&](int u0, int v0, int du, int dv) -> bool {
+    for (int i = 0; i < 4; ++i) {
+      int u = u0 + du * (3 - i);
+      int v = v0 + dv * (3 - i);
+      if (e[i].get().getId() != points[u * cols + v].get().getId())
+        return false;
+    }
+    return true;
+  };
+
+  for (int u = 0; u <= rows - 4; u += 3) {
+    for (int v = 0; v <= cols - 4; v += 3) {
+      auto idx = [&](int du, int dv) { return (u + du) * cols + (v + dv); };
+
+      // ↓ Bottom edge
+      if (match(u, v, 1, 0) || matchReversed(u, v, 1, 0)) {
+        return std::array{points[idx(1, 1)].get().getPosition(),
+                          points[idx(2, 1)].get().getPosition(),
+                          points[idx(0, 1)].get().getPosition(),
+                          points[idx(3, 1)].get().getPosition()};
+      }
+
+      // ↑ Top edge
+      if (match(u, v + 3, 1, 0) || matchReversed(u, v + 3, 1, 0)) {
+        return std::array{points[idx(1, 2)].get().getPosition(),
+                          points[idx(2, 2)].get().getPosition(),
+                          points[idx(0, 2)].get().getPosition(),
+                          points[idx(3, 2)].get().getPosition()};
+      }
+
+      // ← Left edge
+      if (match(u, v, 0, 1) || matchReversed(u, v, 0, 1)) {
+        return std::array{points[idx(1, 1)].get().getPosition(),
+                          points[idx(1, 2)].get().getPosition(),
+                          points[idx(1, 0)].get().getPosition(),
+                          points[idx(1, 3)].get().getPosition()};
+      }
+
+      // → Right edge
+      if (match(u + 3, v, 0, 1) || matchReversed(u + 3, v, 0, 1)) {
+        return std::array{points[idx(2, 1)].get().getPosition(),
+                          points[idx(2, 2)].get().getPosition(),
+                          points[idx(2, 0)].get().getPosition(),
+                          points[idx(2, 3)].get().getPosition()};
       }
     }
   }
-  return std::nullopt; // Edge not found on this surface's boundary
+
+  return std::nullopt;
 }
 
 std::unique_ptr<BezierSurfaceMesh> GregorySurface::generateMesh() {
