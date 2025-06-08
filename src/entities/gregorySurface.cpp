@@ -32,6 +32,8 @@ GregorySurface::GregorySurface(
     const std::array<GregoryQuad, 3> &gregoryPatches) {
   _gregoryPatches = gregoryPatches;
   updateMesh();
+  _id = kClassId++;
+  _name = &"GregorySurface"[_id];
 }
 
 BorderGraph GregorySurface::createBorderGraph(
@@ -360,14 +362,19 @@ GregorySurface::findInnerPointsForEdge(const Edge &edge,
   return std::nullopt;
 }
 
-std::unique_ptr<BezierSurfaceMesh> GregorySurface::generateMesh() {
-  auto _points = calculateGregoryPoints()[0];
-  std::vector<float> controlPointsPositions(_points.size() * 3);
+std::array<std::unique_ptr<BezierSurfaceMesh>, 3>
+GregorySurface::generateMesh() {
+  std::array<std::unique_ptr<BezierSurfaceMesh>, 3> meshes;
+  for (int i = 0; i < 3; ++i) {
+    auto _points = calculateGregoryPoints()[i];
+    std::vector<float> controlPointsPositions(_points.size() * 3);
 
-  for (const auto &[i, point] : _points | std::views::enumerate) {
-    controlPointsPositions[3 * i] = point[0];
-    controlPointsPositions[3 * i + 1] = point[1];
-    controlPointsPositions[3 * i + 2] = point[2];
+    for (const auto &[i, point] : _points | std::views::enumerate) {
+      controlPointsPositions[3 * i] = point[0];
+      controlPointsPositions[3 * i + 1] = point[1];
+      controlPointsPositions[3 * i + 2] = point[2];
+    }
+    meshes[i] = BezierSurfaceMesh::create(controlPointsPositions, 1, 1);
   }
-  return BezierSurfaceMesh::create(controlPointsPositions, 1, 1);
+  return meshes;
 }

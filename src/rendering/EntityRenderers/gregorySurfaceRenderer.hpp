@@ -28,24 +28,25 @@ public:
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
     for (const auto &entity : entities) {
-      auto &bezierSurface = dynamic_cast<GregorySurface &>(*entity);
+      auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
 
       _shader.setUInt("u_subdivisions", 4);
       _shader.setUInt("v_subdivisions", 4);
       //_shader.setInt("renderPolyLine",
       //               static_cast<int>(bezierSurface.wireframe()));
-      const auto &mesh = bezierSurface.getMesh();
       glLineWidth(2.0f);
+      for (const auto &mesh : gregorySurface.getMeshes()) {
 
-      glPatchParameteri(GL_PATCH_VERTICES, 16);
-      glBindVertexArray(mesh.getVAO());
-      _shader.setUInt("direction", 0);
+        glPatchParameteri(GL_PATCH_VERTICES, 16);
+        glBindVertexArray(mesh->getVAO());
+        _shader.setUInt("direction", 0);
 
-      glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
 
-      _shader.setUInt("direction", 1);
-      glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh.getIndicesLength()));
-      glBindVertexArray(0);
+        _shader.setUInt("direction", 1);
+        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
+        glBindVertexArray(0);
+      }
     }
     // _meshRenderer.render(entities);
   }
