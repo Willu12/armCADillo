@@ -1,7 +1,9 @@
 #pragma once
 
+#include "bezierSurfaceC0.hpp"
 #include "graph.hpp"
 #include "pointEntity.hpp"
+#include "vec.hpp"
 #include <functional>
 #include <unordered_map>
 #include <vector>
@@ -40,20 +42,51 @@ struct RefPairEqual {
 
 struct Edge {
   std::array<std::reference_wrapper<const PointEntity>, 4> _points;
+
+  std::array<algebra::Vec3f, 7> subdivide() const;
+};
+
+struct EdgeEqual {
+  bool operator()(const Edge &a, const Edge &b) const {
+    for (int i = 0; i < 4; ++i) {
+      if (a._points[i].get().getId() != b._points[i].get().getId())
+        return false;
+    }
+    return true;
+  }
+};
+
+struct EdgeHash {
+  std::size_t operator()(const Edge &e) const {
+    std::size_t seed = 0;
+    for (int i = 0; i < 4; ++i) {
+      auto id = e._points[i].get().getId();
+      seed ^= std::hash<int>{}(id) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    return seed;
+  }
+};
+
+struct BorderEdge {
+  Edge _edge;
+  Edge _innerEdge;
 };
 
 struct Border {
   std::vector<std::reference_wrapper<const PointEntity>> points_;
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual>
       pointsEdgeMap_;
+  std::unordered_map<Edge, Edge, EdgeHash, EdgeEqual> edgeInnerEdgeMap_;
   uint32_t uLen;
   uint32_t vLen;
+
+  Border(const BezierSurfaceC0 &surface);
 };
 
 class BorderGraph {
 public:
   explicit BorderGraph(const std::vector<Border> &borders);
-  std::vector<std::array<Edge, 3>> findHoles() const;
+  std::vector<std::array<BorderEdge, 3>> findHoles() const;
 
 private:
   algebra::Graph _graph;
@@ -63,6 +96,8 @@ private:
                      PointHash, PointEqual>
       _pointVertexMap;
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual> _edgeMap;
+  std::unordered_map<Edge, Edge, EdgeHash, EdgeEqual> _edgeInnerEdgeMap;
   void addBorder(const Border &border);
-  std::array<Edge, 3> getEdge(const std::array<std::size_t, 3> triangle) const;
+  std::array<BorderEdge, 3>
+  getEdge(const std::array<std::size_t, 3> triangle) const;
 };

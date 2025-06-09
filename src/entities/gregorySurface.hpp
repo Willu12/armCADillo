@@ -39,16 +39,8 @@ private:
   void updateMesh() override { _mesh = generateMesh(); };
   std::array<std::unique_ptr<BezierSurfaceMesh>, 3> generateMesh();
 
-  static Border getBorder(const BezierSurfaceC0 &surface);
-
   static BorderGraph createBorderGraph(
       const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
-  static BezierSurfaceC0 &findSurfaceForEdge(
-      const Edge &edge,
-      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
-  static std::array<GregoryQuad, 3> calculateGregoryPatchesForHole(
-      const std::array<Edge, 3> &edges,
-      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
-  static std::optional<std::array<algebra::Vec3f, 4>>
-  findInnerPointsForEdge(const Edge &edge, const BezierSurfaceC0 &surface);
+  static std::array<GregoryQuad, 3>
+  calculateGregoryPatchesForHole(const std::array<BorderEdge, 3> &edges);
 };
