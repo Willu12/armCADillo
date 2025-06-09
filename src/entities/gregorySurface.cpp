@@ -130,7 +130,6 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
     const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
   std::array<GregoryQuad, 3> quads;
 
-  // 1. Get corner points and adjacent surfaces/inner points
   std::array<algebra::Vec3f, 3> corners;
   std::array<const BezierSurfaceC0 *, 3> adjSurfaces;
   std::array<std::array<algebra::Vec3f, 4>, 3> innerPoints;
@@ -141,102 +140,58 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
     adjSurfaces[i] = &findSurfaceForEdge(edge, surfaces);
 
     auto inner = findInnerPointsForEdge(edge, *adjSurfaces[i]);
-    if (!inner) {
+    if (!inner)
       throw std::runtime_error(
           "Could not find inner control points for an edge.");
-    }
+
     innerPoints[i] = *inner;
   }
 
-  // 2. Define the center point of the hole
-  const auto centerPos = (corners[0] + corners[1] + corners[2]) / 3.0f;
+  std::array<algebra::Vec3f, 3> QiList;
+  std::array<algebra::Vec3f, 3> P3List;
+  std::array<algebra::Vec3f, 3> P2List;
 
-  // 3. Calculate internal "Gregory points" for C1 continuity across hole
-  // boundaries
-  std::array<algebra::Vec3f, 3> g_plus;
-  std::array<algebra::Vec3f, 3> g_minus;
-
+  // const auto centerPos = (corners[0] + corners[1] + corners[2]) / 3.0f;
   for (int i = 0; i < 3; ++i) {
-    const int next_i = (i + 1) % 3;
-    const auto &p_i = corners[i];
-    const auto &p_next = corners[next_i];
-
-    // Sum of vectors from corners to center
-
-    g_plus[i] = p_i + (p_i - centerPos) / 2.0f;
-    g_minus[next_i] = p_next + (p_next - centerPos) / 2.0f;
-  }
-
-  // 4. Construct each of the 3 Gregory Quads
-  for (int i = 0; i < 3; ++i) {
-    int prev_i = (i + 2) % 3; // (i-1+3)%3
     const Edge &edge = edges[i];
 
-    // Corner points for this quad: P_i, P_{i+1}, center, center
     const auto &p0 = corners[i];
     const auto &p1 = corners[(i + 1) % 3];
 
-    // Boundary points along the original surface edge
-    const auto &e0 = edge._points[0].get().getPosition(); // same as p0
-    const auto &e1 = edge._points[1].get().getPosition();
-    const auto &e2 = edge._points[2].get().getPosition();
-    const auto &e3 = edge._points[3].get().getPosition(); // same as p1
+    const auto &P3i = (p0 + p1) / 2.f; // midpoint of boundary edge
 
-    // Interior points from the adjacent surface
-    const auto &i0 = innerPoints[i][0];
-    const auto &i1 = innerPoints[i][1];
-    const auto &i2 = innerPoints[i][2];
-    const auto &i3 = innerPoints[i][3];
+    const auto &B2 = innerPoints[i][2];
+    const auto &B3 = innerPoints[i][3];
 
-    // Calculate the "f" points (the interior Gregory points for C1 continuity)
-    // These ensure the patch is smooth with the adjacent surface
-    algebra::Vec3f f0 = (e0 + e1 + i0 + i1) / 4.0f;
-    algebra::Vec3f f1 = (e2 + e3 + i2 + i3) / 4.0f;
+    const auto P2i = P3i - (B3 - B2) / 3.f;
+    const auto Qi = 1.5f * P3i - 0.5f * P2i; // extrapolated helper point
 
-    // Map to your GregoryQuad structure
-    // This mapping depends on how you define your quad's orientation.
-    // Let's assume 'bottom' is the edge adjacent to the original surface
-    // and 'top' is the edge collapsing to the center point.
-    quads[i].bottom = {p0, e1, e2, p1};
-
-    // The top "edge" is just the center point
-    quads[i].top = {centerPos, centerPos, centerPos, centerPos};
-
-    // Sides connecting bottom to top
-    quads[i].bottomSides = {p0, p1}; // These names are confusing, remapping
-    quads[i].topSides = {centerPos, centerPos};
-
-    // The crucial interior points
-    // uInner and vInner represent the "split" points that make Gregory patches
-    // work. They allow C1 continuity without requiring C2.
-    quads[i].uInner[0] = f0;
-    quads[i].uInner[1] = f1;
-    quads[i].uInner[2] = g_plus[i];
-    quads[i].uInner[3] = g_minus[(i + 1) % 3];
-
-    // vInner is calculated to ensure tangent plane continuity
-    quads[i].vInner[0] = f0;
-    quads[i].vInner[1] = f1;
-    quads[i].vInner[2] = g_plus[i];
-    quads[i].vInner[3] = g_minus[(i + 1) % 3];
+    // Store Q for averaging later
+    QiList[i] = Qi;
+    P3List[i] = P3i;
+    P2List[i] = P2i;
   }
+  const auto P = (QiList[0] + QiList[1] + QiList[2]) / 3.f;
 
-  // Correction for the interior points to ensure smoothness across the new
-  // patch boundaries
   for (int i = 0; i < 3; ++i) {
-    int next_i = (i + 1) % 3;
+    const auto &p0 = corners[i];
+    const auto &p1 = corners[(i + 1) % 3];
 
-    // The two inner points must be collinear with the corner
-    auto &g_p_i = quads[i].uInner[2];    // Corresponds to g_plus[i]
-    auto &g_m_next = quads[i].uInner[3]; // Corresponds to g_minus[next_i]
+    const auto &P3i = P3List[i];
+    const auto &P2i = P2List[i];
+    const auto P1i = (2.f * P + P2i) / 3.f;
 
-    auto &g_p_next = quads[next_i].uInner[2]; // Corresponds to g_plus[next_i]
-    auto &g_m_i = quads[i].vInner[3];         // A point from the other side
+    // Fill the Gregory quad — Bezier patch layout
+    quads[i].bottom = {p0, (2.f * p0 + p1) / 3.f, (p0 + 2.f * p1) / 3.f,
+                       p1};            // cubic edge
+    quads[i].top = {P3i, P2i, P1i, P}; // into the center, inner Bézier curve
 
-    // This is a simplified blending scheme. More complex ones exist.
-    // For now, we will just use the calculated g_plus and g_minus.
-    // The previous calculation is a decent starting point.
+    // Optional: for better control over surface, define sides:
+    quads[i].bottomSides = {(2.f * p0 + P3i) / 3.f, (2.f * p1 + P3i) / 3.f};
+    quads[i].topSides = {(P3i + 2.f * P) / 3.f, (P3i + 2.f * P) / 3.f};
   }
+
+  // here calcuate inner points
 
   return quads;
 }
@@ -249,39 +204,26 @@ GregorySurface::calculateGregoryPoints() {
   for (const auto &quad : _gregoryPatches) {
     std::array<algebra::Vec3f, 16> points;
 
-    // The 12 boundary points are the same
     points[0] = quad.bottom[0];
-    points[1] = quad.bottom[1];
-    points[2] = quad.bottom[2];
-    points[3] = quad.bottom[3];
+    points[1] = quad.bottomSides[0];
+    points[2] = quad.topSides[0];
+    points[3] = quad.top[0];
 
-    // Left and Right sides (mapping might need adjustment based on your
-    // convention)
-    points[4] = quad.bottomSides[0]; // This mapping seems wrong in your struct
-    points[7] = quad.topSides[0];    // Let's assume a standard 4x4 grid.
-    points[8] = quad.bottomSides[1];
-    points[11] = quad.topSides[1];
+    points[4] = quad.bottom[1];
+    points[5] = quad.uInner[0];
+    points[6] = quad.uInner[1];
+    points[7] = quad.top[1];
 
-    // A standard mapping for a 4x4 grid [row * 4 + col]
-    // Row 0
-    points[0] = quad.bottom[0];
-    points[1] = quad.bottom[1];
-    points[2] = quad.bottom[2];
-    points[3] = quad.bottom[3];
-    // Row 3
-    points[12] = quad.top[0];
-    points[13] = quad.top[1];
-    points[14] = quad.top[2];
+    points[8] = quad.bottom[2];
+    points[9] = quad.vInner[0];
+    points[10] = quad.vInner[1];
+    points[11] = quad.top[2];
+
+    points[12] = quad.bottom[3];
+    points[13] = quad.bottomSides[1];
+    points[14] = quad.topSides[1];
     points[15] = quad.top[3];
-    // Column 0
-    points[4] = (quad.vInner[0] + quad.uInner[0]) /
-                2.0f; // Placeholder, need side points
-    points[8] = (quad.vInner[3] + quad.uInner[3]) / 2.0f; // Placeholder
-    // Column 3
-    points[7] = (quad.vInner[1] + quad.uInner[1]) / 2.0f;  // Placeholder
-    points[11] = (quad.vInner[2] + quad.uInner[2]) / 2.0f; // Placeholder
 
-    // THE 4 INNER BEZIER POINTS are the average of the Gregory "split" points
     points[5] = (quad.uInner[0] + quad.vInner[0]) / 2.0f;
     points[6] = (quad.uInner[1] + quad.vInner[1]) / 2.0f;
     points[9] = (quad.uInner[3] + quad.vInner[3]) / 2.0f;
@@ -325,7 +267,7 @@ GregorySurface::findInnerPointsForEdge(const Edge &edge,
     for (int v = 0; v <= cols - 4; v += 3) {
       auto idx = [&](int du, int dv) { return (u + du) * cols + (v + dv); };
 
-      // ↓ Bottom edge
+      // Bottom edge
       if (match(u, v, 1, 0) || matchReversed(u, v, 1, 0)) {
         return std::array{points[idx(1, 1)].get().getPosition(),
                           points[idx(2, 1)].get().getPosition(),
@@ -333,7 +275,7 @@ GregorySurface::findInnerPointsForEdge(const Edge &edge,
                           points[idx(3, 1)].get().getPosition()};
       }
 
-      // ↑ Top edge
+      // Top edge
       if (match(u, v + 3, 1, 0) || matchReversed(u, v + 3, 1, 0)) {
         return std::array{points[idx(1, 2)].get().getPosition(),
                           points[idx(2, 2)].get().getPosition(),
@@ -341,7 +283,7 @@ GregorySurface::findInnerPointsForEdge(const Edge &edge,
                           points[idx(3, 2)].get().getPosition()};
       }
 
-      // ← Left edge
+      // Left edge
       if (match(u, v, 0, 1) || matchReversed(u, v, 0, 1)) {
         return std::array{points[idx(1, 1)].get().getPosition(),
                           points[idx(1, 2)].get().getPosition(),
@@ -349,7 +291,7 @@ GregorySurface::findInnerPointsForEdge(const Edge &edge,
                           points[idx(1, 3)].get().getPosition()};
       }
 
-      // → Right edge
+      // Right edge
       if (match(u + 3, v, 0, 1) || matchReversed(u + 3, v, 0, 1)) {
         return std::array{points[idx(2, 1)].get().getPosition(),
                           points[idx(2, 2)].get().getPosition(),
