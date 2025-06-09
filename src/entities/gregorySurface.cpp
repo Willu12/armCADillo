@@ -68,24 +68,54 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
     P1[i] = (2.f * Q[i] + P) / 3.f;
 
   auto &edge = subdividedEdges[0];
-  auto &leftEdge = subdividedEdges[2];
-  auto &rightEdge = subdividedEdges[1];
+  auto &innerEdge = subdividedInnerEdges[0];
 
-  GregoryQuad quad1{.top{leftEdge[3], P2[2], P1[2], P},
-                    .bottom = {edge[0], edge[1], edge[2], edge[3]},
-                    .topSides{leftEdge[2], P1[0]},
-                    .bottomSides{leftEdge[1], P2[0]}};
+  auto &leftEdge = subdividedEdges[2];
+  auto &leftInnerEdge = subdividedInnerEdges[2];
+
+  auto &rightEdge = subdividedEdges[1];
+  auto &rightInnerEdge = subdividedInnerEdges[1];
+
+  auto v = P - P1[2];
+  auto w = edge[2] - edge[3];
+  auto z = leftEdge[2] - leftEdge[3];
+  auto y = P1[0] - P;
+  auto x = rightEdge[2] - rightEdge[3];
+  GregoryQuad quad1{
+      .top{leftEdge[3], P2[2], P1[2], P},
+      .bottom = {edge[0], edge[1], edge[2], edge[3]},
+      .topSides{leftEdge[2], P1[0]},
+      .bottomSides{leftEdge[1], P2[0]},
+      .uInner{2.f * leftEdge[1] - leftInnerEdge[1], 2.f / 3.f * z + y / 3.f,
+              2.f / 3.f * v + w / 3.f, 2.f * edge[2] - innerEdge[2]},
+      .vInner{2.f * edge[1] - innerEdge[1],
+              2.f * leftEdge[2] - leftInnerEdge[2],
+              1.f / 3.f * z + y * 2.f / 3.f, 1.f / 3.f * v + w * 2.f / 3.f}};
 
   GregoryQuad quad2{.top{P, P1[1], P2[1], rightEdge[3]},
                     .bottom = {edge[3], edge[4], edge[5], edge[6]},
                     .topSides{P1[0], rightEdge[2]},
-                    .bottomSides{P2[0], rightEdge[1]}};
+                    .bottomSides{P2[0], rightEdge[1]},
+                    .uInner{-1.f * quad1.vInner[3], 2.f / 3.f * y + x / 3.f,
+                            2.f * rightEdge[2] - rightInnerEdge[2],
+                            2.f * edge[5] - innerEdge[5]},
+                    .vInner{
+                        2.f * edge[4] - innerEdge[4],
+                        -1.f * quad1.uInner[2],
+                        1.f / 3.f * y + x * 2.f / 3.f,
+                        2.f * rightEdge[1] - rightInnerEdge[1],
+                    }};
 
   GregoryQuad quad3{
-      .top{rightEdge[3], P2[1], P1[0], P},
+      .top{rightEdge[3], P2[1], P1[1], P},
       .bottom = {leftEdge[6], leftEdge[5], leftEdge[4], leftEdge[3]},
       .topSides{rightEdge[4], P1[2]},
-      .bottomSides{rightEdge[5], P2[2]}};
+      .bottomSides{rightEdge[5], P2[2]},
+      .uInner{2.f * rightEdge[5] - rightInnerEdge[5], -1.f * quad2.vInner[2],
+              -1.f * quad1.vInner[2], 2.f * leftEdge[4] - leftInnerEdge[4]},
+      .vInner{2.f * leftEdge[5] - leftInnerEdge[5],
+              2.f * rightEdge[4] - rightInnerEdge[4], -1.f * quad2.uInner[1],
+              -1.f * quad1.uInner[2]}};
 
   return {quad1, quad2, quad3};
 }
@@ -104,13 +134,9 @@ GregorySurface::calculateGregoryPoints() {
     points[3] = quad.top[0];
 
     points[4] = quad.bottom[1];
-    points[5] = quad.uInner[0];
-    points[6] = quad.uInner[1];
     points[7] = quad.top[1];
 
     points[8] = quad.bottom[2];
-    points[9] = quad.vInner[0];
-    points[10] = quad.vInner[1];
     points[11] = quad.top[2];
 
     points[12] = quad.bottom[3];
