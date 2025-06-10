@@ -42,7 +42,7 @@ public:
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        if (i != 2)
+        if (i != 0)
           continue;
         glPatchParameteri(GL_PATCH_VERTICES, 16);
         glBindVertexArray(mesh->getVAO());
