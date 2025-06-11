@@ -43,4 +43,5 @@ private:
       const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
   static std::array<GregoryQuad, 3>
   calculateGregoryPatchesForHole(std::array<BorderEdge, 3> &edges);
+  static void ccwOrderEdges(std::array<BorderEdge, 3> &edges);
 };

@@ -37,7 +37,7 @@ vec3 bicubic_bezier(float u, float v) {
   vec3 pi11 = ((1.0 - u) * p(15) + (1.0 - v) * p(19)) / (2.0 - u - v + eps);
 
   vec3 p0 = bezier3(p(0), p(1), p(2), p(3), v);
-  vec3 p1 = bezier3(p(4), pi00, pi10, p(5), v);
+  vec3 p1 = bezier3(p(4), pi00, pi10, p(5), v); // TUTAJ ODWROC 10 i 01
   vec3 p2 = bezier3(p(6), pi01, pi11, p(7), v);
   vec3 p3 = bezier3(p(8), p(9), p(10), p(11), v);
 

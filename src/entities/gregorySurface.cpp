@@ -57,7 +57,7 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
   std::array<algebra::Vec3f, 3> P3;
   std::array<algebra::Vec3f, 3> P1;
 
-  std::swap(edges[1], edges[2]);
+  ccwOrderEdges(edges);
   std::array<algebra::Vec3f, 3> Q;
   for (const auto &[i, edge] : edges | std::views::enumerate) {
     subdividedEdges[i] = edges[i]._edge.subdivide();
@@ -89,56 +89,57 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
                     .topSides{leftEdge[2], P1[0]},    // P1[0]},
                     .bottomSides{leftEdge[1], P2[0]}, // P2[0]},
                     .uInner{
-                        P2[2] + 2.f / 3.f * z + y / 3.f,
-                        2.f * edge[2] - innerEdge[2],
+                        2.f * leftEdge[2] - leftInnerEdge[2],
                         2.f * leftEdge[1] - leftInnerEdge[1],
-
+                        P2[0] + 1.f / 3.f * v + w * 2.f / 3.f,
                         P1[0] + 2.f / 3.f * v + w / 3.f,
                     },
-                    .vInner{2.f * edge[1] - innerEdge[1],
-                            2.f * leftEdge[2] - leftInnerEdge[2],
-                            P1[2] + 1.f / 3.f * z + y * 2.f / 3.f,
-                            P2[0] + 1.f / 3.f * v + w * 2.f / 3.f}};
+                    .vInner{
+                        P2[2] + 2.f / 3.f * z + y / 3.f,
+                        2.f * edge[1] - innerEdge[1],
+                        2.f * edge[2] - innerEdge[2],
+
+                        P1[2] + 1.f / 3.f * z + y * 2.f / 3.f,
+                    }};
   /* */
   GregoryQuad quad2{.top{P, P1[1], P2[1], rightEdge[3]},
                     .bottom = {edge[3], edge[4], edge[5], edge[6]},
                     .topSides{P1[0], rightEdge[2]},
                     .bottomSides{P2[0], rightEdge[1]},
-                    .uInner{P1[1] + 2.f / 3.f * y + x / 3.f,
-                            2.f * edge[5] - innerEdge[5],
+                    .uInner{P1[0] - 1.f / 3.f * w - 2.f / 3.f * v,
                             P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
+                            2.f * rightEdge[1] - rightInnerEdge[1],
                             2.f * rightEdge[2] - rightInnerEdge[2]},
+                    /*
+                    P1[1] + 2.f / 3.f * y + x / 3.f,
+
+                          P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
+                         },*/
                     .vInner{
-                        P2[2] - 2.f / 3.f * z - y / 3.f,
-                        2.f * rightEdge[1] - rightInnerEdge[1],
-                        2.f * edge[4] - innerEdge[4],
                         P2[1] + 1.f / 3.f * y + x * 2.f / 3.f,
+                        2.f * edge[4] - innerEdge[4],
+                        2.f * edge[5] - innerEdge[5],
+                        P2[2] - 2.f / 3.f * z - y / 3.f,
+
                     }};
-  /*
-    GregoryQuad quad3 {
-      .top{rightEdge[6], rightEdge[5], rightEdge[4], rightEdge[3]},
-          .bottom{leftEdge[3], P2[2], P1[2], P}, .topSides{leftEdge[5], P2[1]},
-          .bottomSides{leftEdge[4], P1[1]}, .uInner {
-        2.f * rightEdge[5] - rightInnerEdge[5],
-        P2[2] + 1.f *
-      }
-    }
-    */
 
   GregoryQuad quad3{
-      .top{rightEdge[3], P2[1], P1[1], P},
-      .bottom = {leftEdge[6], leftEdge[5], leftEdge[4], leftEdge[3]},
-      .topSides{rightEdge[4], P1[2]},
-      .bottomSides{rightEdge[5], P2[2]},
-      .uInner{2.f * rightEdge[4] - rightInnerEdge[4],
-              P1[1] - 2.f / 3.f * v - w / 3.f,
-              2.f * leftEdge[5] - leftInnerEdge[5],
-              P2[1] - 2.f / 3.f * y - x / 3.f},
-      .vInner{
-          P2[1] - 1.f / 3.f * y - x * 2.f / 3.f,
-          P1[2] - 1.f / 3.f * z - y * 2.f / 3.f,
-          2.f * rightEdge[5] - rightInnerEdge[5],
+      .top{rightEdge[6], rightEdge[5], rightEdge[4], rightEdge[3]},
+      .bottom{leftEdge[3], P2[2], P1[2], P},
+      .topSides{leftEdge[5], P2[1]},
+      .bottomSides{leftEdge[4], P1[1]},
+      .uInner{
+          2.f * leftEdge[5] - leftInnerEdge[5],
           2.f * leftEdge[4] - leftInnerEdge[4],
+          P1[1] - 2.f / 3.f * y - x / 3.f,
+          P2[1] - 1.f / 3.f * y - x * 2.f / 3.f,
+      },
+      .vInner{
+          2.f * rightEdge[5] - rightInnerEdge[5],
+          P2[2] - 2.f / 3.f * z - y * 1.f / 3.f,
+          P1[2] - 1.f / 3.f * z - y * 2.f / 3.f,
+
+          2.f * rightEdge[4] - rightInnerEdge[4],
       }};
 
   return {quad1, quad2, quad3};
@@ -186,3 +187,33 @@ std::array<std::unique_ptr<GregoryMesh>, 3> GregorySurface::generateMesh() {
 }
 
 const IMeshable &GregorySurface::getMesh() const { return *_mesh[0]; };
+
+void GregorySurface::ccwOrderEdges(std::array<BorderEdge, 3> &edges) {
+  auto end0 = edges[0]._edge._points[3];
+
+  auto &e1 = edges[1];
+  auto &e2 = edges[2];
+  if (edges[1]._edge._points[0].get().getId() == end0.get().getId()) {
+    e1 = edges[1];
+  } else if (edges[1]._edge._points[3].get().getId() == end0.get().getId()) {
+    e1 = edges[1];
+    std::ranges::reverse(e1._edge._points);
+    std::ranges::reverse(e1._innerEdge._points);
+  } else if (edges[2]._edge._points[0].get().getId() == end0.get().getId()) {
+    e1 = edges[2];
+    e2 = edges[1];
+  } else if (edges[2]._edge._points[3].get().getId() == end0.get().getId()) {
+    e1 = edges[2];
+    e2 = edges[1];
+    std::ranges::reverse(e1._edge._points);
+    std::ranges::reverse(e1._innerEdge._points);
+  }
+
+  if (e2._edge._points[0].get().getId() != e1._edge._points[3].get().getId()) {
+    std::ranges::reverse(e2._edge._points);
+    std::ranges::reverse(e2._innerEdge._points);
+  }
+
+  edges[1] = e1;
+  edges[2] = e2;
+}

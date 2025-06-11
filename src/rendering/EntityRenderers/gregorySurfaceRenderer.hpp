@@ -42,8 +42,8 @@ public:
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        //     if (i != 2)
-        //      continue;
+        // if (i != 0)
+        //    continue;
         _shader.setUInt("u_subdivisions", meshDensities[i].s);
         _shader.setUInt("v_subdivisions", meshDensities[i].t);
         glPatchParameteri(GL_PATCH_VERTICES, 20);
