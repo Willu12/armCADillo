@@ -191,8 +191,8 @@ const IMeshable &GregorySurface::getMesh() const { return *_mesh[0]; };
 void GregorySurface::ccwOrderEdges(std::array<BorderEdge, 3> &edges) {
   auto end0 = edges[0]._edge._points[3];
 
-  auto &e1 = edges[1];
-  auto &e2 = edges[2];
+  auto e1 = edges[1];
+  auto e2 = edges[2];
   if (edges[1]._edge._points[0].get().getId() == end0.get().getId()) {
     e1 = edges[1];
   } else if (edges[1]._edge._points[3].get().getId() == end0.get().getId()) {

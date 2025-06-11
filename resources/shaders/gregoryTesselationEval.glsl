@@ -32,8 +32,8 @@ const float eps = 1e-10;
 
 vec3 bicubic_bezier(float u, float v) {
   vec3 pi00 = (u * p(12) + v * p(16)) / (u + v + eps);
-  vec3 pi01 = (u * p(13) + (1.0 - v) * p(17)) / (u + 1.0 - v + eps);
-  vec3 pi10 = ((1.0 - u) * p(14) + v * p(18)) / (1.0 - u + v + eps);
+  vec3 pi01 = (u * p(14) + (1.0 - v) * p(18)) / (u + 1.0 - v + eps);
+  vec3 pi10 = ((1.0 - u) * p(13) + v * p(17)) / (1.0 - u + v + eps);
   vec3 pi11 = ((1.0 - u) * p(15) + (1.0 - v) * p(19)) / (2.0 - u - v + eps);
 
   vec3 p0 = bezier3(p(0), p(1), p(2), p(3), v);
