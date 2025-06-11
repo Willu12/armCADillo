@@ -8,18 +8,17 @@
 class GregorySurfaceRenderer : public IEntityRenderer {
 public:
   explicit GregorySurfaceRenderer(const Camera &camera)
-      : _shader(
-            {ShaderPath{._path = "../resources/shaders/vertexGregory.glsl",
-                        ._type = GL_VERTEX_SHADER},
-             //  ShaderPath{._path = "../resources/shaders/"
-             //                      "surfaceTesselationControl.glsl",
-             //             ._type = GL_TESS_CONTROL_SHADER},
-             //   ShaderPath{._path = "../resources/shaders/"
-             //                       "surfaceIsolineTeselationEvaluation.glsl",
-             //              ._type = GL_TESS_EVALUATION_SHADER},
+      : _shader({ShaderPath{._path = "../resources/shaders/vertexSurface.glsl",
+                            ._type = GL_VERTEX_SHADER},
+                 ShaderPath{._path = "../resources/shaders/"
+                                     "surfaceTesselationControl.glsl",
+                            ._type = GL_TESS_CONTROL_SHADER},
+                 ShaderPath{._path = "../resources/shaders/"
+                                     "surfaceIsolineTeselationEvaluation.glsl",
+                            ._type = GL_TESS_EVALUATION_SHADER},
 
-             ShaderPath{._path = "../resources/shaders/fragGregory.glsl",
-                        ._type = GL_FRAGMENT_SHADER}}),
+                 ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
+                            ._type = GL_FRAGMENT_SHADER}}),
         _meshRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
@@ -42,17 +41,17 @@ public:
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        if (i != 0)
-          continue;
+        // if (i != 2)
+        //  continue;
         glPatchParameteri(GL_PATCH_VERTICES, 16);
         glBindVertexArray(mesh->getVAO());
         _shader.setUInt("direction", 0);
-
-        glDrawArrays(GL_POINTS, 0, static_cast<int>(mesh->getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
+        //  glDrawArrays(GL_POINTS, 0,
+        //  static_cast<int>(mesh->getIndicesLength()));
 
         _shader.setUInt("direction", 1);
-        // glDrawArrays(GL_PATCHES, 0,
-        // static_cast<int>(mesh->getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
         glBindVertexArray(0);
       }
     }

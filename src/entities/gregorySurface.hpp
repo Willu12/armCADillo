@@ -45,5 +45,5 @@ private:
   static BorderGraph createBorderGraph(
       const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
   static std::array<GregoryQuad, 3>
-  calculateGregoryPatchesForHole(const std::array<BorderEdge, 3> &edges);
+  calculateGregoryPatchesForHole(std::array<BorderEdge, 3> &edges);
 };
