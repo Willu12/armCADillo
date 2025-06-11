@@ -2,6 +2,7 @@
 
 #include "IEntityRenderer.hpp"
 #include "camera.hpp"
+#include "gregoryMesh.hpp"
 #include "gregorySurface.hpp"
 #include "surfaceMeshRenderer.hpp"
 #include <ranges>
@@ -11,10 +12,10 @@ public:
       : _shader({ShaderPath{._path = "../resources/shaders/vertexSurface.glsl",
                             ._type = GL_VERTEX_SHADER},
                  ShaderPath{._path = "../resources/shaders/"
-                                     "surfaceTesselationControl.glsl",
+                                     "gregoryTesselationControl.glsl",
                             ._type = GL_TESS_CONTROL_SHADER},
                  ShaderPath{._path = "../resources/shaders/"
-                                     "surfaceIsolineTeselationEvaluation.glsl",
+                                     "gregoryTesselationEval.glsl",
                             ._type = GL_TESS_EVALUATION_SHADER},
 
                  ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
@@ -41,9 +42,9 @@ public:
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        // if (i != 2)
-        //  continue;
-        glPatchParameteri(GL_PATCH_VERTICES, 16);
+        if (i != 0)
+          continue;
+        glPatchParameteri(GL_PATCH_VERTICES, 20);
         glBindVertexArray(mesh->getVAO());
         _shader.setUInt("direction", 0);
         glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));

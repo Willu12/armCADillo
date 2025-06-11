@@ -2,6 +2,7 @@
 #include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "borderGraph.hpp"
+#include "gregoryMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
 #include <cstdint>
@@ -161,19 +162,11 @@ GregorySurface::calculateGregoryPoints() {
   return bezierPatches;
 }
 
-std::array<std::unique_ptr<BezierSurfaceMesh>, 3>
-GregorySurface::generateMesh() {
-  std::array<std::unique_ptr<BezierSurfaceMesh>, 3> meshes;
-  for (int i = 0; i < 3; ++i) {
-    auto _points = calculateGregoryPoints()[i];
-    std::vector<float> controlPointsPositions(_points.size() * 3);
-
-    for (const auto &[i, point] : _points | std::views::enumerate) {
-      controlPointsPositions[3 * i] = point[0];
-      controlPointsPositions[3 * i + 1] = point[1];
-      controlPointsPositions[3 * i + 2] = point[2];
-    }
-    meshes[i] = BezierSurfaceMesh::create(controlPointsPositions, 1, 1);
-  }
+std::array<std::unique_ptr<GregoryMesh>, 3> GregorySurface::generateMesh() {
+  std::array<std::unique_ptr<GregoryMesh>, 3> meshes;
+  for (const auto &[i, quad] : _gregoryPatches | std::views::enumerate)
+    meshes[i] = GregoryMesh::create(quad);
   return meshes;
 }
+
+const IMeshable &GregorySurface::getMesh() const { return *_mesh[0]; };
