@@ -32,8 +32,8 @@ public:
     for (const auto &entity : entities) {
       auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
 
-      _shader.setUInt("u_subdivisions", 4);
-      _shader.setUInt("v_subdivisions", 4);
+      const auto &meshDensities = gregorySurface.getMeshDensities();
+
       //_shader.setInt("renderPolyLine",
       //               static_cast<int>(bezierSurface.wireframe()));
       glLineWidth(2.0f);
@@ -42,17 +42,21 @@ public:
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        if (i != 0)
-          continue;
+        //     if (i != 2)
+        //      continue;
+        _shader.setUInt("u_subdivisions", meshDensities[i].s);
+        _shader.setUInt("v_subdivisions", meshDensities[i].t);
         glPatchParameteri(GL_PATCH_VERTICES, 20);
         glBindVertexArray(mesh->getVAO());
         _shader.setUInt("direction", 0);
-        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0,
+                     static_cast<int>(mesh->getIndicesLength() / 3));
         //  glDrawArrays(GL_POINTS, 0,
         //  static_cast<int>(mesh->getIndicesLength()));
 
         _shader.setUInt("direction", 1);
-        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0,
+                     static_cast<int>(mesh->getIndicesLength() / 3));
         glBindVertexArray(0);
       }
     }

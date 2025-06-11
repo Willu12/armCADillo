@@ -88,10 +88,13 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
                     .bottom = {edge[0], edge[1], edge[2], edge[3]},
                     .topSides{leftEdge[2], P1[0]},    // P1[0]},
                     .bottomSides{leftEdge[1], P2[0]}, // P2[0]},
-                    .uInner{2.f * leftEdge[1] - leftInnerEdge[1],
-                            P2[2] + 2.f / 3.f * z + y / 3.f,
-                            P1[0] + 2.f / 3.f * v + w / 3.f,
-                            2.f * edge[2] - innerEdge[2]},
+                    .uInner{
+                        P2[2] + 2.f / 3.f * z + y / 3.f,
+                        2.f * edge[2] - innerEdge[2],
+                        2.f * leftEdge[1] - leftInnerEdge[1],
+
+                        P1[0] + 2.f / 3.f * v + w / 3.f,
+                    },
                     .vInner{2.f * edge[1] - innerEdge[1],
                             2.f * leftEdge[2] - leftInnerEdge[2],
                             P1[2] + 1.f / 3.f * z + y * 2.f / 3.f,
@@ -101,30 +104,43 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
                     .bottom = {edge[3], edge[4], edge[5], edge[6]},
                     .topSides{P1[0], rightEdge[2]},
                     .bottomSides{P2[0], rightEdge[1]},
-                    .uInner{P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
-                            P1[1] + 2.f / 3.f * y + x / 3.f,
-                            2.f * rightEdge[2] - rightInnerEdge[2],
-                            2.f * edge[5] - innerEdge[5]},
+                    .uInner{P1[1] + 2.f / 3.f * y + x / 3.f,
+                            2.f * edge[5] - innerEdge[5],
+                            P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
+                            2.f * rightEdge[2] - rightInnerEdge[2]},
                     .vInner{
-                        2.f * edge[4] - innerEdge[4],
                         P2[2] - 2.f / 3.f * z - y / 3.f,
-                        P2[1] + 1.f / 3.f * y + x * 2.f / 3.f,
                         2.f * rightEdge[1] - rightInnerEdge[1],
+                        2.f * edge[4] - innerEdge[4],
+                        P2[1] + 1.f / 3.f * y + x * 2.f / 3.f,
                     }};
+  /*
+    GregoryQuad quad3 {
+      .top{rightEdge[6], rightEdge[5], rightEdge[4], rightEdge[3]},
+          .bottom{leftEdge[3], P2[2], P1[2], P}, .topSides{leftEdge[5], P2[1]},
+          .bottomSides{leftEdge[4], P1[1]}, .uInner {
+        2.f * rightEdge[5] - rightInnerEdge[5],
+        P2[2] + 1.f *
+      }
+    }
+    */
 
   GregoryQuad quad3{
       .top{rightEdge[3], P2[1], P1[1], P},
       .bottom = {leftEdge[6], leftEdge[5], leftEdge[4], leftEdge[3]},
       .topSides{rightEdge[4], P1[2]},
       .bottomSides{rightEdge[5], P2[2]},
-      .uInner{2.f * rightEdge[5] - rightInnerEdge[5],
-              P2[1] - 1.f / 3.f * y - x * 2.f / 3.f,
-              -1.f * P1[2] - 1.f / 3.f * z - y * 2.f / 3.f,
-              2.f * leftEdge[4] - leftInnerEdge[4]},
-      .vInner{2.f * leftEdge[5] - leftInnerEdge[5],
-              2.f * rightEdge[4] - rightInnerEdge[4],
-              P1[1] - 2.f / 3.f * y - x / 3.f,
-              P1[0] - 2.f / 3.f * v - w / 3.f}};
+      .uInner{2.f * rightEdge[4] - rightInnerEdge[4],
+              P1[1] - 2.f / 3.f * v - w / 3.f,
+              2.f * leftEdge[5] - leftInnerEdge[5],
+              P2[1] - 2.f / 3.f * y - x / 3.f},
+      .vInner{
+          P2[1] - 1.f / 3.f * y - x * 2.f / 3.f,
+          P1[2] - 1.f / 3.f * z - y * 2.f / 3.f,
+          2.f * rightEdge[5] - rightInnerEdge[5],
+          2.f * leftEdge[4] - leftInnerEdge[4],
+      }};
+
   return {quad1, quad2, quad3};
 }
 

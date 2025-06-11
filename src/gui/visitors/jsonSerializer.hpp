@@ -21,6 +21,7 @@ public:
   bool visitBezierSurface(BezierSurface &bezierSurface) override;
   bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) override;
   bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) override;
+  bool visitGregorySurface(GregorySurface &gregory) override { return false; };
 
   std::string &getSavePath() { return _savePath; }
 

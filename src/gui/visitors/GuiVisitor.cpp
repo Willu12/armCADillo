@@ -95,6 +95,22 @@ bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
   return false;
 }
 
+bool GuiVisitor::visitGregorySurface(GregorySurface &gregorySurface) {
+  ImGui::InputText("Name", &gregorySurface.getName());
+
+  auto &meshDensities = gregorySurface.getMeshDensities();
+  bool change = false;
+  for (int i = 0; i < meshDensities.size(); ++i) {
+    ImGui::Text("Density of Quad %d", i);
+    std::string labelH = "Horizontal Density##" + std::to_string(i);
+    std::string labelV = "Vertical Density##" + std::to_string(i);
+
+    change |= ImGui::SliderInt(labelH.c_str(), &meshDensities[i].s, 3, 64);
+    change |= ImGui::SliderInt(labelV.c_str(), &meshDensities[i].t, 3, 64);
+  }
+  return change;
+}
+
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
   const auto &position = entity.getPosition();

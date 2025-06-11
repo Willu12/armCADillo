@@ -8,6 +8,7 @@
 #include "graph.hpp"
 #include "gregoryMesh.hpp"
 #include "gregoryQuad.hpp"
+#include "mesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
 #include <array>
@@ -24,10 +25,15 @@ public:
     return _mesh;
   }
   explicit GregorySurface(const std::array<GregoryQuad, 3> &gregoryPatches);
+  std::array<MeshDensity, 3> &getMeshDensities() { return _meshDensities; }
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitGregorySurface(*this);
+  };
 
 private:
   std::array<GregoryQuad, 3> _gregoryPatches;
   std::array<std::unique_ptr<GregoryMesh>, 3> _mesh;
+  std::array<MeshDensity, 3> _meshDensities;
   inline static int kClassId;
   std::vector<std::array<algebra::Vec3f, 16>> calculateGregoryPoints();
   void updateMesh() override { _mesh = generateMesh(); };

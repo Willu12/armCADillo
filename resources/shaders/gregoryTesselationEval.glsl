@@ -8,6 +8,14 @@ uniform uint direction;
 
 out vec2 trim_coord;
 
+// Gregory patch structure
+// top: [Point3<f32>; 4], 0-3
+// top_sides: [Point3<f32>; 2], 4-5
+// bottom_sides: [Point3<f32>; 2], 6-7
+// bottom: [Point3<f32>; 4], 8-11
+// u_inner: [Point3<f32>; 4], 12-15
+// v_inner: [Point3<f32>; 4], 16-19
+
 vec3 p(uint idx) { return gl_in[idx].gl_Position.xyz; }
 
 vec3 bezier3(vec3 b0, vec3 b1, vec3 b2, vec3 b3, float t) {
@@ -29,8 +37,8 @@ vec3 bicubic_bezier(float u, float v) {
   vec3 pi11 = ((1.0 - u) * p(15) + (1.0 - v) * p(19)) / (2.0 - u - v + eps);
 
   vec3 p0 = bezier3(p(0), p(1), p(2), p(3), v);
-  vec3 p1 = bezier3(p(4), pi00, pi01, p(5), v);
-  vec3 p2 = bezier3(p(6), pi10, pi11, p(7), v);
+  vec3 p1 = bezier3(p(4), pi00, pi10, p(5), v);
+  vec3 p2 = bezier3(p(6), pi01, pi11, p(7), v);
   vec3 p3 = bezier3(p(8), p(9), p(10), p(11), v);
 
   return bezier3(p0, p1, p2, p3, u);

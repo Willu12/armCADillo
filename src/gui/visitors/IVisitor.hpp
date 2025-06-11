@@ -9,6 +9,7 @@ class InterpolatingSplineC2;
 class BezierSurface;
 class BezierSurfaceC0;
 class BezierSurfaceC2;
+class GregorySurface;
 
 class IVisitor {
 public:
@@ -23,4 +24,5 @@ public:
   virtual bool visitBezierSurface(BezierSurface &bezierSurface) = 0;
   virtual bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) = 0;
   virtual bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) = 0;
+  virtual bool visitGregorySurface(GregorySurface &gregorySurface) = 0;
 };

@@ -4,6 +4,7 @@
 #include "IVisitor.hpp"
 #include "bezierCurve.hpp"
 #include "bezierSurface.hpp"
+#include "gregorySurface.hpp"
 #include "interpolatingSplineC2.hpp"
 #include <functional>
 #include <vector>
@@ -26,6 +27,7 @@ public:
   bool visitBezierSurface(BezierSurface &bezierSurface) override;
   bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) override;
   bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) override;
+  bool visitGregorySurface(GregorySurface &gregorySurface) override;
 
 private:
   GUI &_gui;

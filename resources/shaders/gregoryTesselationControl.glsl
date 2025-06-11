@@ -1,6 +1,6 @@
 #version 430
 
-layout(vertices = 16) out;
+layout(vertices = 20) out;
 
 uniform uint u_subdivisions;
 uniform uint v_subdivisions;
