@@ -59,6 +59,7 @@ public:
 
   GregoryMesh(const GregoryMesh &) = delete;
   GregoryMesh &operator=(const GregoryMesh &) = delete;
+  friend class GregorySurface;
 
 protected:
   explicit GregoryMesh(const std::vector<float> &vertices)

@@ -3,6 +3,8 @@
 #include "bezierSurfaceC0.hpp"
 #include "borderGraph.hpp"
 #include "gregoryMesh.hpp"
+#include "gregoryQuad.hpp"
+#include "mesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
 #include <cstdint>
@@ -35,7 +37,7 @@ GregorySurface::GregorySurface(
   _gregoryPatches = gregoryPatches;
   updateMesh();
   _id = kClassId++;
-  _name = &"GregorySurface"[_id];
+  _name = "GregorySurface" + std::to_string(_id);
 }
 
 BorderGraph GregorySurface::createBorderGraph(
@@ -216,4 +218,40 @@ void GregorySurface::ccwOrderEdges(std::array<BorderEdge, 3> &edges) {
 
   edges[1] = e1;
   edges[2] = e2;
+}
+
+std::array<std::unique_ptr<Mesh>, 3> GregorySurface::generateTangentMesh() {
+  std::array<std::unique_ptr<Mesh>, 3> meshes;
+  for (const auto &[i, quad] : _gregoryPatches | std::views::enumerate) {
+
+    std::vector<float> vertices = GregoryMesh::createMeshData(quad);
+    std::vector<uint32_t> indices(16);
+
+    indices[0] = 4;
+    indices[1] = 12;
+
+    indices[2] = 6;
+    indices[3] = 13;
+
+    indices[4] = 5;
+    indices[5] = 14;
+
+    indices[6] = 7;
+    indices[7] = 15;
+
+    //  indices[8] = 1;
+    // indices[9] = 16;
+
+    //  indices[10] = 2;
+    //  indices[11] = 17;
+
+    //  indices[12] = 9;
+    //  indices[13] = 18;
+
+    //  indices[14] = 10;
+    //  indices[15] = 19;
+
+    meshes[i] = Mesh::create(vertices, indices);
+  }
+  return meshes;
 }

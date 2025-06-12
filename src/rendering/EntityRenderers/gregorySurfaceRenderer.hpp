@@ -4,7 +4,7 @@
 #include "camera.hpp"
 #include "gregoryMesh.hpp"
 #include "gregorySurface.hpp"
-#include "surfaceMeshRenderer.hpp"
+#include "gregoryTangentVectorsRenderer.hpp"
 #include <ranges>
 class GregorySurfaceRenderer : public IEntityRenderer {
 public:
@@ -20,7 +20,7 @@ public:
 
                  ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
                             ._type = GL_FRAGMENT_SHADER}}),
-        _meshRenderer(camera), _camera(camera) {}
+        _tangentVectorRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
     if (entities.empty())
@@ -34,16 +34,12 @@ public:
 
       const auto &meshDensities = gregorySurface.getMeshDensities();
 
-      //_shader.setInt("renderPolyLine",
-      //               static_cast<int>(bezierSurface.wireframe()));
       glLineWidth(2.0f);
       glPointSize(10.0f);
 
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
-        // if (i != 0)
-        //    continue;
         _shader.setUInt("u_subdivisions", meshDensities[i].s);
         _shader.setUInt("v_subdivisions", meshDensities[i].t);
         glPatchParameteri(GL_PATCH_VERTICES, 20);
@@ -60,11 +56,11 @@ public:
         glBindVertexArray(0);
       }
     }
-    // _meshRenderer.render(entities);
+    _tangentVectorRenderer.render(entities);
   }
 
 private:
   Shader _shader;
-  SurfaceMeshRenderer _meshRenderer;
+  GregoryTangentVectorsRenderer _tangentVectorRenderer;
   const Camera &_camera;
 };

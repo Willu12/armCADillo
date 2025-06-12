@@ -97,6 +97,7 @@ bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
 
 bool GuiVisitor::visitGregorySurface(GregorySurface &gregorySurface) {
   ImGui::InputText("Name", &gregorySurface.getName());
+  ImGui::Checkbox("Show Tangent Vectors", &gregorySurface.showTangentVectors());
 
   auto &meshDensities = gregorySurface.getMeshDensities();
   bool change = false;
@@ -104,7 +105,6 @@ bool GuiVisitor::visitGregorySurface(GregorySurface &gregorySurface) {
     ImGui::Text("Density of Quad %d", i);
     std::string labelH = "Horizontal Density##" + std::to_string(i);
     std::string labelV = "Vertical Density##" + std::to_string(i);
-
     change |= ImGui::SliderInt(labelH.c_str(), &meshDensities[i].s, 3, 64);
     change |= ImGui::SliderInt(labelV.c_str(), &meshDensities[i].t, 3, 64);
   }
