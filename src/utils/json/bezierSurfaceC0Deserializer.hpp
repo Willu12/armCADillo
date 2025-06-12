@@ -2,6 +2,8 @@
 
 #include "bezierSurfaceC0.hpp"
 #include "entityDeserializer.hpp"
+#include "pointEntity.hpp"
+#include <functional>
 #include <memory>
 
 class BezierSurfaceC0Deserializer : public EntityDeserializer {
@@ -16,12 +18,13 @@ public:
 
     const auto points = getPoints(j, scene);
 
-    uint32_t uPoints{};
-    uint32_t vPoints{};
-    j.at("size").at("u").get_to(vPoints);
-    j.at("size").at("v").get_to(uPoints);
+    uint32_t rowCount{};
+    uint32_t colCount{};
+    j.at("size").at("u").get_to(colCount);
+    j.at("size").at("v").get_to(rowCount);
+
     auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
-        points, (uPoints - 1) / 3, (vPoints - 1) / 3);
+        points, (rowCount - 1) / 3, (colCount - 1) / 3);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC0->getName() = name;

@@ -22,6 +22,17 @@ void BorderGraph::addBorder(const Border &border) {
 
   for (const auto &pair : border.pointsEdgeMap_) {
     const Edge &edge = pair.second;
+    if (!_pointVertexMap.contains(edge._points.at(0))) {
+      auto u = _graph.addVertex();
+      _vertexPointMap.insert({u, edge._points[0]});
+      _pointVertexMap.insert({edge._points[0], u});
+    }
+
+    if (!_pointVertexMap.contains(edge._points.at(3))) {
+      auto u = _graph.addVertex();
+      _vertexPointMap.insert({u, edge._points[3]});
+      _pointVertexMap.insert({edge._points[3], u});
+    }
     _graph.addEdge(_pointVertexMap.at(edge._points[0]),
                    _pointVertexMap.at(edge._points[3]));
   }
@@ -92,6 +103,9 @@ Border::Border(const BezierSurfaceC0 &surface) {
   for (int row = 0; row < rows - 3; row += 3) {
     borderPoints.push_back(points[cols * (rows - 1) + rows - 1]);
 
+    if (cols * (rows - 1) + row + 3 >
+        points.size()) // TUTAJ SPRAWDZIĆ CZY DOBRZE OBSLUZONE EDGER CASE
+      continue;
     auto edge = Edge{points[cols * (rows - 1) + row],
                      points[cols * (rows - 1) + row + 1],
                      points[cols * (rows - 1) + row + 2],
