@@ -12,8 +12,8 @@
 #include <vector>
 
 struct Patches {
-  uint32_t sCount;
-  uint32_t tCount;
+  uint32_t colCount;
+  uint32_t rowCount;
 };
 
 class BezierSurface : public IGroupedEntity, public ISubscriber {
@@ -60,7 +60,7 @@ protected:
   std::unique_ptr<BezierSurfaceMesh> _mesh;
   std::unique_ptr<Mesh> _polyMesh;
   MeshDensity _meshDensity = MeshDensity{.s = 4, .t = 4};
-  Patches _patches = Patches{.sCount = 1, .tCount = 1};
+  Patches _patches = Patches{.colCount = 1, .rowCount = 1};
   bool _wireframe = false;
 
   std::unique_ptr<Mesh> createPolyMesh() {

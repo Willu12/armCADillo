@@ -8,8 +8,8 @@
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
 
-  const uint32_t uPatches = _patches.sCount;
-  const uint32_t vPatches = _patches.tCount;
+  const uint32_t uPatches = _patches.colCount;
+  const uint32_t vPatches = _patches.rowCount;
   const uint32_t vPoints = 3 + vPatches;
 
   for (uint32_t uPatch = 0; uPatch < uPatches; ++uPatch) {
@@ -42,8 +42,8 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
     controlPointsPositions[3 * i + 1] = point[1];
     controlPointsPositions[3 * i + 2] = point[2];
   }
-  return BezierSurfaceMesh::createC2(controlPointsPositions, _patches.sCount,
-                                     _patches.tCount);
+  return BezierSurfaceMesh::createC2(controlPointsPositions, _patches.colCount,
+                                     _patches.rowCount);
 }
 
 BezierSurfaceC2::BezierSurfaceC2(
@@ -58,7 +58,7 @@ BezierSurfaceC2::BezierSurfaceC2(
   }
   _points = points;
   _polyMesh = createPolyMesh();
-  _patches = {.sCount = uCount, .tCount = vCount};
+  _patches = {.colCount = uCount, .rowCount = vCount};
   updateMesh();
 }
 

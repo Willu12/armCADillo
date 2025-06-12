@@ -156,8 +156,8 @@ Border::Border(const BezierSurfaceC0 &surface) {
 
   points_ = borderPoints;
   pointsEdgeMap_ = pointsEdgeMap;
-  uLen = surface.getPatches().sCount;
-  vLen = surface.getPatches().tCount;
+  uLen = surface.getPatches().colCount;
+  vLen = surface.getPatches().rowCount;
 };
 
 std::array<algebra::Vec3f, 7> Edge::subdivide() const {

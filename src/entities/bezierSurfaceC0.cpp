@@ -15,8 +15,8 @@ BezierSurfaceC0::createFlatPositions(const algebra::Vec3f &position,
   for (uint32_t i = 0; i < u_points; ++i) {
     for (uint32_t j = 0; j < v_points; ++j) {
       controlPoints.emplace_back(
-          position[0] + static_cast<float>(i) / 3.f * uLength,
-          position[1] + static_cast<float>(j) / 3.f * vLength, position[2]);
+          position[0] + static_cast<float>(j) / 3.f * vLength,
+          position[1] + static_cast<float>(i) / 3.f * uLength, position[2]);
     }
   }
   return controlPoints;
@@ -61,7 +61,7 @@ BezierSurfaceC0::BezierSurfaceC0(
   }
   _points = points;
   _polyMesh = createPolyMesh();
-  _patches = {.sCount = uCount, .tCount = vCount};
+  _patches = {.colCount = uCount, .rowCount = vCount};
   updateMesh();
 }
 
@@ -73,6 +73,6 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC0::generateMesh() {
     controlPointsPositions[3 * i + 1] = point.get().getPosition()[1];
     controlPointsPositions[3 * i + 2] = point.get().getPosition()[2];
   }
-  return BezierSurfaceMesh::create(controlPointsPositions, _patches.sCount,
-                                   _patches.tCount);
+  return BezierSurfaceMesh::create(controlPointsPositions, _patches.colCount,
+                                   _patches.rowCount);
 }
