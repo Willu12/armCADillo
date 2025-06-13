@@ -31,7 +31,7 @@ public:
     for (const auto &entity : entities) {
       auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
       if (!gregorySurface.showTangentVectors())
-        return;
+        continue;
       glLineWidth(2.0f);
 
       const auto &meshes = gregorySurface.getTangentMeshes();
@@ -50,7 +50,7 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
-  std::array<algebra::Vec4f, 3> colors{algebra::Vec4f{0.1f, .5f, 0.3f, 1.f},
+  std::array<algebra::Vec4f, 3> colors{algebra::Vec4f{0.1f, .9f, 0.3f, 1.f},
                                        algebra::Vec4f{1.f, 0.f, 0.f, 0.f},
                                        algebra::Vec4f{.3f, 0.3f, .8f, 0.f}};
 };

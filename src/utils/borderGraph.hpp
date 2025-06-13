@@ -8,27 +8,26 @@
 #include <unordered_map>
 #include <vector>
 
-using PointRefPair = std::pair<std::reference_wrapper<const PointEntity>,
-                               std::reference_wrapper<const PointEntity>>;
+using PointRefPair = std::pair<std::reference_wrapper<PointEntity>,
+                               std::reference_wrapper<PointEntity>>;
 
 struct RefPairHash {
   std::size_t operator()(const PointRefPair &p) const {
-    auto h1 = std::hash<const PointEntity *>{}(&p.first.get());
-    auto h2 = std::hash<const PointEntity *>{}(&p.second.get());
-    return h1 ^ (h2 << 1); // simple combine
+    auto h1 = std::hash<PointEntity *>{}(&p.first.get());
+    auto h2 = std::hash<PointEntity *>{}(&p.second.get());
+    return h1 ^ (h2 << 1);
   }
 };
 
 struct PointHash {
-  std::size_t
-  operator()(const std::reference_wrapper<const PointEntity> &p) const {
-    return std::hash<const PointEntity *>{}(&p.get());
+  std::size_t operator()(const std::reference_wrapper<PointEntity> &p) const {
+    return std::hash<PointEntity *>{}(&p.get());
   }
 };
 
 struct PointEqual {
-  bool operator()(const std::reference_wrapper<const PointEntity> &p1,
-                  const std::reference_wrapper<const PointEntity> &p2) const {
+  bool operator()(const std::reference_wrapper<PointEntity> &p1,
+                  const std::reference_wrapper<PointEntity> &p2) const {
     return &p1.get() == &p2.get();
   }
 };
@@ -41,7 +40,7 @@ struct RefPairEqual {
 };
 
 struct Edge {
-  std::array<std::reference_wrapper<const PointEntity>, 4> _points;
+  std::array<std::reference_wrapper<PointEntity>, 4> _points;
 
   std::array<algebra::Vec3f, 7> subdivide() const;
 };
@@ -73,14 +72,14 @@ struct BorderEdge {
 };
 
 struct Border {
-  std::vector<std::reference_wrapper<const PointEntity>> points_;
+  std::vector<std::reference_wrapper<PointEntity>> points_;
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual>
       pointsEdgeMap_;
   std::unordered_map<Edge, Edge, EdgeHash, EdgeEqual> edgeInnerEdgeMap_;
   uint32_t uLen;
   uint32_t vLen;
 
-  Border(const BezierSurfaceC0 &surface);
+  Border(BezierSurfaceC0 &surface);
 };
 
 class BorderGraph {
@@ -90,9 +89,9 @@ public:
 
 private:
   algebra::Graph _graph;
-  std::unordered_map<std::size_t, std::reference_wrapper<const PointEntity>>
+  std::unordered_map<std::size_t, std::reference_wrapper<PointEntity>>
       _vertexPointMap;
-  std::unordered_map<std::reference_wrapper<const PointEntity>, std::size_t,
+  std::unordered_map<std::reference_wrapper<PointEntity>, std::size_t,
                      PointHash, PointEqual>
       _pointVertexMap;
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual> _edgeMap;

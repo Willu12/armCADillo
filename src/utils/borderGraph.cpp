@@ -78,9 +78,9 @@ BorderGraph::getEdge(const std::array<std::size_t, 3> triangle) const {
           BorderEdge{e3, _edgeInnerEdgeMap.at(e3)}};
 }
 
-Border::Border(const BezierSurfaceC0 &surface) {
-  std::vector<std::reference_wrapper<const PointEntity>> borderPoints;
-  const auto &points = surface.getPointsReferences();
+Border::Border(BezierSurfaceC0 &surface) {
+  std::vector<std::reference_wrapper<PointEntity>> borderPoints;
+  auto &points = surface.getPointsReferences();
   std::unordered_map<PointRefPair, Edge, RefPairHash, RefPairEqual>
       pointsEdgeMap;
 

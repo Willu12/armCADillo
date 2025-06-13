@@ -26,15 +26,21 @@ GregorySurface::createGregorySurfaces(
     return gregorySurfaces;
 
   for (auto &hole : holes) {
-    gregorySurfaces.emplace_back(
-        std::make_shared<GregorySurface>(calculateGregoryPatchesForHole(hole)));
+    gregorySurfaces.emplace_back(std::make_shared<GregorySurface>(hole));
   }
   return gregorySurfaces;
 }
 
-GregorySurface::GregorySurface(
-    const std::array<GregoryQuad, 3> &gregoryPatches) {
-  _gregoryPatches = gregoryPatches;
+GregorySurface::GregorySurface(const std::array<BorderEdge, 3> &edges)
+    : _edges(edges) {
+
+  for (auto &edge : _edges) {
+    for (auto &p : edge._edge._points)
+      subscribe(p.get());
+    for (auto &p : edge._innerEdge._points)
+      subscribe(p.get());
+  }
+  createGregoryPatches();
   updateMesh();
   _id = kClassId++;
   _name = "GregorySurface" + std::to_string(_id);
@@ -51,25 +57,24 @@ BorderGraph GregorySurface::createBorderGraph(
   return BorderGraph(borders);
 }
 
-std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
-    std::array<BorderEdge, 3> &edges) {
+void GregorySurface::createGregoryPatches() {
   std::array<std::array<algebra::Vec3f, 7>, 3> subdividedEdges;
   std::array<std::array<algebra::Vec3f, 7>, 3> subdividedInnerEdges;
   std::array<algebra::Vec3f, 3> P2;
   std::array<algebra::Vec3f, 3> P3;
   std::array<algebra::Vec3f, 3> P1;
 
-  ccwOrderEdges(edges);
+  ccwOrderEdges(_edges);
   std::array<algebra::Vec3f, 3> Q;
-  for (const auto &[i, edge] : edges | std::views::enumerate) {
-    subdividedEdges[i] = edges[i]._edge.subdivide();
-    subdividedInnerEdges[i] = edges[i]._innerEdge.subdivide();
+  for (const auto &[i, edge] : _edges | std::views::enumerate) {
+    subdividedEdges[i] = _edges[i]._edge.subdivide();
+    subdividedInnerEdges[i] = _edges[i]._innerEdge.subdivide();
     P3[i] = subdividedEdges[i][3];
     P2[i] = 2.f * subdividedEdges[i][3] - subdividedInnerEdges[i][3];
     Q[i] = (3.f * P2[i] - P3[i]) / 2.f;
   }
   const auto P = (Q[0] + Q[1] + Q[2]) / 3.f;
-  for (const auto &[i, edge] : edges | std::views::enumerate)
+  for (const auto &[i, edge] : _edges | std::views::enumerate)
     P1[i] = (2.f * Q[i] + P) / 3.f;
 
   auto &edge = subdividedEdges[0];
@@ -103,7 +108,6 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
 
                         P1[2] + 1.f / 3.f * z + y * 2.f / 3.f,
                     }};
-  /* */
   GregoryQuad quad2{
       .top{P, P1[1], P2[1], rightEdge[3]},
       .bottom = {edge[3], edge[4], edge[5], edge[6]},
@@ -140,41 +144,7 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
           2.f * rightEdge[4] - rightInnerEdge[4],
       }};
 
-  return {quad1, quad2, quad3};
-}
-
-std::vector<std::array<algebra::Vec3f, 16>>
-GregorySurface::calculateGregoryPoints() {
-  std::vector<std::array<algebra::Vec3f, 16>> bezierPatches;
-  bezierPatches.reserve(3);
-
-  for (const auto &quad : _gregoryPatches) {
-    std::array<algebra::Vec3f, 16> points;
-
-    points[0] = quad.bottom[0];
-    points[1] = quad.bottomSides[0];
-    points[2] = quad.topSides[0];
-    points[3] = quad.top[0];
-
-    points[4] = quad.bottom[1];
-    points[7] = quad.top[1];
-
-    points[8] = quad.bottom[2];
-    points[11] = quad.top[2];
-
-    points[12] = quad.bottom[3];
-    points[13] = quad.bottomSides[1];
-    points[14] = quad.topSides[1];
-    points[15] = quad.top[3];
-
-    points[5] = (quad.uInner[0] + quad.vInner[0]) / 2.0f;
-    points[6] = (quad.uInner[1] + quad.vInner[1]) / 2.0f;
-    points[10] = (quad.uInner[2] + quad.vInner[2]) / 2.0f;
-    points[9] = (quad.uInner[3] + quad.vInner[3]) / 2.0f;
-
-    bezierPatches.push_back(points);
-  }
-  return bezierPatches;
+  _gregoryPatches = {quad1, quad2, quad3};
 }
 
 std::array<std::unique_ptr<GregoryMesh>, 3> GregorySurface::generateMesh() {

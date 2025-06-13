@@ -45,7 +45,8 @@ public:
         glPatchParameteri(GL_PATCH_VERTICES, 20);
         glBindVertexArray(mesh->getVAO());
         _shader.setUInt("direction", 0);
-        glDrawArrays(GL_PATCHES, 0, static_cast<int>(mesh->getIndicesLength()));
+        glDrawArrays(GL_PATCHES, 0,
+                     static_cast<int>(mesh->getIndicesLength() / 3));
         //  glDrawArrays(GL_POINTS, 0,
         //  static_cast<int>(mesh->getIndicesLength()));
 
