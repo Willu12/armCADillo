@@ -40,7 +40,11 @@ public:
     createGregoryPatches();
     updateMesh();
   }
-  void onSubscribableDestroyed(ISubscribable &publisher) override {};
+  void onSubscribableDestroyed(ISubscribable &publisher) override {
+    _dead = true;
+  }
+
+  bool isDead() { return _dead; }
 
 private:
   std::array<GregoryQuad, 3> _gregoryPatches;
@@ -49,6 +53,7 @@ private:
   std::array<MeshDensity, 3> _meshDensities;
   std::array<BorderEdge, 3> _edges;
   bool _showTangentVectors = false;
+  bool _dead = false;
   inline static int kClassId;
   void updateMesh() override {
     _mesh = generateMesh();

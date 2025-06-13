@@ -4,6 +4,7 @@
 #include "bSplineCurve.hpp"
 #include "bezierSurface.hpp"
 #include "entitiesTypes.hpp"
+#include "gregorySurface.hpp"
 #include "pointEntity.hpp"
 #include <algorithm>
 #include <functional>
@@ -106,6 +107,17 @@ void Scene::enqueueSurfacePoints(
   }
 }
 
+void Scene::enqueueDeadGregoryPatches() {
+  if (!_entities.contains(EntityType::GregorySurface))
+    return;
+
+  for (const auto &entity : _entities.at(EntityType::GregorySurface)) {
+    auto gregory = std::dynamic_pointer_cast<GregorySurface>(entity);
+    if (gregory->isDead())
+      _deadEntities.push_back(gregory);
+  }
+}
+
 std::shared_ptr<IEntity> Scene::contractEdge(const PointEntity &p1,
                                              const PointEntity &p2) {
   const auto avgPos = (p1.getPosition() + p2.getPosition()) / 2.f;
@@ -142,4 +154,10 @@ void Scene::rebindReferences(const PointEntity &oldPoint,
     sub.get().subscribe(newPoint);
     sub.get().unsubscribe(oldPoint);
   }
+}
+
+void Scene::removeDeadEntities() {
+  enqueueDeadGregoryPatches();
+  removeEntities(_deadEntities);
+  _deadEntities.clear();
 }

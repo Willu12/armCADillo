@@ -23,6 +23,7 @@ public:
   std::vector<std::shared_ptr<IEntity>> getPickables() const;
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
   std::vector<std::shared_ptr<IEntity>> getPoints() const;
+  void removeDeadEntities();
 
   friend class GUI;
 
@@ -30,13 +31,16 @@ private:
   std::shared_ptr<Camera> _camera;
   std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
       _entities;
+  std::vector<std::shared_ptr<IEntity>> _deadEntities;
 
   void filterEntitiesToRemove(
       std::vector<std::shared_ptr<IEntity>> &entitiesToRemove);
 
   void enqueueSurfacePoints(
       std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) const;
+  void enqueueDeadGregoryPatches();
   std::shared_ptr<IEntity> contractEdge(const PointEntity &p1,
                                         const PointEntity &p2);
+
   void rebindReferences(const PointEntity &oldPoint, PointEntity &newPoint);
 };
