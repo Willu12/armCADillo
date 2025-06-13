@@ -36,8 +36,6 @@ public:
 
       const auto &meshes = gregorySurface.getTangentMeshes();
       for (const auto &[i, mesh] : meshes | std::views::enumerate) {
-        //   if (i > 0)
-        //      continue;
         _shader.setVec4f("Color", colors[i]);
 
         glBindVertexArray(mesh->getVAO());

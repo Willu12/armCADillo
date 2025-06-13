@@ -30,11 +30,17 @@ vec3 bezier3(vec3 b0, vec3 b1, vec3 b2, vec3 b3, float t) {
 
 const float eps = 1e-10;
 
-vec3 bicubic_bezier(float u, float v) {
+vec3 bicubic_bezier(float u, float v, uint direction) {
   vec3 pi00 = (u * p(13) + v * p(17)) / (u + v + eps);
   vec3 pi01 = (u * p(12) + (1.0 - v) * p(16)) / (u + 1.0 - v + eps);
   vec3 pi10 = ((1.0 - u) * p(14) + v * p(18)) / (1.0 - u + v + eps);
   vec3 pi11 = ((1.0 - u) * p(15) + (1.0 - v) * p(19)) / (2.0 - u - v + eps);
+  if (direction == 0) {
+    vec3 pi00 = (u * p(17) + v * p(13)) / (u + v + eps);
+    vec3 pi01 = (u * p(16) + (1.0 - v) * p(12)) / (u + 1.0 - v + eps);
+    vec3 pi10 = ((1.0 - u) * p(18) + v * p(14)) / (1.0 - u + v + eps);
+    vec3 pi11 = ((1.0 - u) * p(19) + (1.0 - v) * p(15)) / (2.0 - u - v + eps);
+  }
 
   vec3 p0 = bezier3(p(0), p(1), p(2), p(3), v);
   vec3 p1 = bezier3(p(4), pi01, pi11, p(5), v);
@@ -56,6 +62,6 @@ void main() {
   }
 
   trim_coord = vec2(u, v);
-  vec3 pos = bicubic_bezier(u, v);
+  vec3 pos = bicubic_bezier(u, v, direction);
   gl_Position = projection * view * vec4(pos, 1.0);
 }
