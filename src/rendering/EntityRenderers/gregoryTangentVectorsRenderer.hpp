@@ -27,7 +27,6 @@ public:
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
-    _shader.setVec4f("Color", _color);
 
     for (const auto &entity : entities) {
       auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
@@ -37,8 +36,10 @@ public:
 
       const auto &meshes = gregorySurface.getTangentMeshes();
       for (const auto &[i, mesh] : meshes | std::views::enumerate) {
-        if (i > 0)
-          continue;
+        //   if (i > 0)
+        //      continue;
+        _shader.setVec4f("Color", colors[i]);
+
         glBindVertexArray(mesh->getVAO());
         glDrawElements(GL_LINES, mesh->getIndicesLength(), GL_UNSIGNED_INT,
                        nullptr);
@@ -51,5 +52,7 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
-  algebra::Vec4f _color{0.1f, .5f, 0.3f, 1.f};
+  std::array<algebra::Vec4f, 3> colors{algebra::Vec4f{0.1f, .5f, 0.3f, 1.f},
+                                       algebra::Vec4f{1.f, 0.f, 0.f, 0.f},
+                                       algebra::Vec4f{.3f, 0.3f, .8f, 0.f}};
 };

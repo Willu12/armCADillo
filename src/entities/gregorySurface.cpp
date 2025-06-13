@@ -81,9 +81,9 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
   auto &rightEdge = subdividedEdges[1];
   auto &rightInnerEdge = subdividedInnerEdges[1];
 
-  auto v = P - P1[2];
+  auto v = P1[2] - P;
   auto w = edge[2] - edge[3];
-  auto z = leftEdge[2] - leftEdge[3];
+  auto z = leftEdge[4] - leftEdge[3];
   auto y = P1[0] - P;
   auto x = rightEdge[2] - rightEdge[3];
   GregoryQuad quad1{.top{leftEdge[3], P2[2], P1[2], P},
@@ -104,26 +104,22 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
                         P1[2] + 1.f / 3.f * z + y * 2.f / 3.f,
                     }};
   /* */
-  GregoryQuad quad2{.top{P, P1[1], P2[1], rightEdge[3]},
-                    .bottom = {edge[3], edge[4], edge[5], edge[6]},
-                    .topSides{P1[0], rightEdge[2]},
-                    .bottomSides{P2[0], rightEdge[1]},
-                    .uInner{P1[0] - 1.f / 3.f * w - 2.f / 3.f * v,
-                            P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
-                            2.f * rightEdge[1] - rightInnerEdge[1],
-                            2.f * rightEdge[2] - rightInnerEdge[2]},
-                    /*
-                    P1[1] + 2.f / 3.f * y + x / 3.f,
+  GregoryQuad quad2{
+      .top{P, P1[1], P2[1], rightEdge[3]},
+      .bottom = {edge[3], edge[4], edge[5], edge[6]},
+      .topSides{P1[0], rightEdge[2]},
+      .bottomSides{P2[0], rightEdge[1]},
+      .uInner{P1[0] + 1.f / 3.f * (edge[4] - edge[3]) + 2.f / 3.f * (P1[1] - P),
+              P2[0] + 2.f / 3.f * (edge[4] - edge[3]) + 1.f / 3.f * (P1[1] - P),
+              2.f * rightEdge[1] - rightInnerEdge[1],
+              2.f * rightEdge[2] - rightInnerEdge[2]},
+      .vInner{
+          P1[1] + 2.f / 3.f * y + x * 1.f / 3.f,
+          2.f * edge[4] - innerEdge[4],
+          2.f * edge[5] - innerEdge[5],
+          P2[1] + 1.f / 3.f * y + x * 2.f / 3.f,
 
-                          P2[0] - 2.f / 3.f * w - 1.f / 3.f * v,
-                         },*/
-                    .vInner{
-                        P2[1] + 1.f / 3.f * y + x * 2.f / 3.f,
-                        2.f * edge[4] - innerEdge[4],
-                        2.f * edge[5] - innerEdge[5],
-                        P2[2] - 2.f / 3.f * z - y / 3.f,
-
-                    }};
+      }};
 
   GregoryQuad quad3{
       .top{rightEdge[6], rightEdge[5], rightEdge[4], rightEdge[3]},
@@ -133,13 +129,13 @@ std::array<GregoryQuad, 3> GregorySurface::calculateGregoryPatchesForHole(
       .uInner{
           2.f * leftEdge[1] - leftInnerEdge[1],
           2.f * leftEdge[2] - leftInnerEdge[2],
-          P1[1] - 2.f / 3.f * y - x / 3.f,
-          P2[1] - 1.f / 3.f * y - x * 2.f / 3.f,
+          P1[1] - 2.f / 3.f * y + (rightEdge[4] - rightEdge[3]) / 3.f,
+          P2[1] - 1.f / 3.f * y + (rightEdge[4] - rightEdge[3]) * 2.f / 3.f,
       },
       .vInner{
           2.f * rightEdge[5] - rightInnerEdge[5],
-          P2[2] - 2.f / 3.f * z - y * 1.f / 3.f,
-          P1[2] - 1.f / 3.f * z - y * 2.f / 3.f,
+          P2[2] + 2.f / 3.f * (leftEdge[2] - leftEdge[3]) - y * 1.f / 3.f,
+          P1[2] + 1.f / 3.f * (leftEdge[2] - leftEdge[3]) - y * 2.f / 3.f,
 
           2.f * rightEdge[4] - rightInnerEdge[4],
       }};
@@ -233,23 +229,23 @@ std::array<std::unique_ptr<Mesh>, 3> GregorySurface::generateTangentMesh() {
     indices[2] = 6;
     indices[3] = 13;
 
-    indices[4] = 5;
+    indices[4] = 7;
     indices[5] = 14;
 
-    indices[6] = 7;
+    indices[6] = 5;
     indices[7] = 15;
 
-    //  indices[8] = 1;
-    // indices[9] = 16;
+    indices[8] = 1;
+    indices[9] = 16;
 
-    //  indices[10] = 2;
-    //  indices[11] = 17;
+    indices[10] = 2;
+    indices[11] = 19;
 
-    //  indices[12] = 9;
-    //  indices[13] = 18;
+    indices[12] = 9;
+    indices[13] = 17;
 
-    //  indices[14] = 10;
-    //  indices[15] = 19;
+    indices[14] = 10;
+    indices[15] = 18;
 
     meshes[i] = Mesh::create(vertices, indices);
   }
