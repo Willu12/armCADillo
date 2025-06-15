@@ -37,6 +37,8 @@ public:
   };
   bool &showTangentVectors() { return _showTangentVectors; }
   void update() override {
+    if (isDead())
+      return;
     createGregoryPatches();
     updateMesh();
   }

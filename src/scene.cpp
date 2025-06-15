@@ -122,10 +122,10 @@ std::shared_ptr<IEntity> Scene::contractEdge(const PointEntity &p1,
                                              const PointEntity &p2) {
   const auto avgPos = (p1.getPosition() + p2.getPosition()) / 2.f;
   const auto centerPoint = std::make_shared<PointEntity>(avgPos);
+  addEntity(EntityType::Point, centerPoint);
 
   rebindReferences(p1, *centerPoint);
   rebindReferences(p2, *centerPoint);
-  addEntity(EntityType::Point, centerPoint);
   auto &points = _entities.at(EntityType::Point);
   std::erase_if(points, [&p1, &p2](const auto &p) {
     return p->getId() == p1.getId() || p->getId() == p2.getId();
@@ -136,23 +136,26 @@ std::shared_ptr<IEntity> Scene::contractEdge(const PointEntity &p1,
 void Scene::rebindReferences(const PointEntity &oldPoint,
                              PointEntity &newPoint) {
   for (auto &pair : _entities) {
-    if (pair.first == EntityType::Point || pair.first == EntityType::Torus)
+    if (pair.first == EntityType::Point || pair.first == EntityType::Torus ||
+        pair.first == EntityType::GregorySurface)
       continue;
 
+    for (const auto &sub : oldPoint.getSubscribers()) {
+      sub.get().subscribe(newPoint);
+      sub.get().unsubscribe(oldPoint);
+    }
     auto &entities = pair.second;
     for (auto &entitity : entities) {
       auto groupedEntity = std::dynamic_pointer_cast<IGroupedEntity>(entitity);
+      if (groupedEntity == nullptr)
+        return;
       auto &points = groupedEntity->getPointsReferences();
-      auto it = std::ranges::find_if(points, [&oldPoint](const auto &point) {
-        return point.get().getId() == oldPoint.getId();
-      });
-      if (it != points.end())
-        *it = std::ref(newPoint);
+      for (auto &pointRef : points) {
+        if (pointRef.get().getId() == oldPoint.getId()) {
+          pointRef = std::ref(newPoint);
+        }
+      }
     }
-  }
-  for (const auto &sub : oldPoint.getSubscribers()) {
-    sub.get().subscribe(newPoint);
-    sub.get().unsubscribe(oldPoint);
   }
 }
 

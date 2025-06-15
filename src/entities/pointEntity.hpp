@@ -5,6 +5,7 @@
 #include "IVisitor.hpp"
 #include "mesh.hpp"
 #include "vec.hpp"
+#include <iostream>
 
 class PointEntity : public IEntity, public ISubscribable {
 public:
