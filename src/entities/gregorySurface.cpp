@@ -133,13 +133,16 @@ void GregorySurface::createGregoryPatches() {
       .uInner{
           2.f * leftEdge[1] - leftInnerEdge[1],
           2.f * leftEdge[2] - leftInnerEdge[2],
-          P1[1] - 2.f / 3.f * y + (rightEdge[4] - rightEdge[3]) / 3.f,
-          P2[1] - 1.f / 3.f * y + (rightEdge[4] - rightEdge[3]) * 2.f / 3.f,
+          P1[1] + 2.f / 3.f * (P1[2] - P) + (rightEdge[4] - rightEdge[3]) / 3.f,
+          P2[1] + 1.f / 3.f * (P1[2] - P) +
+              (rightEdge[4] - rightEdge[3]) * 2.f / 3.f,
       },
       .vInner{
           2.f * rightEdge[5] - rightInnerEdge[5],
-          P2[2] + 2.f / 3.f * (leftEdge[2] - leftEdge[3]) - y * 1.f / 3.f,
-          P1[2] + 1.f / 3.f * (leftEdge[2] - leftEdge[3]) - y * 2.f / 3.f,
+          P2[2] + 2.f / 3.f * (leftEdge[2] - leftEdge[3]) +
+              (P1[1] - P) * 1.f / 3.f,
+          P1[2] + 1.f / 3.f * (leftEdge[2] - leftEdge[3]) +
+              (P1[1] - P) * 2.f / 3.f,
 
           2.f * rightEdge[4] - rightInnerEdge[4],
       }};
