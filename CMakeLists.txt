@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
  src/utils/borderGraph.cpp
  src/utils/json/bezierCurveC0Deseralizer.cpp
  src/scene.cpp
+ src/intersections/intersectionFinder.cpp
 
  )
 
@@ -44,6 +45,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/rendering/EntityRenderers/
     src/notifications/
     src/gui/visitors/
+    src/intersections
 )
 
 target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json nfd)

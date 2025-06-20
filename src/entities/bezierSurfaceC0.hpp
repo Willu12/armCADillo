@@ -1,4 +1,5 @@
 #pragma once
+#include "IDifferentialParametricForm.hpp"
 #include "bezierSurface.hpp"
 #include "bezierSurfaceMesh.hpp"
 #include "pointEntity.hpp"
@@ -7,7 +8,8 @@
 #include <memory>
 #include <vector>
 
-class BezierSurfaceC0 : public BezierSurface {
+class BezierSurfaceC0 : public BezierSurface,
+                        public IDifferentialParametricForm {
 public:
   explicit BezierSurfaceC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
@@ -26,6 +28,12 @@ public:
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierSurfaceC0(*this);
   };
+
+  algebra::Vec2f bounds() const override;
+  algebra::Vec3f value(const algebra::Vec2f &pos) const override;
+  std::pair<algebra::Vec3f, algebra::Vec3f>
+  derivatives(const algebra::Vec2f &pos) const override;
+  float bernstein(int i, int n, float t) const;
 
 private:
   inline static int kClassId = 0;

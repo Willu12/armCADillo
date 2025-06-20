@@ -76,3 +76,72 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC0::generateMesh() {
   return BezierSurfaceMesh::create(controlPointsPositions, _patches.colCount,
                                    _patches.rowCount);
 }
+
+algebra::Vec2f BezierSurfaceC0::bounds() const { return {1.f, 1.f}; }
+algebra::Vec3f BezierSurfaceC0::value(const algebra::Vec2f &pos) const {
+
+  const uint32_t u_points = 3 * _patches.rowCount + 1;
+  const uint32_t v_points = 3 * _patches.colCount + 1;
+
+  const uint32_t n = u_points - 1;
+  const uint32_t m = v_points - 1;
+
+  algebra::Vec3f result{0.f, 0.f, 0.f};
+  for (uint32_t i = 0; i <= n; ++i) {
+    float Bu = bernstein(i, n, pos[0]);
+    for (uint32_t j = 0; j <= m; ++j) {
+      float Bv = bernstein(j, m, pos[1]);
+      const auto &Pij = _points[i * v_points + j].get().getPosition();
+      result = result + Bu * Bv * Pij;
+    }
+  }
+  return result;
+}
+std::pair<algebra::Vec3f, algebra::Vec3f>
+BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
+  const uint32_t u_points = 3 * _patches.rowCount + 1;
+  const uint32_t v_points = 3 * _patches.colCount + 1;
+
+  const uint32_t n = u_points - 1;
+  const uint32_t m = v_points - 1;
+
+  algebra::Vec3f du{0.f, 0.f, 0.f};
+  algebra::Vec3f dv{0.f, 0.f, 0.f};
+
+  for (uint32_t i = 0; i < n; ++i) {
+    float Bu = bernstein(i, n - 1, pos[0]);
+    for (uint32_t j = 0; j <= m; ++j) {
+      float Bv = bernstein(j, m, pos[1]);
+
+      const algebra::Vec3f &P1 =
+          _points[(i + 1) * v_points + j].get().getPosition();
+      const algebra::Vec3f &P0 = _points[i * v_points + j].get().getPosition();
+      du = du + (P1 - P0) * (Bu * Bv);
+    }
+  }
+  du = du * static_cast<float>(n);
+
+  for (uint32_t i = 0; i <= n; ++i) {
+    float Bu = bernstein(i, n, pos[0]);
+    for (uint32_t j = 0; j < m; ++j) {
+      float Bv = bernstein(j, m - 1, pos[1]);
+
+      const algebra::Vec3f &P1 =
+          _points[i * v_points + (j + 1)].get().getPosition();
+      const algebra::Vec3f &P0 = _points[i * v_points + j].get().getPosition();
+      dv = dv + (P1 - P0) * (Bu * Bv);
+    }
+  }
+  dv = dv * static_cast<float>(m);
+
+  return {du, dv};
+}
+
+float BezierSurfaceC0::bernstein(int i, int n, float t) const {
+  float coeff = 1.0f;
+  for (int k = 0; k < i; ++k) {
+    coeff *= static_cast<float>(n - k) / (k + 1);
+  }
+
+  return coeff * std::pow(t, i) * std::pow(1.0f - t, n - i);
+}
