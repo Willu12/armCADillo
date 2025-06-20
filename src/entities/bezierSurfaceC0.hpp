@@ -9,7 +9,7 @@
 #include <vector>
 
 class BezierSurfaceC0 : public BezierSurface,
-                        public IDifferentialParametricForm {
+                        public algebra::IDifferentialParametricForm {
 public:
   explicit BezierSurfaceC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points,

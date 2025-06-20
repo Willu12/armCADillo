@@ -86,6 +86,7 @@ void GUI::displayGUI() {
     createInterpolatingSplineCurveUI();
     createBezierSurfaceUI();
     createGregoryPatchUI();
+    findIntersectionUI();
 
     removeButtonUI();
     contractEdgeUI();
@@ -635,4 +636,29 @@ GUI::getSelectedSurfacesC0() const {
 void GUI::createGregoryPatchUI() {
   if (ImGui::Button("Create Gregory Patch"))
     createGregoryPatch();
+}
+
+void GUI::findIntersectionUI() {
+  if (ImGui::Button("Find intersections"))
+    findIntersections();
+}
+void GUI::findIntersections() {
+  auto &entities = _scene->getGroupedEntities();
+
+  for (const auto &surface0 : entities.at(EntityType::BezierSurfaceC0)) {
+    for (const auto &surface1 : entities.at(EntityType::BezierSurfaceC0)) {
+      auto surf0 = std::dynamic_pointer_cast<BezierSurfaceC0>(surface0);
+      auto surf1 = std::dynamic_pointer_cast<BezierSurfaceC0>(surface1);
+
+      if (surf1->getId() == surf0->getId())
+        continue;
+
+      _intersectionFinder.setSurfaces(surf0, surf1);
+      auto initPoint = _intersectionFinder.findFirstPoint();
+      std::shared_ptr<PointEntity> point =
+          std::make_shared<PointEntity>(initPoint.point);
+      point->getName() = "INtersectionPoint" + point->getName();
+      _scene->addEntity(EntityType::Point, point);
+    }
+  }
 }

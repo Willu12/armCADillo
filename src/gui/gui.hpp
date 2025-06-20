@@ -8,6 +8,7 @@
 #include "controllers.hpp"
 #include "cursor.hpp"
 #include "entitiesTypes.hpp"
+#include "intersectionFinder.hpp"
 #include "jsonDeserializer.hpp"
 #include "jsonSerializer.hpp"
 #include "mouse.hpp"
@@ -73,6 +74,7 @@ private:
   GuiVisitor _guiSettingsVisitor;
   JsonSerializer _jsonSerializer;
   JsonDeserializer _jsonDeserializer;
+  IntersectionFinder _intersectionFinder;
 
   std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
       _entityFactories;
@@ -100,6 +102,8 @@ private:
   void createLoadSceneUI();
   void contractEdgeUI();
   void createGregoryPatchUI();
+  void findIntersectionUI();
+  void findIntersections();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();
