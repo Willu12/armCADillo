@@ -1,6 +1,10 @@
 #include "intersectionFinder.hpp"
+#include "functions.hpp"
 #include "gradientDescent.hpp"
 #include "vec.hpp"
+#include <memory>
+#include <random>
+#include <ranges>
 
 void IntersectionFinder::setSurfaces(
     std::shared_ptr<algebra::IDifferentialParametricForm> surface0,
@@ -13,19 +17,57 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
   guidancePoint_ = guidancePoint;
 }
 
-IntersectionPoint IntersectionFinder::findFirstPoint() const {
-  algebra::GradientDescent gradientDescent(surface0_, surface1_);
-  auto minimum = gradientDescent.calculate();
+std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
 
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+    // find sample point on surface0
+    const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
+    const auto point0Value = surface0_.lock()->value(point0);
+
+    const auto point1 = findPointProjection(surface1_, point0Value);
+
+    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1))
+      return *intersectionPoint;
+  }
+  return std::nullopt;
+}
+
+std::optional<IntersectionPoint>
+IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
+                                           const algebra::Vec2f &start1) const {
+  auto function = std::make_unique<algebra::SurfaceSurfaceL2DistanceSquared>(
+      surface0_, surface1_);
+  algebra::GradientDescent<4> gradientDescent(std::move(function));
+
+  gradientDescent.setStartingPoint(
+      algebra::Vec4f(start0[0], start0[1], start1[0], start1[1]));
+
+  auto minimum = gradientDescent.calculate();
   auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
   auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
-  auto surface1Val = surface0_.lock()->value(surface1Minimum);
+  auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
   // HERE MAYBE CHECK IF diff less than step
+  if ((surface0Val - surface1Val).length() > 0.1f)
+    return std::nullopt;
 
   return IntersectionPoint{.surface0 = surface0Minimum,
                            .surface1 = surface1Minimum,
                            .point = (surface0Val + surface1Val) / 2.f};
+}
+
+algebra::Vec2f IntersectionFinder::findPointProjection(
+    std::weak_ptr<algebra::IDifferentialParametricForm> surface,
+    algebra::Vec3f surfacePoint) const {
+  auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
+      surface, surfacePoint);
+
+  algebra::GradientDescent<2> gradientDescent(std::move(function));
+
+  return gradientDescent.calculate();
 }

@@ -17,10 +17,18 @@ public:
               std::shared_ptr<algebra::IDifferentialParametricForm> surface1);
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
 
-  IntersectionPoint findFirstPoint() const;
+  std::optional<IntersectionPoint> findFirstPoint() const;
 
 private:
   std::weak_ptr<algebra::IDifferentialParametricForm> surface0_;
   std::weak_ptr<algebra::IDifferentialParametricForm> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
+
+  std::optional<IntersectionPoint>
+  findCommonSurfacePoint(const algebra::Vec2f &start0,
+                         const algebra::Vec2f &start1) const;
+  algebra::Vec2f findPointProjection(
+      std::weak_ptr<algebra::IDifferentialParametricForm> surface,
+      algebra::Vec3f surfacePoint) const;
+  static constexpr std::size_t kStochasticTries = 10;
 };
