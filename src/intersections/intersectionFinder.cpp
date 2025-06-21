@@ -1,10 +1,11 @@
 #include "intersectionFinder.hpp"
 #include "functions.hpp"
 #include "gradientDescent.hpp"
+#include "newtonMethod.hpp"
 #include "vec.hpp"
 #include <memory>
+#include <optional>
 #include <random>
-#include <ranges>
 
 void IntersectionFinder::setSurfaces(
     std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
@@ -15,6 +16,42 @@ void IntersectionFinder::setSurfaces(
 
 void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
   guidancePoint_ = guidancePoint;
+}
+
+std::optional<IntersectionPoint> IntersectionFinder::find() const {
+  auto firstPoint = findFirstPoint();
+  if (!firstPoint)
+    return std::nullopt;
+
+  auto [du0, dv0] = surface0_.lock()->derivatives(firstPoint->surface0);
+  auto [du1, dv1] = surface1_.lock()->derivatives(firstPoint->surface1);
+
+  algebra::Vec3f tangent = (du0 + du1).normalize();
+
+  auto function = std::make_unique<algebra::IntersectionStepFunction>(
+      surface0_, surface1_, firstPoint->point, tangent);
+
+  algebra::NewtonMethod newton(
+      std::move(function),
+      algebra::Vec4f(firstPoint->surface0[0], firstPoint->surface1[0],
+                     firstPoint->surface1[0], firstPoint->surface1[1]));
+
+  auto correctedIntersection = newton.calculate();
+
+  if (correctedIntersection) {
+    auto minimum = *correctedIntersection;
+    auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
+    auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
+
+    auto surface0Val = surface0_.lock()->value(surface0Minimum);
+    auto surface1Val = surface1_.lock()->value(surface1Minimum);
+
+    return IntersectionPoint{.surface0 = surface0Minimum,
+                             .surface1 = surface1Minimum,
+                             .point = (surface0Val + surface1Val) / 2.f};
+  }
+
+  return std::nullopt;
 }
 
 std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
@@ -52,7 +89,6 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  // HERE MAYBE CHECK IF diff less than step
   if ((surface0Val - surface1Val).length() > 0.1f)
     return std::nullopt;
 

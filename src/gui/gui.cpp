@@ -654,7 +654,7 @@ void GUI::findIntersections() {
         continue;
 
       _intersectionFinder.setSurfaces(surf0, surf1);
-      auto initPoint = _intersectionFinder.findFirstPoint();
+      auto initPoint = _intersectionFinder.find();
       if (initPoint) {
         std::shared_ptr<PointEntity> point =
             std::make_shared<PointEntity>((*initPoint).point);

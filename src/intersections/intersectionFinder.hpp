@@ -16,14 +16,14 @@ public:
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1);
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
-
-  std::optional<IntersectionPoint> findFirstPoint() const;
+  std::optional<IntersectionPoint> find() const;
 
 private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0_;
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
 
+  std::optional<IntersectionPoint> findFirstPoint() const;
   std::optional<IntersectionPoint>
   findCommonSurfacePoint(const algebra::Vec2f &start0,
                          const algebra::Vec2f &start1) const;
