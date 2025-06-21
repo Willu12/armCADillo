@@ -7,8 +7,8 @@
 #include <ranges>
 
 void IntersectionFinder::setSurfaces(
-    std::shared_ptr<algebra::IDifferentialParametricForm> surface0,
-    std::shared_ptr<algebra::IDifferentialParametricForm> surface1) {
+    std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
+    std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1) {
   surface0_ = surface0;
   surface1_ = surface1;
 }
@@ -62,7 +62,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
 }
 
 algebra::Vec2f IntersectionFinder::findPointProjection(
-    std::weak_ptr<algebra::IDifferentialParametricForm> surface,
+    std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
     algebra::Vec3f surfacePoint) const {
   auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
       surface, surfacePoint);

@@ -9,7 +9,7 @@
 #include <vector>
 
 class BezierSurfaceC0 : public BezierSurface,
-                        public algebra::IDifferentialParametricForm {
+                        public algebra::IDifferentialParametricForm<2, 3> {
 public:
   explicit BezierSurfaceC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
@@ -33,6 +33,9 @@ public:
   algebra::Vec3f value(const algebra::Vec2f &pos) const override;
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override;
+  algebra::Matrix<float, 3, 2>
+  jacobian(const algebra::Vec2f &pos) const override;
+
   float bernstein(int i, int n, float t) const;
 
 private:

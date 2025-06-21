@@ -145,3 +145,19 @@ float BezierSurfaceC0::bernstein(int i, int n, float t) const {
 
   return coeff * std::pow(t, i) * std::pow(1.0f - t, n - i);
 }
+
+algebra::Matrix<float, 3, 2>
+BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
+  auto [du, dv] = derivatives(pos);
+
+  algebra::Matrix<float, 3, 2> J;
+  J(0, 0) = du[0];
+  J(1, 0) = du[1];
+  J(2, 0) = du[2];
+
+  J(0, 1) = dv[0];
+  J(1, 2) = dv[1];
+  J(2, 3) = dv[2];
+
+  return J;
+}
