@@ -646,10 +646,10 @@ void GUI::findIntersectionUI() {
     findIntersections();
 }
 void GUI::findIntersections() {
-  auto &entities = _scene->getGroupedEntities();
+  auto entities = getEntities();
 
-  for (const auto &surface0 : getEntities()) {
-    for (const auto &surface1 : getEntities()) {
+  for (const auto &surface0 : entities) {
+    for (const auto &surface1 : entities) {
       auto surf0 =
           std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
               surface0);
@@ -659,7 +659,7 @@ void GUI::findIntersections() {
 
       if (surf0 == nullptr || surf1 == nullptr)
         continue;
-      if (surface0->getId() <= surface1->getId())
+      if (surface0->getId() >= surface1->getId())
         continue;
 
       _intersectionFinder.setSurfaces(surf0, surf1);
