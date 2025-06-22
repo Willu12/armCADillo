@@ -3,9 +3,11 @@
 #include "gradientDescent.hpp"
 #include "newtonMethod.hpp"
 #include "vec.hpp"
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <random>
+#include <vector>
 
 using algebra::Vec3f;
 
@@ -25,7 +27,10 @@ std::optional<Intersection> IntersectionFinder::find() const {
   if (!firstPoint)
     return std::nullopt;
 
-  return findNextPoints(*firstPoint);
+  auto nextPoints = findNextPoints(*firstPoint, false);
+  auto previousPoints = findNextPoints(*firstPoint, true);
+
+  return connectFoundPoints(nextPoints, previousPoints);
 }
 
 std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
@@ -96,11 +101,12 @@ IntersectionFinder::getTangent(const IntersectionPoint &firstPoint) const {
 }
 
 std::optional<Intersection>
-IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint) const {
+IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
+                                   bool reversed) const {
   std::vector<IntersectionPoint> points;
   points.push_back(firstPoint);
   for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
-    auto nextPoint = nextIntersectionPoint(points.back());
+    auto nextPoint = nextIntersectionPoint(points.back(), reversed);
     if (nextPoint)
       points.push_back(*nextPoint);
   }
@@ -108,10 +114,14 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint) const {
   return Intersection{.points = points};
 };
 
-std::optional<IntersectionPoint> IntersectionFinder::nextIntersectionPoint(
-    const IntersectionPoint &lastPoint) const {
+std::optional<IntersectionPoint>
+IntersectionFinder::nextIntersectionPoint(const IntersectionPoint &lastPoint,
+                                          bool reversed) const {
 
-  const auto tangent = getTangent(lastPoint);
+  auto tangent = getTangent(lastPoint);
+  if (reversed)
+    tangent = tangent * -1.f;
+
   auto function = std::make_unique<algebra::IntersectionStepFunction>(
       surface0_, surface1_, lastPoint.point, tangent);
 
@@ -136,3 +146,24 @@ std::optional<IntersectionPoint> IntersectionFinder::nextIntersectionPoint(
 
   return std::nullopt;
 };
+
+std::optional<Intersection> IntersectionFinder::connectFoundPoints(
+    const std::optional<Intersection> &nextPoints,
+    const std::optional<Intersection> &previousPoints) const {
+
+  std::vector<IntersectionPoint> points;
+  if (previousPoints) {
+    points.insert(points.end(), previousPoints->points.begin(),
+                  previousPoints->points.end());
+    std::ranges::reverse(points);
+  }
+  if (nextPoints) {
+    points.insert(points.end(), nextPoints->points.begin(),
+                  nextPoints->points.end());
+  }
+
+  if (points.size() == 0)
+    return std::nullopt;
+
+  return Intersection{.points = points};
+}

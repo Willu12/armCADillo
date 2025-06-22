@@ -3,6 +3,7 @@
 #include "IDifferentialParametricForm.hpp"
 #include "vec.hpp"
 #include <memory>
+#include <optional>
 
 struct IntersectionPoint {
   algebra::Vec2f surface0;
@@ -30,7 +31,7 @@ private:
   static constexpr std::size_t kMaxIntersectionCurvePoint = 10;
 
   std::optional<Intersection>
-  findNextPoints(const IntersectionPoint &firstPoint) const;
+  findNextPoints(const IntersectionPoint &firstPoint, bool reversed) const;
   std::optional<IntersectionPoint> findFirstPoint() const;
 
   std::optional<IntersectionPoint>
@@ -43,5 +44,10 @@ private:
   algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;
 
   std::optional<IntersectionPoint>
-  nextIntersectionPoint(const IntersectionPoint &lastPoint) const;
+  nextIntersectionPoint(const IntersectionPoint &lastPoint,
+                        bool reversed) const;
+
+  std::optional<Intersection>
+  connectFoundPoints(const std::optional<Intersection> &nextPoints,
+                     const std::optional<Intersection> &previousPoints) const;
 };
