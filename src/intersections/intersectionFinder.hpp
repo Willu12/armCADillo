@@ -10,25 +10,34 @@ struct IntersectionPoint {
   algebra::Vec3f point;
 };
 
+struct Intersection {
+  std::vector<IntersectionPoint> points;
+};
+
 class IntersectionFinder {
 public:
   void setSurfaces(
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1);
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
-  std::optional<IntersectionPoint> find() const;
+  std::optional<Intersection> find() const;
 
 private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0_;
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
+  static constexpr std::size_t kStochasticTries = 10;
 
+  std::optional<Intersection>
+  findNextPoints(const IntersectionPoint &firstPoint) const;
   std::optional<IntersectionPoint> findFirstPoint() const;
+
   std::optional<IntersectionPoint>
   findCommonSurfacePoint(const algebra::Vec2f &start0,
                          const algebra::Vec2f &start1) const;
   algebra::Vec2f findPointProjection(
       std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
       algebra::Vec3f surfacePoint) const;
-  static constexpr std::size_t kStochasticTries = 10;
+
+  algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;
 };

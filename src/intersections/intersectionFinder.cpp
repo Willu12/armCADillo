@@ -7,6 +7,8 @@
 #include <optional>
 #include <random>
 
+using algebra::Vec3f;
+
 void IntersectionFinder::setSurfaces(
     std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
     std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1) {
@@ -18,40 +20,12 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
   guidancePoint_ = guidancePoint;
 }
 
-std::optional<IntersectionPoint> IntersectionFinder::find() const {
-  auto firstPoint = findFirstPoint();
+std::optional<Intersection> IntersectionFinder::find() const {
+  const auto firstPoint = findFirstPoint();
   if (!firstPoint)
     return std::nullopt;
 
-  auto [du0, dv0] = surface0_.lock()->derivatives(firstPoint->surface0);
-  auto [du1, dv1] = surface1_.lock()->derivatives(firstPoint->surface1);
-
-  algebra::Vec3f tangent = (du0 + du1).normalize();
-
-  auto function = std::make_unique<algebra::IntersectionStepFunction>(
-      surface0_, surface1_, firstPoint->point, tangent);
-
-  algebra::NewtonMethod newton(
-      std::move(function),
-      algebra::Vec4f(firstPoint->surface0[0], firstPoint->surface1[0],
-                     firstPoint->surface1[0], firstPoint->surface1[1]));
-
-  auto correctedIntersection = newton.calculate();
-
-  if (correctedIntersection) {
-    auto minimum = *correctedIntersection;
-    auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
-    auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
-
-    auto surface0Val = surface0_.lock()->value(surface0Minimum);
-    auto surface1Val = surface1_.lock()->value(surface1Minimum);
-
-    return IntersectionPoint{.surface0 = surface0Minimum,
-                             .surface1 = surface1Minimum,
-                             .point = (surface0Val + surface1Val) / 2.f};
-  }
-
-  return std::nullopt;
+  return findNextPoints(*firstPoint);
 }
 
 std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
@@ -89,7 +63,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.1f)
+  if ((surface0Val - surface1Val).length() > 0.001f)
     return std::nullopt;
 
   return IntersectionPoint{.surface0 = surface0Minimum,
@@ -107,3 +81,47 @@ algebra::Vec2f IntersectionFinder::findPointProjection(
 
   return gradientDescent.calculate();
 }
+
+algebra::Vec3f
+IntersectionFinder::getTangent(const IntersectionPoint &firstPoint) const {
+  auto [du0, dv0] = surface0_.lock()->derivatives(firstPoint.surface0);
+  auto [du1, dv1] = surface1_.lock()->derivatives(firstPoint.surface1);
+
+  Vec3f n0 = du0.cross(dv0);
+  Vec3f n1 = du1.cross(dv1);
+
+  Vec3f tangent = n0.cross(n1);
+
+  return tangent.normalize();
+}
+
+std::optional<Intersection>
+IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint) const {
+  const auto tangent = getTangent(firstPoint);
+
+  auto function = std::make_unique<algebra::IntersectionStepFunction>(
+      surface0_, surface1_, firstPoint.point, tangent);
+
+  algebra::NewtonMethod newton(
+      std::move(function),
+      algebra::Vec4f(firstPoint.surface0[0], firstPoint.surface0[1],
+                     firstPoint.surface1[0], firstPoint.surface1[1]));
+
+  const auto correctedIntersection = newton.calculate();
+
+  if (correctedIntersection) {
+    auto minimum = *correctedIntersection;
+    auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
+    auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
+
+    auto surface0Val = surface0_.lock()->value(surface0Minimum);
+    auto surface1Val = surface1_.lock()->value(surface1Minimum);
+
+    auto p = IntersectionPoint{.surface0 = surface0Minimum,
+                               .surface1 = surface1Minimum,
+                               .point = (surface0Val + surface1Val) / 2.f};
+    return Intersection{.points{p}};
+  }
+
+  return std::nullopt;
+};

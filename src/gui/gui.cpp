@@ -653,11 +653,14 @@ void GUI::findIntersections() {
       if (surf1->getId() == surf0->getId())
         continue;
 
+      if (surf1->getId() < surf0->getId())
+        continue;
+
       _intersectionFinder.setSurfaces(surf0, surf1);
       auto initPoint = _intersectionFinder.find();
       if (initPoint) {
         std::shared_ptr<PointEntity> point =
-            std::make_shared<PointEntity>((*initPoint).point);
+            std::make_shared<PointEntity>((*initPoint).points[0].point);
         point->getName() = "INtersectionPoint" + point->getName();
         _scene->addEntity(EntityType::Point, point);
       }
