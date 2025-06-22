@@ -15,6 +15,7 @@
 #include "pickingRenderer.hpp"
 #include "pickingTexture.hpp"
 #include "pointRenderer.hpp"
+#include "polylineRenderer.hpp"
 #include "selectionBoxRenderer.hpp"
 #include "torusRenderer.hpp"
 
@@ -143,5 +144,7 @@ private:
     _entityRenderers.insert(
         {EntityType::GregorySurface,
          std::make_unique<GregorySurfaceRenderer>(*_camera)});
+    _entityRenderers.insert(
+        {EntityType::Polyline, std::make_unique<PolylineRenderer>(*_camera)});
   }
 };

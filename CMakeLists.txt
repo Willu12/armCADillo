@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
  src/gui/visitors/jsonSerializer.cpp
  src/entities/virtualPoint.cpp
  src/entities/gregorySurface.cpp
+ src/entities/polyline.cpp
  src/entities/interpolatingSplineC2.cpp
  src/controllers/selectionController.cpp
  src/entities/bezierSurfaceC0.cpp

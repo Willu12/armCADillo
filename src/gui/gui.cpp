@@ -15,6 +15,7 @@
 #include "jsonSerializer.hpp"
 #include "nfd.h"
 #include "pointEntity.hpp"
+#include "polyline.hpp"
 #include "scene.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
@@ -667,12 +668,24 @@ void GUI::findIntersections() {
       if (!intersection)
         continue;
 
-      for (const auto &intersectionPoint : intersection.value().points) {
-        std::shared_ptr<PointEntity> point =
-            std::make_shared<PointEntity>(intersectionPoint.point);
-        point->getName() = "INtersectionPoint" + point->getName();
-        _scene->addEntity(EntityType::Point, point);
+      std::vector<algebra::Vec3f> points;
+
+      for (const auto &p : intersection->points) {
+        points.push_back(p.point);
       }
+
+      auto polyline = std::make_shared<Polyline>(points);
+      _scene->addEntity(EntityType::Polyline, polyline);
     }
+    /*
+  for (const auto &intersectionPoint : intersection.value().points) {
+
+    std::shared_ptr<PointEntity> point =
+        std::make_shared<PointEntity>(intersectionPoint.point);
+    point->getName() = "INtersectionPoint" + point->getName();
+    _scene->addEntity(EntityType::Point, point);
+  }
+    */
+    //}
   }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "polyline.hpp"
 #include <cstdint>
 enum class EntityType : uint8_t {
   Point,
@@ -11,5 +12,6 @@ enum class EntityType : uint8_t {
   VirtualPoint,
   BezierSurfaceC0,
   BezierSurfaceC2,
-  GregorySurface
+  GregorySurface,
+  Polyline
 };
