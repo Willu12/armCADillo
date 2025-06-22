@@ -27,6 +27,7 @@ private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
   static constexpr std::size_t kStochasticTries = 10;
+  static constexpr std::size_t kMaxIntersectionCurvePoint = 10;
 
   std::optional<Intersection>
   findNextPoints(const IntersectionPoint &firstPoint) const;
@@ -40,4 +41,7 @@ private:
       algebra::Vec3f surfacePoint) const;
 
   algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;
+
+  std::optional<IntersectionPoint>
+  nextIntersectionPoint(const IntersectionPoint &lastPoint) const;
 };

@@ -34,7 +34,6 @@ std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(0.0f, 1.0f);
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
-    // find sample point on surface0
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point0Value = surface0_.lock()->value(point0);
 
@@ -97,16 +96,28 @@ IntersectionFinder::getTangent(const IntersectionPoint &firstPoint) const {
 
 std::optional<Intersection>
 IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint) const {
-  const auto tangent = getTangent(firstPoint);
+  std::vector<IntersectionPoint> points;
+  points.push_back(firstPoint);
+  for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
+    auto nextPoint = nextIntersectionPoint(points.back());
+    if (nextPoint)
+      points.push_back(*nextPoint);
+  }
 
+  return Intersection{.points = points};
+};
+
+std::optional<IntersectionPoint> IntersectionFinder::nextIntersectionPoint(
+    const IntersectionPoint &lastPoint) const {
+
+  const auto tangent = getTangent(lastPoint);
   auto function = std::make_unique<algebra::IntersectionStepFunction>(
-      surface0_, surface1_, firstPoint.point, tangent);
+      surface0_, surface1_, lastPoint.point, tangent);
 
   algebra::NewtonMethod newton(
       std::move(function),
-      algebra::Vec4f(firstPoint.surface0[0], firstPoint.surface0[1],
-                     firstPoint.surface1[0], firstPoint.surface1[1]));
-
+      algebra::Vec4f(lastPoint.surface0[0], lastPoint.surface0[1],
+                     lastPoint.surface1[0], lastPoint.surface1[1]));
   const auto correctedIntersection = newton.calculate();
 
   if (correctedIntersection) {
@@ -117,10 +128,9 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint) const {
     auto surface0Val = surface0_.lock()->value(surface0Minimum);
     auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-    auto p = IntersectionPoint{.surface0 = surface0Minimum,
-                               .surface1 = surface1Minimum,
-                               .point = (surface0Val + surface1Val) / 2.f};
-    return Intersection{.points{p}};
+    return IntersectionPoint{.surface0 = surface0Minimum,
+                             .surface1 = surface1Minimum,
+                             .point = (surface0Val + surface1Val) / 2.f};
   }
 
   return std::nullopt;
