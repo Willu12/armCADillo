@@ -77,7 +77,9 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC0::generateMesh() {
                                    _patches.rowCount);
 }
 
-algebra::Vec2f BezierSurfaceC0::bounds() const { return {1.f, 1.f}; }
+std::array<algebra::Vec2f, 2> BezierSurfaceC0::bounds() const {
+  return {algebra::Vec2f{0.f, 1.f}, algebra::Vec2f{0.f, 1.f}};
+}
 algebra::Vec3f BezierSurfaceC0::value(const algebra::Vec2f &pos) const {
 
   const uint32_t u_points = 3 * _patches.rowCount + 1;
@@ -161,3 +163,5 @@ BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
 
   return J;
 }
+
+bool BezierSurfaceC0::wrapped(size_t dim) const { return false; }

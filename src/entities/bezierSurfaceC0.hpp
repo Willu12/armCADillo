@@ -4,6 +4,7 @@
 #include "bezierSurfaceMesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
+#include <array>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -29,7 +30,8 @@ public:
     return visitor.visitBezierSurfaceC0(*this);
   };
 
-  algebra::Vec2f bounds() const override;
+  bool wrapped(size_t dim) const override;
+  std::array<algebra::Vec2f, 2> bounds() const override;
   algebra::Vec3f value(const algebra::Vec2f &pos) const override;
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override;

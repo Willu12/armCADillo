@@ -27,6 +27,7 @@ public:
   std::vector<std::reference_wrapper<PointEntity>> getPoints() {
     return _points;
   }
+
   bool &wireframe() { return _wireframe; }
   const bool &wireframe() const { return _wireframe; }
 
@@ -39,7 +40,8 @@ public:
     updateMesh();
   }
   void
-  onSubscribableDestroyed(ISubscribable &publisher) override { /* update();*/ }
+  onSubscribableDestroyed(ISubscribable &publisher) override { /* update();*/
+  }
   virtual uint32_t getColCount() const = 0;
   virtual uint32_t getRowCount() const = 0;
   std::vector<std::reference_wrapper<const PointEntity>>

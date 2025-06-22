@@ -32,7 +32,8 @@ std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
 
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+  std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
+                                             surface0_.lock()->bounds()[0][1]);
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point0Value = surface0_.lock()->value(point0);

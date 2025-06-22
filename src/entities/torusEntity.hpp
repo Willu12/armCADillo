@@ -1,10 +1,14 @@
 #pragma once
+#include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
 #include "mesh.hpp"
 #include "torus.hpp"
+#include "vec.hpp"
+#include <array>
 #include <string>
 
-class TorusEntity : public IEntity {
+class TorusEntity : public IEntity,
+                    public algebra::IDifferentialParametricForm<2, 3> {
 public:
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _mesh(generateMesh()) {
@@ -38,6 +42,32 @@ public:
 
     return change;
   }
+
+  std::array<algebra::Vec2f, 2> bounds() const override {
+    return {algebra::Vec2f{0.f, 2.f * std::numbers::pi_v<float>},
+            algebra::Vec2f{0.f, 2.f * std::numbers::pi_v<float>}};
+  }
+  algebra::Vec3f value(const algebra::Vec2f &pos) const override {
+    return _torus.getPosition(pos[0], pos[1]);
+  }
+  std::pair<algebra::Vec3f, algebra::Vec3f>
+  derivatives(const algebra::Vec2f &pos) const override {
+    auto derivatives = _torus.getDerivative(pos[0], pos[1]);
+    return {derivatives.first, derivatives.second};
+  }
+  algebra::Matrix<float, 3, 2>
+  jacobian(const algebra::Vec2f &pos) const override {
+    auto [du, dv] = _torus.getDerivative(pos[0], pos[1]);
+    algebra::Matrix<float, 3, 2> J;
+    for (int i = 0; i < 3; ++i) {
+      J(i, 0) = du[i];
+      J(i, 1) = dv[i];
+    }
+
+    return J;
+  }
+
+  bool wrapped(size_t dim) const override { return true; }
 
 private:
   algebra::Torus<float> _torus;

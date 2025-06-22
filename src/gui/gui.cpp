@@ -2,6 +2,7 @@
 
 #include "EntityFactories/pointFactory.hpp"
 #include "EntityFactories/torusFactory.hpp"
+#include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
@@ -501,6 +502,7 @@ void GUI::createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
 
   auto bezierSurfaceC0 =
       std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
+
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
 }
 
@@ -515,6 +517,7 @@ void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
 
   auto bezierSurfaceC2 =
       std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches);
+
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 
@@ -645,15 +648,18 @@ void GUI::findIntersectionUI() {
 void GUI::findIntersections() {
   auto &entities = _scene->getGroupedEntities();
 
-  for (const auto &surface0 : entities.at(EntityType::BezierSurfaceC0)) {
-    for (const auto &surface1 : entities.at(EntityType::BezierSurfaceC0)) {
-      auto surf0 = std::dynamic_pointer_cast<BezierSurfaceC0>(surface0);
-      auto surf1 = std::dynamic_pointer_cast<BezierSurfaceC0>(surface1);
+  for (const auto &surface0 : getEntities()) {
+    for (const auto &surface1 : getEntities()) {
+      auto surf0 =
+          std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
+              surface0);
+      auto surf1 =
+          std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
+              surface1);
 
-      if (surf1->getId() == surf0->getId())
+      if (surf0 == nullptr || surf1 == nullptr)
         continue;
-
-      if (surf1->getId() < surf0->getId())
+      if (surface0->getId() <= surface1->getId())
         continue;
 
       _intersectionFinder.setSurfaces(surf0, surf1);
