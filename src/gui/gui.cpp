@@ -651,45 +651,29 @@ void GUI::findIntersectionUI() {
 }
 void GUI::findIntersection() {
   auto entities = getSelectedEntities();
-  for (const auto &surface0 : entities) {
-    for (const auto &surface1 : entities) {
-      auto surf0 =
-          std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
-              surface0);
-      auto surf1 =
-          std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
-              surface1);
+  if (entities.size() == 0)
+    return;
 
-      if (surf0 == nullptr || surf1 == nullptr)
-        continue;
+  auto surf0 =
+      std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
+          entities[0]);
 
-      if (surface0->getId() > surface1->getId())
-        continue;
+  auto surf1 =
+      entities.size() == 1
+          ? surf0
+          : std::dynamic_pointer_cast<
+                algebra::IDifferentialParametricForm<2, 3>>(entities[1]);
 
-      _intersectionFinder.setSurfaces(surf0, surf1);
+  _intersectionFinder.setSurfaces(surf0, surf1);
 
-      if (_intersectionFinder.getIntersectionConfig().useCursor_) {
-        _intersectionFinder.setGuidancePoint(getCursor()->getPosition());
-      }
-
-      auto intersection =
-          _intersectionFinder.find(surface0->getId() == surface1->getId());
-      if (!intersection)
-        continue;
-
-      auto intersectionCurve =
-          std::make_shared<IntersectionCurve>(*intersection);
-      _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
-    }
-    /*
-  for (const auto &intersectionPoint : intersection.value().points) {
-
-    std::shared_ptr<PointEntity> point =
-        std::make_shared<PointEntity>(intersectionPoint.point);
-    point->getName() = "INtersectionPoint" + point->getName();
-    _scene->addEntity(EntityType::Point, point);
+  if (_intersectionFinder.getIntersectionConfig().useCursor_) {
+    _intersectionFinder.setGuidancePoint(getCursor()->getPosition());
   }
-    */
-    //}
-  }
+
+  auto intersection = _intersectionFinder.find(entities.size() == 1);
+  if (!intersection)
+    return;
+
+  auto intersectionCurve = std::make_shared<IntersectionCurve>(*intersection);
+  _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
 }
