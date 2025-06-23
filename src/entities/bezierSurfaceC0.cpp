@@ -12,8 +12,8 @@ BezierSurfaceC0::createFlatPositions(const algebra::Vec3f &position,
   const uint32_t v_points = 3 * vPatches + 1;
 
   controlPoints.reserve(u_points * v_points);
-  for (uint32_t i = 0; i < u_points; ++i) {
-    for (uint32_t j = 0; j < v_points; ++j) {
+  for (uint32_t i = 0; i < v_points; ++i) {
+    for (uint32_t j = 0; j < u_points; ++j) {
       controlPoints.emplace_back(
           position[0] + static_cast<float>(j) / 3.f * uLength,
           position[1] + static_cast<float>(i) / 3.f * vLength, position[2]);

@@ -113,7 +113,7 @@ private:
           for (uint32_t j = 0; j < 4; ++j) {
             uint32_t u = u_idx * 3 + i;
             uint32_t v = v_idx * 3 + j;
-            uint32_t idx = 3 * (u * v_points + v);
+            uint32_t idx = 3 * (v * u_points + u);
 
             meshData.insert(meshData.end(), vertices.begin() + idx,
                             vertices.begin() + idx + 3);

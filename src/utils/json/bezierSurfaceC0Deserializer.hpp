@@ -20,8 +20,8 @@ public:
 
     uint32_t rowCount{};
     uint32_t colCount{};
-    j.at("size").at("u").get_to(colCount);
-    j.at("size").at("v").get_to(rowCount);
+    j.at("size").at("v").get_to(colCount);
+    j.at("size").at("u").get_to(rowCount);
 
     auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
         points, (rowCount - 1) / 3, (colCount - 1) / 3);

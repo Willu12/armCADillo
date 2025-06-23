@@ -111,7 +111,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.01f)
+  if ((surface0Val - surface1Val).length() > 0.001f)
     return std::nullopt;
 
   return IntersectionPoint{.surface0 = surface0Minimum,
