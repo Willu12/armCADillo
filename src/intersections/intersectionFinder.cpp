@@ -58,6 +58,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
       surface0_, surface1_);
   algebra::GradientDescent<4> gradientDescent(std::move(function));
 
+  gradientDescent.setLearningRate(config_.numericalStep_);
   gradientDescent.setStartingPoint(
       algebra::Vec4f(start0[0], start0[1], start1[0], start1[1]));
 
@@ -124,7 +125,7 @@ IntersectionFinder::nextIntersectionPoint(const IntersectionPoint &lastPoint,
 
   auto function = std::make_unique<algebra::IntersectionStepFunction>(
       surface0_, surface1_, lastPoint.point, tangent);
-
+  function->setStep(config_.intersectionStep_);
   algebra::NewtonMethod newton(
       std::move(function),
       algebra::Vec4f(lastPoint.surface0[0], lastPoint.surface0[1],

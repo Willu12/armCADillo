@@ -12,6 +12,7 @@
 #include "gregorySurface.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
+#include "intersectionFinder.hpp"
 #include "jsonSerializer.hpp"
 #include "nfd.h"
 #include "pointEntity.hpp"
@@ -89,7 +90,7 @@ void GUI::displayGUI() {
     createBezierSurfaceUI();
     createGregoryPatchUI();
     findIntersectionUI();
-
+    _intersectionFinder.getIntersectionConfig().display();
     removeButtonUI();
     contractEdgeUI();
     ImGui::Separator();
@@ -644,11 +645,10 @@ void GUI::createGregoryPatchUI() {
 
 void GUI::findIntersectionUI() {
   if (ImGui::Button("Find intersections"))
-    findIntersections();
+    findIntersection(); //(getSelectedEntities(), *_scene);
 }
-void GUI::findIntersections() {
-  auto entities = getEntities();
-
+void GUI::findIntersection() {
+  auto entities = getSelectedEntities();
   for (const auto &surface0 : entities) {
     for (const auto &surface1 : entities) {
       auto surf0 =

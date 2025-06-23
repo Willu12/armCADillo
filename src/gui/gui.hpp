@@ -23,7 +23,6 @@
 #include <vector>
 
 class BezierCurveC0;
-
 enum class ControllerKind : uint8_t {
   Camera = 0,
   Model = 1,
@@ -103,7 +102,7 @@ private:
   void contractEdgeUI();
   void createGregoryPatchUI();
   void findIntersectionUI();
-  void findIntersections();
+  void findIntersection();
 
   IEntity &createEntity(EntityType entityType);
   void createBezierCurve();

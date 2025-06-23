@@ -1,7 +1,9 @@
 #pragma once
 
 #include "IDifferentialParametricForm.hpp"
+#include "intersectionConfig.hpp"
 #include "vec.hpp"
+
 #include <memory>
 #include <optional>
 
@@ -23,12 +25,16 @@ public:
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
   std::optional<Intersection> find() const;
 
+  IntersectionConfig &getIntersectionConfig() { return config_; }
+
 private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0_;
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
   static constexpr std::size_t kStochasticTries = 20;
   static constexpr std::size_t kMaxIntersectionCurvePoint = 200;
+
+  IntersectionConfig config_;
 
   std::optional<Intersection>
   findNextPoints(const IntersectionPoint &firstPoint, bool reversed) const;
