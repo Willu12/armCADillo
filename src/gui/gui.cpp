@@ -8,6 +8,7 @@
 #include "bezierCurveC0.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
+#include "cursorController.hpp"
 #include "entitiesTypes.hpp"
 #include "gregorySurface.hpp"
 #include "imgui.h"
@@ -81,7 +82,7 @@ void GUI::displayGUI() {
     renderModelSettings();
     renderModelControllSettings();
     displayEntitiesList();
-
+    renderCursorControllerSettings();
     renderCreateTorusUI();
     renderCreatePointUI();
     createBezierCurveUI();
