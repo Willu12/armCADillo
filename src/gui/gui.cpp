@@ -664,6 +664,11 @@ void GUI::findIntersection() {
         continue;
 
       _intersectionFinder.setSurfaces(surf0, surf1);
+
+      if (_intersectionFinder.getIntersectionConfig().useCursor_) {
+        _intersectionFinder.setGuidancePoint(getCursor()->getPosition());
+      }
+
       auto intersection = _intersectionFinder.find();
       if (!intersection)
         continue;

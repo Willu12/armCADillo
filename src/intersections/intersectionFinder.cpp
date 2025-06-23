@@ -23,7 +23,8 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
 }
 
 std::optional<Intersection> IntersectionFinder::find() const {
-  const auto firstPoint = findFirstPoint();
+  const auto firstPoint =
+      config_.useCursor_ ? findFirstPointWithGuidance() : findFirstPoint();
   if (!firstPoint)
     return std::nullopt;
 
@@ -52,6 +53,13 @@ std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
 }
 
 std::optional<IntersectionPoint>
+IntersectionFinder::findFirstPointWithGuidance() const {
+  auto point0 = findPointProjection(surface0_, *guidancePoint_);
+  auto point1 = findPointProjection(surface1_, *guidancePoint_);
+  return findCommonSurfacePoint(point0, point1);
+}
+
+std::optional<IntersectionPoint>
 IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
                                            const algebra::Vec2f &start1) const {
   auto function = std::make_unique<algebra::SurfaceSurfaceL2DistanceSquared>(
@@ -69,7 +77,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.001f)
+  if ((surface0Val - surface1Val).length() > 0.01f)
     return std::nullopt;
 
   return IntersectionPoint{.surface0 = surface0Minimum,
