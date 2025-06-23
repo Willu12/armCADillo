@@ -146,5 +146,7 @@ private:
          std::make_unique<GregorySurfaceRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::Polyline, std::make_unique<PolylineRenderer>(*_camera)});
+    _entityRenderers.insert({EntityType::IntersectionCurve,
+                             std::make_unique<PolylineRenderer>(*_camera)});
   }
 };

@@ -13,6 +13,7 @@
 #include "gregorySurface.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
+#include "intersectionCurve.hpp"
 #include "intersectionFinder.hpp"
 #include "jsonSerializer.hpp"
 #include "nfd.h"
@@ -676,14 +677,9 @@ void GUI::findIntersection() {
       if (!intersection)
         continue;
 
-      std::vector<algebra::Vec3f> points;
-
-      for (const auto &p : intersection->points) {
-        points.push_back(p.point);
-      }
-
-      auto polyline = std::make_shared<Polyline>(points);
-      _scene->addEntity(EntityType::Polyline, polyline);
+      auto intersectionCurve =
+          std::make_shared<IntersectionCurve>(*intersection);
+      _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
     }
     /*
   for (const auto &intersectionPoint : intersection.value().points) {

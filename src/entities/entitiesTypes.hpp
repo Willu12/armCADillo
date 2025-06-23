@@ -13,5 +13,6 @@ enum class EntityType : uint8_t {
   BezierSurfaceC0,
   BezierSurfaceC2,
   GregorySurface,
-  Polyline
+  Polyline,
+  IntersectionCurve
 };
