@@ -101,8 +101,8 @@ bool JsonSerializer::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) {
   serializeControlPoints(j, bezierSurfaceC0);
   const auto &meshDensity = bezierSurfaceC0.getMeshDensity();
   j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
-  j["size"] = {{"u", bezierSurfaceC0.getColCount()},
-               {"v", bezierSurfaceC0.getRowCount()}};
+  j["size"] = {{"u", bezierSurfaceC0.getRowCount()},
+               {"v", bezierSurfaceC0.getColCount()}};
   _geometryJson.push_back(j);
   return true;
 }

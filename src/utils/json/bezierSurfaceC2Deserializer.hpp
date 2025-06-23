@@ -22,7 +22,7 @@ public:
     j.at("size").at("v").get_to(uPoints);
 
     auto bezierSurfaceC2 =
-        std::make_shared<BezierSurfaceC2>(points, uPoints - 3, vPoints - 3);
+        std::make_shared<BezierSurfaceC2>(points, vPoints - 3, uPoints - 3);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC2->getName() = name;

@@ -48,7 +48,9 @@ public:
             algebra::Vec2f{0.f, 2.f * std::numbers::pi_v<float>}};
   }
   algebra::Vec3f value(const algebra::Vec2f &pos) const override {
-    return _torus.getPosition(pos[0], pos[1]);
+    auto affine =
+        getModelMatrix() * (_torus.getPosition(pos[0], pos[1])).toHomogenous();
+    return affine.fromHomogenous();
   }
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override {

@@ -6,8 +6,8 @@
 #include <vector>
 
 struct MeshDensity {
-  int s = 4;
-  int t = 4;
+  int s = 10;
+  int t = 10;
 };
 
 class Mesh : public IMeshable {

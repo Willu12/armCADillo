@@ -40,8 +40,7 @@ public:
     updateMesh();
   }
   void
-  onSubscribableDestroyed(ISubscribable &publisher) override { /* update();*/
-  }
+  onSubscribableDestroyed(ISubscribable &publisher) override { /* update();*/ }
   virtual uint32_t getColCount() const = 0;
   virtual uint32_t getRowCount() const = 0;
   std::vector<std::reference_wrapper<const PointEntity>>
@@ -56,6 +55,15 @@ public:
   std::vector<std::reference_wrapper<PointEntity>> &
   getPointsReferences() override {
     return _points;
+  }
+
+  static inline float bernstein(int i, int n, float t) {
+    float coeff = 1.0f;
+    for (int k = 0; k < i; ++k) {
+      coeff *= static_cast<float>(n - k) / (k + 1);
+    }
+
+    return coeff * std::pow(t, i) * std::pow(1.0f - t, n - i);
   }
 
 protected:

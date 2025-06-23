@@ -27,8 +27,8 @@ private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0_;
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
-  static constexpr std::size_t kStochasticTries = 10;
-  static constexpr std::size_t kMaxIntersectionCurvePoint = 10;
+  static constexpr std::size_t kStochasticTries = 20;
+  static constexpr std::size_t kMaxIntersectionCurvePoint = 200;
 
   std::optional<Intersection>
   findNextPoints(const IntersectionPoint &firstPoint, bool reversed) const;

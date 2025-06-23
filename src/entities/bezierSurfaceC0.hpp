@@ -38,8 +38,6 @@ public:
   algebra::Matrix<float, 3, 2>
   jacobian(const algebra::Vec2f &pos) const override;
 
-  float bernstein(int i, int n, float t) const;
-
 private:
   inline static int kClassId = 0;
   std::unique_ptr<BezierSurfaceMesh> generateMesh();

@@ -34,7 +34,7 @@ void main() {
   float v = float(gl_TessCoord.y) * float(gl_TessLevelOuter[0]) /
             float(gl_TessLevelOuter[0] - 1);
 
-  if (direction == 1) {
+  if (direction == 0) {
     float temp = u;
     u = v;
     v = temp;

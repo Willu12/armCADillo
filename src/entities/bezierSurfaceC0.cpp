@@ -15,8 +15,8 @@ BezierSurfaceC0::createFlatPositions(const algebra::Vec3f &position,
   for (uint32_t i = 0; i < u_points; ++i) {
     for (uint32_t j = 0; j < v_points; ++j) {
       controlPoints.emplace_back(
-          position[0] + static_cast<float>(j) / 3.f * vLength,
-          position[1] + static_cast<float>(i) / 3.f * uLength, position[2]);
+          position[0] + static_cast<float>(j) / 3.f * uLength,
+          position[1] + static_cast<float>(i) / 3.f * vLength, position[2]);
     }
   }
   return controlPoints;
@@ -137,15 +137,6 @@ BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
   dv = dv * static_cast<float>(m);
 
   return {du, dv};
-}
-
-float BezierSurfaceC0::bernstein(int i, int n, float t) const {
-  float coeff = 1.0f;
-  for (int k = 0; k < i; ++k) {
-    coeff *= static_cast<float>(n - k) / (k + 1);
-  }
-
-  return coeff * std::pow(t, i) * std::pow(1.0f - t, n - i);
 }
 
 algebra::Matrix<float, 3, 2>
