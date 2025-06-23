@@ -5,6 +5,11 @@
 
 class TextureResource {
 public:
+  TextureResource(const uint32_t width, const uint32_t height)
+      : _width(width), _height(height) {
+    glGenTextures(1, &_id);
+    setWrappingParameters();
+  };
   TextureResource(const Image &image)
       : _width(image.getWidth()), _height(image.getHeight()), bpp(4) {
 
@@ -20,6 +25,16 @@ public:
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, _id);
   }
+
+  void fill(const std::vector<uint8_t> &canvas) {
+    glBindTexture(GL_TEXTURE_2D, _id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, canvas.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  }
+
+  GLuint getTextureId() const { return _id; }
 
 private:
   GLuint _id{};

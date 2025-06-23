@@ -10,6 +10,7 @@ class BezierSurface;
 class BezierSurfaceC0;
 class BezierSurfaceC2;
 class GregorySurface;
+class IntersectionCurve;
 
 class IVisitor {
 public:
@@ -25,4 +26,5 @@ public:
   virtual bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) = 0;
   virtual bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) = 0;
   virtual bool visitGregorySurface(GregorySurface &gregorySurface) = 0;
+  virtual bool visitIntersectionCurve(IntersectionCurve &intersectionCurve) = 0;
 };

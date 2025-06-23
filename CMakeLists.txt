@@ -28,7 +28,8 @@ add_executable(${PROJECT_NAME}
  src/utils/json/bezierCurveC0Deseralizer.cpp
  src/scene.cpp
  src/intersections/intersectionFinder.cpp
-
+ src/textures/image.cpp
+ src/entities/intersectionCurve.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

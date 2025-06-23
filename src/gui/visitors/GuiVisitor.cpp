@@ -6,6 +6,7 @@
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
 #include "bezierSurface.hpp"
+#include "intersectionCurve.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
@@ -109,6 +110,30 @@ bool GuiVisitor::visitGregorySurface(GregorySurface &gregorySurface) {
     change |= ImGui::SliderInt(labelV.c_str(), &meshDensities[i].t, 3, 64);
   }
   return change;
+}
+
+bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
+  ImGui::InputText("Name", &intersectionCurve.getName());
+
+  auto &texture1 = intersectionCurve.getFirstTexture();
+  auto &texture2 = intersectionCurve.getSecondTexture();
+
+  static bool showIntersections = false;
+
+  ImGui::Checkbox("Show intersections", &showIntersections);
+
+  if (showIntersections) {
+    ImGui::Begin("first Texture", nullptr);
+    ImGui::Image((ImTextureID)(intptr_t)texture1.getTextureId(),
+                 ImVec2(300, 300));
+    ImGui::End();
+
+    ImGui::Begin("second Texture", nullptr);
+    ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(),
+                 ImVec2(300, 300));
+    ImGui::End();
+  }
+  return false;
 }
 
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {

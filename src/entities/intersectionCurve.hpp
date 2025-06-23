@@ -3,28 +3,27 @@
 #include "IEntity.hpp"
 #include "intersectionFinder.hpp"
 #include "polyline.hpp"
+#include "texture.hpp"
 #include "vec.hpp"
+#include <memory>
 #include <ranges>
+
+class IntersectionTexture;
 class IntersectionCurve : public IEntity {
 public:
-  explicit IntersectionCurve(const Intersection &intersection) {
-    _id = kClassId++;
-    _name = "IntersectionCurve" + std::to_string(_id);
-    std::vector<algebra::Vec3f> points(intersection.points.size());
-    for (const auto &[u, p] : intersection.points | std::views::enumerate)
-      points[u] = p.point;
-    polyline_ = std::make_unique<Polyline>(points);
-
-    // craete texture 1
-    // craete texture 2
-  }
+  explicit IntersectionCurve(const Intersection &intersection);
   void updateMesh() override { polyline_->updateMesh(); }
   const IMeshable &getMesh() const override { return polyline_->getMesh(); };
+  const IntersectionTexture &getFirstTexture() const { return *texture0_; }
+  const IntersectionTexture &getSecondTexture() const { return *texture1_; }
+  bool acceptVisitor(IVisitor &visitor) override {
+    return visitor.visitIntersectionCurve(*this);
+  }
 
 private:
   inline static int kClassId = 0;
 
   std::unique_ptr<Polyline> polyline_;
-  // texutre 1
-  // texture 2
+  std::unique_ptr<IntersectionTexture> texture0_;
+  std::unique_ptr<IntersectionTexture> texture1_;
 };

@@ -28,6 +28,7 @@ public:
   bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) override;
   bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) override;
   bool visitGregorySurface(GregorySurface &gregorySurface) override;
+  bool visitIntersectionCurve(IntersectionCurve &intersectionCurve) override;
 
 private:
   GUI &_gui;
