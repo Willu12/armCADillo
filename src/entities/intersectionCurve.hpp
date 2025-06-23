@@ -2,13 +2,13 @@
 
 #include "IEntity.hpp"
 #include "intersectionFinder.hpp"
+#include "intersectionTexture.hpp"
 #include "polyline.hpp"
 #include "texture.hpp"
 #include "vec.hpp"
 #include <memory>
 #include <ranges>
 
-class IntersectionTexture;
 class IntersectionCurve : public IEntity {
 public:
   explicit IntersectionCurve(const Intersection &intersection);

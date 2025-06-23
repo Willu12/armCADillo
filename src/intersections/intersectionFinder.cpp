@@ -205,6 +205,14 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
                   nextPoints->points.end());
   }
 
+  if (points[0].surface1[0] < 0.1f)
+    points[0].surface1[0] = 0;
+  if (points[0].surface0[0] < 0.1f)
+    points[0].surface0[0] = 0;
+  if (points[0].surface0[1] < 0.1f)
+    points[0].surface0[1] = 0;
+  if (points[0].surface1[1] < 0.1f)
+    points[0].surface1[1] = 0;
   if (points.size() == 0)
     return std::nullopt;
 

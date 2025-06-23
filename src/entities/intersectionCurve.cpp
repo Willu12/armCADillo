@@ -1,7 +1,5 @@
 #include "intersectionCurve.hpp"
 
-#include "texture.hpp"
-
 IntersectionCurve::IntersectionCurve(const Intersection &intersection) {
   _id = kClassId++;
   _name = "IntersectionCurve" + std::to_string(_id);

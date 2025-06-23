@@ -127,12 +127,18 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
   ImGui::Checkbox("Show intersections", &showIntersections);
 
   if (showIntersections) {
-    ImGui::Begin("first Texture", nullptr);
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
+
+    ImGui::Begin("first Texture", nullptr, ImGuiWindowFlags_NoResize);
+
     ImGui::Image((ImTextureID)(intptr_t)texture1.getTextureId(),
                  ImVec2(300, 300));
     ImGui::End();
 
-    ImGui::Begin("second Texture", nullptr);
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
+
+    ImGui::Begin("second Texture", nullptr, ImGuiWindowFlags_NoResize);
+
     ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(),
                  ImVec2(300, 300));
     ImGui::End();
