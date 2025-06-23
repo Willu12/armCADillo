@@ -661,7 +661,8 @@ void GUI::findIntersection() {
 
       if (surf0 == nullptr || surf1 == nullptr)
         continue;
-      if (surface0->getId() >= surface1->getId())
+
+      if (surface0->getId() > surface1->getId())
         continue;
 
       _intersectionFinder.setSurfaces(surf0, surf1);
@@ -670,7 +671,8 @@ void GUI::findIntersection() {
         _intersectionFinder.setGuidancePoint(getCursor()->getPosition());
       }
 
-      auto intersection = _intersectionFinder.find();
+      auto intersection =
+          _intersectionFinder.find(surface0->getId() == surface1->getId());
       if (!intersection)
         continue;
 

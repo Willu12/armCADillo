@@ -23,7 +23,7 @@ public:
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface0,
       std::shared_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1);
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
-  std::optional<Intersection> find() const;
+  std::optional<Intersection> find(bool same) const;
 
   IntersectionConfig &getIntersectionConfig() { return config_; }
 
@@ -38,8 +38,11 @@ private:
 
   std::optional<Intersection>
   findNextPoints(const IntersectionPoint &firstPoint, bool reversed) const;
-  std::optional<IntersectionPoint> findFirstPoint() const;
+  std::optional<IntersectionPoint> findFirstPoint(bool same) const;
+  std::optional<IntersectionPoint> findFirstPointStochastic() const;
+  std::optional<IntersectionPoint> findFirstPointSameStochastic() const;
   std::optional<IntersectionPoint> findFirstPointWithGuidance() const;
+  std::optional<IntersectionPoint> findFirstPointSameWithGuidance() const;
 
   std::optional<IntersectionPoint>
   findCommonSurfacePoint(const algebra::Vec2f &start0,

@@ -22,9 +22,8 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
   guidancePoint_ = guidancePoint;
 }
 
-std::optional<Intersection> IntersectionFinder::find() const {
-  const auto firstPoint =
-      config_.useCursor_ ? findFirstPointWithGuidance() : findFirstPoint();
+std::optional<Intersection> IntersectionFinder::find(bool same) const {
+  std::optional<IntersectionPoint> firstPoint = findFirstPoint(same);
   if (!firstPoint)
     return std::nullopt;
 
@@ -34,7 +33,8 @@ std::optional<Intersection> IntersectionFinder::find() const {
   return connectFoundPoints(nextPoints, previousPoints);
 }
 
-std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
+std::optional<IntersectionPoint>
+IntersectionFinder::findFirstPointStochastic() const {
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -53,10 +53,44 @@ std::optional<IntersectionPoint> IntersectionFinder::findFirstPoint() const {
 }
 
 std::optional<IntersectionPoint>
+IntersectionFinder::findFirstPointSameStochastic() const {
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
+                                             surface0_.lock()->bounds()[0][1]);
+  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+    const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
+    const auto point1 = algebra::Vec2f(dist(gen), dist(gen));
+
+    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1))
+      return *intersectionPoint;
+  }
+  return std::nullopt;
+}
+
+std::optional<IntersectionPoint>
 IntersectionFinder::findFirstPointWithGuidance() const {
   auto point0 = findPointProjection(surface0_, *guidancePoint_);
   auto point1 = findPointProjection(surface1_, *guidancePoint_);
   return findCommonSurfacePoint(point0, point1);
+}
+
+std::optional<IntersectionPoint>
+IntersectionFinder::findFirstPointSameWithGuidance() const {
+  auto point0 = findPointProjection(surface0_, *guidancePoint_);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
+                                             surface0_.lock()->bounds()[0][1]);
+  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+    const auto point0Value = surface0_.lock()->value(point0);
+    const auto point1 = findPointProjection(surface0_, point0Value);
+
+    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1))
+      return *intersectionPoint;
+  }
+  return std::nullopt;
 }
 
 std::optional<IntersectionPoint>
@@ -175,4 +209,15 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
     return std::nullopt;
 
   return Intersection{.points = points};
+}
+
+std::optional<IntersectionPoint>
+IntersectionFinder::findFirstPoint(bool same) const {
+  if (same) {
+    return config_.useCursor_ ? findFirstPointSameWithGuidance()
+                              : findFirstPointSameStochastic();
+  } else {
+    return config_.useCursor_ ? findFirstPointWithGuidance()
+                              : findFirstPointStochastic();
+  }
 }
