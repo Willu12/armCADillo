@@ -59,6 +59,7 @@ public:
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
   void clearVirtualPoints();
   bool &stereographicVision() { return _stereographicVision; }
+  Scene &getScene() { return *_scene; }
 
 private:
   GLFWwindow *_window;

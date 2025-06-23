@@ -14,6 +14,10 @@ void Polyline::addPoint(algebra::Vec3f &point) {
   updateMesh();
 }
 
+const std::vector<algebra::Vec3f> &Polyline::getPoints() const {
+  return _points;
+}
+
 void Polyline::updateMesh() { _mesh = generateMesh(); }
 
 const IMeshable &Polyline::getMesh() const { return *_mesh; }

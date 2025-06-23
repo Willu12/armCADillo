@@ -5,6 +5,7 @@
 #include "bezierSurface.hpp"
 #include "entitiesTypes.hpp"
 #include "gregorySurface.hpp"
+#include "intersectionCurve.hpp"
 #include "pointEntity.hpp"
 #include <algorithm>
 #include <functional>
@@ -113,6 +114,15 @@ void Scene::enqueueDeadGregoryPatches() {
 
   for (const auto &entity : _entities.at(EntityType::GregorySurface)) {
     auto gregory = std::dynamic_pointer_cast<GregorySurface>(entity);
+    if (gregory->isDead())
+      _deadEntities.push_back(gregory);
+  }
+
+  if (!_entities.contains(EntityType::IntersectionCurve))
+    return;
+
+  for (const auto &entity : _entities.at(EntityType::IntersectionCurve)) {
+    auto gregory = std::dynamic_pointer_cast<IntersectionCurve>(entity);
     if (gregory->isDead())
       _deadEntities.push_back(gregory);
   }

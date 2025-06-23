@@ -1,18 +1,22 @@
 #include "GuiVisitor.hpp"
 #include "IEntity.hpp"
+#include "entitiesTypes.hpp"
 #include "gui.hpp"
 #include "imgui.h"
 
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
 #include "bezierSurface.hpp"
+#include "interpolatingSplineC2.hpp"
 #include "intersectionCurve.hpp"
 #include "pointEntity.hpp"
+#include "polyline.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <functional>
+#include <memory>
 #include <string>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
@@ -132,6 +136,20 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
     ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(),
                  ImVec2(300, 300));
     ImGui::End();
+  }
+  if (ImGui::Button("Convert to interoplating spline")) {
+
+    std::vector<std::reference_wrapper<PointEntity>> points;
+    auto &scene = _gui.getScene();
+    for (const auto &p : intersectionCurve.getPolyline().getPoints()) {
+      auto point = std::make_shared<PointEntity>(p);
+      scene.addEntity(EntityType::Point, point);
+      points.push_back(*point);
+    }
+
+    auto interpolatingSpline = std::make_shared<InterpolatingSplineC2>(points);
+    scene.addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
+    intersectionCurve.isDead() = true;
   }
   return false;
 }
