@@ -6,7 +6,8 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform uint direction;
 uniform bool renderPolyLine;
-
+uniform uint u_patches;
+uniform uint v_patches;
 out vec2 trim_coord;
 
 vec3 p(uint up, uint vp) { return gl_in[up * 4 + vp].gl_Position.xyz; }
@@ -40,7 +41,11 @@ void main() {
     v = temp;
   }
 
-  trim_coord = vec2(v, u);
+  float u_glob = (gl_PrimitiveID / v_patches + u) / u_patches;
+  float v_glob = (gl_PrimitiveID % v_patches + v) / v_patches;
+
+  trim_coord = vec2(v_glob, u_glob);
+
   vec3 pos = bicubic_bezier(u, v);
   gl_Position = projection * view * vec4(pos, 1.0);
 }

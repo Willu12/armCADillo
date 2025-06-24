@@ -36,6 +36,8 @@ public:
     for (const auto &entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
 
+      _shader.setUInt("u_patches", bezierSurface.getPatches().rowCount);
+      _shader.setUInt("v_patches", bezierSurface.getPatches().colCount);
       _shader.setUInt("u_subdivisions", bezierSurface.getMeshDensity().s);
       _shader.setUInt("v_subdivisions", bezierSurface.getMeshDensity().t);
       _shader.setInt("renderPolyLine",
