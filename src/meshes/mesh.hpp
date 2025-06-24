@@ -164,9 +164,9 @@ private:
     const auto bounds = parametrizable.getBounds();
 
     for (int i = 0; i < meshDensity.s; ++i) {
-      float theta = i * (bounds[0] / static_cast<float>(meshDensity.s));
+      float theta = i * (bounds[0] / static_cast<float>(meshDensity.s - 1));
       for (int j = 0; j < meshDensity.t; ++j) {
-        float phi = j * (bounds[1] / static_cast<float>(meshDensity.t));
+        float phi = j * (bounds[1] / static_cast<float>(meshDensity.t - 1));
 
         const auto position = parametrizable.getPosition(theta, phi).toVector();
 

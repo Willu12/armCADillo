@@ -30,6 +30,7 @@ add_executable(${PROJECT_NAME}
  src/intersections/intersectionFinder.cpp
  src/textures/image.cpp
  src/entities/intersectionCurve.cpp
+ src/textures/intersectionTexture.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

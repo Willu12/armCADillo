@@ -33,6 +33,8 @@ public:
 
   bool &wireframe() { return _wireframe; }
   const bool &wireframe() const { return _wireframe; }
+  bool &isCyllinder() { return _cyllinder; }
+  const bool &isCyllinder() const { return _cyllinder; }
 
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierSurface(*this);
@@ -76,6 +78,7 @@ protected:
   MeshDensity _meshDensity = MeshDensity{.s = 4, .t = 4};
   Patches _patches = Patches{.colCount = 1, .rowCount = 1};
   bool _wireframe = false;
+  bool _cyllinder = false;
 
   std::unique_ptr<Mesh> createPolyMesh() {
     std::vector<float> vertices(3 * _points.size());

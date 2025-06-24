@@ -314,7 +314,7 @@ void GUI::displayEntitiesList() {
   auto entities = _scene->getEntites();
   if (entities.empty())
     return;
-  const float height = entities.size() > 4 ? 100.f : 25.f * entities.size();
+  const float height = entities.size() > 4 ? 300.f : 25.f * entities.size();
   ImVec2 childSize(-1, height);
 
   ImGui::BeginChild("EntitiesListChild", childSize, true,

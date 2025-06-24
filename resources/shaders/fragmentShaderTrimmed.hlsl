@@ -9,10 +9,11 @@ out vec4 frag_color;
 
 void main() {
 
+  frag_color = vec4(trim_coord.x, trim_coord.y, 0.f, 1.f);
   vec4 texSample = texture(trimmer, trim_coord);
   if (trim == 1 && texSample.a < 0.5) {
     discard;
   } else {
-    frag_color = vec4(1.0);
+    frag_color = vec4(1.0, 1.f, 1.f, 1.f);
   }
 }
