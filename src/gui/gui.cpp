@@ -13,6 +13,7 @@
 #include "gregorySurface.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
+#include "intersectable.hpp"
 #include "intersectionCurve.hpp"
 #include "intersectionFinder.hpp"
 #include "jsonSerializer.hpp"
@@ -674,6 +675,22 @@ void GUI::findIntersection() {
   if (!intersection)
     return;
 
-  auto intersectionCurve = std::make_shared<IntersectionCurve>(*intersection);
+  auto bounds1 = surf0->bounds();
+  auto bounds2 = surf1->bounds();
+  auto bounds =
+      std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>(
+          bounds1, bounds2);
+
+  auto intersectionCurve =
+      std::make_shared<IntersectionCurve>(*intersection, bounds);
   _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
+
+  auto surfInter0 = std::dynamic_pointer_cast<Intersectable>(entities[0]);
+
+  auto surfInter1 = entities.size() == 1
+                        ? surfInter0
+                        : std::dynamic_pointer_cast<Intersectable>(entities[1]);
+
+  surfInter0->setIntersectionTexture(intersectionCurve->getFirstTexturePtr());
+  surfInter1->setIntersectionTexture(intersectionCurve->getSecondTexturePtr());
 }

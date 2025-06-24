@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 struct IntersectionPoint {
   algebra::Vec2f surface0;
@@ -60,4 +61,7 @@ private:
   std::optional<Intersection>
   connectFoundPoints(const std::optional<Intersection> &nextPoints,
                      const std::optional<Intersection> &previousPoints) const;
+
+  void fixIntersectionPointsEdges(std::vector<IntersectionPoint> &points) const;
+  bool intersectionLooped(const Intersection &intersection) const;
 };

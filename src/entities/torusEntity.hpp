@@ -1,6 +1,7 @@
 #pragma once
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
+#include "intersectable.hpp"
 #include "mesh.hpp"
 #include "torus.hpp"
 #include "vec.hpp"
@@ -8,7 +9,8 @@
 #include <string>
 
 class TorusEntity : public IEntity,
-                    public algebra::IDifferentialParametricForm<2, 3> {
+                    public algebra::IDifferentialParametricForm<2, 3>,
+                    public Intersectable {
 public:
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
       : _torus(innerRadius, tubeRadius), _mesh(generateMesh()) {
@@ -79,6 +81,6 @@ private:
   static inline int kClassId;
 
   std::shared_ptr<Mesh> generateMesh() {
-    return Mesh::fromParametrization(_torus, _meshDensity);
+    return Mesh::fromParametrizationTextured(_torus, _meshDensity);
   }
 };

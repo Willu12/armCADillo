@@ -11,11 +11,20 @@
 
 class IntersectionCurve : public IEntity {
 public:
-  explicit IntersectionCurve(const Intersection &intersection);
+  explicit IntersectionCurve(
+      const Intersection &intersection,
+      std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
+          bounds);
   void updateMesh() override { polyline_->updateMesh(); }
   const IMeshable &getMesh() const override { return polyline_->getMesh(); };
   const IntersectionTexture &getFirstTexture() const { return *texture0_; }
   const IntersectionTexture &getSecondTexture() const { return *texture1_; }
+  std::weak_ptr<IntersectionTexture> getFirstTexturePtr() const {
+    return std::weak_ptr<IntersectionTexture>(texture0_);
+  }
+  std::weak_ptr<IntersectionTexture> getSecondTexturePtr() const {
+    return std::weak_ptr<IntersectionTexture>(texture1_);
+  }
   const Polyline &getPolyline() const { return *polyline_; }
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitIntersectionCurve(*this);
@@ -28,6 +37,6 @@ private:
 
   bool dead_ = false;
   std::unique_ptr<Polyline> polyline_;
-  std::unique_ptr<IntersectionTexture> texture0_;
-  std::unique_ptr<IntersectionTexture> texture1_;
+  std::shared_ptr<IntersectionTexture> texture0_;
+  std::shared_ptr<IntersectionTexture> texture1_;
 };

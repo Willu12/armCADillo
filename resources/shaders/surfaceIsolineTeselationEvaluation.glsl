@@ -40,7 +40,7 @@ void main() {
     v = temp;
   }
 
-  trim_coord = vec2(u, v);
+  trim_coord = vec2(v, u);
   vec3 pos = bicubic_bezier(u, v);
   gl_Position = projection * view * vec4(pos, 1.0);
 }

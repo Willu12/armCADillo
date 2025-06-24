@@ -66,6 +66,6 @@ public:
 
 private:
   TextureResource _textureResource;
-  TextureFiltering _filtering = TextureFiltering::Linear;
-  TextureWrapping _wrapping = TextureWrapping::Repeat;
+  TextureFiltering _filtering = TextureFiltering::Nearest;
+  TextureWrapping _wrapping = TextureWrapping::ClampToEdge;
 };

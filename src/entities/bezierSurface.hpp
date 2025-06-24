@@ -4,6 +4,7 @@
 #include "IMeshable.hpp"
 #include "ISubscriber.hpp"
 #include "bezierSurfaceMesh.hpp"
+#include "intersectable.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
 #include "vec.hpp"
@@ -16,7 +17,9 @@ struct Patches {
   uint32_t rowCount;
 };
 
-class BezierSurface : public IGroupedEntity, public ISubscriber {
+class BezierSurface : public IGroupedEntity,
+                      public ISubscriber,
+                      public Intersectable {
 public:
   const MeshDensity &getMeshDensity() const { return _meshDensity; }
   MeshDensity &getMeshDensity() { return _meshDensity; }

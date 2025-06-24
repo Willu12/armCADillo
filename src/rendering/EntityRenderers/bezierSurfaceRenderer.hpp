@@ -21,8 +21,9 @@ public:
                                      "surfaceIsolineTeselationEvaluation.glsl",
                             ._type = GL_TESS_EVALUATION_SHADER},
 
-                 ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
-                            ._type = GL_FRAGMENT_SHADER}}),
+                 ShaderPath{
+                     ._path = "../resources/shaders/fragmentShaderTrimmed.hlsl",
+                     ._type = GL_FRAGMENT_SHADER}}),
         _meshRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
@@ -40,6 +41,15 @@ public:
       _shader.setInt("renderPolyLine",
                      static_cast<int>(bezierSurface.wireframe()));
       const auto &mesh = bezierSurface.getMesh();
+      if (bezierSurface.isTrimmed()) {
+        _shader.setInt("trim", 1);
+      } else {
+        _shader.setInt("trim", 0);
+      }
+      if (bezierSurface.hasIntersectionTexture()) {
+        const auto &texture = bezierSurface.getIntersectionTexutre();
+        texture.bind();
+      }
       glLineWidth(2.0f);
 
       glPatchParameteri(GL_PATCH_VERTICES, 16);

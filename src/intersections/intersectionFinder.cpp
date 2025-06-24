@@ -28,6 +28,10 @@ std::optional<Intersection> IntersectionFinder::find(bool same) const {
     return std::nullopt;
 
   auto nextPoints = findNextPoints(*firstPoint, false);
+  // if (nextPoints)
+  //   if (intersectionLooped(*nextPoints))
+  //     return connectFoundPoints(nextPoints, std::nullopt);
+
   auto previousPoints = findNextPoints(*firstPoint, true);
 
   return connectFoundPoints(nextPoints, previousPoints);
@@ -205,14 +209,8 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
                   nextPoints->points.end());
   }
 
-  if (points[0].surface1[0] < 0.1f)
-    points[0].surface1[0] = 0;
-  if (points[0].surface0[0] < 0.1f)
-    points[0].surface0[0] = 0;
-  if (points[0].surface0[1] < 0.1f)
-    points[0].surface0[1] = 0;
-  if (points[0].surface1[1] < 0.1f)
-    points[0].surface1[1] = 0;
+  fixIntersectionPointsEdges(points);
+
   if (points.size() == 0)
     return std::nullopt;
 
@@ -228,4 +226,46 @@ IntersectionFinder::findFirstPoint(bool same) const {
     return config_.useCursor_ ? findFirstPointWithGuidance()
                               : findFirstPointStochastic();
   }
+}
+
+void IntersectionFinder::fixIntersectionPointsEdges(
+    std::vector<IntersectionPoint> &points) const {
+  if (points.empty())
+    return;
+
+  auto snap = [](float &value, const algebra::Vec2f &min,
+                 const algebra::Vec2f &max, int dim) {
+    float epsilon = 0.001f;
+    if (std::abs(value - min[dim]) < epsilon)
+      value = min[dim];
+    else if (std::abs(value - max[dim]) < epsilon)
+      value = max[dim];
+  };
+
+  const auto surface0 = surface0_.lock();
+  const auto surface1 = surface1_.lock();
+  if (!surface0 || !surface1)
+    return;
+
+  const auto bounds0 = surface0->bounds();
+  const auto bounds1 = surface1->bounds();
+
+  for (int i : {0, static_cast<int>(points.size()) - 1}) {
+    snap(points[i].surface0[0], bounds0[0], bounds0[1], 0);
+    snap(points[i].surface0[1], bounds0[0], bounds0[1], 1);
+    snap(points[i].surface1[0], bounds1[0], bounds1[1], 0);
+    snap(points[i].surface1[1], bounds1[0], bounds1[1], 1);
+  }
+}
+
+bool IntersectionFinder::intersectionLooped(
+    const Intersection &intersection) const {
+  auto &firstPoint = intersection.points.front();
+  auto &lastPoint = intersection.points.front();
+  const auto dist = 0.01f;
+  if ((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
+      (firstPoint.surface1 - lastPoint.surface1).length() < dist)
+    return true;
+
+  return false;
 }

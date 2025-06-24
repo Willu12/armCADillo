@@ -20,6 +20,8 @@
 #include <string>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
+  if (torus.hasIntersectionTexture())
+    ImGui::Checkbox("Trim", &torus.isTrimmed());
   return torus.renderSettings(_gui);
 }
 bool GuiVisitor::visitPoint(PointEntity &point) {
@@ -84,6 +86,9 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
   change |= ImGui::SliderInt("Vertical Density",
                              &bezierSurface.getMeshDensity().t, 3, 64);
   ImGui::Checkbox("Show Polygonal Line", &bezierSurface.wireframe());
+  if (bezierSurface.hasIntersectionTexture())
+    ImGui::Checkbox("Trim", &bezierSurface.isTrimmed());
+
   return change;
 }
 

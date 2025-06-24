@@ -39,6 +39,14 @@ public:
     return create(vertices, indices);
   }
 
+  static std::unique_ptr<Mesh> fromParametrizationTextured(
+      const algebra::IParametrizable<float> &parametrizable,
+      const MeshDensity &meshDensity) {
+    auto vertices = generateVerticesWithTexture(parametrizable, meshDensity);
+    auto indices = generateIndices(meshDensity);
+    return createTexturedMesh(vertices, indices);
+  }
+
   ~Mesh() {
     if (_vao > 0)
       glDeleteVertexArrays(1, &_vao);
@@ -143,6 +151,28 @@ private:
         const auto position = parametrizable.getPosition(theta, phi).toVector();
 
         vertices.insert(vertices.end(), position.begin(), position.end());
+      }
+    }
+    return vertices;
+  }
+
+  static std::vector<float> generateVerticesWithTexture(
+      const algebra::IParametrizable<float> &parametrizable,
+      const MeshDensity &meshDensity) {
+    std::vector<float> vertices;
+
+    const auto bounds = parametrizable.getBounds();
+
+    for (int i = 0; i < meshDensity.s; ++i) {
+      float theta = i * (bounds[0] / static_cast<float>(meshDensity.s));
+      for (int j = 0; j < meshDensity.t; ++j) {
+        float phi = j * (bounds[1] / static_cast<float>(meshDensity.t));
+
+        const auto position = parametrizable.getPosition(theta, phi).toVector();
+
+        vertices.insert(vertices.end(), position.begin(), position.end());
+        vertices.push_back(theta);
+        vertices.push_back(phi);
       }
     }
     return vertices;
