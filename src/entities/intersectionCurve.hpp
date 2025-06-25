@@ -17,8 +17,8 @@ public:
           bounds);
   void updateMesh() override { polyline_->updateMesh(); }
   const IMeshable &getMesh() const override { return polyline_->getMesh(); };
-  const IntersectionTexture &getFirstTexture() const { return *texture0_; }
-  const IntersectionTexture &getSecondTexture() const { return *texture1_; }
+  IntersectionTexture &getFirstTexture() { return *texture0_; }
+  IntersectionTexture &getSecondTexture() { return *texture1_; }
   std::weak_ptr<IntersectionTexture> getFirstTexturePtr() const {
     return std::weak_ptr<IntersectionTexture>(texture0_);
   }

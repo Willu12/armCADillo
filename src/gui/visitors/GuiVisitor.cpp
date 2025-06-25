@@ -127,27 +127,55 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
   auto &texture1 = intersectionCurve.getFirstTexture();
   auto &texture2 = intersectionCurve.getSecondTexture();
 
-  static bool showIntersections = false;
+  static bool showFirstTexture = false;
+  static bool showSecondTexture = false;
+  ImGui::Checkbox("Show First intersection Texture", &showFirstTexture);
+  ImGui::Checkbox(" Show Second intersection Texture", &showSecondTexture);
 
-  ImGui::Checkbox("Show intersections", &showIntersections);
-
-  if (showIntersections) {
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
-
+  if (showFirstTexture) {
+    ImGui::SetNextWindowSize(ImVec2(330, 330), ImGuiCond_Always);
     ImGui::Begin("first Texture", nullptr, ImGuiWindowFlags_NoResize);
 
-    ImGui::Image((ImTextureID)(intptr_t)texture1.getTextureId(),
-                 ImVec2(300, 300));
-    ImGui::End();
+    ImVec2 imageSize(300, 300);
+    ImVec2 imagePos = ImGui::GetCursorScreenPos();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Always);
+    ImGui::Image((ImTextureID)(intptr_t)texture1.getTextureId(), imageSize);
 
-    ImGui::Begin("second Texture", nullptr, ImGuiWindowFlags_NoResize);
+    if (ImGui::IsItemHovered()) {
+      ImVec2 mousePos = ImGui::GetMousePos();
+      ImVec2 localPos =
+          ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
-    ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(),
-                 ImVec2(300, 300));
+      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        texture1.floodFill(localPos.x, 300 - localPos.y, true);
+      else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+        texture1.floodFill(localPos.x, 300 - localPos.y, false);
+    }
+
     ImGui::End();
   }
+  if (showSecondTexture) {
+    ImGui::SetNextWindowSize(ImVec2(330, 330), ImGuiCond_Always);
+    ImGui::Begin("second Texture", nullptr, ImGuiWindowFlags_NoResize);
+
+    ImVec2 imageSize(300, 300);
+    ImVec2 imagePos = ImGui::GetCursorScreenPos();
+    ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(), imageSize);
+
+    if (ImGui::IsItemHovered()) {
+      ImVec2 mousePos = ImGui::GetMousePos();
+      ImVec2 localPos =
+          ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+
+      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        texture2.floodFill(localPos.x, 300 - localPos.y, true);
+      else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+        texture2.floodFill(localPos.x, 300 - localPos.y, false);
+    }
+
+    ImGui::End();
+  }
+
   if (ImGui::Button("Convert to interoplating spline")) {
 
     std::vector<std::reference_wrapper<PointEntity>> points;

@@ -691,6 +691,10 @@ void GUI::findIntersection() {
                         ? surfInter0
                         : std::dynamic_pointer_cast<Intersectable>(entities[1]);
 
+  intersectionCurve->getFirstTexture().setWrapping(surf0->wrapped(0),
+                                                   surf0->wrapped(1));
+  intersectionCurve->getSecondTexture().setWrapping(surf1->wrapped(0),
+                                                    surf1->wrapped(1));
   surfInter0->setIntersectionTexture(intersectionCurve->getFirstTexturePtr());
   surfInter1->setIntersectionTexture(intersectionCurve->getSecondTexturePtr());
 }

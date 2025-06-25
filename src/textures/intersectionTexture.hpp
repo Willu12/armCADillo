@@ -18,19 +18,23 @@ public:
   explicit IntersectionTexture(const std::vector<algebra::Vec2f> &surfacePoints,
                                const std::array<algebra::Vec2f, 2> &bounds);
   uint32_t getTextureId() const;
+  void floodFill(uint32_t x, uint32_t y, bool transparent);
+  bool wrapU() const { return wrapU_; }
+  bool wrapV() const { return wrapV_; }
+  void setWrapping(bool wrapU, bool wrapV) {
+    wrapU_ = wrapU;
+    wrapV_ = wrapV;
+  }
 
 private:
-  static int constexpr kWidth = 512;
-  static int constexpr kHeight = 512;
-
+  static int constexpr kWidth = 300;
+  static int constexpr kHeight = 300;
+  bool wrapU_ = false;
+  bool wrapV_ = false;
   std::unique_ptr<Texture> texture_;
   std::array<algebra::Vec2f, 2> bounds_;
   Canvas canvas_;
 
   void drawLine(const std::vector<algebra::Vec2f> &surfacePoints);
-  std::vector<std::pair<uint32_t, uint32_t>> findInteriorSamplePoints();
-  std::vector<std::vector<algebra::Vec2f>>
-  divideSurfacePoints(const std::vector<algebra::Vec2f> &surfacePoints);
   void fillCanvas(const std::vector<algebra::Vec2f> &surfacePoints);
-  void floodFillTransparent(int startX, int startY);
 };
