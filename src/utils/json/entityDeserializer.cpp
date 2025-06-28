@@ -53,3 +53,17 @@ EntityDeserializer::getPoints(const json &j, const Scene &scene) const {
   }
   return pointsRef;
 }
+
+bool EntityDeserializer::isCyllinder(
+    const std::vector<std::reference_wrapper<PointEntity>> &points,
+    size_t rowCount, size_t colCount) const {
+
+  for (size_t i = 0; i < colCount; ++i) {
+    const auto &first = points[i].get();
+    const auto &last = points[(rowCount - 1) * colCount + i].get();
+    if (first.getId() != last.getId()) {
+      return false;
+    }
+  }
+  return true;
+}

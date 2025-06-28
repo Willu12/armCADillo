@@ -21,6 +21,9 @@ protected:
   algebra::Vec3f deserializePosition(const json &j) const;
   algebra::Vec3f deserializeScale(const json &j) const;
   algebra::Quaternion<float> deserializeRotation(const json &j) const;
+  bool
+  isCyllinder(const std::vector<std::reference_wrapper<PointEntity>> &points,
+              size_t rowCount, size_t colCount) const;
 
   std::vector<std::reference_wrapper<PointEntity>>
   getPoints(const json &j, const Scene &scene) const;

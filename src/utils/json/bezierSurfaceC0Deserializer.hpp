@@ -17,7 +17,6 @@ public:
     j.at("id").get_to(id);
 
     const auto points = getPoints(j, scene);
-
     uint32_t rowCount{};
     uint32_t colCount{};
     j.at("size").at("v").get_to(colCount);
@@ -32,6 +31,9 @@ public:
     j.at("samples").at("u").get_to(bezierSurfaceC0->getMeshDensity().s);
     j.at("samples").at("v").get_to(bezierSurfaceC0->getMeshDensity().t);
     bezierSurfaceC0->getId() = id;
+    bezierSurfaceC0->isCyllinder() =
+        EntityDeserializer::isCyllinder(points, colCount, rowCount);
+
     return bezierSurfaceC0;
   }
 

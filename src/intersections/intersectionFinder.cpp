@@ -4,6 +4,7 @@
 #include "newtonMethod.hpp"
 #include "vec.hpp"
 #include <algorithm>
+#include <cstdio>
 #include <memory>
 #include <optional>
 #include <random>
@@ -115,8 +116,46 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.001f)
+  if ((surface0Val - surface1Val).length() > 0.01f)
     return std::nullopt;
+
+  printf("found first approximation of dist == %f \n",
+         (surface0Val - surface1Val).length());
+
+  auto firstIntersection =
+      IntersectionPoint{.surface0 = surface0Minimum,
+                        .surface1 = surface1Minimum,
+                        .point = (surface0Val + surface1Val) / 2.f};
+
+  return newtowRefinment(firstIntersection);
+}
+
+std::optional<IntersectionPoint>
+IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
+  auto function = std::make_unique<algebra::IntersectionFunction>(
+      surface0_, surface1_, point.point, algebra::Vec3f());
+
+  algebra::Vec4f startingPoint{point.surface0[0], point.surface0[1],
+                               point.surface1[0], point.surface1[1]};
+  algebra::NewtonMethod<4, 3> newton(std::move(function), startingPoint);
+  newton.setIterationCount(2);
+
+  auto newtonResult = newton.calculate();
+  if (!newtonResult) {
+    return std::nullopt;
+  }
+  auto minimum = *newtonResult;
+  auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
+  auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
+
+  auto surface0Val = surface0_.lock()->value(surface0Minimum);
+  auto surface1Val = surface1_.lock()->value(surface1Minimum);
+
+  if ((surface0Val - surface1Val).length() > 10e-3)
+    return std::nullopt;
+
+  printf("found Newton Refinment of size  approximation of dist == %f \n",
+         (surface0Val - surface1Val).length());
 
   return IntersectionPoint{.surface0 = surface0Minimum,
                            .surface1 = surface1Minimum,
@@ -172,14 +211,14 @@ IntersectionFinder::nextIntersectionPoint(const IntersectionPoint &lastPoint,
   auto function = std::make_unique<algebra::IntersectionStepFunction>(
       surface0_, surface1_, lastPoint.point, tangent);
   function->setStep(config_.intersectionStep_);
-  algebra::NewtonMethod newton(
+  algebra::NewtonMethod<4, 4> newton(
       std::move(function),
       algebra::Vec4f(lastPoint.surface0[0], lastPoint.surface0[1],
                      lastPoint.surface1[0], lastPoint.surface1[1]));
-  const auto correctedIntersection = newton.calculate();
+  const auto nextIntersection = newton.calculate();
 
-  if (correctedIntersection) {
-    auto minimum = *correctedIntersection;
+  if (nextIntersection) {
+    auto minimum = *nextIntersection;
     auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
     auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
@@ -209,7 +248,7 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
                   nextPoints->points.end());
   }
 
-  fixIntersectionPointsEdges(points);
+  // fixIntersectionPointsEdges(points);
 
   if (points.size() == 0)
     return std::nullopt;
@@ -261,7 +300,7 @@ void IntersectionFinder::fixIntersectionPointsEdges(
 bool IntersectionFinder::intersectionLooped(
     const Intersection &intersection) const {
   auto &firstPoint = intersection.points.front();
-  auto &lastPoint = intersection.points.front();
+  auto &lastPoint = intersection.points.back();
   const auto dist = 0.01f;
   if ((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
       (firstPoint.surface1 - lastPoint.surface1).length() < dist)

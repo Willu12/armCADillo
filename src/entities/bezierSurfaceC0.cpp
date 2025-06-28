@@ -155,4 +155,8 @@ BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
   return J;
 }
 
-bool BezierSurfaceC0::wrapped(size_t dim) const { return false; }
+bool BezierSurfaceC0::wrapped(size_t dim) const {
+  if (dim == 0)
+    return isCyllinder();
+  return false;
+}

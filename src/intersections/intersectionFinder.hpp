@@ -33,7 +33,7 @@ private:
   std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
   static constexpr std::size_t kStochasticTries = 300;
-  static constexpr std::size_t kMaxIntersectionCurvePoint = 2000;
+  static constexpr std::size_t kMaxIntersectionCurvePoint = 200;
 
   IntersectionConfig config_;
 
@@ -44,7 +44,8 @@ private:
   std::optional<IntersectionPoint> findFirstPointSameStochastic() const;
   std::optional<IntersectionPoint> findFirstPointWithGuidance() const;
   std::optional<IntersectionPoint> findFirstPointSameWithGuidance() const;
-
+  std::optional<IntersectionPoint>
+  newtowRefinment(const IntersectionPoint &point) const;
   std::optional<IntersectionPoint>
   findCommonSurfacePoint(const algebra::Vec2f &start0,
                          const algebra::Vec2f &start1) const;

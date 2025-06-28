@@ -29,7 +29,6 @@ IntersectionTexture::IntersectionTexture(
     : bounds_(bounds), canvas_(kWidth, kHeight) {
   texture_ = Texture::createTexture(kWidth, kHeight);
   fillCanvas(surfacePoints);
-  // canvas_.flipY();
   texture_->fill(canvas_.getData());
 }
 
@@ -69,7 +68,6 @@ void IntersectionTexture::drawLine(
     int sy = y0 < y1 ? 1 : -1;
     int err = dx - dy;
 
-    // Optionally skip long segments (same logic as before)
     if (std::max(dx, dy) > 100)
       continue;
 
@@ -120,8 +118,6 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
     auto [x, y] = q.front();
     q.pop();
 
-    // Example of doing something with the filled pixel:
-    // For example, you can paint it red:
     if (transparent)
       canvas_.fillAtIndex(y * kWidth + x, Color{0, 0, 0, 0});
     else
@@ -145,7 +141,6 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
           ny -= kHeight;
       }
 
-      // Clamp to boundaries
       if (nx < 0 || nx >= static_cast<int>(kWidth) || ny < 0 ||
           ny >= static_cast<int>(kHeight))
         continue;
