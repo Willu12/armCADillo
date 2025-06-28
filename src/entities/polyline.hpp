@@ -13,6 +13,7 @@ public:
   const std::vector<algebra::Vec3f> &getPoints() const;
   explicit Polyline(std::vector<algebra::Vec3f> &points);
   const IMeshable &getMesh() const override;
+  std::vector<algebra::Vec3f> getSparsePoints(float delta) const;
 
 private:
   std::vector<algebra::Vec3f> _points;

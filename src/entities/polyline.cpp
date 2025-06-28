@@ -43,3 +43,13 @@ std::unique_ptr<Mesh> Polyline::generateMesh() {
 
   return Mesh::create(vertices, indices);
 }
+
+std::vector<algebra::Vec3f> Polyline::getSparsePoints(float delta) const {
+  std::vector<algebra::Vec3f> points;
+  points.push_back(_points.front());
+  for (const auto &point : _points) {
+    if ((points.back() - point).length() > delta)
+      points.push_back(point);
+  }
+  return points;
+}

@@ -20,7 +20,7 @@ public:
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
     _shader.setVec4f("Color", _color);
-    // glLineWidth(3.0f);
+    glLineWidth(3.0f);
 
     for (const auto &entity : entities) {
       const auto &mesh = entity->getMesh();
@@ -29,7 +29,7 @@ public:
                      nullptr);
       glBindVertexArray(0);
     }
-    // glLineWidth(2.0f);
+    glLineWidth(2.0f);
   }
 
 private:

@@ -180,7 +180,8 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
 
     std::vector<std::reference_wrapper<PointEntity>> points;
     auto &scene = _gui.getScene();
-    for (const auto &p : intersectionCurve.getPolyline().getPoints()) {
+    for (const auto &p :
+         intersectionCurve.getPolyline().getSparsePoints(0.5f)) {
       auto point = std::make_shared<PointEntity>(p);
       scene.addEntity(EntityType::Point, point);
       points.push_back(*point);

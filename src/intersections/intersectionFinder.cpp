@@ -29,9 +29,9 @@ std::optional<Intersection> IntersectionFinder::find(bool same) const {
     return std::nullopt;
 
   auto nextPoints = findNextPoints(*firstPoint, false);
-  // if (nextPoints)
-  //   if (intersectionLooped(*nextPoints))
-  //     return connectFoundPoints(nextPoints, std::nullopt);
+  if (nextPoints)
+    if (intersectionLooped(*nextPoints))
+      return connectFoundPoints(nextPoints, std::nullopt);
 
   auto previousPoints = findNextPoints(*firstPoint, true);
 
@@ -195,6 +195,12 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
     auto nextPoint = nextIntersectionPoint(points.back(), reversed);
     if (nextPoint)
       points.push_back(*nextPoint);
+    if (i % 100 == 0)
+      printf("Newton found first %zu points\n", i);
+    if (i > 2 && intersectionLooped(Intersection{.points = points})) {
+      points.back() = points.front();
+      return Intersection{.points = points};
+    }
   }
 
   return Intersection{.points = points};
@@ -301,7 +307,7 @@ bool IntersectionFinder::intersectionLooped(
     const Intersection &intersection) const {
   auto &firstPoint = intersection.points.front();
   auto &lastPoint = intersection.points.back();
-  const auto dist = 0.01f;
+  const auto dist = 0.005f;
   if ((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
       (firstPoint.surface1 - lastPoint.surface1).length() < dist)
     return true;
