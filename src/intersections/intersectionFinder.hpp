@@ -56,7 +56,6 @@ private:
       algebra::Vec3f surfacePoint) const;
 
   algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;
-
   std::optional<IntersectionPoint>
   nextIntersectionPoint(const IntersectionPoint &lastPoint,
                         bool reversed) const;

@@ -111,7 +111,6 @@ BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
   algebra::Vec3f dv{0.f, 0.f, 0.f}; // formerly 'du'
   algebra::Vec3f du{0.f, 0.f, 0.f}; // formerly 'dv'
 
-  // ∂S/∂v — moving along i (rows)
   for (uint32_t i = 0; i < 3; ++i) {
     float Bv = bernstein(i, 2, uv[1]);
     for (uint32_t j = 0; j < 4; ++j) {
@@ -121,7 +120,6 @@ BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
   }
   dv = dv * 3.f * _patches.rowCount;
 
-  // ∂S/∂u — moving along j (columns)
   for (uint32_t i = 0; i < 4; ++i) {
     float Bv = bernstein(i, 3, uv[1]);
     for (uint32_t j = 0; j < 3; ++j) {
@@ -151,7 +149,7 @@ BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
 }
 
 bool BezierSurfaceC0::wrapped(size_t dim) const {
-  if (dim == 0)
+  if (dim == 1)
     return isCyllinder();
   return false;
 }
@@ -159,16 +157,17 @@ bool BezierSurfaceC0::wrapped(size_t dim) const {
 LocalBezierPatch
 BezierSurfaceC0::getCorrespondingBezierPatch(const algebra::Vec2f &pos) const {
   // Clamp to just below 1 to avoid falling out of bounds
-  float clampedU =
-      std::min(pos[0], 1.0f - std::numeric_limits<float>::epsilon());
-  float clampedV =
-      std::min(pos[1], 1.0f - std::numeric_limits<float>::epsilon());
+  float clampedU = std::clamp(pos[0], 0.0f, 1.0f);
+
+  float clampedV = std::clamp(pos[1], 0.0f, 1.0f);
 
   // Compute which patch we're in
   uint32_t colPatchIndex =
-      static_cast<uint32_t>(std::floor(clampedU * _patches.colCount));
+      std::min(static_cast<uint32_t>(clampedU * _patches.colCount),
+               _patches.colCount - 1);
   uint32_t rowPatchIndex =
-      static_cast<uint32_t>(std::floor(clampedV * _patches.rowCount));
+      std::min(static_cast<uint32_t>(clampedV * _patches.rowCount),
+               _patches.rowCount - 1);
 
   // Compute local position within patch
   float patchUStart = static_cast<float>(colPatchIndex) / _patches.colCount;
