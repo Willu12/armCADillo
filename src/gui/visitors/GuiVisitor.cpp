@@ -186,6 +186,10 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
       scene.addEntity(EntityType::Point, point);
       points.push_back(*point);
     }
+    if (intersectionCurve.isLooped() &&
+        points.front().get().getId() != points.back().get().getId()) {
+      points.push_back(points.front());
+    }
 
     auto interpolatingSpline = std::make_shared<InterpolatingSplineC2>(points);
     scene.addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);

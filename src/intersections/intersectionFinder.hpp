@@ -16,6 +16,7 @@ struct IntersectionPoint {
 
 struct Intersection {
   std::vector<IntersectionPoint> points;
+  bool looped = false;
 };
 
 class IntersectionFinder {

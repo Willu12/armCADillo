@@ -683,8 +683,8 @@ void GUI::findIntersection() {
       std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>(
           bounds1, bounds2);
 
-  auto intersectionCurve =
-      std::make_shared<IntersectionCurve>(*intersection, bounds);
+  auto intersectionCurve = std::make_shared<IntersectionCurve>(
+      *intersection, bounds, intersection->looped);
   _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
 
   auto surfInter0 = std::dynamic_pointer_cast<Intersectable>(entities[0]);

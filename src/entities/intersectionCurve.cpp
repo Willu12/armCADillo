@@ -3,7 +3,9 @@
 IntersectionCurve::IntersectionCurve(
     const Intersection &intersection,
     std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
-        bounds) {
+        bounds,
+    bool looped)
+    : looped_(looped) {
   _id = kClassId++;
   _name = "IntersectionCurve" + std::to_string(_id);
   std::vector<algebra::Vec3f> points(intersection.points.size());

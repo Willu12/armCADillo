@@ -30,8 +30,8 @@ std::optional<Intersection> IntersectionFinder::find(bool same) const {
 
   auto nextPoints = findNextPoints(*firstPoint, false);
   if (nextPoints)
-    if (intersectionLooped(*nextPoints))
-      return connectFoundPoints(nextPoints, std::nullopt);
+    if (nextPoints->looped)
+      return nextPoints;
 
   auto previousPoints = findNextPoints(*firstPoint, true);
 
@@ -199,7 +199,7 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
       printf("Newton found first %zu points\n", i);
     if (i > 2 && intersectionLooped(Intersection{.points = points})) {
       points.back() = points.front();
-      return Intersection{.points = points};
+      return Intersection{.points = points, .looped = true};
     }
   }
 

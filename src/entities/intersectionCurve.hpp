@@ -14,7 +14,8 @@ public:
   explicit IntersectionCurve(
       const Intersection &intersection,
       std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
-          bounds);
+          bounds,
+      bool looped);
   void updateMesh() override { polyline_->updateMesh(); }
   const IMeshable &getMesh() const override { return polyline_->getMesh(); };
   IntersectionTexture &getFirstTexture() { return *texture0_; }
@@ -30,12 +31,15 @@ public:
     return visitor.visitIntersectionCurve(*this);
   }
 
+  const bool &isLooped() const { return looped_; }
+
   bool &isDead() { return dead_; }
 
 private:
   inline static int kClassId = 0;
 
   bool dead_ = false;
+  bool looped_ = false;
   std::unique_ptr<Polyline> polyline_;
   std::shared_ptr<IntersectionTexture> texture0_;
   std::shared_ptr<IntersectionTexture> texture1_;
