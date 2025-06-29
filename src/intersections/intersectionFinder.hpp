@@ -17,6 +17,7 @@ struct IntersectionPoint {
 struct Intersection {
   std::vector<IntersectionPoint> points;
   bool looped = false;
+  algebra::Vec3f firstPoint;
 };
 
 class IntersectionFinder {

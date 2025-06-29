@@ -3,6 +3,7 @@
 #include "IEntity.hpp"
 #include "intersectionFinder.hpp"
 #include "intersectionTexture.hpp"
+#include "point.hpp"
 #include "polyline.hpp"
 #include "texture.hpp"
 #include "vec.hpp"
@@ -32,12 +33,15 @@ public:
   }
 
   const bool &isLooped() const { return looped_; }
-
   bool &isDead() { return dead_; }
+  void setFirstPoint(const algebra::Vec3f &pos) {
+    firstPoint_ = std::make_unique<Point>(pos);
+  }
+  Point &firstPoint() const { return *firstPoint_; };
 
 private:
   inline static int kClassId = 0;
-
+  std::unique_ptr<Point> firstPoint_;
   bool dead_ = false;
   bool looped_ = false;
   std::unique_ptr<Polyline> polyline_;

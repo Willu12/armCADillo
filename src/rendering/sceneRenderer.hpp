@@ -12,6 +12,7 @@
 #include "gregorySurfaceRenderer.hpp"
 #include "grid.hpp"
 #include "imgui.h"
+#include "intersectionCurveRenderer.hpp"
 #include "pickingRenderer.hpp"
 #include "pickingTexture.hpp"
 #include "pointRenderer.hpp"
@@ -146,7 +147,8 @@ private:
          std::make_unique<GregorySurfaceRenderer>(*_camera)});
     _entityRenderers.insert(
         {EntityType::Polyline, std::make_unique<PolylineRenderer>(*_camera)});
-    _entityRenderers.insert({EntityType::IntersectionCurve,
-                             std::make_unique<PolylineRenderer>(*_camera)});
+    _entityRenderers.insert(
+        {EntityType::IntersectionCurve,
+         std::make_unique<IntersectionCurveRenderer>(*_camera)});
   }
 };

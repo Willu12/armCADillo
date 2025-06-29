@@ -213,7 +213,7 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
     }
   }
 
-  return Intersection{.points = points};
+  return Intersection{.points = points, .firstPoint = firstPoint.point};
 };
 
 std::optional<IntersectionPoint>
@@ -269,7 +269,8 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
   if (points.size() == 0)
     return std::nullopt;
 
-  return Intersection{.points = points};
+  return Intersection{.points = points,
+                      .firstPoint = nextPoints->points[0].point};
 }
 
 std::optional<IntersectionPoint>

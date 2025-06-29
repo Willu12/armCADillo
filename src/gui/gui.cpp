@@ -685,6 +685,8 @@ void GUI::findIntersection() {
 
   auto intersectionCurve = std::make_shared<IntersectionCurve>(
       *intersection, bounds, intersection->looped);
+  intersectionCurve->setFirstPoint(intersection->firstPoint);
+
   _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
 
   auto surfInter0 = std::dynamic_pointer_cast<Intersectable>(entities[0]);
