@@ -17,6 +17,11 @@ struct Patches {
   uint32_t rowCount;
 };
 
+struct LocalBezierPatch {
+  std::array<std::array<algebra::Vec3f, 4>, 4> patch;
+  algebra::Vec2f localPos;
+};
+
 class BezierSurface : public IGroupedEntity,
                       public ISubscriber,
                       public Intersectable {

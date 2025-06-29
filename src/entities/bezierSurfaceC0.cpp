@@ -1,5 +1,7 @@
 #include "bezierSurfaceC0.hpp"
+#include "bezierSurface.hpp"
 #include "vec.hpp"
+#include <array>
 #include <memory>
 #include <ranges>
 
@@ -86,60 +88,48 @@ std::array<algebra::Vec2f, 2> BezierSurfaceC0::bounds() const {
   return {algebra::Vec2f{0.f, 1.f}, algebra::Vec2f{0.f, 1.f}};
 }
 algebra::Vec3f BezierSurfaceC0::value(const algebra::Vec2f &pos) const {
-
-  const uint32_t u_points = 3 * _patches.rowCount + 1;
-  const uint32_t v_points = 3 * _patches.colCount + 1;
-
-  const uint32_t n = u_points - 1;
-  const uint32_t m = v_points - 1;
+  auto patch = getCorrespondingBezierPatch(pos);
+  const auto &P = patch.patch;
+  const auto &uv = patch.localPos;
 
   algebra::Vec3f result{0.f, 0.f, 0.f};
-  for (uint32_t i = 0; i <= n; ++i) {
-    float Bu = bernstein(i, n, pos[0]);
-    for (uint32_t j = 0; j <= m; ++j) {
-      float Bv = bernstein(j, m, pos[1]);
-      const auto &Pij = _points[i * v_points + j].get().getPosition();
-      result = result + Bu * Bv * Pij;
+  for (uint32_t i = 0; i < 4; ++i) {
+    float Bu = bernstein(i, 3, uv[1]);
+    for (uint32_t j = 0; j < 4; ++j) {
+      float Bv = bernstein(j, 3, uv[0]);
+      result = result + Bu * Bv * P[i][j];
     }
   }
   return result;
 }
 std::pair<algebra::Vec3f, algebra::Vec3f>
 BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
-  const uint32_t u_points = 3 * _patches.rowCount + 1;
-  const uint32_t v_points = 3 * _patches.colCount + 1;
+  auto patch = getCorrespondingBezierPatch(pos);
+  const auto &P = patch.patch;
+  const auto &uv = patch.localPos;
 
-  const uint32_t n = u_points - 1;
-  const uint32_t m = v_points - 1;
+  algebra::Vec3f dv{0.f, 0.f, 0.f}; // formerly 'du'
+  algebra::Vec3f du{0.f, 0.f, 0.f}; // formerly 'dv'
 
-  algebra::Vec3f du{0.f, 0.f, 0.f};
-  algebra::Vec3f dv{0.f, 0.f, 0.f};
-
-  for (uint32_t i = 0; i < n; ++i) {
-    float Bu = bernstein(i, n - 1, pos[0]);
-    for (uint32_t j = 0; j <= m; ++j) {
-      float Bv = bernstein(j, m, pos[1]);
-
-      const algebra::Vec3f &P1 =
-          _points[(i + 1) * v_points + j].get().getPosition();
-      const algebra::Vec3f &P0 = _points[i * v_points + j].get().getPosition();
-      du = du + (P1 - P0) * (Bu * Bv);
+  // ∂S/∂v — moving along i (rows)
+  for (uint32_t i = 0; i < 3; ++i) {
+    float Bv = bernstein(i, 2, uv[1]);
+    for (uint32_t j = 0; j < 4; ++j) {
+      float Bu = bernstein(j, 3, uv[0]);
+      dv = dv + (P[i + 1][j] - P[i][j]) * (Bv * Bu);
     }
   }
-  du = du * static_cast<float>(n);
+  dv = dv * 3.f * _patches.rowCount;
 
-  for (uint32_t i = 0; i <= n; ++i) {
-    float Bu = bernstein(i, n, pos[0]);
-    for (uint32_t j = 0; j < m; ++j) {
-      float Bv = bernstein(j, m - 1, pos[1]);
-
-      const algebra::Vec3f &P1 =
-          _points[i * v_points + (j + 1)].get().getPosition();
-      const algebra::Vec3f &P0 = _points[i * v_points + j].get().getPosition();
-      dv = dv + (P1 - P0) * (Bu * Bv);
+  // ∂S/∂u — moving along j (columns)
+  for (uint32_t i = 0; i < 4; ++i) {
+    float Bv = bernstein(i, 3, uv[1]);
+    for (uint32_t j = 0; j < 3; ++j) {
+      float Bu = bernstein(j, 2, uv[0]);
+      du = du + (P[i][j + 1] - P[i][j]) * (Bv * Bu);
     }
   }
-  dv = dv * static_cast<float>(m);
+  du = du * 3.f * _patches.colCount;
 
   return {du, dv};
 }
@@ -154,8 +144,8 @@ BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
   J(2, 0) = du[2];
 
   J(0, 1) = dv[0];
-  J(1, 2) = dv[1];
-  J(2, 3) = dv[2];
+  J(1, 1) = dv[1];
+  J(2, 1) = dv[2];
 
   return J;
 }
@@ -164,4 +154,43 @@ bool BezierSurfaceC0::wrapped(size_t dim) const {
   if (dim == 0)
     return isCyllinder();
   return false;
+}
+
+LocalBezierPatch
+BezierSurfaceC0::getCorrespondingBezierPatch(const algebra::Vec2f &pos) const {
+  // Clamp to just below 1 to avoid falling out of bounds
+  float clampedU =
+      std::min(pos[0], 1.0f - std::numeric_limits<float>::epsilon());
+  float clampedV =
+      std::min(pos[1], 1.0f - std::numeric_limits<float>::epsilon());
+
+  // Compute which patch we're in
+  uint32_t colPatchIndex =
+      static_cast<uint32_t>(std::floor(clampedU * _patches.colCount));
+  uint32_t rowPatchIndex =
+      static_cast<uint32_t>(std::floor(clampedV * _patches.rowCount));
+
+  // Compute local position within patch
+  float patchUStart = static_cast<float>(colPatchIndex) / _patches.colCount;
+  float patchVStart = static_cast<float>(rowPatchIndex) / _patches.rowCount;
+
+  float localU = (clampedU - patchUStart) * _patches.colCount;
+  float localV = (clampedV - patchVStart) * _patches.rowCount;
+
+  // Extract 4x4 control points for the patch
+  std::array<std::array<algebra::Vec3f, 4>, 4> patch;
+  uint32_t u_offset = colPatchIndex * 3;
+  uint32_t v_offset = rowPatchIndex * 3;
+  uint32_t u_points = 3 * _patches.colCount + 1;
+
+  for (uint32_t row = 0; row < 4; ++row) {
+    for (uint32_t col = 0; col < 4; ++col) {
+      uint32_t globalRow = v_offset + row;
+      uint32_t globalCol = u_offset + col;
+      patch[row][col] =
+          _points[globalRow * u_points + globalCol].get().getPosition();
+    }
+  }
+
+  return LocalBezierPatch{.patch = patch, .localPos = {localU, localV}};
 }

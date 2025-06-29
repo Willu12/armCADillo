@@ -41,4 +41,6 @@ public:
 private:
   inline static int kClassId = 0;
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
+
+  LocalBezierPatch getCorrespondingBezierPatch(const algebra::Vec2f &pos) const;
 };

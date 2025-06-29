@@ -66,6 +66,8 @@ IntersectionFinder::findFirstPointSameStochastic() const {
   std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
                                              surface0_.lock()->bounds()[0][1]);
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+    if (stochTry > 0 && stochTry % 100)
+      std::println("stochastic try {}", stochTry);
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point1 = algebra::Vec2f(dist(gen), dist(gen));
 
@@ -128,7 +130,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
                         .surface1 = surface1Minimum,
                         .point = (surface0Val + surface1Val) / 2.f};
 
-  return newtowRefinment(firstIntersection);
+  return firstIntersection; // newtowRefinment(firstIntersection);
 }
 
 std::optional<IntersectionPoint>
@@ -194,13 +196,20 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
   points.push_back(firstPoint);
   for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
     auto nextPoint = nextIntersectionPoint(points.back(), reversed);
-    if (nextPoint)
-      points.push_back(*nextPoint);
-    if (i % 100 == 0)
+
+    if (i > 0 && i % 300 == 0)
       std::println("Newton found first {} points", i);
     if (i > 2 && intersectionLooped(Intersection{.points = points})) {
+      std::println("Found loop ending Newton");
       points.back() = points.front();
       return Intersection{.points = points, .looped = true};
+    }
+    if (nextPoint)
+      points.push_back(*nextPoint);
+    else {
+      std::println("Newton method failed to find next point on {} iteration",
+                   i);
+      break;
     }
   }
 
@@ -308,9 +317,16 @@ bool IntersectionFinder::intersectionLooped(
     const Intersection &intersection) const {
   auto &firstPoint = intersection.points.front();
   auto &lastPoint = intersection.points.back();
+  auto surf0Wrapped =
+      surface0_.lock()->wrapped(0) || surface0_.lock()->wrapped(1);
+  auto surf1Wrapped =
+      surface1_.lock()->wrapped(0) || surface1_.lock()->wrapped(1);
+
   const auto dist = 0.005f;
-  if ((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
-      (firstPoint.surface1 - lastPoint.surface1).length() < dist)
+  if (((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
+       surf0Wrapped) &&
+      ((firstPoint.surface1 - lastPoint.surface1).length() < dist &&
+       surf1Wrapped))
     return true;
 
   return false;
