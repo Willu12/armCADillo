@@ -107,8 +107,8 @@ private:
     const uint32_t u_points = 3 * u_patches + 1;
     const uint32_t v_points = 3 * v_patches + 1;
     // for(int i = 0; )
-    for (uint32_t u_idx = 0; u_idx < u_patches; ++u_idx) {
-      for (uint32_t v_idx = 0; v_idx < v_patches; ++v_idx) {
+    for (uint32_t v_idx = 0; v_idx < v_patches; ++v_idx) {
+      for (uint32_t u_idx = 0; u_idx < u_patches; ++u_idx) {
         for (uint32_t i = 0; i < 4; ++i) {
           for (uint32_t j = 0; j < 4; ++j) {
             uint32_t u = u_idx * 3 + i;

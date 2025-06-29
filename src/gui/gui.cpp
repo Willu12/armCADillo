@@ -477,7 +477,7 @@ void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
       createSurfacePoints(positions);
 
   auto bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
+      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches, false);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
 }
 
@@ -492,7 +492,7 @@ void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
       createSurfacePoints(positions);
 
   auto bezierSurfaceC2 =
-      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches);
+      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches, false);
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 
@@ -506,7 +506,7 @@ void GUI::createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
       createSurfacePoints(positions);
 
   auto bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches);
+      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches, true);
 
   bezierSurfaceC0->isCyllinder() = true;
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
@@ -522,7 +522,7 @@ void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
       createSurfacePoints(positions);
 
   auto bezierSurfaceC2 =
-      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches);
+      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches, true);
 
   bezierSurfaceC2->isCyllinder() = true;
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);

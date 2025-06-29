@@ -31,15 +31,14 @@ BezierSurfaceC0::createCyllinderPositions(const algebra::Vec3f &position,
   std::vector<algebra::Vec3f> controlPoints;
   controlPoints.reserve(u_points * v_points);
 
-  for (uint32_t i = 0; i < u_points; ++i) {
-    float u_ratio = static_cast<float>(i) / static_cast<float>(3 * uPatches);
-    float angle = u_ratio * 2.0f * std::numbers::pi_v<float>; /// 2.f;
-
+  for (uint32_t i = 0; i < v_points - 1; ++i) {
+    float u_ratio = static_cast<float>(i) / static_cast<float>(v_points);
+    float angle = u_ratio * 2.0f * std::numbers::pi_v<float>;
     float x_circle = std::cos(angle) * r;
     float y_circle = std::sin(angle) * r;
 
-    for (uint32_t j = 0; j < v_points; ++j) {
-      float v_ratio = static_cast<float>(j) / static_cast<float>(3 * vPatches);
+    for (uint32_t j = 0; j < u_points; ++j) {
+      float v_ratio = static_cast<float>(j) / static_cast<float>(u_points);
       float z = v_ratio * h;
 
       controlPoints.emplace_back(x_circle + position[0], y_circle + position[1],
@@ -51,7 +50,7 @@ BezierSurfaceC0::createCyllinderPositions(const algebra::Vec3f &position,
 
 BezierSurfaceC0::BezierSurfaceC0(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
-    uint32_t uCount, uint32_t vCount) {
+    uint32_t uCount, uint32_t vCount, bool cyllinder) {
   _id = kClassId++;
   _name = "BezierSurfaceC0_" + std::to_string(_id);
 
@@ -60,6 +59,12 @@ BezierSurfaceC0::BezierSurfaceC0(
     subscribe(controlPoint);
   }
   _points = points;
+  if (cyllinder) {
+    for (int i = 0; i < (3 * uCount + 1); ++i) {
+      _points.push_back(_points[i]);
+    }
+    isCyllinder() = cyllinder;
+  }
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
   updateMesh();

@@ -21,9 +21,10 @@ public:
     uint32_t colCount{};
     j.at("size").at("v").get_to(colCount);
     j.at("size").at("u").get_to(rowCount);
-
+    bool isCyllinder =
+        EntityDeserializer::isCyllinder(points, colCount, rowCount);
     auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
-        points, (rowCount - 1) / 3, (colCount - 1) / 3);
+        points, (rowCount - 1) / 3, (colCount - 1) / 3, isCyllinder);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC0->getName() = name;
@@ -31,8 +32,6 @@ public:
     j.at("samples").at("u").get_to(bezierSurfaceC0->getMeshDensity().s);
     j.at("samples").at("v").get_to(bezierSurfaceC0->getMeshDensity().t);
     bezierSurfaceC0->getId() = id;
-    bezierSurfaceC0->isCyllinder() =
-        EntityDeserializer::isCyllinder(points, colCount, rowCount);
 
     return bezierSurfaceC0;
   }

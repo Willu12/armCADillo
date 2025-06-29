@@ -50,7 +50,7 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
 
 BezierSurfaceC2::BezierSurfaceC2(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
-    uint32_t uCount, uint32_t vCount) {
+    uint32_t uCount, uint32_t vCount, bool cyllinder) {
   _id = kClassId++;
   _name = "BezierCurveC2_" + std::to_string(_id);
 

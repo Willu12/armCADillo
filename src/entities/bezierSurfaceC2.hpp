@@ -10,7 +10,7 @@ class BezierSurfaceC2 : public BezierSurface,
 public:
   explicit BezierSurfaceC2(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
-      uint32_t uCount, uint32_t vCount);
+      uint32_t uCount, uint32_t vCount, bool cyllinder);
 
   static std::vector<algebra::Vec3f>
   createFlatPositions(const algebra::Vec3f &position, uint32_t uPatches,

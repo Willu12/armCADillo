@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <memory>
 #include <optional>
+#include <print>
 #include <random>
 #include <vector>
 
@@ -119,8 +120,8 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   if ((surface0Val - surface1Val).length() > 0.01f)
     return std::nullopt;
 
-  printf("found first approximation of dist == %f \n",
-         (surface0Val - surface1Val).length());
+  std::println("found first approximation of dist == {}",
+               (surface0Val - surface1Val).length());
 
   auto firstIntersection =
       IntersectionPoint{.surface0 = surface0Minimum,
@@ -154,8 +155,8 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   if ((surface0Val - surface1Val).length() > 10e-3)
     return std::nullopt;
 
-  printf("found Newton Refinment of size  approximation of dist == %f \n",
-         (surface0Val - surface1Val).length());
+  std::println("found Newton Refinment of size  approximation of dist == {}",
+               (surface0Val - surface1Val).length());
 
   return IntersectionPoint{.surface0 = surface0Minimum,
                            .surface1 = surface1Minimum,
@@ -196,7 +197,7 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
     if (nextPoint)
       points.push_back(*nextPoint);
     if (i % 100 == 0)
-      printf("Newton found first %zu points\n", i);
+      std::println("Newton found first {} points", i);
     if (i > 2 && intersectionLooped(Intersection{.points = points})) {
       points.back() = points.front();
       return Intersection{.points = points, .looped = true};
