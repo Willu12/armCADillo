@@ -56,12 +56,17 @@ public:
   }
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override {
+    auto R = getRotation().getRotationMatrix();
     auto derivatives = _torus.getDerivative(pos[0], pos[1]);
-    return {derivatives.first, derivatives.second};
+    algebra::Vec3f du_world =
+        (R * derivatives.first.toHomogenous()).fromHomogenous();
+    algebra::Vec3f dv_world =
+        (R * derivatives.second.toHomogenous()).fromHomogenous();
+    return {du_world, dv_world};
   }
   algebra::Matrix<float, 3, 2>
   jacobian(const algebra::Vec2f &pos) const override {
-    auto [du, dv] = _torus.getDerivative(pos[0], pos[1]);
+    auto [du, dv] = derivatives(pos);
     algebra::Matrix<float, 3, 2> J;
     for (int i = 0; i < 3; ++i) {
       J(i, 0) = du[i];

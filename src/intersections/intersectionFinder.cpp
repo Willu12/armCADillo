@@ -119,7 +119,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.01f)
+  if ((surface0Val - surface1Val).length() > config_.numericalStep_)
     return std::nullopt;
 
   std::println("found first approximation of dist == {}",
@@ -130,18 +130,19 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
                         .surface1 = surface1Minimum,
                         .point = (surface0Val + surface1Val) / 2.f};
 
-  return firstIntersection; // newtowRefinment(firstIntersection);
+  return firstIntersection;
+  // return newtowRefinment(firstIntersection);
 }
 
 std::optional<IntersectionPoint>
 IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
-  auto function = std::make_unique<algebra::IntersectionFunction>(
-      surface0_, surface1_, point.point, algebra::Vec3f());
+  auto function =
+      std::make_unique<algebra::IntersectionFunction>(surface0_, surface1_);
 
   algebra::Vec4f startingPoint{point.surface0[0], point.surface0[1],
                                point.surface1[0], point.surface1[1]};
-  algebra::NewtonMethod<4, 3> newton(std::move(function), startingPoint);
-  newton.setIterationCount(2);
+  algebra::NewtonMethod<4, 4> newton(std::move(function), startingPoint);
+  // newton.setIterationCount(2);
 
   auto newtonResult = newton.calculate();
   if (!newtonResult) {
@@ -154,7 +155,7 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-3)
+  if ((surface0Val - surface1Val).length() > 10e-5)
     return std::nullopt;
 
   std::println("found Newton Refinment of size  approximation of dist == {}",
