@@ -27,12 +27,14 @@ public:
     glLineWidth(3.0f);
 
     for (const auto &entity : entities) {
-      auto &intersectionCurve = dynamic_cast<IntersectionCurve &>(*entity);
       const auto &mesh = entity->getMesh();
       glBindVertexArray(mesh.getVAO());
       glDrawElements(GL_LINES, mesh.getIndicesLength(), GL_UNSIGNED_INT,
                      nullptr);
       glBindVertexArray(0);
+    }
+    for (const auto &entity : entities) {
+      auto &intersectionCurve = dynamic_cast<IntersectionCurve &>(*entity);
       firstPointRenderer_->render(intersectionCurve.firstPoint());
     }
     glLineWidth(2.0f);
