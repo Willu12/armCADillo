@@ -39,10 +39,10 @@ void main() {
   float u = gl_TessCoord.x;
   float v = gl_TessCoord.y;
 
-  float u_glob = (gl_PrimitiveID / v_patches + u) / u_patches;
-  float v_glob = (gl_PrimitiveID % v_patches + v) / v_patches;
+  float v_glob = (gl_PrimitiveID / v_patches + u) / u_patches;
+  float u_glob = (gl_PrimitiveID % v_patches + v) / v_patches;
 
-  trim_coord = vec2(u_glob, v_glob);
+  trim_coord = vec2(v_glob, u_glob);
 
   vec4 position = vec4(bicubic_bezier(u, v), 1.0f);
   // gl_Position = vec4(u, v, 0.0, 1.0); //

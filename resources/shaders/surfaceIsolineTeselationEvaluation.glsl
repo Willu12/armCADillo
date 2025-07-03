@@ -32,17 +32,22 @@ vec3 bicubic_bezier(float u, float v) {
 
 void main() {
   float u = gl_TessCoord.x;
-  float v = float(gl_TessCoord.y) * float(gl_TessLevelOuter[0]) /
-            float(gl_TessLevelOuter[0] - 1);
+  float v = gl_TessCoord.y;
 
-  if (direction == 0) {
+  float uSub = gl_TessLevelOuter[0] - 1;
+  v = (uSub + 1) * v / uSub;
+
+  if (direction == 1) {
     float temp = u;
     u = v;
     v = temp;
   }
 
-  float u_glob = (gl_PrimitiveID / v_patches + u) / u_patches;
-  float v_glob = (gl_PrimitiveID % v_patches + v) / v_patches;
+  uint col = gl_PrimitiveID / v_patches;
+  uint row = gl_PrimitiveID % v_patches;
+
+  float u_glob = (col + v) / u_patches;
+  float v_glob = (row + u) / v_patches;
 
   trim_coord = vec2(v_glob, u_glob);
 
