@@ -119,7 +119,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > config_.numericalStep_)
+  if ((surface0Val - surface1Val).length() > 10e-2)
     return std::nullopt;
 
   std::println("found first approximation of dist == {}",
@@ -155,7 +155,7 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-5) {
+  if ((surface0Val - surface1Val).length() > 10e-3) {
     std::println("Newton Refinment fail maxPreccsion == {}",
                  (surface0Val - surface1Val).length());
     return std::nullopt;
