@@ -46,7 +46,9 @@ IntersectionFinder::findFirstPointStochastic() const {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
                                              surface0_.lock()->bounds()[0][1]);
-  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+  for (std::size_t stochTry = 0; stochTry <= kStochasticTries; ++stochTry) {
+    if (stochTry > 0 && stochTry % 100 == 0)
+      std::println("stochastic try {}", stochTry);
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point0Value = surface0_.lock()->value(point0);
 
@@ -66,8 +68,6 @@ IntersectionFinder::findFirstPointSameStochastic() const {
   std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
                                              surface0_.lock()->bounds()[0][1]);
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
-    if (stochTry > 0 && stochTry % 100)
-      std::println("stochastic try {}", stochTry);
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point1 = algebra::Vec2f(dist(gen), dist(gen));
 
@@ -130,8 +130,8 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
                         .surface1 = surface1Minimum,
                         .point = (surface0Val + surface1Val) / 2.f};
 
-  return firstIntersection;
-  // return newtowRefinment(firstIntersection);
+  // return firstIntersection;
+  return newtowRefinment(firstIntersection);
 }
 
 std::optional<IntersectionPoint>
@@ -155,8 +155,11 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-5)
+  if ((surface0Val - surface1Val).length() > 10e-5) {
+    std::println("Newton Refinment fail maxPreccsion == {}",
+                 (surface0Val - surface1Val).length());
     return std::nullopt;
+  }
 
   std::println("found Newton Refinment of size  approximation of dist == {}",
                (surface0Val - surface1Val).length());
