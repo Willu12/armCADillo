@@ -1,5 +1,7 @@
 #include "bezierSurfaceC2.hpp"
 #include "bezierSurface.hpp"
+#include "bezierSurfaceC0.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <array>
 #include <cmath>
@@ -10,18 +12,19 @@
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
 
-  const uint32_t uPatches = _patches.colCount;
-  const uint32_t vPatches = _patches.rowCount;
-  const uint32_t vPoints = 3 + vPatches;
+  const uint32_t colPatches = _patches.colCount;
+  const uint32_t rowPatches = _patches.rowCount;
+  const uint32_t colDeboorPoints = 3 + colPatches;
 
-  for (uint32_t uPatch = 0; uPatch < uPatches; ++uPatch) {
-    for (uint32_t vPatch = 0; vPatch < vPatches; ++vPatch) {
+  for (uint32_t rowPatch = 0; rowPatch < rowPatches; ++rowPatch) {
+    for (uint32_t colPatch = 0; colPatch < colPatches; ++colPatch) {
 
       std::array<std::array<algebra::Vec3f, 4>, 4> patch;
       for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-          patch[i][j] =
-              _points[(uPatch + i) * vPoints + vPatch + j].get().getPosition();
+          patch[i][j] = _points[(rowPatch + i) * colDeboorPoints + colPatch + j]
+                            .get()
+                            .getPosition();
         }
       }
 
@@ -144,95 +147,37 @@ std::array<std::array<algebra::Vec3f, 4>, 4> BezierSurfaceC2::processPatch(
   return finalPatch;
 }
 
-bool BezierSurfaceC2::wrapped(size_t dim) const { return false; }
+bool BezierSurfaceC2::wrapped(size_t dim) const {
+  return getBezierC0Patch().wrapped(dim);
+}
 std::array<algebra::Vec2f, 2> BezierSurfaceC2::bounds() const {
-  return {algebra::Vec2f{0.f, 1.f}, algebra::Vec2f{0.f, 1.f}};
+  return getBezierC0Patch().bounds();
 }
 algebra::Vec3f BezierSurfaceC2::value(const algebra::Vec2f &pos) const {
-  const uint32_t u_points = 3 * _patches.rowCount + 1;
-  const uint32_t v_points = 3 * _patches.colCount + 1;
-
-  const uint32_t n = u_points - 1;
-  const uint32_t m = v_points - 1;
-  const auto bezierPoints = getRowOrderedBezierPoints();
-  algebra::Vec3f result{0.f, 0.f, 0.f};
-  for (uint32_t i = 0; i <= n; ++i) {
-    float Bu = BezierSurface::bernstein(i, n, pos[0]);
-    for (uint32_t j = 0; j <= m; ++j) {
-      float Bv = BezierSurface::bernstein(j, m, pos[1]);
-      const auto &Pij = bezierPoints[i * v_points + j];
-      result = result + Bu * Bv * Pij;
-    }
-  }
-  return result;
+  return getBezierC0Patch().value(pos);
 }
 std::pair<algebra::Vec3f, algebra::Vec3f>
 BezierSurfaceC2::derivatives(const algebra::Vec2f &pos) const {
-  const uint32_t u_points = 3 * _patches.rowCount + 1;
-  const uint32_t v_points = 3 * _patches.colCount + 1;
-
-  const uint32_t n = u_points - 1;
-  const uint32_t m = v_points - 1;
-
-  algebra::Vec3f du{0.f, 0.f, 0.f};
-  algebra::Vec3f dv{0.f, 0.f, 0.f};
-  const auto bezierPoints = getRowOrderedBezierPoints();
-
-  for (uint32_t i = 0; i < n; ++i) {
-    float Bu = BezierSurface::bernstein(i, n - 1, pos[0]);
-    for (uint32_t j = 0; j <= m; ++j) {
-      float Bv = BezierSurface::bernstein(j, m, pos[1]);
-
-      const algebra::Vec3f &P1 = bezierPoints[(i + 1) * v_points + j];
-      const algebra::Vec3f &P0 = bezierPoints[i * v_points + j];
-      du = du + (P1 - P0) * (Bu * Bv);
-    }
-  }
-  du = du * static_cast<float>(n);
-
-  for (uint32_t i = 0; i <= n; ++i) {
-    float Bu = BezierSurface::bernstein(i, n, pos[0]);
-    for (uint32_t j = 0; j < m; ++j) {
-      float Bv = BezierSurface::bernstein(j, m - 1, pos[1]);
-
-      const algebra::Vec3f &P1 = bezierPoints[i * v_points + (j + 1)];
-      const algebra::Vec3f &P0 = bezierPoints[i * v_points + j];
-      dv = dv + (P1 - P0) * (Bu * Bv);
-    }
-  }
-  dv = dv * static_cast<float>(m);
-
-  return {du, dv};
+  return getBezierC0Patch().derivatives(pos);
 }
 
 algebra::Matrix<float, 3, 2>
 BezierSurfaceC2::jacobian(const algebra::Vec2f &pos) const {
-  auto [du, dv] = derivatives(pos);
-
-  algebra::Matrix<float, 3, 2> J;
-  J(0, 0) = du[0];
-  J(1, 0) = du[1];
-  J(2, 0) = du[2];
-
-  J(0, 1) = dv[0];
-  J(1, 2) = dv[1];
-  J(2, 3) = dv[2];
-
-  return J;
+  return getBezierC0Patch().jacobian(pos);
 }
 
 std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
-  const uint32_t uPatches = _patches.colCount;
-  const uint32_t vPatches = _patches.rowCount;
+  const uint32_t colPatches = _patches.colCount;
+  const uint32_t rowPatches = _patches.rowCount;
 
-  const uint32_t rows = 3 * vPatches + 1;
-  const uint32_t cols = 3 * uPatches + 1;
+  const uint32_t rows = 3 * rowPatches + 1;
+  const uint32_t cols = 3 * colPatches + 1;
 
   std::vector<algebra::Vec3f> grid(rows * cols);
 
-  for (uint32_t u = 0; u < uPatches; ++u) {
-    for (uint32_t v = 0; v < vPatches; ++v) {
-      uint32_t patchIndex = u * vPatches + v;
+  for (uint32_t v = 0; v < rowPatches; ++v) {
+    for (uint32_t u = 0; u < colPatches; ++u) {
+      uint32_t patchIndex = v * colPatches + u;
 
       for (uint32_t i = 0; i < 4; ++i) {
         for (uint32_t j = 0; j < 4; ++j) {
@@ -251,4 +196,11 @@ std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
   }
 
   return grid;
+}
+
+algebra::BezierSurfaceC0 BezierSurfaceC2::getBezierC0Patch() const {
+  auto bezierPoints = getRowOrderedBezierPoints();
+
+  return algebra::BezierSurfaceC0(bezierPoints, 3 * _patches.colCount + 1,
+                                  3 * _patches.rowCount + 1, isCyllinder());
 }

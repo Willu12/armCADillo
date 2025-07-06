@@ -1,6 +1,8 @@
 #pragma once
 #include "IDifferentialParametricForm.hpp"
 #include "bezierSurface.hpp"
+#include "bezierSurfaceC0.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <array>
 #include <sys/types.h>
@@ -44,6 +46,7 @@ public:
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;
   std::vector<algebra::Vec3f> getRowOrderedBezierPoints() const;
+  algebra::BezierSurfaceC0 getBezierC0Patch() const;
   inline static int kClassId = 0;
 
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
