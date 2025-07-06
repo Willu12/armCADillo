@@ -40,13 +40,13 @@ public:
   derivatives(const algebra::Vec2f &pos) const override;
   algebra::Matrix<float, 3, 2>
   jacobian(const algebra::Vec2f &pos) const override;
-
-  float bernstein(int i, int n, float t) const;
+  algebra::BezierSurfaceC0 getBezierC0Patch() const;
 
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;
   std::vector<algebra::Vec3f> getRowOrderedBezierPoints() const;
-  algebra::BezierSurfaceC0 getBezierC0Patch() const;
+  float bernstein(int i, int n, float t) const;
+
   inline static int kClassId = 0;
 
   std::unique_ptr<BezierSurfaceMesh> generateMesh();

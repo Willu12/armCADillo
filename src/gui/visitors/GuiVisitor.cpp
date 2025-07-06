@@ -1,5 +1,6 @@
 #include "GuiVisitor.hpp"
 #include "IEntity.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "entitiesTypes.hpp"
 #include "gui.hpp"
 #include "imgui.h"
@@ -11,6 +12,7 @@
 #include "intersectionCurve.hpp"
 #include "pointEntity.hpp"
 #include "polyline.hpp"
+#include "scene.hpp"
 #include "torusEntity.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
@@ -100,8 +102,45 @@ bool GuiVisitor::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) {
 }
 bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
   if (auto *p = dynamic_cast<BezierSurface *>(&bezierSurface)) {
-    return visitBezierSurface(*p);
+    visitBezierSurface(*p);
   }
+
+  if (ImGui::Button("Convert to BezierC0")) {
+
+    auto bezierC0 = bezierSurface.getBezierC0Patch();
+
+    std::vector<std::reference_wrapper<PointEntity>> points;
+    for (const auto &point : bezierC0.points_) {
+      auto pointEntity = std::make_shared<PointEntity>(point);
+      _gui.getScene().addEntity(EntityType::Point, pointEntity);
+      points.emplace_back(*pointEntity);
+    }
+
+    auto bezierC0Entity = std::make_shared<BezierSurfaceC0>(
+        points, bezierC0.patches_.colCount, bezierC0.patches_.rowCount,
+        bezierC0.cyllinder_);
+    _gui.getScene().addEntity(EntityType::BezierSurfaceC0, bezierC0Entity);
+  }
+  // auto &scene = _gui.getScene();
+
+  /*
+  std::vector<std::reference_wrapper<PointEntity>> points;
+  for (const auto &p :
+       intersectionCurve.getPolyline().getSparsePoints(0.5f)) {
+    auto point = std::make_shared<PointEntity>(p);
+    scene.addEntity(EntityType::Point, point);
+    points.push_back(*point);
+  }
+  if (intersectionCurve.isLooped() &&
+      points.front().get().getId() != points.back().get().getId()) {
+    points.push_back(points.front());
+  }
+
+  auto interpolatingSpline = std::make_shared<InterpolatingSplineC2>(points);
+  scene.addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
+  intersectionCurve.isDead() = true;
+  */
+
   return false;
 }
 
