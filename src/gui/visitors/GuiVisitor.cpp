@@ -149,9 +149,9 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
           ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
       if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-        texture1.floodFill(localPos.x, 300 - localPos.y, true);
+        texture1.floodFill(localPos.x, localPos.y, true);
       else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-        texture1.floodFill(localPos.x, 300 - localPos.y, false);
+        texture1.floodFill(localPos.x, localPos.y, false);
     }
 
     ImGui::End();
@@ -170,9 +170,9 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
           ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
       if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-        texture2.floodFill(localPos.x, 300 - localPos.y, true);
+        texture2.floodFill(localPos.x, localPos.y, true);
       else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-        texture2.floodFill(localPos.x, 300 - localPos.y, false);
+        texture2.floodFill(localPos.x, localPos.y, false);
     }
 
     ImGui::End();
