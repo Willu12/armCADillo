@@ -75,8 +75,6 @@ protected:
   explicit BezierSurfaceMesh(const std::vector<float> &vertices,
                              uint32_t u_patches, uint32_t v_patches)
       : _controlPoints(vertices) {
-    // here we have to fix it.
-    // _controlPoints = createC0MeshData(vertices, u_patches, v_patches);
     initBuffers();
   }
 
@@ -105,8 +103,6 @@ private:
     std::vector<float> meshData;
 
     const uint32_t u_points = 3 * u_patches + 1;
-    const uint32_t v_points = 3 * v_patches + 1;
-    // for(int i = 0; )
     for (uint32_t v_idx = 0; v_idx < v_patches; ++v_idx) {
       for (uint32_t u_idx = 0; u_idx < u_patches; ++u_idx) {
         for (uint32_t i = 0; i < 4; ++i) {

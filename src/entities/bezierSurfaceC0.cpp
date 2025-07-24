@@ -1,5 +1,6 @@
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurface.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <array>
 #include <memory>
@@ -88,108 +89,30 @@ std::array<algebra::Vec2f, 2> BezierSurfaceC0::bounds() const {
   return {algebra::Vec2f{0.f, 1.f}, algebra::Vec2f{0.f, 1.f}};
 }
 algebra::Vec3f BezierSurfaceC0::value(const algebra::Vec2f &pos) const {
-  auto patch = getCorrespondingBezierPatch(pos);
-  const auto &P = patch.patch;
-  const auto &uv = patch.localPos;
-
-  algebra::Vec3f result{0.f, 0.f, 0.f};
-  for (uint32_t i = 0; i < 4; ++i) {
-    float Bu = bernstein(i, 3, uv[1]);
-    for (uint32_t j = 0; j < 4; ++j) {
-      float Bv = bernstein(j, 3, uv[0]);
-      result = result + Bu * Bv * P[i][j];
-    }
-  }
-  return result;
+  return getBezierSurface().value(pos);
 }
 std::pair<algebra::Vec3f, algebra::Vec3f>
 BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
-  auto patch = getCorrespondingBezierPatch(pos);
-  const auto &P = patch.patch;
-  const auto &uv = patch.localPos;
-
-  algebra::Vec3f dv{0.f, 0.f, 0.f}; // formerly 'du'
-  algebra::Vec3f du{0.f, 0.f, 0.f}; // formerly 'dv'
-
-  for (uint32_t i = 0; i < 3; ++i) {
-    float Bv = bernstein(i, 2, uv[1]);
-    for (uint32_t j = 0; j < 4; ++j) {
-      float Bu = bernstein(j, 3, uv[0]);
-      dv = dv + (P[i + 1][j] - P[i][j]) * (Bv * Bu);
-    }
-  }
-  dv = dv * 3.f * _patches.rowCount;
-
-  for (uint32_t i = 0; i < 4; ++i) {
-    float Bv = bernstein(i, 3, uv[1]);
-    for (uint32_t j = 0; j < 3; ++j) {
-      float Bu = bernstein(j, 2, uv[0]);
-      du = du + (P[i][j + 1] - P[i][j]) * (Bv * Bu);
-    }
-  }
-  du = du * 3.f * _patches.colCount;
-
-  return {du, dv};
+  return getBezierSurface().derivatives(pos);
 }
 
 algebra::Matrix<float, 3, 2>
 BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
-  auto [du, dv] = derivatives(pos);
-
-  algebra::Matrix<float, 3, 2> J;
-  J(0, 0) = du[0];
-  J(1, 0) = du[1];
-  J(2, 0) = du[2];
-
-  J(0, 1) = dv[0];
-  J(1, 1) = dv[1];
-  J(2, 1) = dv[2];
-
-  return J;
+  return getBezierSurface().jacobian(pos);
 }
 
 bool BezierSurfaceC0::wrapped(size_t dim) const {
-  if (dim == 1)
-    return isCyllinder();
-  return false;
+  return getBezierSurface().wrapped(dim);
 }
 
-LocalBezierPatch
-BezierSurfaceC0::getCorrespondingBezierPatch(const algebra::Vec2f &pos) const {
-  // Clamp to just below 1 to avoid falling out of bounds
-  float clampedU = std::clamp(pos[0], 0.0f, 1.0f);
+void BezierSurfaceC0::updateAlgebraSurface() {
+  std::vector<algebra::Vec3f> points(_points.size());
+  for (const auto &[i, p] : _points | std::views::enumerate)
+    points[i] = p.get().getPosition();
+  _algebraSurface = std::make_unique<algebra::BezierSurfaceC0>(
+      points, _patches.colCount, _patches.rowCount, isCyllinder());
+}
 
-  float clampedV = std::clamp(pos[1], 0.0f, 1.0f);
-
-  // Compute which patch we're in
-  uint32_t colPatchIndex =
-      std::min(static_cast<uint32_t>(clampedU * _patches.colCount),
-               _patches.colCount - 1);
-  uint32_t rowPatchIndex =
-      std::min(static_cast<uint32_t>(clampedV * _patches.rowCount),
-               _patches.rowCount - 1);
-
-  // Compute local position within patch
-  float patchUStart = static_cast<float>(colPatchIndex) / _patches.colCount;
-  float patchVStart = static_cast<float>(rowPatchIndex) / _patches.rowCount;
-
-  float localU = (clampedU - patchUStart) * _patches.colCount;
-  float localV = (clampedV - patchVStart) * _patches.rowCount;
-
-  // Extract 4x4 control points for the patch
-  std::array<std::array<algebra::Vec3f, 4>, 4> patch;
-  uint32_t u_offset = colPatchIndex * 3;
-  uint32_t v_offset = rowPatchIndex * 3;
-  uint32_t u_points = 3 * _patches.colCount + 1;
-
-  for (uint32_t row = 0; row < 4; ++row) {
-    for (uint32_t col = 0; col < 4; ++col) {
-      uint32_t globalRow = v_offset + row;
-      uint32_t globalCol = u_offset + col;
-      patch[row][col] =
-          _points[globalRow * u_points + globalCol].get().getPosition();
-    }
-  }
-
-  return LocalBezierPatch{.patch = patch, .localPos = {localU, localV}};
+algebra::BezierSurfaceC0 BezierSurfaceC0::getBezierSurface() const {
+  return *_algebraSurface;
 }

@@ -44,6 +44,7 @@ public:
 
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;
+  std::vector<algebra::Vec3f> _rowOrderBezierControlPoints;
   std::vector<algebra::Vec3f> getRowOrderedBezierPoints() const;
   float bernstein(int i, int n, float t) const;
 

@@ -3,6 +3,7 @@
 #include "bezierSurface.hpp"
 #include "bezierSurfaceMesh.hpp"
 #include "pointEntity.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <array>
 #include <functional>
@@ -23,7 +24,10 @@ public:
   createCyllinderPositions(const algebra::Vec3f &position, uint32_t uPatches,
                            uint32_t vPatches, float r, float h);
 
-  void updateMesh() override { _mesh = generateMesh(); }
+  void updateMesh() override {
+    updateAlgebraSurface();
+    _mesh = generateMesh();
+  }
   uint32_t getColCount() const override { return 3 * _patches.colCount + 1; }
   uint32_t getRowCount() const override { return 3 * _patches.rowCount + 1; }
   bool acceptVisitor(IVisitor &visitor) override {
@@ -40,7 +44,9 @@ public:
 
 private:
   inline static int kClassId = 0;
-  std::unique_ptr<BezierSurfaceMesh> generateMesh();
+  std::unique_ptr<algebra::BezierSurfaceC0> _algebraSurface;
 
-  LocalBezierPatch getCorrespondingBezierPatch(const algebra::Vec2f &pos) const;
+  std::unique_ptr<BezierSurfaceMesh> generateMesh();
+  algebra::BezierSurfaceC0 getBezierSurface() const;
+  void updateAlgebraSurface();
 };

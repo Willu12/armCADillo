@@ -146,6 +146,7 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
 
   auto newtonResult = newton.calculate();
   if (!newtonResult) {
+    std::println("Newton failed to calculate\n");
     return std::nullopt;
   }
   auto minimum = *newtonResult;

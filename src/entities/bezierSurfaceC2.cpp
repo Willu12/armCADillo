@@ -6,14 +6,17 @@
 #include <array>
 #include <cmath>
 #include <numbers>
+#include <print>
 #include <ranges>
 #include <stdexcept>
 
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
-
+  _rowOrderBezierControlPoints.clear();
   const uint32_t colPatches = _patches.colCount;
   const uint32_t rowPatches = _patches.rowCount;
+  const uint32_t bezierCols = 3 * colPatches + 1;
+  _rowOrderBezierControlPoints.resize((3 * rowPatches + 1) * bezierCols);
   const uint32_t colDeboorPoints = 3 + colPatches;
 
   for (uint32_t rowPatch = 0; rowPatch < rowPatches; ++rowPatch) {
@@ -30,9 +33,15 @@ void BezierSurfaceC2::updateBezierSurface() {
 
       auto finalPatch = processPatch(patch);
 
-      for (const auto &row : finalPatch) {
-        for (const auto &j : row) {
-          _bezierControlPoints.emplace_back(j);
+      for (const auto &[rowCount, row] : finalPatch | std::views::enumerate) {
+        for (const auto &[colCount, col] : row | std::views::enumerate) {
+          const uint32_t globalRow = rowPatch * 3 + rowCount;
+          const uint32_t globalCol = colPatch * 3 + colCount;
+          const uint32_t globalIndex =
+              globalRow * (3 * colPatches + 1) + globalCol;
+          _rowOrderBezierControlPoints[globalIndex] =
+              finalPatch[rowCount][colCount];
+          _bezierControlPoints.emplace_back(col);
         }
       }
     }
@@ -42,7 +51,9 @@ void BezierSurfaceC2::updateBezierSurface() {
 std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
   std::vector<float> controlPointsPositions(_bezierControlPoints.size() * 3);
 
-  for (const auto &[i, point] : _bezierControlPoints | std::views::enumerate) {
+  for (const auto &[i, point] :
+       getRowOrderedBezierPoints() | std::views::enumerate) {
+    std::println("point [{}] = [{}; {}; {}]", i, point[0], point[1], point[2]);
     controlPointsPositions[3 * i] = point[0];
     controlPointsPositions[3 * i + 1] = point[1];
     controlPointsPositions[3 * i + 2] = point[2];
@@ -167,14 +178,25 @@ BezierSurfaceC2::jacobian(const algebra::Vec2f &pos) const {
 }
 
 std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
+  return _rowOrderBezierControlPoints;
+
   const uint32_t colPatches = _patches.colCount;
   const uint32_t rowPatches = _patches.rowCount;
 
-  const uint32_t rows = 3 * rowPatches + 1;
-  const uint32_t cols = 3 * colPatches + 1;
+  // const uint32_t rows = 3 * rowPatches + 1;
+  // const uint32_t cols = 3 * colPatches + 1;
 
-  std::vector<algebra::Vec3f> grid(rows * cols);
+  std::vector<algebra::Vec3f> grid;
 
+  for (int r = 0; r < rowPatches + 3; ++r) {
+    for (int c = 0; c < colPatches + 3; ++c) {
+      auto globalIndex = c < 4 ? (c + 4 * r) : (3 + (c - 3) * 16 + 4 * r);
+      grid.push_back(_bezierControlPoints[globalIndex]);
+    }
+  }
+  return grid;
+
+  /*
   for (uint32_t v = 0; v < rowPatches; ++v) {
     for (uint32_t u = 0; u < colPatches; ++u) {
       uint32_t patchIndex = v * colPatches + u;
@@ -194,13 +216,12 @@ std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
       }
     }
   }
-
-  return grid;
+*/
 }
 
 algebra::BezierSurfaceC0 BezierSurfaceC2::getBezierC0Patch() const {
   auto bezierPoints = getRowOrderedBezierPoints();
 
-  return algebra::BezierSurfaceC0(bezierPoints, 3 * _patches.colCount + 1,
-                                  3 * _patches.rowCount + 1, isCyllinder());
+  return algebra::BezierSurfaceC0(bezierPoints, _patches.colCount,
+                                  _patches.rowCount, isCyllinder());
 }
