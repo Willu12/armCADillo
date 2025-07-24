@@ -70,7 +70,7 @@ BezierSurfaceC0::BezierSurfaceC0(
   }
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
-  updateMesh();
+  update();
 }
 
 std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC0::generateMesh() {
@@ -85,34 +85,10 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC0::generateMesh() {
                                    _patches.rowCount);
 }
 
-std::array<algebra::Vec2f, 2> BezierSurfaceC0::bounds() const {
-  return {algebra::Vec2f{0.f, 1.f}, algebra::Vec2f{0.f, 1.f}};
-}
-algebra::Vec3f BezierSurfaceC0::value(const algebra::Vec2f &pos) const {
-  return getBezierSurface().value(pos);
-}
-std::pair<algebra::Vec3f, algebra::Vec3f>
-BezierSurfaceC0::derivatives(const algebra::Vec2f &pos) const {
-  return getBezierSurface().derivatives(pos);
-}
-
-algebra::Matrix<float, 3, 2>
-BezierSurfaceC0::jacobian(const algebra::Vec2f &pos) const {
-  return getBezierSurface().jacobian(pos);
-}
-
-bool BezierSurfaceC0::wrapped(size_t dim) const {
-  return getBezierSurface().wrapped(dim);
-}
-
-void BezierSurfaceC0::updateAlgebraSurface() {
+void BezierSurfaceC0::updateAlgebraicSurfaceC0() {
   std::vector<algebra::Vec3f> points(_points.size());
   for (const auto &[i, p] : _points | std::views::enumerate)
     points[i] = p.get().getPosition();
-  _algebraSurface = std::make_unique<algebra::BezierSurfaceC0>(
+  _algebraSurfaceC0 = std::make_unique<algebra::BezierSurfaceC0>(
       points, _patches.colCount, _patches.rowCount, isCyllinder());
-}
-
-algebra::BezierSurfaceC0 BezierSurfaceC0::getBezierSurface() const {
-  return *_algebraSurface;
 }

@@ -7,6 +7,7 @@
 #include "intersectable.hpp"
 #include "mesh.hpp"
 #include "pointEntity.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <functional>
 #include <memory>
@@ -24,8 +25,10 @@ struct LocalBezierPatch {
 
 class BezierSurface : public IGroupedEntity,
                       public ISubscriber,
-                      public Intersectable {
+                      public Intersectable,
+                      public algebra::IDifferentialParametricForm<2, 3> {
 public:
+  virtual ~BezierSurface() = default;
   const MeshDensity &getMeshDensity() const { return _meshDensity; }
   MeshDensity &getMeshDensity() { return _meshDensity; }
 
@@ -47,6 +50,7 @@ public:
 
   void update() override {
     _polyMesh = createPolyMesh();
+    updateAlgebraicSurfaceC0();
     updateMesh();
   }
   void
@@ -67,14 +71,24 @@ public:
     return _points;
   }
 
-  static inline float bernstein(int i, int n, float t) {
-    float coeff = 1.0f;
-    for (int k = 0; k < i; ++k) {
-      coeff *= static_cast<float>(n - k) / (k + 1);
-    }
-
-    return coeff * std::pow(t, i) * std::pow(1.0f - t, n - i);
+  bool wrapped(size_t dim) const override {
+    return getAlgebraSurfaceC0().wrapped(dim);
   }
+  std::array<algebra::Vec2f, 2> bounds() const override {
+    return getAlgebraSurfaceC0().bounds();
+  }
+  algebra::Vec3f value(const algebra::Vec2f &pos) const override {
+    return getAlgebraSurfaceC0().value(pos);
+  }
+  std::pair<algebra::Vec3f, algebra::Vec3f>
+  derivatives(const algebra::Vec2f &pos) const override {
+    return getAlgebraSurfaceC0().derivatives(pos);
+  }
+  algebra::Matrix<float, 3, 2>
+  jacobian(const algebra::Vec2f &pos) const override {
+    return getAlgebraSurfaceC0().jacobian(pos);
+  }
+  algebra::BezierSurfaceC0 getBezierC0Patch() const;
 
 protected:
   std::vector<std::reference_wrapper<PointEntity>> _points;
@@ -84,6 +98,12 @@ protected:
   Patches _patches = Patches{.colCount = 1, .rowCount = 1};
   bool _wireframe = false;
   bool _cyllinder = false;
+  std::unique_ptr<algebra::BezierSurfaceC0> _algebraSurfaceC0;
+
+  virtual void updateAlgebraicSurfaceC0() = 0;
+  const algebra::BezierSurfaceC0 &getAlgebraSurfaceC0() const {
+    return *_algebraSurfaceC0;
+  };
 
   std::unique_ptr<Mesh> createPolyMesh() {
     std::vector<float> vertices(3 * _points.size());

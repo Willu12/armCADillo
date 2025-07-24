@@ -10,8 +10,7 @@
 #include <memory>
 #include <vector>
 
-class BezierSurfaceC0 : public BezierSurface,
-                        public algebra::IDifferentialParametricForm<2, 3> {
+class BezierSurfaceC0 : public BezierSurface {
 public:
   explicit BezierSurfaceC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
@@ -24,29 +23,15 @@ public:
   createCyllinderPositions(const algebra::Vec3f &position, uint32_t uPatches,
                            uint32_t vPatches, float r, float h);
 
-  void updateMesh() override {
-    updateAlgebraSurface();
-    _mesh = generateMesh();
-  }
+  void updateMesh() override { _mesh = generateMesh(); }
   uint32_t getColCount() const override { return 3 * _patches.colCount + 1; }
   uint32_t getRowCount() const override { return 3 * _patches.rowCount + 1; }
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierSurfaceC0(*this);
   };
 
-  bool wrapped(size_t dim) const override;
-  std::array<algebra::Vec2f, 2> bounds() const override;
-  algebra::Vec3f value(const algebra::Vec2f &pos) const override;
-  std::pair<algebra::Vec3f, algebra::Vec3f>
-  derivatives(const algebra::Vec2f &pos) const override;
-  algebra::Matrix<float, 3, 2>
-  jacobian(const algebra::Vec2f &pos) const override;
-
 private:
   inline static int kClassId = 0;
-  std::unique_ptr<algebra::BezierSurfaceC0> _algebraSurface;
-
   std::unique_ptr<BezierSurfaceMesh> generateMesh();
-  algebra::BezierSurfaceC0 getBezierSurface() const;
-  void updateAlgebraSurface();
+  void updateAlgebraicSurfaceC0() override;
 };

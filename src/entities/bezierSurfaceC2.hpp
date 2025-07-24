@@ -7,8 +7,7 @@
 #include <array>
 #include <sys/types.h>
 #include <vector>
-class BezierSurfaceC2 : public BezierSurface,
-                        public algebra::IDifferentialParametricForm<2, 3> {
+class BezierSurfaceC2 : public BezierSurface {
 public:
   explicit BezierSurfaceC2(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
@@ -33,20 +32,11 @@ public:
   uint32_t getColCount() const override { return 3 + _patches.rowCount; }
   uint32_t getRowCount() const override { return 3 + _patches.colCount; }
 
-  bool wrapped(size_t dim) const override;
-  std::array<algebra::Vec2f, 2> bounds() const override;
-  algebra::Vec3f value(const algebra::Vec2f &pos) const override;
-  std::pair<algebra::Vec3f, algebra::Vec3f>
-  derivatives(const algebra::Vec2f &pos) const override;
-  algebra::Matrix<float, 3, 2>
-  jacobian(const algebra::Vec2f &pos) const override;
-  algebra::BezierSurfaceC0 getBezierC0Patch() const;
-
 private:
   std::vector<algebra::Vec3f> _bezierControlPoints;
   std::vector<algebra::Vec3f> _rowOrderBezierControlPoints;
   std::vector<algebra::Vec3f> getRowOrderedBezierPoints() const;
-  float bernstein(int i, int n, float t) const;
+  void updateAlgebraicSurfaceC0() override;
 
   inline static int kClassId = 0;
 

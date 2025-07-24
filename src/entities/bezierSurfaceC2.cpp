@@ -5,6 +5,7 @@
 #include "vec.hpp"
 #include <array>
 #include <cmath>
+#include <memory>
 #include <numbers>
 #include <print>
 #include <ranges>
@@ -46,13 +47,13 @@ void BezierSurfaceC2::updateBezierSurface() {
       }
     }
   }
+  updateAlgebraicSurfaceC0();
 }
 
 std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
   std::vector<float> controlPointsPositions(_bezierControlPoints.size() * 3);
 
-  for (const auto &[i, point] :
-       getRowOrderedBezierPoints() | std::views::enumerate) {
+  for (const auto &[i, point] : _bezierControlPoints | std::views::enumerate) {
     std::println("point [{}] = [{}; {}; {}]", i, point[0], point[1], point[2]);
     controlPointsPositions[3 * i] = point[0];
     controlPointsPositions[3 * i + 1] = point[1];
@@ -75,7 +76,7 @@ BezierSurfaceC2::BezierSurfaceC2(
   _points = points;
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
-  updateMesh();
+  update();
 }
 
 std::vector<algebra::Vec3f>
@@ -158,25 +159,6 @@ std::array<std::array<algebra::Vec3f, 4>, 4> BezierSurfaceC2::processPatch(
   return finalPatch;
 }
 
-bool BezierSurfaceC2::wrapped(size_t dim) const {
-  return getBezierC0Patch().wrapped(dim);
-}
-std::array<algebra::Vec2f, 2> BezierSurfaceC2::bounds() const {
-  return getBezierC0Patch().bounds();
-}
-algebra::Vec3f BezierSurfaceC2::value(const algebra::Vec2f &pos) const {
-  return getBezierC0Patch().value(pos);
-}
-std::pair<algebra::Vec3f, algebra::Vec3f>
-BezierSurfaceC2::derivatives(const algebra::Vec2f &pos) const {
-  return getBezierC0Patch().derivatives(pos);
-}
-
-algebra::Matrix<float, 3, 2>
-BezierSurfaceC2::jacobian(const algebra::Vec2f &pos) const {
-  return getBezierC0Patch().jacobian(pos);
-}
-
 std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
   return _rowOrderBezierControlPoints;
 
@@ -218,10 +200,9 @@ std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
   }
 */
 }
+void BezierSurfaceC2::updateAlgebraicSurfaceC0() {
+  const auto &bezierPoints = getRowOrderedBezierPoints();
 
-algebra::BezierSurfaceC0 BezierSurfaceC2::getBezierC0Patch() const {
-  auto bezierPoints = getRowOrderedBezierPoints();
-
-  return algebra::BezierSurfaceC0(bezierPoints, _patches.colCount,
-                                  _patches.rowCount, isCyllinder());
+  _algebraSurfaceC0 = std::make_unique<algebra::BezierSurfaceC0>(
+      bezierPoints, _patches.colCount, _patches.rowCount, isCyllinder());
 }
