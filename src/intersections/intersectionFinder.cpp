@@ -135,8 +135,8 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   if ((surface0Val - surface1Val).length() > 10e-2) {
     std::println("Failed to find max prec = {}\n",
                  (surface0Val - surface1Val).length());
+    return std::nullopt;
   }
-  return std::nullopt;
 
   std::println("found first approximation of dist == {}",
                (surface0Val - surface1Val).length());

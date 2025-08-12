@@ -1,6 +1,5 @@
 #include "bezierSurfaceC2.hpp"
 #include "bezierSurface.hpp"
-#include "bezierSurfaceC0.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
 #include <array>
@@ -9,7 +8,6 @@
 #include <numbers>
 #include <print>
 #include <ranges>
-#include <stdexcept>
 
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
@@ -76,6 +74,7 @@ BezierSurfaceC2::BezierSurfaceC2(
   _points = points;
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
+  _cyllinder = cyllinder;
   update();
 }
 
@@ -85,12 +84,12 @@ BezierSurfaceC2::createFlatPositions(const algebra::Vec3f &position,
                                      float uLength, float vLength) {
 
   std::vector<algebra::Vec3f> controlPoints;
-  const uint32_t u_points = 3 + uPatches;
-  const uint32_t v_points = 3 + vPatches;
+  const uint32_t uPoints = 3 + uPatches;
+  const uint32_t vPoints = 3 + vPatches;
 
-  controlPoints.reserve(u_points * v_points);
-  for (uint32_t i = 0; i < u_points; ++i) {
-    for (uint32_t j = 0; j < v_points; ++j) {
+  controlPoints.reserve(uPoints * vPoints);
+  for (uint32_t i = 0; i < uPoints; ++i) {
+    for (uint32_t j = 0; j < vPoints; ++j) {
       controlPoints.emplace_back(
           position[0] + static_cast<float>(j) / 3.f * uLength,
           position[1] + static_cast<float>(i) / 3.f * vLength, position[2]);
@@ -103,27 +102,27 @@ std::vector<algebra::Vec3f>
 BezierSurfaceC2::createCyllinderPositions(const algebra::Vec3f &position,
                                           uint32_t uPatches, uint32_t vPatches,
                                           float r, float h) {
-  const uint32_t u_points = 3 + uPatches;
-  const uint32_t v_points = 3 + vPatches;
+  const uint32_t uPoints = 3 + uPatches;
+  const uint32_t vPoints = 3 + vPatches;
   std::vector<algebra::Vec3f> controlPoints;
 
-  controlPoints.reserve(u_points * v_points);
+  controlPoints.reserve(uPoints * vPoints);
   const float angleBetweenPoints =
-      1.f / static_cast<float>(u_points - 3) * 2.0f * std::numbers::pi_v<float>;
+      1.f / static_cast<float>(uPoints - 3) * 2.0f * std::numbers::pi_v<float>;
   float newR = 3 * r / (std::cos(angleBetweenPoints) + 2);
 
-  for (uint32_t i = 0; i < u_points; ++i) {
-    float u_ratio = static_cast<float>(i) / static_cast<float>(u_points - 3);
-    float angle = u_ratio * 2.0f * std::numbers::pi_v<float>;
+  for (uint32_t i = 0; i < uPoints; ++i) {
+    float uRatio = static_cast<float>(i) / static_cast<float>(uPoints - 3);
+    float angle = uRatio * 2.0f * std::numbers::pi_v<float>;
 
-    float x_circle = std::cos(angle) * newR;
-    float y_circle = std::sin(angle) * newR;
+    float xCircle = std::cos(angle) * newR;
+    float yCircle = std::sin(angle) * newR;
 
-    for (uint32_t j = 0; j < v_points; ++j) {
-      float v_ratio = static_cast<float>(j) / static_cast<float>(v_points - 1);
-      float z = v_ratio * h;
+    for (uint32_t j = 0; j < vPoints; ++j) {
+      float vRatio = static_cast<float>(j) / static_cast<float>(vPoints - 1);
+      float z = vRatio * h;
 
-      controlPoints.emplace_back(x_circle + position[0], y_circle + position[1],
+      controlPoints.emplace_back(xCircle + position[0], yCircle + position[1],
                                  z + position[2]);
     }
   }
@@ -164,10 +163,6 @@ std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
 
   const uint32_t colPatches = _patches.colCount;
   const uint32_t rowPatches = _patches.rowCount;
-
-  // const uint32_t rows = 3 * rowPatches + 1;
-  // const uint32_t cols = 3 * colPatches + 1;
-
   std::vector<algebra::Vec3f> grid;
 
   for (int r = 0; r < rowPatches + 3; ++r) {
@@ -177,28 +172,6 @@ std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
     }
   }
   return grid;
-
-  /*
-  for (uint32_t v = 0; v < rowPatches; ++v) {
-    for (uint32_t u = 0; u < colPatches; ++u) {
-      uint32_t patchIndex = v * colPatches + u;
-
-      for (uint32_t i = 0; i < 4; ++i) {
-        for (uint32_t j = 0; j < 4; ++j) {
-          uint32_t localIndex = i * 4 + j;
-
-          uint32_t row = 3 * v + i;
-          uint32_t col = 3 * u + j;
-
-          if (row < rows && col < cols) {
-            grid[row * cols + col] =
-                _bezierControlPoints[patchIndex * 16 + localIndex];
-          }
-        }
-      }
-    }
-  }
-*/
 }
 void BezierSurfaceC2::updateAlgebraicSurfaceC0() {
   const auto &bezierPoints = getRowOrderedBezierPoints();
