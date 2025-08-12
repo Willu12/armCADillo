@@ -19,6 +19,15 @@ public:
     _name = ("Torus_" + std::to_string(TorusEntity::_id));
   }
 
+  TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position,
+              const MeshDensity &meshDensity)
+      : _torus(innerRadius, tubeRadius), _meshDensity(meshDensity),
+        _mesh(generateMesh()) {
+    _position = position;
+    _id = kClassId++;
+    _name = ("Torus_" + std::to_string(TorusEntity::_id));
+  }
+
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitTorus(*this);
   }
