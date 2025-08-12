@@ -125,7 +125,11 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   gradientDescent.setStartingPoint(
       algebra::Vec4f(start0[0], start0[1], start1[0], start1[1]));
 
-  auto minimum = gradientDescent.calculate();
+  auto gradientResult = gradientDescent.calculate();
+  if (!gradientResult) {
+    return std::nullopt;
+  }
+  auto minimum = *gradientResult;
   auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
   auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
@@ -194,7 +198,7 @@ algebra::Vec2f IntersectionFinder::findPointProjection(
 
   algebra::GradientDescent<2> gradientDescent(std::move(function));
 
-  return gradientDescent.calculate();
+  return *gradientDescent.calculate();
 }
 
 algebra::Vec3f
