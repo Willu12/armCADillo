@@ -1,4 +1,5 @@
 #include "intersectionFinder.hpp"
+#include "distribution.hpp"
 #include "functions.hpp"
 #include "gradientDescent.hpp"
 #include "newtonMethod.hpp"
@@ -87,8 +88,12 @@ IntersectionFinder::findFirstPointWithGuidance() const {
     if (stochTry > 0 && stochTry % 100 == 0) {
       std::println("stochastic try {}", stochTry);
     }
-    auto point0 = findPointProjection(surface0_, *guidancePoint_);
-    auto point1 = findPointProjection(surface1_, *guidancePoint_);
+    auto point0 = findPointProjection(
+        surface0_,
+        algebra::Distribution::randomPointInsideSphere(*guidancePoint_, 0.05f));
+    auto point1 = findPointProjection(
+        surface1_,
+        algebra::Distribution::randomPointInsideSphere(*guidancePoint_, 0.05f));
     if (auto intersectionPoint = findCommonSurfacePoint(point0, point1)) {
       return intersectionPoint;
     }
@@ -136,7 +141,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-2) {
+  if ((surface0Val - surface1Val).length() > 10e-3) {
     std::println("Failed to find max prec = {}\n",
                  (surface0Val - surface1Val).length());
     return std::nullopt;
@@ -176,7 +181,7 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-3) {
+  if ((surface0Val - surface1Val).length() > 10e-2) {
     std::println("Newton Refinment fail maxPreccsion == {}",
                  (surface0Val - surface1Val).length());
     return std::nullopt;
