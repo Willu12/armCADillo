@@ -2,7 +2,10 @@
 
 #include "bezierSurfaceC2.hpp"
 #include "entityDeserializer.hpp"
+#include "surface.hpp"
 #include <memory>
+#include <ostream>
+#include <print>
 
 class BezierSurfaceC2Deserializer : public EntityDeserializer {
   using json = nlohmann::json;
@@ -21,8 +24,11 @@ public:
     j.at("size").at("u").get_to(vPoints);
     j.at("size").at("v").get_to(uPoints);
 
+    auto connectionType =
+        EntityDeserializer::getConnectionType(points, uPoints, vPoints, 3);
+
     auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
-        points, vPoints - 3, uPoints - 3, false);
+        points, vPoints - 3, uPoints - 3, connectionType);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC2->getName() = name;

@@ -14,7 +14,7 @@ class BezierSurfaceC0 : public BezierSurface {
 public:
   explicit BezierSurfaceC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points,
-      uint32_t uCount, uint32_t vCount, bool cyllinder);
+      uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType);
 
   static std::vector<algebra::Vec3f>
   createFlatPositions(const algebra::Vec3f &position, uint32_t uPatches,

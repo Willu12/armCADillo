@@ -2,9 +2,8 @@
 
 #include "bezierSurfaceC0.hpp"
 #include "entityDeserializer.hpp"
-#include "pointEntity.hpp"
-#include <functional>
 #include <memory>
+#include <print>
 
 class BezierSurfaceC0Deserializer : public EntityDeserializer {
   using json = nlohmann::json;
@@ -21,10 +20,10 @@ public:
     uint32_t colCount{};
     j.at("size").at("v").get_to(colCount);
     j.at("size").at("u").get_to(rowCount);
-    bool isCyllinder =
-        EntityDeserializer::isCyllinder(points, colCount, rowCount);
+    auto connectionType =
+        EntityDeserializer::getConnectionType(points, rowCount, colCount, 1);
     auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
-        points, (rowCount - 1) / 3, (colCount - 1) / 3, isCyllinder);
+        points, (rowCount - 1) / 3, (colCount - 1) / 3, connectionType);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC0->getName() = name;

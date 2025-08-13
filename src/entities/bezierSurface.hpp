@@ -11,6 +11,7 @@
 #include "vec.hpp"
 #include <functional>
 #include <memory>
+#include <surface.hpp>
 #include <vector>
 
 struct Patches {
@@ -41,8 +42,10 @@ public:
 
   bool &wireframe() { return _wireframe; }
   const bool &wireframe() const { return _wireframe; }
-  bool &isCyllinder() { return _cyllinder; }
-  const bool &isCyllinder() const { return _cyllinder; }
+  algebra::ConnectionType &getConnectionType() { return _connectionType; }
+  const algebra::ConnectionType &getConnectionType() const {
+    return _connectionType;
+  }
 
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitBezierSurface(*this);
@@ -97,7 +100,7 @@ protected:
   MeshDensity _meshDensity = MeshDensity{.s = 4, .t = 4};
   Patches _patches = Patches{.colCount = 1, .rowCount = 1};
   bool _wireframe = false;
-  bool _cyllinder = false;
+  algebra::ConnectionType _connectionType;
   std::unique_ptr<algebra::BezierSurfaceC0> _algebraSurfaceC0;
 
   virtual void updateAlgebraicSurfaceC0() = 0;

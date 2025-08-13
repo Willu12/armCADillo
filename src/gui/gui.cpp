@@ -6,6 +6,7 @@
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
+#include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
 #include "cursorController.hpp"
@@ -21,6 +22,7 @@
 #include "pointEntity.hpp"
 #include "polyline.hpp"
 #include "scene.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
@@ -476,8 +478,8 @@ void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
   std::vector<std::reference_wrapper<PointEntity>> points =
       createSurfacePoints(positions);
 
-  auto bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches, false);
+  auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
+      points, uPatches, vPatches, algebra::ConnectionType::Flat);
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
 }
 
@@ -491,8 +493,8 @@ void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
   std::vector<std::reference_wrapper<PointEntity>> points =
       createSurfacePoints(positions);
 
-  auto bezierSurfaceC2 =
-      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches, false);
+  auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
+      points, uPatches, vPatches, algebra::ConnectionType::Flat);
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 
@@ -505,10 +507,9 @@ void GUI::createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
   std::vector<std::reference_wrapper<PointEntity>> points =
       createSurfacePoints(positions);
 
-  auto bezierSurfaceC0 =
-      std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches, true);
+  auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
+      points, uPatches, vPatches, algebra::ConnectionType::Columns);
 
-  bezierSurfaceC0->isCyllinder() = true;
   _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
 }
 
@@ -521,10 +522,9 @@ void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
   std::vector<std::reference_wrapper<PointEntity>> points =
       createSurfacePoints(positions);
 
-  auto bezierSurfaceC2 =
-      std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches, true);
+  auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
+      points, uPatches, vPatches, algebra::ConnectionType::Columns);
 
-  bezierSurfaceC2->isCyllinder() = true;
   _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
 }
 

@@ -1,7 +1,9 @@
 #include "entityDeserializer.hpp"
 #include "IEntity.hpp"
+#include "bezierSurface.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <functional>
 #include <memory>
@@ -54,16 +56,45 @@ EntityDeserializer::getPoints(const json &j, const Scene &scene) const {
   return pointsRef;
 }
 
-bool EntityDeserializer::isCyllinder(
+algebra::ConnectionType EntityDeserializer::getConnectionType(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
-    size_t rowCount, size_t colCount) const {
+    size_t rowCount, size_t colCount, size_t degree) const {
 
-  for (size_t i = 0; i < colCount; ++i) {
-    const auto &first = points[i].get();
-    const auto &last = points[(rowCount - 1) * colCount + i].get();
-    if (first.getId() != last.getId()) {
-      return false;
+  bool wrapV = true;
+  for (size_t row = 0; row < rowCount; ++row) {
+    for (size_t k = 0; k < degree; ++k) {
+      size_t leftIndex = row * colCount + k;
+      size_t rightIndex = row * colCount + (colCount - degree + k);
+      if (points[leftIndex].get().getId() != points[rightIndex].get().getId()) {
+        wrapV = false;
+        break;
+      }
+    }
+    if (!wrapV) {
+      break;
     }
   }
-  return true;
+
+  bool wrapU = true;
+  for (size_t col = 0; col < colCount; ++col) {
+    for (size_t k = 0; k < degree; ++k) {
+      size_t topIndex = k * colCount + col;
+      size_t bottomIndex = (rowCount - degree + k) * colCount + col;
+      if (points[topIndex].get().getId() != points[bottomIndex].get().getId()) {
+        wrapU = false;
+        break;
+      }
+    }
+    if (!wrapU) {
+      break;
+    }
+  }
+
+  if (wrapU) {
+    return algebra::ConnectionType::Rows;
+  }
+  if (wrapV) {
+    return algebra::ConnectionType::Columns;
+  }
+  return algebra::ConnectionType::Flat;
 }

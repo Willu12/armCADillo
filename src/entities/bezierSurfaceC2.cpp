@@ -52,7 +52,6 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
   std::vector<float> controlPointsPositions(_bezierControlPoints.size() * 3);
 
   for (const auto &[i, point] : _bezierControlPoints | std::views::enumerate) {
-    std::println("point [{}] = [{}; {}; {}]", i, point[0], point[1], point[2]);
     controlPointsPositions[3 * i] = point[0];
     controlPointsPositions[3 * i + 1] = point[1];
     controlPointsPositions[3 * i + 2] = point[2];
@@ -63,7 +62,7 @@ std::unique_ptr<BezierSurfaceMesh> BezierSurfaceC2::generateMesh() {
 
 BezierSurfaceC2::BezierSurfaceC2(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
-    uint32_t uCount, uint32_t vCount, bool cyllinder) {
+    uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierCurveC2_" + std::to_string(_id);
 
@@ -74,7 +73,8 @@ BezierSurfaceC2::BezierSurfaceC2(
   _points = points;
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
-  _cyllinder = cyllinder;
+  _connectionType = connectionType;
+  updateBezierSurface();
   update();
 }
 
@@ -177,5 +177,5 @@ void BezierSurfaceC2::updateAlgebraicSurfaceC0() {
   const auto &bezierPoints = getRowOrderedBezierPoints();
 
   _algebraSurfaceC0 = std::make_unique<algebra::BezierSurfaceC0>(
-      bezierPoints, _patches.colCount, _patches.rowCount, isCyllinder());
+      bezierPoints, _patches.colCount, _patches.rowCount, _connectionType);
 }

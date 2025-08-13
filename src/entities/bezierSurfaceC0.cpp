@@ -52,7 +52,7 @@ BezierSurfaceC0::createCyllinderPositions(const algebra::Vec3f &position,
 
 BezierSurfaceC0::BezierSurfaceC0(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
-    uint32_t uCount, uint32_t vCount, bool cyllinder) {
+    uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierSurfaceC0_" + std::to_string(_id);
 
@@ -61,11 +61,11 @@ BezierSurfaceC0::BezierSurfaceC0(
     subscribe(controlPoint);
   }
   _points = points;
-  if (cyllinder) {
+  if (connectionType == algebra::ConnectionType::Columns) {
     for (int i = 0; i < (3 * uCount + 1); ++i) {
       _points.push_back(_points[i]);
     }
-    isCyllinder() = cyllinder;
+    _connectionType = algebra::ConnectionType::Columns;
   }
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
@@ -90,5 +90,5 @@ void BezierSurfaceC0::updateAlgebraicSurfaceC0() {
     points[i] = p.get().getPosition();
   }
   _algebraSurfaceC0 = std::make_unique<algebra::BezierSurfaceC0>(
-      points, _patches.colCount, _patches.rowCount, isCyllinder());
+      points, _patches.colCount, _patches.rowCount, _connectionType);
 }
