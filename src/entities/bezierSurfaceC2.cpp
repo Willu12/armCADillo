@@ -160,18 +160,6 @@ std::array<std::array<algebra::Vec3f, 4>, 4> BezierSurfaceC2::processPatch(
 
 std::vector<algebra::Vec3f> BezierSurfaceC2::getRowOrderedBezierPoints() const {
   return _rowOrderBezierControlPoints;
-
-  const uint32_t colPatches = _patches.colCount;
-  const uint32_t rowPatches = _patches.rowCount;
-  std::vector<algebra::Vec3f> grid;
-
-  for (int r = 0; r < rowPatches + 3; ++r) {
-    for (int c = 0; c < colPatches + 3; ++c) {
-      auto globalIndex = c < 4 ? (c + 4 * r) : (3 + (c - 3) * 16 + 4 * r);
-      grid.push_back(_bezierControlPoints[globalIndex]);
-    }
-  }
-  return grid;
 }
 void BezierSurfaceC2::updateAlgebraicSurfaceC0() {
   const auto &bezierPoints = getRowOrderedBezierPoints();

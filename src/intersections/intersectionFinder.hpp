@@ -51,7 +51,7 @@ private:
   std::optional<IntersectionPoint>
   findCommonSurfacePoint(const algebra::Vec2f &start0,
                          const algebra::Vec2f &start1) const;
-  algebra::Vec2f findPointProjection(
+  std::optional<algebra::Vec2f> findPointProjection(
       std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
       algebra::Vec3f surfacePoint) const;
 

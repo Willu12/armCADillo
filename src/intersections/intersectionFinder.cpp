@@ -56,8 +56,11 @@ IntersectionFinder::findFirstPointStochastic() const {
     const auto point0Value = surface0_.lock()->value(point0);
 
     const auto point1 = findPointProjection(surface1_, point0Value);
+    if (!point1) {
+      continue;
+    }
 
-    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1)) {
+    if (auto intersectionPoint = findCommonSurfacePoint(point0, *point1)) {
       return intersectionPoint;
     }
   }
@@ -94,7 +97,10 @@ IntersectionFinder::findFirstPointWithGuidance() const {
     auto point1 = findPointProjection(
         surface1_,
         algebra::Distribution::randomPointInsideSphere(*guidancePoint_, 0.05f));
-    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1)) {
+    if (!point0 || !point1) {
+      continue;
+    }
+    if (auto intersectionPoint = findCommonSurfacePoint(*point0, *point1)) {
       return intersectionPoint;
     }
   }
@@ -103,16 +109,21 @@ IntersectionFinder::findFirstPointWithGuidance() const {
 
 std::optional<IntersectionPoint>
 IntersectionFinder::findFirstPointSameWithGuidance() const {
-  auto point0 = findPointProjection(surface0_, *guidancePoint_);
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_.lock()->bounds()[0][0],
                                              surface0_.lock()->bounds()[0][1]);
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
-    const auto point0Value = surface0_.lock()->value(point0);
+    auto point0 = findPointProjection(surface0_, *guidancePoint_);
+    if (!point0) {
+      continue;
+    }
+    const auto point0Value = surface0_.lock()->value(*point0);
     const auto point1 = findPointProjection(surface0_, point0Value);
-
-    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1)) {
+    if (!point1) {
+      continue;
+    }
+    if (auto intersectionPoint = findCommonSurfacePoint(*point0, *point1)) {
       return intersectionPoint;
     }
   }
@@ -195,15 +206,28 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
                            .point = (surface0Val + surface1Val) / 2.f};
 }
 
-algebra::Vec2f IntersectionFinder::findPointProjection(
+std::optional<algebra::Vec2f> IntersectionFinder::findPointProjection(
     std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
     algebra::Vec3f surfacePoint) const {
   auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
       surface, surfacePoint);
 
   algebra::GradientDescent<2> gradientDescent(std::move(function));
-
-  return *gradientDescent.calculate();
+  for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
+    surfacePoint =
+        algebra::Distribution::randomPointInsideSphere(surfacePoint, 0.2f);
+    auto result = *gradientDescent.calculate();
+    auto pos = surface.lock()->value(result);
+    std::println(
+        "found Point Projection [{},{},{}], from [{},{},{}], dist = {}",
+        surfacePoint[0], surfacePoint[1], surfacePoint[2], pos[0], pos[1],
+        pos[2], (surfacePoint - pos).length());
+    if ((surfacePoint - pos).length() > 0.5f) {
+      continue;
+    }
+    return result;
+  }
+  return std::nullopt;
 }
 
 algebra::Vec3f
