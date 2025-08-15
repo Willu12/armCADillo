@@ -19,7 +19,7 @@ public:
   }
 
 private:
-  static float constexpr kNumericalStepMin = 0.001f;
+  static float constexpr kNumericalStepMin = 0.0001f;
   static float constexpr kNumericalStepMax = 0.01f;
   static float constexpr kIntersectionStepMin = 0.001f;
   static float constexpr kIntersectionStepMax = 1.0f;

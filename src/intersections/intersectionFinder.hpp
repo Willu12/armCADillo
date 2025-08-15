@@ -37,7 +37,7 @@ private:
   static constexpr std::size_t kStochasticTries = 300;
   static constexpr std::size_t kMaxIntersectionCurvePoint = 2000;
 
-  IntersectionConfig config_;
+  mutable IntersectionConfig config_;
 
   std::optional<Intersection>
   findNextPoints(const IntersectionPoint &firstPoint, bool reversed) const;
@@ -54,6 +54,10 @@ private:
   std::optional<algebra::Vec2f> findPointProjection(
       std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
       algebra::Vec3f surfacePoint) const;
+
+  algebra::Vec2f findInitialGuessWithGuidance(
+      std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
+      const algebra::Vec3f &targetPoint, uint32_t gridResolution = 10) const;
 
   algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;
   std::optional<IntersectionPoint>

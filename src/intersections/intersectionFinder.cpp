@@ -88,18 +88,20 @@ IntersectionFinder::findFirstPointSameStochastic() const {
 std::optional<IntersectionPoint>
 IntersectionFinder::findFirstPointWithGuidance() const {
   for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
-    if (stochTry > 0 && stochTry % 100 == 0) {
+    if (stochTry > 0 && stochTry % 10 == 0) {
       std::println("stochastic try {}", stochTry);
+      config_.numericalStep_ *= 2.f;
     }
-    auto point0 = findPointProjection(
-        surface0_,
-        algebra::Distribution::randomPointInsideSphere(*guidancePoint_, 0.05f));
-    auto point1 = findPointProjection(
-        surface1_,
-        algebra::Distribution::randomPointInsideSphere(*guidancePoint_, 0.05f));
-    if (!point0 || !point1) {
+    auto point0 = findPointProjection(surface0_, *guidancePoint_);
+    if (!point0) {
       continue;
     }
+
+    auto point1 = findPointProjection(surface1_, *guidancePoint_);
+    if (!point1) {
+      continue;
+    }
+
     if (auto intersectionPoint = findCommonSurfacePoint(*point0, *point1)) {
       return intersectionPoint;
     }
@@ -152,7 +154,7 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
   auto surface0Val = surface0_.lock()->value(surface0Minimum);
   auto surface1Val = surface1_.lock()->value(surface1Minimum);
 
-  if ((surface0Val - surface1Val).length() > 10e-3) {
+  if ((surface0Val - surface1Val).length() > 0.1) {
     std::println("Failed to find max prec = {}\n",
                  (surface0Val - surface1Val).length());
     return std::nullopt;
@@ -209,22 +211,32 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
 std::optional<algebra::Vec2f> IntersectionFinder::findPointProjection(
     std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
     algebra::Vec3f surfacePoint) const {
-  auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
-      surface, surfacePoint);
 
-  algebra::GradientDescent<2> gradientDescent(std::move(function));
   for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
-    surfacePoint =
-        algebra::Distribution::randomPointInsideSphere(surfacePoint, 0.2f);
+
+    auto guess = findInitialGuessWithGuidance(
+        surface.lock(), surfacePoint,
+        algebra::Distribution::randomInt(200, 300));
+
+    auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
+        surface, surfacePoint);
+    algebra::GradientDescent<2> gradientDescent(std::move(function));
+    gradientDescent.setStartingPoint(guess);
     auto result = *gradientDescent.calculate();
     auto pos = surface.lock()->value(result);
-    std::println(
-        "found Point Projection [{},{},{}], from [{},{},{}], dist = {}",
-        surfacePoint[0], surfacePoint[1], surfacePoint[2], pos[0], pos[1],
-        pos[2], (surfacePoint - pos).length());
+
     if ((surfacePoint - pos).length() > 0.5f) {
+      std::println(
+          "found Point Projection [{},{},{}], from [{},{},{}], dist = {}",
+          pos[0], pos[1], pos[2], surfacePoint[0], surfacePoint[1],
+          surfacePoint[2], (surfacePoint - pos).length());
+      //    std::println("failed to find starting points dist == {}",
       continue;
     }
+    if (i > kMaxIntersectionCurvePoint / 10) {
+      gradientDescent.setLearningRate(gradientDescent.getLearningRate() * 2.f);
+    }
+    std::println("found starting point [{},{}]", result[0], result[1]);
     return result;
   }
   return std::nullopt;
@@ -387,4 +399,32 @@ bool IntersectionFinder::intersectionLooped(
           surf0Wrapped) &&
          ((firstPoint.surface1 - lastPoint.surface1).length() < dist &&
           surf1Wrapped);
+}
+
+algebra::Vec2f IntersectionFinder::findInitialGuessWithGuidance(
+    std::weak_ptr<algebra::IDifferentialParametricForm<2, 3>> surface,
+    const algebra::Vec3f &targetPoint, uint32_t gridResolution) const {
+  auto bounds = surface.lock()->bounds();
+  float minDistSq = std::numeric_limits<float>::max();
+  algebra::Vec2f bestUV;
+
+  for (int i = 0; i < gridResolution; ++i) {
+    for (int j = 0; j < gridResolution; ++j) {
+      float u = bounds[0][0] + (bounds[0][1] - bounds[0][0]) *
+                                   (static_cast<float>(i) /
+                                    static_cast<float>(gridResolution - 1));
+      float v = bounds[1][0] + (bounds[1][1] - bounds[1][0]) *
+                                   (static_cast<float>(j) /
+                                    static_cast<float>(gridResolution - 1));
+
+      auto p = surface.lock()->value({u, v});
+      float distSq = std::pow((p - targetPoint).length(), 2.f);
+
+      if (distSq < minDistSq) {
+        minDistSq = distSq;
+        bestUV = algebra::Vec2f(u, v);
+      }
+    }
+  }
+  return bestUV;
 }
