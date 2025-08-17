@@ -1,5 +1,6 @@
 #include "selectionController.hpp"
 #include "IEntity.hpp"
+#include "color.hpp"
 #include "imgui.h"
 #include "mouse.hpp"
 #include <algorithm>
@@ -42,6 +43,9 @@ void SelectionController::process(const Mouse &mouse) {
     } else {
       mouse._isSelectionBoxActive = true;
       if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+        for (const auto &selectedEntity : _selectedEntities) {
+          selectedEntity->setColor(Color::White());
+        }
         _selectedEntities.clear();
       }
     }
