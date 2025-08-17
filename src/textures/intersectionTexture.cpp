@@ -1,4 +1,5 @@
 #include "intersectionTexture.hpp"
+#include "color.hpp"
 #include <queue>
 
 std::pair<std::shared_ptr<IntersectionTexture>,
@@ -55,7 +56,7 @@ void IntersectionTexture::drawLine(
     int ix = std::clamp(x, 0, kWidth - 1);
     int iy = std::clamp(y, 0, kHeight - 1);
     int index = iy * kWidth + ix;
-    canvas_.fillAtIndex(index, {0, 255, 0, 255});
+    canvas_.fillAtIndex(index, Color::Green());
   };
 
   for (size_t i = 1; i < surfacePoints.size(); ++i) {
@@ -68,15 +69,17 @@ void IntersectionTexture::drawLine(
     int sy = y0 < y1 ? 1 : -1;
     int err = dx - dy;
 
-    if (std::max(dx, dy) > 100)
+    if (std::max(dx, dy) > 100) {
       continue;
+    }
 
     int x = x0;
     int y = y0;
     while (true) {
       drawPixel(x, y);
-      if (x == x1 && y == y1)
+      if (x == x1 && y == y1) {
         break;
+      }
 
       int e2 = 2 * err;
       if (e2 > -dy) {
@@ -93,7 +96,7 @@ void IntersectionTexture::drawLine(
 
 void IntersectionTexture::fillCanvas(
     const std::vector<algebra::Vec2f> &surfacePoints) {
-  canvas_.fillWithColor({0, 0, 0, 255});
+  canvas_.fillWithColor(Color::Black());
   drawLine(surfacePoints);
 }
 
@@ -104,7 +107,7 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
 
   auto isGreen = [&](uint32_t x, uint32_t y) {
     auto color = canvas_.colorAtIndex(y * kWidth + x);
-    return color == Color{0, 255, 0, 255};
+    return color == Color::Green();
   };
 
   std::queue<std::pair<uint32_t, uint32_t>> q;
@@ -118,10 +121,11 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
     auto [x, y] = q.front();
     q.pop();
 
-    if (transparent)
-      canvas_.fillAtIndex(y * kWidth + x, Color{0, 0, 0, 0});
-    else
-      canvas_.fillAtIndex(y * kWidth + x, Color{0, 0, 0, 255});
+    if (transparent) {
+      canvas_.fillAtIndex(y * kWidth + x, Color::Transparent());
+    } else {
+      canvas_.fillAtIndex(y * kWidth + x, Color::Black());
+    }
 
     for (int d = 0; d < 4; ++d) {
       int nx = x + dx[d];
@@ -142,8 +146,9 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
       }
 
       if (nx < 0 || nx >= static_cast<int>(kWidth) || ny < 0 ||
-          ny >= static_cast<int>(kHeight))
+          ny >= static_cast<int>(kHeight)) {
         continue;
+      }
 
       if (!visited[ny][nx] && !isGreen(nx, ny)) {
         visited[ny][nx] = true;

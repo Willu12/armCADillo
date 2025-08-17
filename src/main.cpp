@@ -15,30 +15,32 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-static void glfw_error_callback(int error, const char *description) {
-  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+namespace {
+void glfw_error_callback(int error, const char *description) {
+  std::println(stderr, "GLFW Error {}: {}", error, description);
 }
-static void scrollCallback(GLFWwindow * /*window*/, double /*xoffset*/,
-                           double yoffset) {
+void scrollCallback(GLFWwindow * /*window*/, double /*xoffset*/,
+                    double yoffset) {
   ImGuiIO &io = ImGui::GetIO();
   io.MouseWheel += static_cast<float>(yoffset); // Update ImGui's mouse wheel
 }
 
-static void setupViewPortAndClear(GLFWwindow *window,
-                                  const ImVec4 &clearColor) {
-  int display_w = 0;
-  int display_h = 0;
-  glfwGetFramebufferSize(window, &display_w, &display_h);
-  glViewport(0, 0, display_w, display_h);
+void setupViewPortAndClear(GLFWwindow *window, const ImVec4 &clearColor) {
+  int displayW = 0;
+  int displayH = 0;
+  glfwGetFramebufferSize(window, &displayW, &displayH);
+  glViewport(0, 0, displayW, displayH);
   glClearColor(clearColor.x * clearColor.w, clearColor.y * clearColor.w,
                clearColor.z * clearColor.w, clearColor.w);
   glClear(GL_COLOR_BUFFER_BIT);
 }
+} // namespace
 
 int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
-  if (!glfwInit())
+  if (!glfwInit()) {
     return 1;
+  }
 
   const char *glsl_version = "#version 430";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -46,8 +48,9 @@ int main(int, char **) {
 
   GLFWwindow *window =
       glfwCreateWindow(WIDTH, HEIGHT, "armCADillo", nullptr, nullptr);
-  if (window == nullptr)
+  if (window == nullptr) {
     return 1;
+  }
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1); // Enable vsync
 
@@ -78,7 +81,7 @@ int main(int, char **) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  ImVec4 clear_color = ImVec4(0.1, 0.1f, 0.1f, 1.00f);
+  ImVec4 clearColor = ImVec4(0.1, 0.1f, 0.1f, 1.00f);
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -94,17 +97,20 @@ int main(int, char **) {
     // Rendering
     ImGui::Render();
 
-    setupViewPortAndClear(window, clear_color);
+    setupViewPortAndClear(window, clearColor);
 
     scene->removeDeadEntities();
-    if (gui.stereographicVision())
+    if (gui.stereographicVision()) {
       sceneRenderer.stereoscopicRender(scene->getGroupedEntities());
-    else
+    } else {
       sceneRenderer.render(scene->getGroupedEntities());
+    }
 
-    sceneRenderer.renderSelectedPoints(gui.getSelectedPointsPointers());
-    if (gui.getCenterPoint())
+    sceneRenderer.renderSelectedPoints(
+        gui.getSelectedPointsPointers()); // NOT EFFICIENT
+    if (gui.getCenterPoint()) {
       sceneRenderer.renderCenterPoint(*gui.getCenterPoint().value());
+    }
 
     if (gui.getMouse().leftButtonDown() && !scene->getPickables().empty()) {
       sceneRenderer.renderPicking(scene->getPickables());

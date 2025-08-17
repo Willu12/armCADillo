@@ -16,17 +16,17 @@ public:
   }
 
   void fillAtIndex(std::size_t index, const Color &color) {
-    data_[4 * index] = color.Red;
-    data_[4 * index + 1] = color.Green;
-    data_[4 * index + 2] = color.Blue;
-    data_[4 * index + 3] = color.Alpha;
+    data_[4 * index] = color.r;
+    data_[4 * index + 1] = color.g;
+    data_[4 * index + 2] = color.b;
+    data_[4 * index + 3] = color.a;
   }
 
   Color colorAtIndex(std::size_t index) const {
-    return Color{.Red = data_[4 * index],
-                 .Green = data_[4 * index + 1],
-                 .Blue = data_[4 * index + 2],
-                 .Alpha = data_[4 * index + 3]};
+    return Color{.r = data_[4 * index],
+                 .g = data_[4 * index + 1],
+                 .b = data_[4 * index + 2],
+                 .a = data_[4 * index + 3]};
   }
   void flipY() {
     std::vector<uint8_t> new_data(data_.size());

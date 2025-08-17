@@ -3,21 +3,28 @@
 #include "vec.hpp"
 #include <cstdint>
 struct Color {
-  uint8_t Red;
-  uint8_t Green;
-  uint8_t Blue;
-  uint8_t Alpha;
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+  uint8_t a;
 
-  inline algebra::Vec4f convertToVector() {
+  algebra::Vec4f convertToVector() const {
     return algebra::Vec4f{
-        static_cast<float>(Red) / 255.f, static_cast<float>(Green) / 255.f,
-        static_cast<float>(Blue) / 255.f, static_cast<float>(Alpha) / 255.f};
+        static_cast<float>(r) / 255.f, static_cast<float>(g) / 255.f,
+        static_cast<float>(b) / 255.f, static_cast<float>(a) / 255.f};
   }
 
-  inline bool operator==(const Color &other) const {
-    return Red == other.Red && Green == other.Green && Blue == other.Blue &&
-           Alpha == other.Alpha;
+  bool operator==(const Color &other) const {
+    return r == other.r && g == other.g && b == other.b && a == other.a;
   }
 
-  inline bool operator!=(const Color &other) const { return !(*this == other); }
+  bool operator!=(const Color &other) const { return !(*this == other); }
+
+  static constexpr Color Red() { return Color(255, 0, 0, 255); }
+  static constexpr Color Blue() { return Color(0, 0, 255, 255); }
+  static constexpr Color Green() { return Color(0, 255, 0, 255); }
+  static constexpr Color Orange() { return Color(204, 85, 0, 255); }
+  static constexpr Color White() { return Color(255, 255, 255, 255); }
+  static constexpr Color Black() { return Color(0, 0, 0, 255); }
+  static constexpr Color Transparent() { return Color(0, 0, 0, 0); }
 };

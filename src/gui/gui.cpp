@@ -6,7 +6,6 @@
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
-#include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
 #include "cursorController.hpp"
@@ -20,7 +19,6 @@
 #include "jsonSerializer.hpp"
 #include "nfd.h"
 #include "pointEntity.hpp"
-#include "polyline.hpp"
 #include "scene.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
@@ -66,22 +64,24 @@ std::shared_ptr<Cursor> GUI::getCursor() {
 }
 
 std::optional<const IRenderable *> GUI::getCenterPoint() {
-  if (_selectedEntities.size() > 0)
+  if (_selectedEntities.size() > 0) {
     _centerPoint.display(getSelectedEntities());
+  }
 
-  if (_selectedEntities.size() < 2)
+  if (_selectedEntities.size() < 2) {
     return std::nullopt;
+  }
 
   return &_centerPoint.getPoint();
 }
 
 void GUI::displayGUI() {
-  ImGuiWindowFlags window_flags =
+  ImGuiWindowFlags windowFlags =
       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNavFocus;
   ImGui::SetNextWindowBgAlpha(0.9f);
   ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin("Settings", nullptr, window_flags)) {
+  if (ImGui::Begin("Settings", nullptr, windowFlags)) {
     showFPSCounter();
     renderModelSettings();
     renderModelControllSettings();
@@ -135,7 +135,7 @@ void GUI::initControllers() {
 }
 
 void GUI::renderModelControllSettings() {
-  const char *AxisOptions[] = {"X axis", "Y axis", "Z axis"};
+  const char *axisOptions[] = {"X axis", "Y axis", "Z axis"};
   const char *transformationCenterOptions[] = {"Center Point", "Cursor"};
 
   auto modelController = std::dynamic_pointer_cast<ModelController>(
@@ -143,8 +143,8 @@ void GUI::renderModelControllSettings() {
 
   if (modelController) {
     int selectedIndex = static_cast<int>(modelController->_transformationAxis);
-    if (ImGui::Combo("TransformationAxis", &selectedIndex, AxisOptions,
-                     IM_ARRAYSIZE(AxisOptions))) {
+    if (ImGui::Combo("TransformationAxis", &selectedIndex, axisOptions,
+                     IM_ARRAYSIZE(axisOptions))) {
       modelController->_transformationAxis = static_cast<Axis>(selectedIndex);
     }
 
@@ -160,7 +160,7 @@ void GUI::renderModelControllSettings() {
 
 void GUI::renderCursorControllerSettings() {
   auto cursor = getCursor();
-  auto &cursorPosition = cursor->getPosition();
+  const auto &cursorPosition = cursor->getPosition();
   float position[3] = {cursorPosition[0], cursorPosition[1], cursorPosition[2]};
   if (ImGui::InputFloat3("Cursor Position", position)) {
     cursor->updatePosition(position[0], position[1], position[2]);
@@ -168,8 +168,9 @@ void GUI::renderCursorControllerSettings() {
 }
 
 void GUI::renderCreateTorusUI() {
-  if (ImGui::Button("Add new torus"))
+  if (ImGui::Button("Add new torus")) {
     createEntity(EntityType::Torus);
+  }
 }
 
 void GUI::renderCreatePointUI() {
@@ -186,22 +187,26 @@ void GUI::renderCreatePointUI() {
 }
 
 void GUI::removeButtonUI() {
-  if (ImGui::Button("Remove Entity"))
+  if (ImGui::Button("Remove Entity")) {
     deleteSelectedEntities();
+  }
 }
 
 void GUI::createBezierCurveUI() {
-  if (ImGui::Button("Create Bezier Curve"))
+  if (ImGui::Button("Create Bezier Curve")) {
     createBezierCurve();
+  }
 }
 void GUI::createBSplineCurveUI() {
-  if (ImGui::Button("Create BSplineCurve"))
+  if (ImGui::Button("Create BSplineCurve")) {
     createBSplineCurve();
+  }
 }
 
 void GUI::createInterpolatingSplineCurveUI() {
-  if (ImGui::Button("Create Interpolating Spline Curve"))
+  if (ImGui::Button("Create Interpolating Spline Curve")) {
     createInterpolatingSplineCurve();
+  }
 }
 
 void GUI::createBezierSurfaceUI() {
@@ -209,8 +214,9 @@ void GUI::createBezierSurfaceUI() {
   if (ImGui::Button("Create Bezier Surface")) {
     openConfigWindow = true;
   }
-  if (!openConfigWindow)
+  if (!openConfigWindow) {
     return;
+  }
   static int c0 = 1;
   static int surfaceType = 0;
   static int uPatches = 2;
@@ -244,15 +250,17 @@ void GUI::createBezierSurfaceUI() {
 
   if (ImGui::Button("Create")) {
     if (surfaceType == 0) {
-      if (c0)
+      if (c0) {
         createBezierSurfaceC0Flat(uPatches, vPatches, x, y);
-      else
+      } else {
         createBezierSurfaceC2Flat(uPatches, vPatches, x, y);
+      }
     } else {
-      if (c0)
+      if (c0) {
         createBezierSurfaceC0Cylinder(uPatches, vPatches, x, y);
-      else
+      } else {
         createBezierSurfaceC2Cylinder(uPatches, vPatches, x, y);
+      }
     }
 
     openConfigWindow = false;
@@ -303,23 +311,27 @@ IEntity &GUI::createEntity(EntityType entityType) {
 }
 
 void GUI::renderModelSettings() {
-  if (_selectedEntities.size() != 1)
+  if (_selectedEntities.size() != 1) {
     return;
+  }
 
   clearVirtualPoints();
   auto selectedEntity = *_selectedEntities.begin();
-  if (selectedEntity->acceptVisitor(_guiSettingsVisitor))
+  if (selectedEntity->acceptVisitor(_guiSettingsVisitor)) {
     selectedEntity->updateMesh();
+  }
 }
 
 void GUI::displayEntitiesList() {
   auto entities = _scene->getEntites();
-  if (entities.empty())
+  if (entities.empty()) {
     return;
-  const float height = entities.size() > 4 ? 300.f : 25.f * entities.size();
+  }
+  const float height =
+      entities.size() > 4 ? 300.f : 25.f * static_cast<float>(entities.size());
   ImVec2 childSize(-1, height);
 
-  ImGui::BeginChild("EntitiesListChild", childSize, true,
+  ImGui::BeginChild("EntitiesListChild", childSize, static_cast<int>(true),
                     ImGuiWindowFlags_HorizontalScrollbar);
   for (int i = 0; i < entities.size(); ++i) {
 
@@ -331,10 +343,11 @@ void GUI::displayEntitiesList() {
     if (ImGui::Selectable(name.c_str(), isSelected,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected)
+        if (isSelected) {
           unselectEntity(i);
-        else
+        } else {
           selectEntity(i);
+        }
 
       } else {
         _selectedEntities.clear();
@@ -441,8 +454,9 @@ GUI::getSelectedBezierCurves() {
 
 void GUI::createBezierCurve() {
   auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2)
+  if (pointEntities.size() < 2) {
     return;
+  }
 
   std::shared_ptr<IEntity> bezierCurve =
       std::make_shared<BezierCurveC0>(pointEntities);
@@ -451,8 +465,9 @@ void GUI::createBezierCurve() {
 
 void GUI::createBSplineCurve() {
   auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2)
+  if (pointEntities.size() < 2) {
     return;
+  }
 
   std::shared_ptr<IEntity> bezierCurve =
       std::make_shared<BSplineCurve>(pointEntities);
@@ -461,8 +476,9 @@ void GUI::createBSplineCurve() {
 
 void GUI::createInterpolatingSplineCurve() {
   auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2)
+  if (pointEntities.size() < 2) {
     return;
+  }
   std::shared_ptr<IEntity> interpolatingSpline =
       std::make_shared<InterpolatingSplineC2>(pointEntities);
   _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
@@ -533,8 +549,9 @@ void GUI::createGregoryPatch() {
 
   auto gregorySurfaces =
       GregorySurface::createGregorySurfaces(selectedSurfaces);
-  for (const auto &gregorySurface : gregorySurfaces)
+  for (const auto &gregorySurface : gregorySurfaces) {
     _scene->addEntity(EntityType::GregorySurface, gregorySurface);
+  }
 }
 
 void GUI::processControllers() {
@@ -621,8 +638,9 @@ void GUI::stereoscopicSettings() {
 
 void GUI::contractSelectedEdge() {
   const auto &points = getSelectedPoints();
-  if (points.size() != 2)
+  if (points.size() != 2) {
     return;
+  }
   _selectedEntities = {_scene->contractEdge(points[0], points[1])};
 }
 
@@ -636,26 +654,31 @@ std::vector<std::reference_wrapper<BezierSurfaceC0>>
 GUI::getSelectedSurfacesC0() const {
   std::vector<std::reference_wrapper<BezierSurfaceC0>> surfaces;
 
-  for (const auto &entity : _selectedEntities)
-    if (auto surface = std::dynamic_pointer_cast<BezierSurfaceC0>(entity))
-      surfaces.push_back(*surface);
+  for (const auto &entity : _selectedEntities) {
+    if (auto surface = std::dynamic_pointer_cast<BezierSurfaceC0>(entity)) {
+      surfaces.emplace_back(*surface);
+    }
+  }
 
   return surfaces;
 }
 
 void GUI::createGregoryPatchUI() {
-  if (ImGui::Button("Create Gregory Patch"))
+  if (ImGui::Button("Create Gregory Patch")) {
     createGregoryPatch();
+  }
 }
 
 void GUI::findIntersectionUI() {
-  if (ImGui::Button("Find intersections"))
+  if (ImGui::Button("Find intersections")) {
     findIntersection(); //(getSelectedEntities(), *_scene);
+  }
 }
 void GUI::findIntersection() {
   auto entities = getSelectedEntities();
-  if (entities.size() == 0)
+  if (entities.size() == 0) {
     return;
+  }
 
   auto surf0 =
       std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
@@ -674,8 +697,9 @@ void GUI::findIntersection() {
   }
 
   auto intersection = _intersectionFinder.find(entities.size() == 1);
-  if (!intersection)
+  if (!intersection) {
     return;
+  }
 
   auto bounds1 = surf0->bounds();
   auto bounds2 = surf1->bounds();
