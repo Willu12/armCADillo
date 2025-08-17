@@ -1,6 +1,5 @@
 #pragma once
 
-#include "polyline.hpp"
 #include <cstdint>
 enum class EntityType : uint8_t {
   Point,

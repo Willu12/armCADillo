@@ -3,6 +3,7 @@
 #include "IEntity.hpp"
 #include "IGroupedEntity.hpp"
 #include "ISubscriber.hpp"
+#include "mesh.hpp"
 #include "vec.hpp"
 #include <functional>
 

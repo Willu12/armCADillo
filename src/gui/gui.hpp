@@ -124,6 +124,7 @@ private:
   void stereoscopicSettings();
   void displayEntitiesList();
   void deleteSelectedEntities();
+  void clearSelectedEntities();
   void selectEntity(int entityIndex);
   void unselectEntity(int entityIndex);
   void contractSelectedEdge();

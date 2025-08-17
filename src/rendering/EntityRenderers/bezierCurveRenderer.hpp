@@ -15,7 +15,7 @@ public:
       : _camera(camera), _window(window),
         _shader("../resources/shaders/vertexBezier.vs",
                 "../resources/shaders/geometryBezier.gs",
-                "../resources/shaders/fragmentShader.hlsl") {}
+                "../resources/shaders/colorFragmentShader.hlsl") {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
     if (entities.empty()) {
@@ -33,6 +33,8 @@ public:
     for (const auto &entity : entities) {
       auto &bezier = dynamic_cast<BezierCurve &>(*entity);
       _shader.setInt("renderPolyLine", static_cast<int>(bezier.showPolyLine()));
+      _shader.setVec4f("Color", entity->getColor().toVector());
+
       const auto &mesh = entity->getMesh();
       glLineWidth(2.0f);
       glBindVertexArray(mesh.getVAO());

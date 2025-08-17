@@ -18,13 +18,15 @@ public:
                                      "gregoryTesselationEval.glsl",
                             ._type = GL_TESS_EVALUATION_SHADER},
 
-                 ShaderPath{._path = "../resources/shaders/fragmentShader.hlsl",
+                 ShaderPath{._path =
+                                "../resources/shaders/colorFragmentShader.hlsl",
                             ._type = GL_FRAGMENT_SHADER}}),
         _tangentVectorRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
@@ -36,12 +38,14 @@ public:
 
       glLineWidth(2.0f);
       glPointSize(10.0f);
+      _shader.setVec4f("Color", entity->getColor().toVector());
 
       for (const auto &[i, mesh] :
            gregorySurface.getMeshes() | std::views::enumerate) {
 
         _shader.setUInt("u_subdivisions", meshDensities[i].s);
         _shader.setUInt("v_subdivisions", meshDensities[i].t);
+
         glPatchParameteri(GL_PATCH_VERTICES, 20);
         glBindVertexArray(mesh->getVAO());
         _shader.setUInt("direction", 0);

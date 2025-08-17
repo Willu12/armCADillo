@@ -22,6 +22,7 @@ public:
     for (auto &entity : entities) {
       const auto &mesh = entity->getMesh();
       auto &torus = dynamic_cast<TorusEntity &>(*entity);
+      _shader.setVec4f("color", entity->getColor().toVector());
 
       if (torus.isTrimmed()) {
         _shader.setInt("trim", 1);

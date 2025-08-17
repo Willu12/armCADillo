@@ -35,6 +35,7 @@ public:
 
     for (const auto &entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
+      _shader.setVec4f("color", entity->getColor().toVector());
 
       _shader.setUInt("u_patches", bezierSurface.getPatches().rowCount);
       _shader.setUInt("v_patches", bezierSurface.getPatches().colCount);

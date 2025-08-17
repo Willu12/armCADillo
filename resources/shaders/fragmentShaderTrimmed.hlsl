@@ -1,7 +1,7 @@
 #version 430
 
 layout(binding = 0) uniform sampler2D trimmer;
-// uniform vec3 color;
+uniform vec4 color;
 uniform int trim;
 in vec2 trim_coord;
 
@@ -14,6 +14,6 @@ void main() {
   if (trim == 1 && texSample.a < 0.5) {
     discard;
   } else {
-    frag_color = vec4(1.0, 1.f, 1.f, 1.f);
+    frag_color = color;
   }
 }

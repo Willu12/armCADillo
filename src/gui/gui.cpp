@@ -8,6 +8,7 @@
 #include "bezierCurveC0.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
+#include "color.hpp"
 #include "cursorController.hpp"
 #include "entitiesTypes.hpp"
 #include "gregorySurface.hpp"
@@ -350,7 +351,7 @@ void GUI::displayEntitiesList() {
         }
 
       } else {
-        _selectedEntities.clear();
+        clearSelectedEntities();
         selectEntity(i);
       }
     }
@@ -360,6 +361,13 @@ void GUI::displayEntitiesList() {
 
 void GUI::deleteSelectedEntities() {
   _scene->removeEntities(_selectedEntities);
+  clearSelectedEntities();
+}
+
+void GUI::clearSelectedEntities() {
+  for (const auto &selectedEntity : _selectedEntities) {
+    selectedEntity->setColor(Color::White());
+  }
   _selectedEntities.clear();
 }
 
@@ -391,9 +399,11 @@ std::shared_ptr<SelectionController> GUI::getSelectionController() {
 void GUI::selectEntity(int entityIndex) {
   auto entities = _scene->getEntites();
   _selectedEntities.push_back(entities[entityIndex]);
+  _selectedEntities.back()->setColor(Color::Orange());
 }
 
 void GUI::unselectEntity(int entityIndex) {
+  getEntities()[entityIndex]->setColor(Color::White());
   _selectedEntities.erase(
       std::ranges::remove(_selectedEntities, getEntities()[entityIndex])
           .begin(),

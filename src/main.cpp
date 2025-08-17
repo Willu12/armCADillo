@@ -94,6 +94,7 @@ int main(int, char **) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     gui.displayGUI();
+
     // Rendering
     ImGui::Render();
 

@@ -41,8 +41,9 @@ void SelectionController::process(const Mouse &mouse) {
       }
     } else {
       mouse._isSelectionBoxActive = true;
-      if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+      if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
         _selectedEntities.clear();
+      }
     }
 
   }

@@ -1,7 +1,6 @@
 #pragma once
 #include "IRenderable.hpp"
 #include "IVisitor.hpp"
-#include "color.hpp"
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
@@ -69,14 +68,12 @@ public:
     _scale = _scale * scaleFactor;
     _position = translatedPosition + centerPoint;
   }
-
   const uint32_t &getId() const { return _id; }
   uint32_t &getId() { return _id; }
 
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;
-  Color _color = Color::White();
   algebra::Vec3f _scale = algebra::Vec3f(1.f, 1.f, 1.f);
   std::string _name;
   uint32_t _id;
