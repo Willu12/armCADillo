@@ -5,7 +5,6 @@
 
 class PickingTexture {
 public:
-  //  PickingTexture() {}
   ~PickingTexture() {
     if (_fbo != 0) {
       glDeleteFramebuffers(1, &_fbo);
@@ -42,8 +41,9 @@ public:
                  windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
       throw std::runtime_error("Frame Buffer error, status " + status + '\n');
+    }
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

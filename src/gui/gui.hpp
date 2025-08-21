@@ -60,6 +60,7 @@ public:
   void clearVirtualPoints();
   bool &stereographicVision() { return _stereographicVision; }
   Scene &getScene() { return *_scene; }
+  friend class GuiVisitor;
 
 private:
   GLFWwindow *_window;
@@ -126,6 +127,7 @@ private:
   void deleteSelectedEntities();
   void clearSelectedEntities();
   void selectEntity(int entityIndex);
+  void selectEntity(const IEntity &entity);
   void unselectEntity(int entityIndex);
   void contractSelectedEdge();
 

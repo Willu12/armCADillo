@@ -27,8 +27,9 @@ public:
 
   void process(const Mouse & /*mouse*/) override {
     ImVec2 currentMousePosition = ImGui::GetMousePos();
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
       translate(currentMousePosition.x, currentMousePosition.y);
+    }
   }
 
   std::shared_ptr<Cursor> getCursor() { return _cursor; }

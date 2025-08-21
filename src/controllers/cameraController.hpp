@@ -16,8 +16,9 @@ public:
 
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
-    if (scroll == 0.0f)
+    if (scroll == 0.0f) {
       return false;
+    }
     _camera->changeZoom(-scroll * kZoomSpeed);
     return true;
   }
@@ -37,10 +38,11 @@ public:
   void process(const Mouse &mouse) override {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
       const auto &delta = mouse.getPositionDelta();
-      if (ImGui::GetIO().KeyShift)
+      if (ImGui::GetIO().KeyShift) {
         translate(delta[0], delta[1]);
-      else
+      } else {
         rotate(delta[0], delta[1]);
+      }
     }
   }
 

@@ -88,9 +88,14 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
   change |= ImGui::SliderInt("Vertical Density",
                              &bezierSurface.getMeshDensity().t, 3, 64);
   ImGui::Checkbox("Show Polygonal Line", &bezierSurface.wireframe());
-  if (bezierSurface.hasIntersectionTexture())
+  if (bezierSurface.hasIntersectionTexture()) {
     ImGui::Checkbox("Trim", &bezierSurface.isTrimmed());
-
+  }
+  if (ImGui::Button("Select Elements points")) {
+    for (const auto &point : bezierSurface.getPoints()) {
+      _gui.selectEntity(point);
+    }
+  }
   return change;
 }
 
@@ -186,7 +191,7 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
          intersectionCurve.getPolyline().getSparsePoints(0.5f)) {
       auto point = std::make_shared<PointEntity>(p);
       scene.addEntity(EntityType::Point, point);
-      points.push_back(*point);
+      points.emplace_back(*point);
     }
     if (intersectionCurve.isLooped() &&
         points.front().get().getId() != points.back().get().getId()) {

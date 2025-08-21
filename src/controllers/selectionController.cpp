@@ -11,19 +11,22 @@ std::optional<std::shared_ptr<IEntity>>
 SelectionController::getEntity(float x, float y) {
   PickingTexture::PixelInfo pixel =
       _pickingTexture.ReadPixel(x, GLFWHelper::getHeight(_window) - y - 1);
-  if (pixel.ObjectId == 0)
+  if (pixel.ObjectId == 0) {
     return std::nullopt;
+  }
   auto clickedObjectId = pixel.ObjectId - 1;
 
   auto sceneEntities = _scene->getPoints();
-  if (clickedObjectId > sceneEntities.size())
+  if (clickedObjectId > sceneEntities.size()) {
     return std::nullopt;
+  }
   return sceneEntities[clickedObjectId];
 }
 
 void SelectionController::process(const Mouse &mouse) {
-  if (ImGui::IsAnyItemActive())
+  if (ImGui::IsAnyItemActive()) {
     return; // This maybe unnecessary
+  }
 
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
     //   if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
@@ -35,10 +38,11 @@ void SelectionController::process(const Mouse &mouse) {
       mouse._isSelectionBoxActive = false;
       const auto iter = std::ranges::find(_selectedEntities, *entity);
       if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-        if (iter == _selectedEntities.end())
+        if (iter == _selectedEntities.end()) {
           _selectedEntities.emplace_back(*entity);
-        else
+        } else {
           _selectedEntities.erase(iter);
+        }
       }
     } else {
       mouse._isSelectionBoxActive = true;
@@ -58,13 +62,15 @@ void SelectionController::process(const Mouse &mouse) {
     const auto &entities =
         getEntities(mouse.getLastClickedPosition(), mouse.getCurrentPosition());
     if (!ImGui::GetIO().KeyCtrl) {
-      if (_selectedEntities.empty())
+      if (_selectedEntities.empty()) {
         _selectedEntities = entities;
+      }
     } else {
       for (const auto &entity : entities) {
         if (std::ranges::find(_selectedEntities, entity) ==
-            _selectedEntities.end())
+            _selectedEntities.end()) {
           _selectedEntities.emplace_back(entity);
+        }
       }
     }
   }
@@ -87,8 +93,9 @@ SelectionController::getEntities(const algebra::Vec2f &startPos,
       y += dy;
       if (auto entity = getEntity(x, y)) {
         if (std::ranges::find(selectedEntities, *entity) !=
-            selectedEntities.end())
+            selectedEntities.end()) {
           continue;
+        }
 
         selectedEntities.push_back(*entity);
       }

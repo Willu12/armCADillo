@@ -7,7 +7,7 @@
 
 class PickingRenderer {
 public:
-  PickingRenderer(PickingTexture &pickingTexture)
+  explicit PickingRenderer(PickingTexture &pickingTexture)
       : _pickingTexture(pickingTexture),
         _shader("../resources/shaders/vertexPickingShader.hlsl",
                 "../resources/shaders/pickingShader.frag") {}
@@ -15,8 +15,9 @@ public:
   void render(const std::vector<std::shared_ptr<IEntity>> &entities,
               const Camera &camera) {
 
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
     _pickingTexture.enableWriting();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -46,7 +47,7 @@ private:
       const std::vector<std::shared_ptr<IEntity>> &entities) {
     struct InstanceData {
       algebra::Mat4f modelMatrix;
-      uint32_t objectIndex;
+      uint32_t objectIndex{};
     };
 
     std::vector<InstanceData> instanceData;
@@ -57,7 +58,7 @@ private:
       instanceData.push_back(data);
     }
 
-    GLuint instanceBuffer;
+    GLuint instanceBuffer = 0;
     glGenBuffers(1, &instanceBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
     glBufferData(GL_ARRAY_BUFFER, instanceData.size() * sizeof(InstanceData),

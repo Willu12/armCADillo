@@ -30,11 +30,11 @@ public:
 
   void process(const Mouse &mouse) override {
     if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-      if (ImGui::GetIO().KeyShift)
+      if (ImGui::GetIO().KeyShift) {
         rotateAroundCenterPoint(mouse.getPositionDelta()[1]);
-      else if (ImGui::GetIO().KeyAlt)
+      } else if (ImGui::GetIO().KeyAlt) {
         scaleAroundCenterPoint(mouse.getPositionDelta()[1]);
-      else {
+      } else {
         ImVec2 currentMousePosition = ImGui::GetMousePos();
         translate(currentMousePosition.x, currentMousePosition.y);
       }

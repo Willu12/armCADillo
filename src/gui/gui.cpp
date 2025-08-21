@@ -397,9 +397,18 @@ std::shared_ptr<SelectionController> GUI::getSelectionController() {
 }
 
 void GUI::selectEntity(int entityIndex) {
-  auto entities = _scene->getEntites();
+  const auto &entities = _scene->getEntites();
   _selectedEntities.push_back(entities[entityIndex]);
   _selectedEntities.back()->setColor(Color::Orange());
+}
+
+void GUI::selectEntity(const IEntity &entity) {
+  const auto &entities = _scene->getEntites();
+
+  auto it = std::ranges::find_if(entities, [&entity](const auto &e) {
+    return e->getId() == entity.getId();
+  });
+  selectEntity(static_cast<int>(it - entities.begin()));
 }
 
 void GUI::unselectEntity(int entityIndex) {
