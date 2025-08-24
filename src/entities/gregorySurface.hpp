@@ -36,9 +36,10 @@ public:
     return visitor.visitGregorySurface(*this);
   };
   bool &showTangentVectors() { return _showTangentVectors; }
+
+  void markToUpdate() override { _dirty = true; }
+
   void update() override {
-    if (isDead())
-      return;
     createGregoryPatches();
     updateMesh();
   }
@@ -46,7 +47,7 @@ public:
     _dead = true;
   }
 
-  bool isDead() { return _dead; }
+  bool isDead() const { return _dead; }
 
 private:
   std::array<GregoryQuad, 3> _gregoryPatches;

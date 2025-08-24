@@ -21,13 +21,15 @@ public:
     return _points;
   }
   void updateMesh() override { _mesh = generateMesh(); };
+  void markToUpdate() override { _dirty = true; }
   void update() override { updateMesh(); }
   void onSubscribableDestroyed(ISubscribable &publisher) override {
 
     const auto *point = dynamic_cast<PointEntity *>(&publisher);
-    if (!point)
+    if (!point) {
       throw std::runtime_error("Unexpected publisher type: " +
                                std::string(typeid(publisher).name()));
+    }
 
     auto it = std::ranges::find_if(_points, [&point](const auto &p) {
       return p.get().getId() == point->getId();

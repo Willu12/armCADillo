@@ -71,11 +71,14 @@ public:
   }
   const uint32_t &getId() const { return _id; }
   uint32_t &getId() { return _id; }
+  const bool &dirty() const { return _dirty; }
+  bool &dirty() { return _dirty; }
 
 protected:
   algebra::Vec3f _position;
   algebra::Quaternion<float> _rotation;
   algebra::Vec3f _scale = algebra::Vec3f(1.f, 1.f, 1.f);
   std::string _name;
+  bool _dirty = false;
   uint32_t _id;
 };

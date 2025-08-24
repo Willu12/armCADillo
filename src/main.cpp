@@ -100,7 +100,8 @@ int main(int, char **) {
 
     setupViewPortAndClear(window, clearColor);
 
-    scene->removeDeadEntities();
+    scene->processFrame();
+
     if (gui.stereographicVision()) {
       sceneRenderer.stereoscopicRender(scene->getGroupedEntities());
     } else {

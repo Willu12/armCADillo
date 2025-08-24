@@ -13,8 +13,9 @@ public:
   }
 
   virtual void notifySubscribers() {
-    for (auto &subscriber : _subscribers)
-      subscriber.get().update();
+    for (auto &subscriber : _subscribers) {
+      subscriber.get().markToUpdate();
+    }
   }
 
   void removeSubscriber(ISubscriber &subscriber) const {

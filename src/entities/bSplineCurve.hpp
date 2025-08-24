@@ -53,19 +53,22 @@ public:
           return bezierPoint.get() == &point;
         });
 
-    if (it == _bezierPoints.end())
+    if (it == _bezierPoints.end()) {
       return;
+    }
 
     size_t index = std::distance(_bezierPoints.begin(), it);
-    if (_bezierPoints.size() < 4 || _points.size() < 4)
+    if (_bezierPoints.size() < 4 || _points.size() < 4) {
       return;
+    }
 
     algebra::Vec3f delta = _bezierPoints[index]->getPosition() - pos;
 
     int segment = std::max<int>(static_cast<int>(index) - 1, 0) / 3;
 
-    if (segment + 3 >= _points.size())
+    if (segment + 3 >= _points.size()) {
       return;
+    }
 
     auto &D0 = _points[segment].get();
     auto &D1 = _points[segment + 1].get();
@@ -97,12 +100,14 @@ private:
   bool _showBezierPoints = false;
 
   void recalculateBezierPoints() {
-    if (_points.size() < 4)
+    if (_points.size() < 4) {
       return;
+    }
 
-    const long currentBezierCount = 3 * _points.size() - 8;
+    const auto currentBezierCount = 3 * _points.size() - 8;
     const auto bezierRemoveCount = _bezierPoints.size() - currentBezierCount;
-    _bezierPoints.erase(_bezierPoints.end() - bezierRemoveCount,
+    _bezierPoints.erase(_bezierPoints.end() -
+                            static_cast<int64_t>(bezierRemoveCount),
                         _bezierPoints.end());
 
     algebra::Vec3f g = _points[0].get().getPosition() * (1.f / 3.f) +
@@ -160,8 +165,9 @@ private:
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> bezierPositions;
     bezierPositions.reserve(_bezierPoints.size());
-    for (const auto &p : _bezierPoints)
+    for (const auto &p : _bezierPoints) {
       bezierPositions.emplace_back(p->getPosition());
+    }
 
     return BezierMesh::create(bezierPositions);
   }

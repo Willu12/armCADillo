@@ -1,6 +1,7 @@
 #include "scene.hpp"
 #include "IEntity.hpp"
 #include "IGroupedEntity.hpp"
+#include "ISubscriber.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierSurface.hpp"
 #include "entitiesTypes.hpp"
@@ -188,4 +189,21 @@ void Scene::removeDeadEntities() {
   enqueueDeadGregoryPatches();
   removeEntities(_deadEntities);
   _deadEntities.clear();
+}
+
+void Scene::updateDirtyEntities() {
+  for (const auto &entityTypeVectorPair : _entities) {
+    for (const auto &entity : entityTypeVectorPair.second) {
+      if (entity->dirty()) {
+        if (auto subscriber = std::dynamic_pointer_cast<ISubscriber>(entity)) {
+          subscriber->update();
+        }
+      }
+    }
+  }
+}
+
+void Scene::processFrame() {
+  removeDeadEntities();
+  updateDirtyEntities();
 }

@@ -23,8 +23,8 @@ public:
   std::vector<std::shared_ptr<IEntity>> getPickables() const;
   std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
   std::vector<std::shared_ptr<IEntity>> getPoints() const;
-  void removeDeadEntities();
 
+  void processFrame();
   friend class GUI;
 
 private:
@@ -43,4 +43,6 @@ private:
                                         const PointEntity &p2);
 
   void rebindReferences(const PointEntity &oldPoint, PointEntity &newPoint);
+  void removeDeadEntities();
+  void updateDirtyEntities();
 };

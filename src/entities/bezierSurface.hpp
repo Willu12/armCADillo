@@ -51,6 +51,8 @@ public:
     return visitor.visitBezierSurface(*this);
   };
 
+  void markToUpdate() override { _dirty = true; }
+
   void update() override {
     _polyMesh = createPolyMesh();
     updateAlgebraicSurfaceC0();
