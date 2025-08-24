@@ -24,8 +24,9 @@ public:
   }
   bool acceptVisitor(IVisitor &visitor) override {
     bool changed = visitor.visitPoint(*this);
-    if (changed)
+    if (changed) {
       notifySubscribers();
+    }
     return changed;
   }
 
@@ -36,6 +37,18 @@ public:
 
   void setPositionWithoutNotify(const algebra::Vec3f &position) {
     IEntity::updatePosition(position);
+  }
+
+  void rotateAroundPoint(const algebra::Quaternion<float> &rotation,
+                         const algebra::Vec3f &point) override {
+    notifySubscribers();
+    IEntity::rotateAroundPoint(rotation, point);
+  }
+
+  void scaleAroundPoint(float scaleFactor,
+                        const algebra::Vec3f &centerPoint) override {
+    notifySubscribers();
+    IEntity::scaleAroundPoint(scaleFactor, centerPoint);
   }
 
   // algebra::Vec3f &getPosition() override {

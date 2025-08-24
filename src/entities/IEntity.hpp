@@ -54,14 +54,15 @@ public:
     return translationMatrix * rotationMatrix * scaleMatrix;
   }
 
-  void rotateAroundPoint(const algebra::Quaternion<float> &rotation,
-                         const algebra::Vec3f &point) {
+  virtual void rotateAroundPoint(const algebra::Quaternion<float> &rotation,
+                                 const algebra::Vec3f &point) {
     auto rotatedAtOrigin = rotation * (_position - point);
     _position = rotatedAtOrigin.toVector() + point;
     _rotation = rotation * _rotation;
   }
 
-  void scaleAroundPoint(float scaleFactor, const algebra::Vec3f &centerPoint) {
+  virtual void scaleAroundPoint(float scaleFactor,
+                                const algebra::Vec3f &centerPoint) {
     auto translatedPosition = _position - centerPoint;
     translatedPosition = translatedPosition * scaleFactor;
 
