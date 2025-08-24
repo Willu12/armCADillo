@@ -72,7 +72,7 @@ BezierSurfaceC2::BezierSurfaceC2(
   }
   _points = points;
   _polyMesh = createPolyMesh();
-  _patches = {.colCount = uCount, .rowCount = vCount};
+  _patches = {.colCount = vCount, .rowCount = uCount};
   _connectionType = connectionType;
   updateBezierSurface();
   update();
