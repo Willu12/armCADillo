@@ -32,7 +32,9 @@ void SelectionController::process(const Mouse &mouse) {
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
     //   if (!ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
     // _selectedEntities.clear();
-
+    if (ImGui::IsKeyDown(ImGuiKey_C)) {
+      return;
+    }
     // check if something was clicked;
     const auto &currentMousePos = ImGui::GetMousePos();
     if (auto entity = getEntity(currentMousePos[0], currentMousePos[1])) {

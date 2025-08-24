@@ -88,18 +88,21 @@ public:
   }
 
   void rotateHorizontal(float angle) {
-    if (std::abs(_position._phi + angle) < std::numbers::pi_v<float> / 2.f)
+    if (std::abs(_position._phi + angle) < std::numbers::pi_v<float> / 2.f) {
       _position._phi += angle;
+    }
   }
 
   void rotateVertical(float angle) {
-    if (std::abs(_position._theta + angle) < std::numbers::pi_v<float> / 2.f)
+    if (std::abs(_position._theta + angle) < std::numbers::pi_v<float> / 2.f) {
       _position._theta += angle;
+    }
   }
 
   void changeZoom(float zoom) {
-    if (_position._r + zoom < 45.f && _position._r + zoom > 0.1f)
+    if (_position._r + zoom < 45.f && _position._r + zoom > 0.1f) {
       _position._r += zoom;
+    }
   }
 
   void updateTarget(float xShift, float yShift) {
@@ -122,7 +125,7 @@ public:
 private:
   GLFWwindow *_window;
   algebra::SphericalPosition<float> _position =
-      algebra::SphericalPosition((algebra::Vec3f(0.0f, 0.1f, -1.f)));
+      algebra::SphericalPosition(algebra::Vec3f(0.0f, 0.1f, -1.f));
 
   std::unique_ptr<algebra::Mat4f> _projectionMatrix;
   algebra::Vec3f _target = algebra::Vec3f(0.f, 0.0f, 0.0f);
