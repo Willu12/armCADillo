@@ -406,7 +406,7 @@ void GUI::selectEntity(const IEntity &entity) {
   const auto &entities = _scene->getEntites();
 
   auto it = std::ranges::find_if(entities, [&entity](const auto &e) {
-    return e->getId() == entity.getId();
+    return e->getId() == entity.getId() && e->getName() == entity.getName();
   });
   selectEntity(static_cast<int>(it - entities.begin()));
 }
