@@ -5,6 +5,7 @@
 #include "mouse.hpp"
 #include <algorithm>
 #include <print>
+#include <unordered_set>
 #include <vector>
 
 std::optional<std::shared_ptr<IEntity>>
@@ -59,8 +60,8 @@ void SelectionController::process(const Mouse &mouse) {
   else if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
            mouse._isSelectionBoxActive) {
     mouse._isSelectionBoxActive = false;
-    const auto &entities =
-        getEntities(mouse.getLastClickedPosition(), mouse.getCurrentPosition());
+    const auto &entities = getEntities(mouse.getLastClickedPosition(),
+                                       mouse.getCurrentPosition(), 4);
     if (!ImGui::GetIO().KeyCtrl) {
       if (_selectedEntities.empty()) {
         _selectedEntities = entities;
@@ -78,28 +79,41 @@ void SelectionController::process(const Mouse &mouse) {
 
 std::vector<std::shared_ptr<IEntity>>
 SelectionController::getEntities(const algebra::Vec2f &startPos,
-                                 const algebra::Vec2f &endPos) {
-  const size_t stepCount = 30;
-  const float dx = (endPos[0] - startPos[0]) / stepCount;
-  const float dy = (endPos[1] - startPos[1]) / stepCount;
-
+                                 const algebra::Vec2f &endPos,
+                                 int stride /* = 1 */) {
   std::vector<std::shared_ptr<IEntity>> selectedEntities;
-  float x = startPos[0];
-  for (int stepX = 0; stepX < stepCount; ++stepX) {
-    float y = startPos[1];
-    x += dx;
 
-    for (int stepY = 0; stepY < stepCount; ++stepY) {
-      y += dy;
-      if (auto entity = getEntity(x, y)) {
-        if (std::ranges::find(selectedEntities, *entity) !=
-            selectedEntities.end()) {
-          continue;
-        }
+  int minX =
+      std::min(static_cast<int>(startPos[0]), static_cast<int>(endPos[0]));
+  int maxX =
+      std::max(static_cast<int>(startPos[0]), static_cast<int>(endPos[0]));
+  int minY =
+      std::min(static_cast<int>(startPos[1]), static_cast<int>(endPos[1]));
+  int maxY =
+      std::max(static_cast<int>(startPos[1]), static_cast<int>(endPos[1]));
 
-        selectedEntities.push_back(*entity);
+  auto sceneEntities = _scene->getPoints();
+  std::unordered_set<int> uniqueIds;
+
+  for (int y = minY; y <= maxY; y += stride) {
+    for (int x = minX; x <= maxX; x += stride) {
+      auto pixel =
+          _pickingTexture.ReadPixel(x, GLFWHelper::getHeight(_window) - y - 1);
+
+      if (pixel.ObjectId == 0) {
+        continue;
+      }
+
+      int objId = static_cast<int>(pixel.ObjectId) - 1;
+      if (objId < 0 || objId >= static_cast<int>(sceneEntities.size())) {
+        continue;
+      }
+
+      if (uniqueIds.insert(objId).second) {
+        selectedEntities.push_back(sceneEntities[objId]);
       }
     }
   }
+
   return selectedEntities;
 }

@@ -39,5 +39,6 @@ private:
 
   std::optional<std::shared_ptr<IEntity>> getEntity(float x, float y);
   std::vector<std::shared_ptr<IEntity>>
-  getEntities(const algebra::Vec2f &startPos, const algebra::Vec2f &endPos);
+  getEntities(const algebra::Vec2f &startPos, const algebra::Vec2f &endPos,
+              int stride = 1);
 };
