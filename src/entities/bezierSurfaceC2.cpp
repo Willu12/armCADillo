@@ -65,7 +65,6 @@ BezierSurfaceC2::BezierSurfaceC2(
     uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierSurfaceC2_" + std::to_string(_id);
-  //_points = points;
 
   if (connectionType == algebra::ConnectionType::Columns) {
     const uint32_t uPoints = 3 + uCount;

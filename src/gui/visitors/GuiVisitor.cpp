@@ -23,8 +23,9 @@
 #include <unordered_set>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
-  if (torus.hasIntersectionTexture())
+  if (torus.hasIntersectionTexture()) {
     ImGui::Checkbox("Trim", &torus.isTrimmed());
+  }
   return torus.renderSettings(_gui);
 }
 bool GuiVisitor::visitPoint(PointEntity &point) {
@@ -154,17 +155,20 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
     ImVec2 imageSize(300, 300);
     ImVec2 imagePos = ImGui::GetCursorScreenPos();
 
-    ImGui::Image((ImTextureID)(intptr_t)texture1.getTextureId(), imageSize);
+    ImGui::Image(static_cast<ImTextureID>(
+                     static_cast<intptr_t>(texture1.getTextureId())),
+                 imageSize);
 
     if (ImGui::IsItemHovered()) {
       ImVec2 mousePos = ImGui::GetMousePos();
       ImVec2 localPos =
           ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
-      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         texture1.floodFill(localPos.x, localPos.y, true);
-      else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+      } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
         texture1.floodFill(localPos.x, localPos.y, false);
+      }
     }
 
     ImGui::End();
@@ -175,17 +179,20 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
 
     ImVec2 imageSize(300, 300);
     ImVec2 imagePos = ImGui::GetCursorScreenPos();
-    ImGui::Image((ImTextureID)(intptr_t)texture2.getTextureId(), imageSize);
+    ImGui::Image(static_cast<ImTextureID>(
+                     static_cast<intptr_t>(texture2.getTextureId())),
+                 imageSize);
 
     if (ImGui::IsItemHovered()) {
       ImVec2 mousePos = ImGui::GetMousePos();
       ImVec2 localPos =
           ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
 
-      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         texture2.floodFill(localPos.x, localPos.y, true);
-      else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+      } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
         texture2.floodFill(localPos.x, localPos.y, false);
+      }
     }
 
     ImGui::End();
@@ -256,10 +263,11 @@ void GuiVisitor::renderPointList(
                 .c_str(),
             isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected)
+        if (isSelected) {
           unselectEntity(entity);
-        else
+        } else {
           selectEntity(entity);
+        }
       } else {
         _selectedEntities.clear();
         selectEntity(entity);
@@ -276,8 +284,9 @@ std::vector<std::reference_wrapper<PointEntity>> GuiVisitor::getRemainingPoints(
 
   for (const auto &p : allPoints) {
     if (!std::ranges::any_of(currentPoints,
-                             [&](auto &e) { return &e.get() == &p.get(); }))
+                             [&](auto &e) { return &e.get() == &p.get(); })) {
       remainingPoints.push_back(p);
+    }
   }
   return remainingPoints;
 }
@@ -331,10 +340,11 @@ void GuiVisitor::renderVirtualPointList(
     if (ImGui::Selectable((vPoint->getName() + "##").c_str(), isSelected,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected)
+        if (isSelected) {
           unselectVirtualPoint(*vPoint);
-        else
+        } else {
           selectVirtualPoint(*vPoint);
+        }
       } else {
         _selectedVirtualPoints.clear();
         selectVirtualPoint(*vPoint);
