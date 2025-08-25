@@ -61,6 +61,25 @@ public:
   const Mesh &getMesh() const override { return *_mesh; }
   bool &surfacePoint() { return _surfacePoint; }
 
+  bool operator==(const PointEntity &other) const {
+    return other._id == this->_id;
+  }
+
+  struct RefHash {
+    std::size_t
+    operator()(const std::reference_wrapper<PointEntity> &ref) const noexcept {
+      return std::hash<PointEntity *>{}(&ref.get());
+    }
+  };
+
+  struct RefEq {
+    bool
+    operator()(const std::reference_wrapper<PointEntity> &lhs,
+               const std::reference_wrapper<PointEntity> &rhs) const noexcept {
+      return &lhs.get() == &rhs.get();
+    }
+  };
+
 private:
   inline static int kClassId;
   std::shared_ptr<Mesh> _mesh;

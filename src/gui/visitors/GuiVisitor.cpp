@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
   if (torus.hasIntersectionTexture())
@@ -92,8 +93,15 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
     ImGui::Checkbox("Trim", &bezierSurface.isTrimmed());
   }
   if (ImGui::Button("Select Elements points")) {
+    std::unordered_set<std::reference_wrapper<PointEntity>,
+                       PointEntity::RefHash, PointEntity::RefEq>
+        pointSet;
+
     for (const auto &point : bezierSurface.getPoints()) {
-      _gui.selectEntity(point);
+      pointSet.insert(point);
+    }
+    for (const auto &p : pointSet) {
+      _gui.selectEntity(p);
     }
   }
   return change;

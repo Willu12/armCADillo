@@ -50,14 +50,16 @@ private:
 
   void translate(float x, float y) {
     auto &window = _camera.getWindow();
-    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
       return;
+    }
     x = (2.f * x) / static_cast<float>(GLFWHelper::getWidth(&window)) - 1.f;
     y = 1.f - (2.f * y) / static_cast<float>(GLFWHelper::getHeight(&window));
-    if (_entites.size() == 1)
+    if (_entites.size() == 1) {
       updateFromCamera(_entites.front(), x, y);
-    else
+    } else {
       updateCenterPoint(x, y);
+    }
   }
 
   void rotateAroundCenterPoint(float deltaY) {
@@ -71,10 +73,12 @@ private:
 
   void scaleAroundCenterPoint(float deltaY) {
     auto scaleFactor = 1.f;
-    if (deltaY > 0.f)
+    if (deltaY > 0.f) {
       scaleFactor = 1.05f;
-    if (deltaY < 0.f)
+    }
+    if (deltaY < 0.f) {
       scaleFactor = 0.95f;
+    }
     for (const auto &entity : _entites) {
       if (entity->getScale()[0] * scaleFactor > 0.01f) {
         entity->scaleAroundPoint(scaleFactor, getTransformationPoint());
@@ -83,10 +87,12 @@ private:
   }
 
   algebra::Vec3f getAxisVector(const Axis &axis) {
-    if (axis == Axis::X)
+    if (axis == Axis::X) {
       return algebra::Vec3f(1.f, 0.f, 0.f);
-    if (axis == Axis::Y)
+    }
+    if (axis == Axis::Y) {
       return algebra::Vec3f(0.f, 1.f, 0.f);
+    }
 
     return algebra::Vec3f(0.f, 0.f, 1.f);
   }
@@ -132,7 +138,7 @@ private:
     auto worldPos = _camera.inverseViewMatrix() * viewPosition;
     auto diff = worldPos.fromHomogenous() - basePosition;
 
-    for (auto entity : _entites) {
+    for (const auto &entity : _entites) {
       entity->updatePosition(entity->getPosition() + diff);
     }
   }
