@@ -21,14 +21,14 @@ public:
 
     uint32_t uPoints{};
     uint32_t vPoints{};
-    j.at("size").at("u").get_to(vPoints);
-    j.at("size").at("v").get_to(uPoints);
+    j.at("size").at("u").get_to(uPoints);
+    j.at("size").at("v").get_to(vPoints);
 
     auto connectionType =
-        EntityDeserializer::getConnectionType(points, uPoints, vPoints, 3);
+        EntityDeserializer::getConnectionType(points, vPoints, uPoints, 3);
 
     auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
-        points, vPoints - 3, uPoints - 3, connectionType);
+        points, uPoints - 3, vPoints - 3, connectionType);
     if (j.contains("name")) {
       j.at("name").get_to(name);
       bezierSurfaceC2->getName() = name;
