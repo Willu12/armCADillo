@@ -137,8 +137,9 @@ private:
   std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
     std::vector<std::shared_ptr<VirtualPoint>> bezierPoints;
 
-    if (_points.size() < 4)
+    if (_points.size() < 4) {
       return bezierPoints;
+    }
 
     for (int i = 0; i < _points.size() * 3 - 8; ++i) {
       bezierPoints.emplace_back(

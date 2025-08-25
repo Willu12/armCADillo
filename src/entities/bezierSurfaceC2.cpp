@@ -65,14 +65,30 @@ BezierSurfaceC2::BezierSurfaceC2(
     uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierCurveC2_" + std::to_string(_id);
+  //_points = points;
+
+  if (connectionType == algebra::ConnectionType::Columns) {
+    const uint32_t uPoints = 3 + uCount;
+    const uint32_t vPoints = 3 + vCount;
+    _points.reserve(vPoints * uPoints);
+    for (uint32_t row = 0; row < vPoints; ++row) {
+      for (uint32_t col = 0; col < uPoints - 3; ++col) {
+        _points.push_back(points[row * (uPoints - 3) + col]);
+      }
+      for (uint32_t col = 0; col < 3; ++col) {
+        _points.push_back(points[row * (uPoints - 3) + col]);
+      }
+    }
+  } else {
+    _points = points;
+  }
 
   for (const auto &point : points) {
     point.get().surfacePoint() = true;
     subscribe(point);
   }
-  _points = points;
   _polyMesh = createPolyMesh();
-  _patches = {.colCount = vCount, .rowCount = uCount};
+  _patches = {.colCount = uCount, .rowCount = vCount};
   _connectionType = connectionType;
   updateBezierSurface();
   update();
@@ -88,8 +104,8 @@ BezierSurfaceC2::createFlatPositions(const algebra::Vec3f &position,
   const uint32_t vPoints = 3 + vPatches;
 
   controlPoints.reserve(uPoints * vPoints);
-  for (uint32_t i = 0; i < uPoints; ++i) {
-    for (uint32_t j = 0; j < vPoints; ++j) {
+  for (uint32_t i = 0; i < vPoints; ++i) {
+    for (uint32_t j = 0; j < uPoints; ++j) {
       controlPoints.emplace_back(
           position[0] + static_cast<float>(j) / 3.f * uLength,
           position[1] + static_cast<float>(i) / 3.f * vLength, position[2]);
@@ -107,21 +123,20 @@ BezierSurfaceC2::createCyllinderPositions(const algebra::Vec3f &position,
   std::vector<algebra::Vec3f> controlPoints;
 
   controlPoints.reserve(uPoints * vPoints);
-  const float angleBetweenPoints =
-      1.f / static_cast<float>(uPoints - 3) * 2.0f * std::numbers::pi_v<float>;
-  float newR = 3 * r / (std::cos(angleBetweenPoints) + 2);
+  const float angle =
+      2.0f * std::numbers::pi_v<float> / static_cast<float>(uPoints - 3);
+  float newR = 3 * r / (std::cos(angle) + 2);
 
-  for (uint32_t i = 0; i < uPoints; ++i) {
-    float uRatio = static_cast<float>(i) / static_cast<float>(uPoints - 3);
-    float angle = uRatio * 2.0f * std::numbers::pi_v<float>;
+  for (uint32_t i = 0; i < vPoints; ++i) {
+    float vRatio = static_cast<float>(i) / static_cast<float>(vPoints - 1);
+    float z = vRatio * h;
 
-    float xCircle = std::cos(angle) * newR;
-    float yCircle = std::sin(angle) * newR;
+    for (uint32_t j = 0; j < uPoints - 3; ++j) {
+      float uRatio = static_cast<float>(j) / static_cast<float>(uPoints - 3);
+      float currentAngle = uRatio * 2.0f * std::numbers::pi_v<float>;
 
-    for (uint32_t j = 0; j < vPoints; ++j) {
-      float vRatio = static_cast<float>(j) / static_cast<float>(vPoints - 1);
-      float z = vRatio * h;
-
+      float xCircle = std::cos(currentAngle) * newR;
+      float yCircle = std::sin(currentAngle) * newR;
       controlPoints.emplace_back(xCircle + position[0], yCircle + position[1],
                                  z + position[2]);
     }

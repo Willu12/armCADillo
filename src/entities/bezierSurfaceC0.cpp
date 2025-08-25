@@ -65,8 +65,8 @@ BezierSurfaceC0::BezierSurfaceC0(
     for (int i = 0; i < (3 * uCount + 1); ++i) {
       _points.push_back(_points[i]);
     }
-    _connectionType = algebra::ConnectionType::Columns;
   }
+  _connectionType = connectionType;
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};
   update();
