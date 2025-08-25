@@ -64,7 +64,7 @@ BezierSurfaceC2::BezierSurfaceC2(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
     uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
-  _name = "BezierCurveC2_" + std::to_string(_id);
+  _name = "BezierSurfaceC2_" + std::to_string(_id);
   //_points = points;
 
   if (connectionType == algebra::ConnectionType::Columns) {
