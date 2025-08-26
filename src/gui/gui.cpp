@@ -241,18 +241,12 @@ void GUI::createBezierSurfaceUI() {
   ImGui::Separator();
 
   if (ImGui::Button("Create")) {
-    if (surfaceType == 0) {
-      if (c0) {
-        createBezierSurfaceC0Flat(uPatches, vPatches, x, y);
-      } else {
-        createBezierSurfaceC2Flat(uPatches, vPatches, x, y);
-      }
+    if (c0) {
+      _entityFactory.createBezierSurfaceC0(getCursor()->getPosition(), uPatches,
+                                           vPatches, x, y, surfaceType != 0);
     } else {
-      if (c0) {
-        createBezierSurfaceC0Cylinder(uPatches, vPatches, x, y);
-      } else {
-        createBezierSurfaceC2Cylinder(uPatches, vPatches, x, y);
-      }
+      _entityFactory.createBezierSurfaceC2(getCursor()->getPosition(), uPatches,
+                                           vPatches, x, y, surfaceType != 0);
     }
 
     openConfigWindow = false;
@@ -455,66 +449,6 @@ GUI::getSelectedBezierCurves() {
   return bezierCurves;
 }
 
-void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
-                                    float uLength, float vLength) {
-
-  const auto &cursorPosition = getCursor()->getPosition();
-  const auto &positions = BezierSurfaceC0::createFlatPositions(
-      cursorPosition, uPatches, vPatches, uLength, vLength);
-
-  std::vector<std::reference_wrapper<PointEntity>> points =
-      createSurfacePoints(positions);
-
-  auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
-      points, uPatches, vPatches, algebra::ConnectionType::Flat);
-  _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
-}
-
-void GUI::createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
-                                    float uLength, float vLength) {
-
-  const auto &cursorPosition = getCursor()->getPosition();
-  const auto &positions = BezierSurfaceC2::createFlatPositions(
-      cursorPosition, uPatches, vPatches, uLength, vLength);
-
-  std::vector<std::reference_wrapper<PointEntity>> points =
-      createSurfacePoints(positions);
-
-  auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
-      points, uPatches, vPatches, algebra::ConnectionType::Flat);
-  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
-}
-
-void GUI::createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
-                                        float r, float h) {
-  const auto &cursorPosition = getCursor()->getPosition();
-  const auto &positions = BezierSurfaceC0::createCyllinderPositions(
-      cursorPosition, uPatches, vPatches, r, h);
-
-  std::vector<std::reference_wrapper<PointEntity>> points =
-      createSurfacePoints(positions);
-
-  auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
-      points, uPatches, vPatches, algebra::ConnectionType::Columns);
-
-  _scene->addEntity(EntityType::BezierSurfaceC0, bezierSurfaceC0);
-}
-
-void GUI::createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
-                                        float r, float h) {
-  const auto &cursorPosition = getCursor()->getPosition();
-  const auto &positions = BezierSurfaceC2::createCyllinderPositions(
-      cursorPosition, uPatches, vPatches, r, h);
-
-  std::vector<std::reference_wrapper<PointEntity>> points =
-      createSurfacePoints(positions);
-
-  auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
-      points, uPatches, vPatches, algebra::ConnectionType::Columns);
-
-  _scene->addEntity(EntityType::BezierSurfaceC2, bezierSurfaceC2);
-}
-
 void GUI::createGregoryPatch() {
   const auto selectedSurfaces = getSelectedSurfacesC0();
 
@@ -584,18 +518,6 @@ std::vector<std::shared_ptr<IEntity>> GUI::getVirtualPoints() const {
 void GUI::clearVirtualPoints() {
   _selectedVirtualPoints.clear();
   _virtualPoints.clear();
-}
-
-std::vector<std::reference_wrapper<PointEntity>>
-GUI::createSurfacePoints(const std::vector<algebra::Vec3f> &positions) {
-  std::vector<std::reference_wrapper<PointEntity>> points;
-  points.reserve(positions.size());
-  for (const auto &pos : positions) {
-    std::shared_ptr<PointEntity> point = std::make_shared<PointEntity>(pos);
-    points.emplace_back(*point);
-    _scene->addEntity(EntityType::Point, point);
-  }
-  return points;
 }
 
 void GUI::stereoscopicSettings() {

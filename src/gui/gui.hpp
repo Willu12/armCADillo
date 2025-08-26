@@ -19,7 +19,6 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 class BezierCurveC0;
@@ -102,16 +101,6 @@ private:
   void createGregoryPatchUI();
   void findIntersectionUI();
   void findIntersection();
-
-  void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
-                                 float uLength, float vLength);
-  void createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,
-                                 float uLength, float vLength);
-
-  void createBezierSurfaceC0Cylinder(uint32_t uPatches, uint32_t vPatches,
-                                     float r, float h);
-  void createBezierSurfaceC2Cylinder(uint32_t uPatches, uint32_t vPatches,
-                                     float r, float h);
   void createGregoryPatch();
 
   void renderModelSettings();
@@ -133,6 +122,4 @@ private:
 
   std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints();
   std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
-  std::vector<std::reference_wrapper<PointEntity>>
-  createSurfacePoints(const std::vector<algebra::Vec3f> &positions);
 };

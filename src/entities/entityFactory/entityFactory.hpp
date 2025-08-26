@@ -2,6 +2,8 @@
 
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
+#include "bezierSurfaceC0.hpp"
+#include "bezierSurfaceC2.hpp"
 #include "interpolatingSplineC2.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
@@ -23,7 +25,30 @@ public:
   std::optional<std::shared_ptr<InterpolatingSplineC2>>
   createInterpolatingSpline(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
+  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  createBezierSurfaceC0(const algebra::Vec3f &position, uint32_t uPatches,
+                        uint32_t vPatches, float u, float v, bool cyllinder);
+  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  createBezierSurfaceC2(const algebra::Vec3f &position, uint32_t uPatches,
+                        uint32_t vPatches, float u, float v, bool cyllinder);
 
 private:
+  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  createFlatBezierSurfaceC0(const algebra::Vec3f &position, uint32_t uPatches,
+                            uint32_t vPatches, float u, float v);
+  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  createCyllinderBezierSurfaceC0(const algebra::Vec3f &position,
+                                 uint32_t uPatches, uint32_t vPatches, float r,
+                                 float h);
+  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  createFlatBezierSurfaceC2(const algebra::Vec3f &position, uint32_t uPatches,
+                            uint32_t vPatches, float u, float v);
+  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  createCyllinderBezierSurfaceC2(const algebra::Vec3f &position,
+                                 uint32_t uPatches, uint32_t vPatches, float r,
+                                 float h);
+
+  std::vector<std::reference_wrapper<PointEntity>>
+  createSurfacePoints(const std::vector<algebra::Vec3f> &positions);
   Scene *scene_;
 };
