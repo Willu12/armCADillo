@@ -9,8 +9,6 @@
 #include <memory>
 #include <vector>
 
-#include "gui.hpp"
-
 class BezierCurveC0 : public BezierCurve {
 public:
   explicit BezierCurveC0(
@@ -34,8 +32,9 @@ private:
   std::unique_ptr<BezierMesh> generateMesh() override {
     std::vector<algebra::Vec3f> vertices;
     vertices.reserve(_points.size());
-    for (const auto &point : _points)
+    for (const auto &point : _points) {
       vertices.push_back(point.get().getPosition());
+    }
 
     return BezierMesh::create(vertices);
   }

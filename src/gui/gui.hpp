@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EntityFactories/IEntityFactory.hpp"
 #include "GuiVisitor.hpp"
 #include "IEntity.hpp"
 #include "bezierSurfaceC0.hpp"
@@ -8,6 +7,7 @@
 #include "controllers.hpp"
 #include "cursor.hpp"
 #include "entitiesTypes.hpp"
+#include "entityFactory.hpp"
 #include "intersectionFinder.hpp"
 #include "jsonDeserializer.hpp"
 #include "jsonSerializer.hpp"
@@ -65,6 +65,7 @@ public:
 private:
   GLFWwindow *_window;
   std::shared_ptr<Scene> _scene;
+  EntityFactory _entityFactory;
   std::vector<std::shared_ptr<IEntity>> _selectedEntities;
   std::vector<std::shared_ptr<VirtualPoint>> _selectedVirtualPoints;
   std::vector<std::shared_ptr<VirtualPoint>> _virtualPoints;
@@ -77,15 +78,11 @@ private:
   JsonDeserializer _jsonDeserializer;
   IntersectionFinder _intersectionFinder;
 
-  std::unordered_map<EntityType, std::shared_ptr<IEntityFactory>>
-      _entityFactories;
-
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
   double _fps = 0.0;
   bool _stereographicVision = false;
 
-  void initEnitityFactories();
   void initControllers();
   void processControllers();
 
@@ -106,10 +103,6 @@ private:
   void findIntersectionUI();
   void findIntersection();
 
-  IEntity &createEntity(EntityType entityType);
-  void createBezierCurve();
-  void createBSplineCurve();
-  void createInterpolatingSplineCurve();
   void createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
                                  float uLength, float vLength);
   void createBezierSurfaceC2Flat(uint32_t uPatches, uint32_t vPatches,

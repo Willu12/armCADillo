@@ -31,6 +31,7 @@ add_executable(${PROJECT_NAME}
  src/textures/image.cpp
  src/entities/intersectionCurve.cpp
  src/textures/intersectionTexture.cpp
+ src/entities/entityFactory/entityFactory.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -39,6 +40,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/textures/
     src/controllers/
     src/entities/
+    src/entities/entityFactory
     src/utils/
     src/utils/json
     src/

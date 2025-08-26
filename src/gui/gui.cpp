@@ -1,7 +1,4 @@
 #include "gui.hpp"
-
-#include "EntityFactories/pointFactory.hpp"
-#include "EntityFactories/torusFactory.hpp"
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
 #include "bSplineCurve.hpp"
@@ -11,6 +8,7 @@
 #include "color.hpp"
 #include "cursorController.hpp"
 #include "entitiesTypes.hpp"
+#include "entityFactory.hpp"
 #include "gregorySurface.hpp"
 #include "imgui.h"
 #include "interpolatingSplineC2.hpp"
@@ -32,9 +30,9 @@
 #include <vector>
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
-    : _window(window), _scene(std::move(scene)), _guiSettingsVisitor(*this) {
+    : _window(window), _scene(std::move(scene)), _entityFactory(_scene.get()),
+      _guiSettingsVisitor(*this) {
   initControllers();
-  initEnitityFactories();
 }
 
 IController &GUI::getController() {
@@ -115,11 +113,6 @@ PickingTexture &GUI::getPickingTexture() {
   return getSelectionController()->getPickingTexture();
 }
 
-void GUI::initEnitityFactories() {
-  _entityFactories.emplace(EntityType::Point, std::make_shared<PointFactory>());
-  _entityFactories.emplace(EntityType::Torus, std::make_shared<TorusFactory>());
-}
-
 void GUI::initControllers() {
   _controllers.resize(4);
   _controllers[static_cast<int>(ControllerKind::Camera)] =
@@ -170,19 +163,17 @@ void GUI::renderCursorControllerSettings() {
 
 void GUI::renderCreateTorusUI() {
   if (ImGui::Button("Add new torus")) {
-    createEntity(EntityType::Torus);
+    _entityFactory.createTorus(getCursor()->getPosition());
   }
 }
 
 void GUI::renderCreatePointUI() {
 
   if (ImGui::Button("Add new point")) {
-    auto &entity = dynamic_cast<PointEntity &>(
-        createEntity(EntityType::Point)); // std::static_cast()
-
+    auto entity = _entityFactory.createPoint(getCursor()->getPosition());
     auto bezierCurves = getSelectedBezierCurves();
     for (const auto &bezierCurve : bezierCurves) {
-      bezierCurve.get().addPoint(entity);
+      bezierCurve.get().addPoint(*entity);
     }
   }
 }
@@ -195,18 +186,18 @@ void GUI::removeButtonUI() {
 
 void GUI::createBezierCurveUI() {
   if (ImGui::Button("Create Bezier Curve")) {
-    createBezierCurve();
+    _entityFactory.createBezierCurveC0(getSelectedPoints());
   }
 }
 void GUI::createBSplineCurveUI() {
   if (ImGui::Button("Create BSplineCurve")) {
-    createBSplineCurve();
+    _entityFactory.createBSplineCurve(getSelectedPoints());
   }
 }
 
 void GUI::createInterpolatingSplineCurveUI() {
   if (ImGui::Button("Create Interpolating Spline Curve")) {
-    createInterpolatingSplineCurve();
+    _entityFactory.createInterpolatingSpline(getSelectedPoints());
   }
 }
 
@@ -302,13 +293,6 @@ void GUI::createSerializeUI() {
     }
     NFD_Quit();
   }
-}
-
-IEntity &GUI::createEntity(EntityType entityType) {
-  const auto &cursorPosition = getCursor()->getPosition();
-  auto entity = _entityFactories.at(entityType)->create(cursorPosition);
-  _scene->addEntity(entityType, entity);
-  return *entity;
 }
 
 void GUI::renderModelSettings() {
@@ -469,38 +453,6 @@ GUI::getSelectedBezierCurves() {
     }
   }
   return bezierCurves;
-}
-
-void GUI::createBezierCurve() {
-  auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2) {
-    return;
-  }
-
-  std::shared_ptr<IEntity> bezierCurve =
-      std::make_shared<BezierCurveC0>(pointEntities);
-  _scene->addEntity(EntityType::BezierCurveC0, bezierCurve);
-}
-
-void GUI::createBSplineCurve() {
-  auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2) {
-    return;
-  }
-
-  std::shared_ptr<IEntity> bezierCurve =
-      std::make_shared<BSplineCurve>(pointEntities);
-  _scene->addEntity(EntityType::BSplineCurve, bezierCurve);
-}
-
-void GUI::createInterpolatingSplineCurve() {
-  auto pointEntities = getSelectedPoints();
-  if (pointEntities.size() < 2) {
-    return;
-  }
-  std::shared_ptr<IEntity> interpolatingSpline =
-      std::make_shared<InterpolatingSplineC2>(pointEntities);
-  _scene->addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
 }
 
 void GUI::createBezierSurfaceC0Flat(uint32_t uPatches, uint32_t vPatches,
