@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
  src/entities/intersectionCurve.cpp
  src/textures/intersectionTexture.cpp
  src/entities/entityFactory/entityFactory.cpp
+ src/entities/IEntity.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

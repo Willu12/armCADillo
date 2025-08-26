@@ -5,7 +5,6 @@
 #include "IVisitor.hpp"
 #include "mesh.hpp"
 #include "vec.hpp"
-#include <iostream>
 
 class PointEntity : public IEntity, public ISubscribable {
 public:
@@ -51,10 +50,6 @@ public:
     IEntity::scaleAroundPoint(scaleFactor, centerPoint);
   }
 
-  // algebra::Vec3f &getPosition() override {
-  //   notifySubscribers();
-  //  return _position;
-  // }
   const algebra::Vec3f &getPosition() const override { return _position; }
 
   void updateMesh() override { _mesh = generateMesh(); };
