@@ -20,8 +20,9 @@ public:
         _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
@@ -29,8 +30,9 @@ public:
 
     for (const auto &entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
-      if (!bezierSurface.wireframe())
-        return;
+      if (!bezierSurface.wireframe()) {
+        continue;
+      }
       const auto &mesh = bezierSurface.getPolyMesh();
       glLineWidth(2.0f);
 
@@ -47,5 +49,5 @@ public:
 private:
   Shader _shader;
   const Camera &_camera;
-  algebra::Vec4f _color{0.1f, .5f, 0.3f, 1.f};
+  algebra::Vec4f _color{0.6f, .1f, 0.6f, 1.f};
 };

@@ -27,8 +27,9 @@ public:
         _meshRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());

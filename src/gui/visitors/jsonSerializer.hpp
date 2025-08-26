@@ -40,4 +40,5 @@ private:
   void serializeScale(nlohmann::json &j, const IEntity &entity);
   void serializeControlPoints(nlohmann::json &j,
                               const IGroupedEntity &groupedEntity);
+  void clear();
 };

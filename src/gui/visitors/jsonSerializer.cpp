@@ -19,6 +19,7 @@ void JsonSerializer::serializeScene(const Scene &scene) {
   if (file.is_open()) {
     file << std::setw(4) << _sceneJson << std::endl;
     file.close();
+    clear();
   } else {
     throw std::runtime_error("Unable to open file: " + _savePath);
   }
@@ -155,4 +156,11 @@ bool JsonSerializer::visitVirtualPoint(VirtualPoint & /*point*/) {
 }
 bool JsonSerializer::visitBezierSurface(BezierSurface & /*bezierSurface*/) {
   return false;
+}
+
+void JsonSerializer::clear() {
+  _geometryJson.clear();
+  _pointsJson.clear();
+  _savePath.clear();
+  _sceneJson.clear();
 }
