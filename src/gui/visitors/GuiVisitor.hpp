@@ -63,4 +63,6 @@ private:
   void unselectVirtualPoint(const VirtualPoint &point);
 
   bool renderCurveGui(BezierCurve &curve);
+  std::vector<std::reference_wrapper<PointEntity>>
+  clonePoints(const BezierSurface &bezierSurface);
 };

@@ -4,6 +4,7 @@
 #include "entitiesTypes.hpp"
 #include "gui.hpp"
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include "bSplineCurve.hpp"
 #include "bezierCurveC0.hpp"
@@ -21,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 bool GuiVisitor::visitTorus(TorusEntity &torus) {
   if (torus.hasIntersectionTexture()) {
@@ -105,18 +107,36 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
       _gui.selectEntity(p);
     }
   }
+
   return change;
 }
 
 bool GuiVisitor::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) {
   if (auto *p = dynamic_cast<BezierSurface *>(&bezierSurface)) {
-    return visitBezierSurface(*p);
+    visitBezierSurface(*p);
   }
+  if (ImGui::Button("Clone")) {
+    auto points = clonePoints(bezierSurface);
+    _gui.getScene().addEntity(EntityType::BezierSurfaceC0,
+                              std::make_shared<BezierSurfaceC0>(
+                                  points, bezierSurface.getPatches().colCount,
+                                  bezierSurface.getPatches().rowCount,
+                                  bezierSurface.getConnectionType()));
+  }
+
   return false;
 }
 bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
   if (auto *p = dynamic_cast<BezierSurface *>(&bezierSurface)) {
     visitBezierSurface(*p);
+  }
+  if (ImGui::Button("Clone")) {
+    auto points = clonePoints(bezierSurface);
+    _gui.getScene().addEntity(EntityType::BezierSurfaceC2,
+                              std::make_shared<BezierSurfaceC2>(
+                                  points, bezierSurface.getPatches().colCount,
+                                  bezierSurface.getPatches().rowCount,
+                                  bezierSurface.getConnectionType()));
   }
   return false;
 }
@@ -364,4 +384,15 @@ bool GuiVisitor::renderCurveGui(BezierCurve &curve) {
   ImGui::SameLine();
   renderRemovingSelectedPoints(curve);
   return false;
+}
+
+std::vector<std::reference_wrapper<PointEntity>>
+GuiVisitor::clonePoints(const BezierSurface &bezierSurface) {
+  std::vector<std::reference_wrapper<PointEntity>> points;
+  points.reserve(bezierSurface.getPointsReferences().size());
+  for (const auto &p : bezierSurface.getPointsReferences()) {
+    points.emplace_back(
+        *_gui._entityFactory.createPoint(p.get().getPosition()));
+  }
+  return points;
 }
