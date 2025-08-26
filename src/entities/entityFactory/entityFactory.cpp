@@ -6,6 +6,7 @@
 #include "interpolatingSplineC2.hpp"
 #include "pointEntity.hpp"
 #include "torusEntity.hpp"
+#include <functional>
 #include <memory>
 
 std::shared_ptr<PointEntity>
@@ -117,7 +118,11 @@ EntityFactory::createFlatBezierSurfaceC2(const algebra::Vec3f &position,
                                          float u, float v) {
   const auto &positions =
       BezierSurfaceC2::createFlatPositions(position, uPatches, vPatches, u, v);
-  const auto &points = createSurfacePoints(positions);
+  auto points = createSurfacePoints(positions);
+  for (int i = 0; i < (3 * uPatches + 1); ++i) {
+    points.push_back(points[i]);
+  }
+
   return std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Flat);
 }
@@ -128,8 +133,21 @@ EntityFactory::createCyllinderBezierSurfaceC2(const algebra::Vec3f &position,
                                               float h) {
   const auto &positions = BezierSurfaceC2::createCyllinderPositions(
       position, uPatches, vPatches, r, h);
-  const auto &points = createSurfacePoints(positions);
-  return std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches,
+  auto points = createSurfacePoints(positions);
+
+  const uint32_t uPoints = 3 + uPatches;
+  const uint32_t vPoints = 3 + vPatches;
+  std::vector<std::reference_wrapper<PointEntity>> fixedPoints;
+  fixedPoints.reserve(vPoints * uPoints);
+  for (uint32_t row = 0; row < vPoints; ++row) {
+    for (uint32_t col = 0; col < uPoints - 3; ++col) {
+      fixedPoints.push_back(points[row * (uPoints - 3) + col]);
+    }
+    for (uint32_t col = 0; col < 3; ++col) {
+      fixedPoints.push_back(points[row * (uPoints - 3) + col]);
+    }
+  }
+  return std::make_shared<BezierSurfaceC2>(fixedPoints, uPatches, vPatches,
                                            algebra::ConnectionType::Columns);
 }
 

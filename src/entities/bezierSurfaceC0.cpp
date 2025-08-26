@@ -55,17 +55,13 @@ BezierSurfaceC0::BezierSurfaceC0(
     uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierSurfaceC0_" + std::to_string(_id);
+  _points = points;
 
   for (const auto &controlPoint : points) {
     controlPoint.get().surfacePoint() = true;
     subscribe(controlPoint);
   }
-  _points = points;
-  if (connectionType == algebra::ConnectionType::Columns) {
-    for (int i = 0; i < (3 * uCount + 1); ++i) {
-      _points.push_back(_points[i]);
-    }
-  }
+
   _connectionType = connectionType;
   _polyMesh = createPolyMesh();
   _patches = {.colCount = uCount, .rowCount = vCount};

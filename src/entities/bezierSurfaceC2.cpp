@@ -65,24 +65,7 @@ BezierSurfaceC2::BezierSurfaceC2(
     uint32_t uCount, uint32_t vCount, algebra::ConnectionType connectionType) {
   _id = kClassId++;
   _name = "BezierSurfaceC2_" + std::to_string(_id);
-  const uint32_t uPoints = 3 + uCount;
-  const uint32_t vPoints = 3 + vCount;
-  if (connectionType == algebra::ConnectionType::Columns &&
-      points.size() < uPoints * vPoints) {
-
-    _points.reserve(vPoints * uPoints);
-    for (uint32_t row = 0; row < vPoints; ++row) {
-      for (uint32_t col = 0; col < uPoints - 3; ++col) {
-        _points.push_back(points[row * (uPoints - 3) + col]);
-      }
-      for (uint32_t col = 0; col < 3; ++col) {
-        _points.push_back(points[row * (uPoints - 3) + col]);
-      }
-    }
-  } else {
-    _points = points;
-  }
-
+  _points = points;
   for (const auto &point : points) {
     point.get().surfacePoint() = true;
     subscribe(point);
