@@ -1,12 +1,9 @@
 #pragma once
 #include "IRenderable.hpp"
 #include "IVisitor.hpp"
-#include "imgui.h"
-#include "imgui_stdlib.h"
 
 #include "matrix.hpp"
 #include "quaternion.hpp"
-#include "transformations.hpp"
 #include "vec.hpp"
 
 class GUI;

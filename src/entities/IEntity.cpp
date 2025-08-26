@@ -1,4 +1,7 @@
 #include "IEntity.hpp"
+#include "imgui.h"
+#include "imgui_stdlib.h"
+#include "transformations.hpp"
 
 bool IEntity::acceptVisitor(IVisitor &visitor) { return false; };
 
