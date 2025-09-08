@@ -12,6 +12,7 @@ public:
   virtual ~IEntityBuilder() = default;
 
   virtual void drawGui() {
+    ImGui::SameLine();
     if (ImGui::Button("Create")) {
       create();
     }

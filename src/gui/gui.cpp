@@ -515,10 +515,9 @@ void GUI::findIntersection() {
 }
 
 void GUI::createEnitityUI() {
-  static EntityType selectedType = EntityType::Point; // default selected entity
-
-  // Find the display name for the current selection
+  static EntityType selectedType = EntityType::Point;
   std::string previewValue = "Select...";
+
   for (const auto &[name, type] : _entityUtils.getStringEntityMap()) {
     if (type == selectedType) {
       previewValue = name;
@@ -526,7 +525,7 @@ void GUI::createEnitityUI() {
     }
   }
 
-  if (ImGui::BeginCombo("Creatable Entities", previewValue.c_str())) {
+  if (ImGui::BeginCombo("##Creatable Entities", previewValue.c_str())) {
     for (const auto &[name, entityType] : _entityUtils.getStringEntityMap()) {
       bool isSelected = (selectedType == entityType);
       if (ImGui::Selectable(name.c_str(), isSelected)) {
@@ -538,10 +537,5 @@ void GUI::createEnitityUI() {
     }
     ImGui::EndCombo();
   }
-  const auto &builders = _entityUtils.getEntityBuilders();
-  auto it = builders.find(selectedType);
-  if (it != builders.end()) {
-    IEntityBuilder *builder = it->second.get();
-    builder->drawGui();
-  }
+  _entityUtils.getEntityBuilders().at(selectedType)->drawGui();
 }
