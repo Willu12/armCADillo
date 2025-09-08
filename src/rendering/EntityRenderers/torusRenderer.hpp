@@ -13,13 +13,14 @@ public:
         _camera(camera) {}
 
   void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
-    for (auto &entity : entities) {
+    for (const auto &entity : entities) {
       const auto &mesh = entity->getMesh();
       auto &torus = dynamic_cast<TorusEntity &>(*entity);
       _shader.setVec4f("color", entity->getColor().toVector());

@@ -30,7 +30,7 @@ public:
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
     for (const auto &entity : entities) {
-      auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
+      const auto &gregorySurface = dynamic_cast<GregorySurface &>(*entity);
       if (!gregorySurface.showTangentVectors()) {
         continue;
       }

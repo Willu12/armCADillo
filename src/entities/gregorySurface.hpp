@@ -36,6 +36,7 @@ public:
     return visitor.visitGregorySurface(*this);
   };
   bool &showTangentVectors() { return _showTangentVectors; }
+  const bool &showTangentVectors() const { return _showTangentVectors; }
 
   void markToUpdate() override { _dirty = true; }
 

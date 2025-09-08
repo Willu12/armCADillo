@@ -15,6 +15,8 @@
 #include "optional"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "utils.hpp"
+#include "vec.hpp"
 #include "virtualPoint.hpp"
 #include <chrono>
 #include <functional>
@@ -38,10 +40,13 @@ public:
   std::vector<std::reference_wrapper<PointEntity>> getPoints() const;
   const std::vector<std::shared_ptr<IEntity>> &getSelectedEntities() const;
   std::vector<std::shared_ptr<IEntity>> getSelectedPointsPointers() const;
+  std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints() const;
   std::vector<std::reference_wrapper<BezierSurfaceC0>>
   getSelectedSurfacesC0() const;
 
   std::shared_ptr<Cursor> getCursor();
+  const Cursor &getCursor() const;
+  const algebra::Vec3f &getCursorPosition() const;
 
   std::optional<const IRenderable *> getCenterPoint();
 
@@ -76,6 +81,7 @@ private:
   JsonSerializer _jsonSerializer;
   JsonDeserializer _jsonDeserializer;
   IntersectionFinder _intersectionFinder;
+  EntityUtils _entityUtils;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
@@ -88,20 +94,13 @@ private:
   void renderModelControllSettings();
   void renderCursorControllerSettings();
 
-  void renderCreateTorusUI();
-  void renderCreatePointUI();
+  void createEnitityUI();
   void removeButtonUI();
-  void createBezierCurveUI();
-  void createBSplineCurveUI();
-  void createInterpolatingSplineCurveUI();
-  void createBezierSurfaceUI();
   void createSerializeUI();
   void createLoadSceneUI();
   void contractEdgeUI();
-  void createGregoryPatchUI();
   void findIntersectionUI();
   void findIntersection();
-  void createGregoryPatch();
 
   void renderModelSettings();
   void stereoscopicSettings();
@@ -120,6 +119,5 @@ private:
   std::shared_ptr<SelectionController> getSelectionController();
   std::vector<std::shared_ptr<IController>> getActiveControllers();
 
-  std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints();
   std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
 };

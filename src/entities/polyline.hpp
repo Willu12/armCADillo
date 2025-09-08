@@ -9,10 +9,11 @@
 
 class Polyline : public IEntity {
 public:
+  explicit Polyline(const std::vector<algebra::Vec3f> &points);
+
   void addPoint(algebra::Vec3f &point);
   void updateMesh() override;
   const std::vector<algebra::Vec3f> &getPoints() const;
-  explicit Polyline(std::vector<algebra::Vec3f> &points);
   const IMeshable &getMesh() const override;
   std::vector<algebra::Vec3f> getSparsePoints(float delta) const;
 

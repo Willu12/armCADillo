@@ -4,8 +4,10 @@
 #include "bezierCurveC0.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceC2.hpp"
+#include "gregorySurface.hpp"
 #include "interpolatingSplineC2.hpp"
 #include "pointEntity.hpp"
+#include "polyline.hpp"
 #include "scene.hpp"
 #include "torusEntity.hpp"
 #include "vec.hpp"
@@ -31,6 +33,11 @@ public:
   std::optional<std::shared_ptr<BezierSurfaceC2>>
   createBezierSurfaceC2(const algebra::Vec3f &position, uint32_t uPatches,
                         uint32_t vPatches, float u, float v, bool cyllinder);
+  std::optional<std::shared_ptr<GregorySurface>> createGregoryPatch(
+      const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
+
+  std::optional<std::shared_ptr<Polyline>>
+  createPolyline(const std::vector<algebra::Vec3f> &points);
 
 private:
   std::optional<std::shared_ptr<BezierSurfaceC0>>

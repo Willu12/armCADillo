@@ -5,6 +5,7 @@
 #include "entitiesTypes.hpp"
 #include "interpolatingSplineC2.hpp"
 #include "pointEntity.hpp"
+#include "polyline.hpp"
 #include "torusEntity.hpp"
 #include <functional>
 #include <memory>
@@ -163,4 +164,21 @@ EntityFactory::createSurfacePoints(
   }
 
   return points;
+}
+
+std::optional<std::shared_ptr<GregorySurface>>
+EntityFactory::createGregoryPatch(
+    const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
+  auto gregorySurfaces = GregorySurface::createGregorySurfaces(surfaces);
+  for (const auto &gregorySurface : gregorySurfaces) {
+    scene_->addEntity(EntityType::GregorySurface, gregorySurface);
+  }
+  return gregorySurfaces[0];
+}
+
+std::optional<std::shared_ptr<Polyline>>
+EntityFactory::createPolyline(const std::vector<algebra::Vec3f> &points) {
+  auto polyline = std::make_shared<Polyline>(points);
+  scene_->addEntity(EntityType::Polyline, polyline);
+  return polyline;
 }

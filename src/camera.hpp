@@ -1,9 +1,9 @@
 #pragma once
 #include "glfwHelper.hpp"
 #include "matrix.hpp"
+#include "rotation/utils.hpp"
 #include "spherical.hpp"
 #include "transformations.hpp"
-#include "utils.hpp"
 #include <memory>
 #include <numbers>
 

@@ -4,7 +4,8 @@
 #include <ranges>
 #include <vector>
 
-Polyline::Polyline(std::vector<algebra::Vec3f> &points) : _points(points) {
+Polyline::Polyline(const std::vector<algebra::Vec3f> &points)
+    : _points(points) {
   _id = kClassId++;
   _name = "Polyline_" + std::to_string(_id);
   _mesh = generateMesh();

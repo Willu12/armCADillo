@@ -33,6 +33,7 @@ add_executable(${PROJECT_NAME}
  src/textures/intersectionTexture.cpp
  src/entities/entityFactory/entityFactory.cpp
  src/entities/IEntity.cpp
+ src/gui/entityBuilders/entityBuilder.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

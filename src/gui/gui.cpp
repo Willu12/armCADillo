@@ -3,6 +3,7 @@
 #include "IEntity.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "color.hpp"
+#include "cursor.hpp"
 #include "cursorController.hpp"
 #include "entitiesTypes.hpp"
 #include "entityFactory.hpp"
@@ -15,6 +16,7 @@
 #include "nfd.h"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
 #include <algorithm>
@@ -26,7 +28,7 @@
 
 GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
     : _window(window), _scene(std::move(scene)), _entityFactory(_scene.get()),
-      _guiSettingsVisitor(*this) {
+      _guiSettingsVisitor(*this), _entityUtils(this, &_entityFactory) {
   initControllers();
 }
 
@@ -57,6 +59,16 @@ std::shared_ptr<Cursor> GUI::getCursor() {
   return cursorController->getCursor();
 }
 
+const Cursor &GUI::getCursor() const {
+  auto cursorController = std::dynamic_pointer_cast<CursorController>(
+      _controllers[static_cast<int>(ControllerKind::Cursor)]);
+  return *cursorController->getCursor();
+}
+
+const algebra::Vec3f &GUI::getCursorPosition() const {
+  return getCursor().getPosition();
+}
+
 std::optional<const IRenderable *> GUI::getCenterPoint() {
   if (_selectedEntities.size() > 0) {
     _centerPoint.display(getSelectedEntities());
@@ -81,13 +93,7 @@ void GUI::displayGUI() {
     renderModelControllSettings();
     displayEntitiesList();
     renderCursorControllerSettings();
-    renderCreateTorusUI();
-    renderCreatePointUI();
-    createBezierCurveUI();
-    createBSplineCurveUI();
-    createInterpolatingSplineCurveUI();
-    createBezierSurfaceUI();
-    createGregoryPatchUI();
+    createEnitityUI();
     findIntersectionUI();
     _intersectionFinder.getIntersectionConfig().display();
     removeButtonUI();
@@ -156,102 +162,10 @@ void GUI::renderCursorControllerSettings() {
   }
 }
 
-void GUI::renderCreateTorusUI() {
-  if (ImGui::Button("Add new torus")) {
-    _entityFactory.createTorus(getCursor()->getPosition());
-  }
-}
-
-void GUI::renderCreatePointUI() {
-
-  if (ImGui::Button("Add new point")) {
-    auto entity = _entityFactory.createPoint(getCursor()->getPosition());
-    auto bezierCurves = getSelectedBezierCurves();
-    for (const auto &bezierCurve : bezierCurves) {
-      bezierCurve.get().addPoint(*entity);
-    }
-  }
-}
-
 void GUI::removeButtonUI() {
   if (ImGui::Button("Remove Entity")) {
     deleteSelectedEntities();
   }
-}
-
-void GUI::createBezierCurveUI() {
-  if (ImGui::Button("Create Bezier Curve")) {
-    _entityFactory.createBezierCurveC0(getSelectedPoints());
-  }
-}
-void GUI::createBSplineCurveUI() {
-  if (ImGui::Button("Create BSplineCurve")) {
-    _entityFactory.createBSplineCurve(getSelectedPoints());
-  }
-}
-
-void GUI::createInterpolatingSplineCurveUI() {
-  if (ImGui::Button("Create Interpolating Spline Curve")) {
-    _entityFactory.createInterpolatingSpline(getSelectedPoints());
-  }
-}
-
-void GUI::createBezierSurfaceUI() {
-  static bool openConfigWindow = false;
-  if (ImGui::Button("Create Bezier Surface")) {
-    openConfigWindow = true;
-  }
-  if (!openConfigWindow) {
-    return;
-  }
-  static int c0 = 1;
-  static int surfaceType = 0;
-  static int uPatches = 2;
-  static int vPatches = 2;
-
-  static float x = 1.0f;
-  static float y = 2.0f;
-
-  ImGui::Begin("Bezier Surface Options", &openConfigWindow);
-
-  ImGui::Text("Surface Type:");
-
-  ImGui::RadioButton("C0", &c0, 1);
-  ImGui::SameLine();
-  ImGui::RadioButton("C2", &c0, 0);
-  ImGui::Separator();
-  ImGui::RadioButton("Flat", &surfaceType, 0);
-  ImGui::SameLine();
-  ImGui::RadioButton("Cylinder", &surfaceType, 1);
-  ImGui::Separator();
-  ImGui::InputInt("U Patches", &uPatches);
-  ImGui::InputInt("V Patches", &vPatches);
-  if (surfaceType == 0) {
-    ImGui::InputFloat("uLen", &x);
-    ImGui::InputFloat("VLen", &y);
-  } else {
-    ImGui::InputFloat("Radius", &x);
-    ImGui::InputFloat("Height", &y);
-  }
-  ImGui::Separator();
-
-  if (ImGui::Button("Create")) {
-    if (c0) {
-      _entityFactory.createBezierSurfaceC0(getCursor()->getPosition(), uPatches,
-                                           vPatches, x, y, surfaceType != 0);
-    } else {
-      _entityFactory.createBezierSurfaceC2(getCursor()->getPosition(), uPatches,
-                                           vPatches, x, y, surfaceType != 0);
-    }
-
-    openConfigWindow = false;
-  }
-  ImGui::SameLine();
-
-  if (ImGui::Button("Cancel")) {
-    openConfigWindow = false;
-  }
-  ImGui::End();
 }
 
 void GUI::createLoadSceneUI() {
@@ -408,10 +322,11 @@ std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
   return activeControllers;
 }
 
-std::vector<std::reference_wrapper<PointEntity>> GUI::getSelectedPoints() {
+std::vector<std::reference_wrapper<PointEntity>>
+GUI::getSelectedPoints() const {
   std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
-  for (auto &entity : _selectedEntities) {
+  for (const auto &entity : _selectedEntities) {
     auto point = std::dynamic_pointer_cast<PointEntity>(entity);
     if (point) {
       pointEntities.emplace_back(*point);
@@ -442,16 +357,6 @@ GUI::getSelectedBezierCurves() {
     }
   }
   return bezierCurves;
-}
-
-void GUI::createGregoryPatch() {
-  const auto selectedSurfaces = getSelectedSurfacesC0();
-
-  auto gregorySurfaces =
-      GregorySurface::createGregorySurfaces(selectedSurfaces);
-  for (const auto &gregorySurface : gregorySurfaces) {
-    _scene->addEntity(EntityType::GregorySurface, gregorySurface);
-  }
 }
 
 void GUI::processControllers() {
@@ -551,12 +456,6 @@ GUI::getSelectedSurfacesC0() const {
   return surfaces;
 }
 
-void GUI::createGregoryPatchUI() {
-  if (ImGui::Button("Create Gregory Patch")) {
-    createGregoryPatch();
-  }
-}
-
 void GUI::findIntersectionUI() {
   if (ImGui::Button("Find intersections")) {
     findIntersection(); //(getSelectedEntities(), *_scene);
@@ -581,7 +480,7 @@ void GUI::findIntersection() {
   _intersectionFinder.setSurfaces(surf0, surf1);
 
   if (_intersectionFinder.getIntersectionConfig().useCursor_) {
-    _intersectionFinder.setGuidancePoint(getCursor()->getPosition());
+    _intersectionFinder.setGuidancePoint(getCursorPosition());
   }
 
   auto intersection = _intersectionFinder.find(entities.size() == 1);
@@ -613,4 +512,36 @@ void GUI::findIntersection() {
                                                     surf1->wrapped(1));
   surfInter0->setIntersectionTexture(intersectionCurve->getFirstTexturePtr());
   surfInter1->setIntersectionTexture(intersectionCurve->getSecondTexturePtr());
+}
+
+void GUI::createEnitityUI() {
+  static EntityType selectedType = EntityType::Point; // default selected entity
+
+  // Find the display name for the current selection
+  std::string previewValue = "Select...";
+  for (const auto &[name, type] : _entityUtils.getStringEntityMap()) {
+    if (type == selectedType) {
+      previewValue = name;
+      break;
+    }
+  }
+
+  if (ImGui::BeginCombo("Creatable Entities", previewValue.c_str())) {
+    for (const auto &[name, entityType] : _entityUtils.getStringEntityMap()) {
+      bool isSelected = (selectedType == entityType);
+      if (ImGui::Selectable(name.c_str(), isSelected)) {
+        selectedType = entityType;
+      }
+      if (isSelected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+  const auto &builders = _entityUtils.getEntityBuilders();
+  auto it = builders.find(selectedType);
+  if (it != builders.end()) {
+    IEntityBuilder *builder = it->second.get();
+    builder->drawGui();
+  }
 }
