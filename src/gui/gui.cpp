@@ -7,7 +7,6 @@
 #include "cursorController.hpp"
 #include "entitiesTypes.hpp"
 #include "entityFactory.hpp"
-#include "gregorySurface.hpp"
 #include "imgui.h"
 #include "intersectable.hpp"
 #include "intersectionCurve.hpp"
@@ -89,15 +88,18 @@ void GUI::displayGUI() {
   ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Settings", nullptr, windowFlags)) {
     showFPSCounter();
+
     renderModelSettings();
     renderModelControllSettings();
     displayEntitiesList();
     renderCursorControllerSettings();
+
     createEnitityUI();
     findIntersectionUI();
-    _intersectionFinder.getIntersectionConfig().display();
+
     removeButtonUI();
     contractEdgeUI();
+
     ImGui::Separator();
     createSerializeUI();
     createLoadSceneUI();
@@ -458,8 +460,9 @@ GUI::getSelectedSurfacesC0() const {
 
 void GUI::findIntersectionUI() {
   if (ImGui::Button("Find intersections")) {
-    findIntersection(); //(getSelectedEntities(), *_scene);
+    findIntersection();
   }
+  _intersectionFinder.getIntersectionConfig().display();
 }
 void GUI::findIntersection() {
   auto entities = getSelectedEntities();
