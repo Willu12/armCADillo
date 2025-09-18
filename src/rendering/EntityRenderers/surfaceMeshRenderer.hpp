@@ -34,7 +34,7 @@ public:
         continue;
       }
       const auto &mesh = bezierSurface.getPolyMesh();
-      glLineWidth(2.0f);
+      // glLineWidth(2.0f);
 
       glBindVertexArray(mesh.getVAO());
 

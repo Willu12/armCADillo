@@ -75,6 +75,13 @@ public:
     }
   };
 
+  void setId(uint32_t id) {
+    _id = id;
+    if (id > kClassId) {
+      kClassId = id + 1;
+    }
+  }
+
 private:
   inline static int kClassId;
   std::shared_ptr<Mesh> _mesh;

@@ -109,7 +109,10 @@ EntityFactory::createCyllinderBezierSurfaceC0(const algebra::Vec3f &position,
                                               float h) {
   const auto &positions = BezierSurfaceC0::createCyllinderPositions(
       position, uPatches, vPatches, r, h);
-  const auto &points = createSurfacePoints(positions);
+  auto points = createSurfacePoints(positions);
+  for (int i = 0; i < (3 * uPatches + 1); ++i) {
+    points.push_back(points[i]);
+  }
   return std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Columns);
 }
@@ -120,9 +123,6 @@ EntityFactory::createFlatBezierSurfaceC2(const algebra::Vec3f &position,
   const auto &positions =
       BezierSurfaceC2::createFlatPositions(position, uPatches, vPatches, u, v);
   auto points = createSurfacePoints(positions);
-  for (int i = 0; i < (3 * uPatches + 1); ++i) {
-    points.push_back(points[i]);
-  }
 
   return std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Flat);

@@ -22,7 +22,7 @@ public:
       point.getName() = name;
     }
     auto p = std::make_shared<PointEntity>(point);
-    p->getId() = id;
+    p->setId(id);
     return p;
   }
 

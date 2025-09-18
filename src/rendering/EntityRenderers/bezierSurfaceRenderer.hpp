@@ -54,7 +54,7 @@ public:
         const auto &texture = bezierSurface.getIntersectionTexutre();
         texture.bind();
       }
-      glLineWidth(2.0f);
+      // glLineWidth(2.0f);
 
       glPatchParameteri(GL_PATCH_VERTICES, 16);
       glBindVertexArray(mesh.getVAO());

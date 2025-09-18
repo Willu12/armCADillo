@@ -72,15 +72,13 @@ private:
   }
 
   void scaleAroundCenterPoint(float deltaY) {
-    auto scaleFactor = 1.f;
-    if (deltaY > 0.f) {
-      scaleFactor = 1.05f;
+    if (deltaY == 0.f) {
+      return;
     }
-    if (deltaY < 0.f) {
-      scaleFactor = 0.95f;
-    }
+
+    const auto scaleFactor = deltaY > 0.f ? 1.02f : 0.98f;
     for (const auto &entity : _entites) {
-      if (entity->getScale()[0] * scaleFactor > 0.01f) {
+      if (entity->getScale()[0] * scaleFactor > 0.001f) {
         entity->scaleAroundPoint(scaleFactor, getTransformationPoint());
       }
     }

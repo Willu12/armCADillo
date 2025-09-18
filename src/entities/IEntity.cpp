@@ -55,7 +55,7 @@ void IEntity::scaleAroundPoint(float scaleFactor,
   auto translatedPosition = _position - centerPoint;
   translatedPosition = translatedPosition * scaleFactor;
 
-  _scale = _scale * scaleFactor;
+  //_scale = _scale * scaleFactor;
   _position = translatedPosition + centerPoint;
 }
 
