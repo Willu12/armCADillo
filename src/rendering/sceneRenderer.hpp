@@ -11,7 +11,6 @@
 #include "entitiesTypes.hpp"
 #include "gregorySurfaceRenderer.hpp"
 #include "grid.hpp"
-#include "imgui.h"
 #include "intersectionCurveRenderer.hpp"
 #include "pickingRenderer.hpp"
 #include "pickingTexture.hpp"
@@ -24,6 +23,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#define GLFW_INCLUDE_NONE
 
 #include "GLFW/glfw3.h"
 #include "vec.hpp"

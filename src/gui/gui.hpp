@@ -14,7 +14,6 @@
 #include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
-#include "scene.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"

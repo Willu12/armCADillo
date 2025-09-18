@@ -3,7 +3,6 @@
 #include "IEntityRenderer.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "camera.hpp"
-#include "glad/gl.h"
 #include "gregorySurface.hpp"
 #include "mesh.hpp"
 #include "pointRenderer.hpp"

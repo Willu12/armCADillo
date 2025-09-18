@@ -34,6 +34,12 @@ add_executable(${PROJECT_NAME}
  src/entities/entityFactory/entityFactory.cpp
  src/entities/IEntity.cpp
  src/gui/entityBuilders/entityBuilder.cpp
+ src/app/app.cpp
+ src/shader.cpp
+ src/meshes/bezierCurveMesh.cpp
+ src/meshes/bezierSurfaceMesh.cpp
+ src/meshes/gregoryMesh.cpp
+ src/meshes/mesh.cpp
  )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -53,6 +59,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/notifications/
     src/gui/visitors/
     src/intersections
+    src/app
 )
 
 target_link_libraries(${PROJECT_NAME} imgui algebra glad glfw GL dl stb_image nlohmann_json::nlohmann_json nfd)

@@ -1,5 +1,6 @@
 #pragma once
 #include "IEntity.hpp"
+#include "glad/gl.h"
 #include <vector>
 
 class IEntityRenderer {
