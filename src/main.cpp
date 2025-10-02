@@ -1,7 +1,8 @@
 #include "app.hpp"
+#include <cstdlib>
 
 int main(int, char **) {
   App app;
   app.run();
-  return 0;
+  return EXIT_SUCCESS;
 }
