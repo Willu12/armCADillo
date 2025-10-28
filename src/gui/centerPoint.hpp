@@ -2,14 +2,14 @@
 #include "IEntity.hpp"
 #include "point.hpp"
 #include <memory>
-#include <utility>
 
 class CenterPoint {
 public:
   CenterPoint() : _point(algebra::Vec3f()) {}
   void display(const std::vector<std::shared_ptr<IEntity>> &entities) {
-    if (entities.size() < 1)
+    if (entities.size() < 1) {
       return;
+    }
     updatePosition(entities);
   }
 

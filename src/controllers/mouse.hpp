@@ -74,8 +74,9 @@ private:
     ImVec2 currentMousePosition = ImGui::GetMousePos();
     float deltaY = _position[1] - currentMousePosition.y;
     float deltaX = _position[0] - currentMousePosition.x;
-    if (deltaY == 0.f && deltaX == 0.f)
+    if (deltaY == 0.f && deltaX == 0.f) {
       return;
+    }
 
     _lastDelta = algebra::Vec2f{deltaX, deltaY};
     _position = algebra::Vec2f(currentMousePosition.x, currentMousePosition.y);

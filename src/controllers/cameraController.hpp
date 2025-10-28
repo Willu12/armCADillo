@@ -50,7 +50,7 @@ private:
   std::shared_ptr<Camera> _camera;
 
   static constexpr float kCameraRotationSpeed =
-      std::numbers::pi_v<float> / 400.f;
-  static constexpr float kCameraMoveSpeed = 0.002f;
-  static constexpr float kZoomSpeed = 0.1f;
+      std::numbers::pi_v<float> / 401.f;
+  static constexpr float kCameraMoveSpeed = 0.05f;
+  static constexpr float kZoomSpeed = 1.1f;
 };

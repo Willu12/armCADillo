@@ -25,8 +25,9 @@ public:
 
     endPos[0] = 2.0f * endPos[0] / static_cast<float>(windowWidth) - 1.0f;
     endPos[1] = 1.0f - 2.0f * endPos[1] / static_cast<float>(windowHeight);
-    if (startPos[0] > endPos[0])
+    if (startPos[0] > endPos[0]) {
       std::swap(startPos[0], endPos[0]);
+	}
     if (startPos[1] > endPos[1])
       std::swap(startPos[1], endPos[1]);
 

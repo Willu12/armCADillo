@@ -88,9 +88,13 @@ public:
   }
 
   void rotateHorizontal(float angle) {
-    if (std::abs(_position._phi + angle) < std::numbers::pi_v<float> / 2.f) {
-      _position._phi += angle;
-    }
+
+    _position._phi += angle;
+
+    if (_position._phi > std::numbers::pi_v<float>)
+      _position._phi -= 2.f * std::numbers::pi_v<float>;
+    else if (_position._phi < -std::numbers::pi_v<float>)
+      _position._phi += 2.f * std::numbers::pi_v<float>;
   }
 
   void rotateVertical(float angle) {
