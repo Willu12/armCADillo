@@ -13,8 +13,8 @@ public:
 
 private:
   GLFWwindow *window_ = nullptr;
-  std::shared_ptr<Camera> camera_;
-  std::shared_ptr<Scene> scene_;
+  std::unique_ptr<Camera> camera_;
+  std::unique_ptr<Scene> scene_;
   std::unique_ptr<GUI> gui_;
   std::unique_ptr<SceneRenderer> sceneRenderer_;
 

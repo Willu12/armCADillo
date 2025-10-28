@@ -31,7 +31,7 @@
 
 class SceneRenderer {
 public:
-  SceneRenderer(std::shared_ptr<Camera> camera, PickingTexture &pickingTexture,
+  SceneRenderer(Camera *camera, PickingTexture &pickingTexture,
                 GLFWwindow *window)
       : _centerPointRenderer(*camera), _pickingRenderer(pickingTexture),
         _selectedPointsRenderer(*camera,
@@ -111,7 +111,7 @@ private:
   PickingRenderer _pickingRenderer;
   SelectionBoxRenderer _selectionBoxRenderer;
   PointRenderer _selectedPointsRenderer;
-  std::shared_ptr<Camera> _camera;
+  Camera *_camera;
   GLFWwindow *_window;
   Grid _grid;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IController.hpp"
+#include "camera.hpp"
 #include "cursor.hpp"
 #include "imgui.h"
 #include <memory>
@@ -8,9 +9,8 @@
 
 class CursorController : public IController {
 public:
-  CursorController(GLFWwindow *window, std::shared_ptr<Camera> camera)
-      : _window(window), _cursor(std::make_shared<Cursor>()),
-        _camera(std::move(camera)) {}
+  CursorController(GLFWwindow *window, Camera *camera)
+      : _window(window), _cursor(std::make_shared<Cursor>()), _camera(camera) {}
 
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
@@ -37,5 +37,5 @@ public:
 private:
   GLFWwindow *_window;
   std::shared_ptr<Cursor> _cursor;
-  std::shared_ptr<Camera> _camera;
+  Camera *_camera;
 };

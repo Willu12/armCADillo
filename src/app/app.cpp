@@ -42,11 +42,11 @@ void App::init() {
 
   glfwSetScrollCallback(window_, scrollCallback);
 
-  camera_ = std::make_shared<Camera>(window_);
-  scene_ = std::make_shared<Scene>(camera_);
-  gui_ = std::make_unique<GUI>(window_, scene_);
+  camera_ = std::make_unique<Camera>(window_);
+  scene_ = std::make_unique<Scene>(camera_.get());
+  gui_ = std::make_unique<GUI>(window_, scene_.get());
   sceneRenderer_ = std::make_unique<SceneRenderer>(
-      camera_, gui_->getPickingTexture(), window_);
+      camera_.get(), gui_->getPickingTexture(), window_);
 
   initImgui();
 }

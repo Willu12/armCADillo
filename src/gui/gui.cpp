@@ -1,4 +1,5 @@
 #include "gui.hpp"
+#include "IController.hpp"
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
 #include "bezierSurfaceC0.hpp"
@@ -12,9 +13,11 @@
 #include "intersectionCurve.hpp"
 #include "intersectionFinder.hpp"
 #include "jsonSerializer.hpp"
+#include "modelController.hpp"
 #include "nfd.h"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "selectionController.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
@@ -25,8 +28,8 @@
 #include <utility>
 #include <vector>
 
-GUI::GUI(GLFWwindow *window, std::shared_ptr<Scene> scene)
-    : _window(window), _scene(std::move(scene)), _entityFactory(_scene.get()),
+GUI::GUI(GLFWwindow *window, Scene *scene)
+    : _window(window), _scene(scene), _entityFactory(_scene),
       _guiSettingsVisitor(*this), _entityUtils(this, &_entityFactory) {
   initControllers();
 }
@@ -53,14 +56,14 @@ std::vector<std::shared_ptr<IEntity>> GUI::getSelectedPointsPointers() const {
 }
 
 std::shared_ptr<Cursor> GUI::getCursor() {
-  auto cursorController = std::dynamic_pointer_cast<CursorController>(
-      _controllers[static_cast<int>(ControllerKind::Cursor)]);
+  auto cursorController = dynamic_cast<CursorController *>(
+      _controllers[static_cast<int>(ControllerKind::Cursor)].get());
   return cursorController->getCursor();
 }
 
 const Cursor &GUI::getCursor() const {
-  auto cursorController = std::dynamic_pointer_cast<CursorController>(
-      _controllers[static_cast<int>(ControllerKind::Cursor)]);
+  auto cursorController = dynamic_cast<CursorController *>(
+      _controllers[static_cast<int>(ControllerKind::Cursor)].get());
   return *cursorController->getCursor();
 }
 
@@ -119,24 +122,24 @@ PickingTexture &GUI::getPickingTexture() {
 void GUI::initControllers() {
   _controllers.resize(4);
   _controllers[static_cast<int>(ControllerKind::Camera)] =
-      std::make_shared<CameraController>(_scene->getCamera());
+      std::make_unique<CameraController>(_scene->getCamera());
 
   _controllers[static_cast<int>(ControllerKind::Cursor)] =
-      std::make_shared<CursorController>(_window, _scene->getCamera());
+      std::make_unique<CursorController>(_window, _scene->getCamera());
 
   _controllers[static_cast<int>(ControllerKind::Model)] =
-      std::make_shared<ModelController>(
+      std::make_unique<ModelController>(
           _centerPoint, getCursor(), _selectedEntities, *_scene->getCamera());
   _controllers[static_cast<int>(ControllerKind::Selection)] =
-      std::make_shared<SelectionController>(_window, _scene, _selectedEntities);
+      std::make_unique<SelectionController>(_window, _scene, _selectedEntities);
 }
 
 void GUI::renderModelControllSettings() {
   const char *axisOptions[] = {"X axis", "Y axis", "Z axis"};
   const char *transformationCenterOptions[] = {"Center Point", "Cursor"};
 
-  auto modelController = std::dynamic_pointer_cast<ModelController>(
-      _controllers[static_cast<int>(ControllerKind::Model)]);
+  auto modelController = dynamic_cast<ModelController *>(
+      _controllers[static_cast<int>(ControllerKind::Model)].get());
 
   if (modelController) {
     int selectedIndex = static_cast<int>(modelController->_transformationAxis);
@@ -275,14 +278,14 @@ void GUI::showFPSCounter() {
   ImGui::Text("FPS: %.1f", _fps);
 }
 
-std::shared_ptr<ModelController> GUI::getModelController() {
+ModelController *GUI::getModelController() {
   auto &controller = _controllers[static_cast<int>(ControllerKind::Model)];
-  return std::dynamic_pointer_cast<ModelController>(controller);
+  return dynamic_cast<ModelController *>(controller.get());
 }
 
-std::shared_ptr<SelectionController> GUI::getSelectionController() {
+SelectionController *GUI::getSelectionController() {
   auto &controller = _controllers[static_cast<int>(ControllerKind::Selection)];
-  return std::dynamic_pointer_cast<SelectionController>(controller);
+  return dynamic_cast<SelectionController *>(controller.get());
 }
 
 void GUI::selectEntity(int entityIndex) {
@@ -308,18 +311,18 @@ void GUI::unselectEntity(int entityIndex) {
       _selectedEntities.end());
 }
 
-std::vector<std::shared_ptr<IController>> GUI::getActiveControllers() {
-  std::vector<std::shared_ptr<IController>> activeControllers;
+std::vector<IController *> GUI::getActiveControllers() {
+  std::vector<IController *> activeControllers;
 
   activeControllers.push_back(
-      _controllers[static_cast<int>(ControllerKind::Camera)]);
+      _controllers[static_cast<int>(ControllerKind::Camera)].get());
   activeControllers.push_back(
-      _controllers[static_cast<int>(ControllerKind::Cursor)]);
+      _controllers[static_cast<int>(ControllerKind::Cursor)].get());
   // activeControllers.push_back(
   //   _controllers[static_cast<int>(ControllerKind::Selection)]);
 
   activeControllers.push_back(
-      _controllers[static_cast<int>(ControllerKind::Model)]);
+      _controllers[static_cast<int>(ControllerKind::Model)].get());
 
   return activeControllers;
 }

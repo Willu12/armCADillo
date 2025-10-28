@@ -10,7 +10,7 @@ public:
       : _shader("../resources/shaders/gridVertexShader.hlsl",
                 "../resources/shaders/gridFragmentShader.hlsl") {}
 
-  void render(std::shared_ptr<Camera> camera) {
+  void render(const Camera *camera) {
     _shader.use();
     _shader.setViewMatrix(camera->viewMatrix());
     _shader.setProjectionMatrix(camera->projectionMatrix());

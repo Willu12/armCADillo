@@ -4,6 +4,7 @@
 #include "ISubscriber.hpp"
 #include "bSplineCurve.hpp"
 #include "bezierSurface.hpp"
+#include "camera.hpp"
 #include "entitiesTypes.hpp"
 #include "gregorySurface.hpp"
 #include "intersectionCurve.hpp"
@@ -26,7 +27,7 @@ void Scene::addEntity(EntityType entityType,
   _entities[entityType].emplace_back(entity);
 }
 
-std::shared_ptr<Camera> Scene::getCamera() { return _camera; }
+Camera *Scene::getCamera() { return _camera; }
 void Scene::removeEntities(
     std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
 

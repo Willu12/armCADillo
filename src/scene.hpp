@@ -7,16 +7,15 @@
 
 #include <memory>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 class Scene {
 public:
-  explicit Scene(std::shared_ptr<Camera> camera) : _camera(std::move(camera)){};
+  explicit Scene(Camera *camera) : _camera(camera){};
 
   std::vector<std::shared_ptr<IEntity>> getEntites() const;
   void addEntity(EntityType entityType, const std::shared_ptr<IEntity> &entity);
-  std::shared_ptr<Camera> getCamera();
+  Camera *getCamera();
   void removeEntities(std::vector<std::shared_ptr<IEntity>> &entitiesToRemove);
   const std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>> &
   getGroupedEntities() const;
@@ -28,7 +27,7 @@ public:
   friend class GUI;
 
 private:
-  std::shared_ptr<Camera> _camera;
+  Camera *_camera;
   std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>>
       _entities;
   std::vector<std::shared_ptr<IEntity>> _deadEntities;

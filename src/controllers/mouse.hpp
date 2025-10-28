@@ -8,7 +8,7 @@
 
 class Mouse {
 public:
-  void process(const std::vector<std::shared_ptr<IController>> &controllers) {
+  void process(const std::vector<IController *> &controllers) {
     if (ImGui::IsAnyItemHovered())
       return;
     processScroll(controllers);
@@ -23,8 +23,9 @@ public:
       } else if (_clicked) {
         updateDelta();
         for (const auto &controller : controllers)
-          if (controller)
+          if (controller) {
             controller->process(*this);
+          }
       }
     } else if (AllButtonsUp()) {
       _clicked = false;
@@ -63,11 +64,12 @@ private:
            !ImGui::IsMouseDown(ImGuiMouseButton_Right);
   }
 
-  void
-  processScroll(const std::vector<std::shared_ptr<IController>> &controllers) {
-    for (const auto &controller : controllers)
-      if (controller)
+  void processScroll(const std::vector<IController *> &controllers) {
+    for (const auto &controller : controllers) {
+      if (controller) {
         controller->processScroll();
+      }
+    }
   }
 
   void updateDelta() {

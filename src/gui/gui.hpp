@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GuiVisitor.hpp"
+#include "IController.hpp"
 #include "IEntity.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "centerPoint.hpp"
@@ -11,9 +12,11 @@
 #include "intersectionFinder.hpp"
 #include "jsonDeserializer.hpp"
 #include "jsonSerializer.hpp"
+#include "modelController.hpp"
 #include "mouse.hpp"
 #include "optional"
 #include "pointEntity.hpp"
+#include "selectionController.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
@@ -32,7 +35,7 @@ enum class ControllerKind : uint8_t {
 
 class GUI {
 public:
-  GUI(GLFWwindow *window, std::shared_ptr<Scene> scene);
+  GUI(GLFWwindow *window, Scene *scene);
   IController &getController();
 
   std::vector<std::shared_ptr<IEntity>> getEntities() const;
@@ -67,12 +70,12 @@ public:
 
 private:
   GLFWwindow *_window;
-  std::shared_ptr<Scene> _scene;
+  Scene *_scene;
   EntityFactory _entityFactory;
   std::vector<std::shared_ptr<IEntity>> _selectedEntities;
   std::vector<std::shared_ptr<VirtualPoint>> _selectedVirtualPoints;
   std::vector<std::shared_ptr<VirtualPoint>> _virtualPoints;
-  std::vector<std::shared_ptr<IController>> _controllers;
+  std::vector<std::unique_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   CenterPoint _centerPoint;
   Mouse _mouse;
@@ -114,9 +117,9 @@ private:
   void calculateFPS();
   void showFPSCounter();
 
-  std::shared_ptr<ModelController> getModelController();
-  std::shared_ptr<SelectionController> getSelectionController();
-  std::vector<std::shared_ptr<IController>> getActiveControllers();
+  ModelController *getModelController();
+  SelectionController *getSelectionController();
+  std::vector<IController *> getActiveControllers();
 
   std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
 };

@@ -9,10 +9,9 @@
 
 class CameraController : public IController {
 public:
-  explicit CameraController(std::shared_ptr<Camera> camera)
-      : _camera(std::move(camera)) {}
+  explicit CameraController(Camera *camera) : _camera(camera) {}
 
-  std::shared_ptr<Camera> getCamera() const { return _camera; }
+  Camera *getCamera() const { return _camera; }
 
   bool processScroll() override {
     float scroll = ImGui::GetIO().MouseWheel;
@@ -47,7 +46,7 @@ public:
   }
 
 private:
-  std::shared_ptr<Camera> _camera;
+  Camera *_camera;
 
   static constexpr float kCameraRotationSpeed =
       std::numbers::pi_v<float> / 401.f;

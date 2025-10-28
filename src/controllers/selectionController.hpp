@@ -14,10 +14,9 @@
 
 class SelectionController : public IController {
 public:
-  SelectionController(GLFWwindow *window, std::shared_ptr<Scene> scene,
+  SelectionController(GLFWwindow *window, const Scene *scene,
                       std::vector<std::shared_ptr<IEntity>> &selectedEntities)
-      : _window(window), _scene(std::move(scene)),
-        _selectedEntities(selectedEntities) {
+      : _window(window), _scene(scene), _selectedEntities(selectedEntities) {
 
     _pickingTexture.init(GLFWHelper::getWidth(_window),
                          GLFWHelper::getHeight(_window));
@@ -32,7 +31,7 @@ public:
 
 private:
   GLFWwindow *_window;
-  std::shared_ptr<Scene> _scene;
+  const Scene *_scene;
   std::vector<std::shared_ptr<IEntity>> &_selectedEntities;
   PickingTexture _pickingTexture;
   bool _selectionBoxActive = false;
