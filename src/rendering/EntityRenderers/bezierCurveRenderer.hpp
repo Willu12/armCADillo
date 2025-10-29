@@ -1,10 +1,9 @@
 #pragma once
 
 #include "IEntityRenderer.hpp"
-#include "bezierCurveC0.hpp"
+#include "bezierCurve.hpp"
 #include "camera.hpp"
 #include "glfwHelper.hpp"
-#include "mesh.hpp"
 #include "shader.hpp"
 
 #include "GLFW/glfw3.h"

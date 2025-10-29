@@ -21,18 +21,19 @@ public:
 
   void updatePosition(float x, float y, const Camera &camera) {
     auto projection = camera.projectionMatrix();
-    auto sceneCursorPosition =
+    auto scene_cursor_pos =
         projection * (camera.viewMatrix() * _position.toHomogenous());
 
-    sceneCursorPosition = sceneCursorPosition * (1.0f / sceneCursorPosition[3]);
-    float z_ndc = sceneCursorPosition[2];
+    scene_cursor_pos = scene_cursor_pos * (1.0f / scene_cursor_pos[3]);
+    float z_ndc = scene_cursor_pos[2];
 
-    auto screenPosition = algebra::Vec3f(x, y, z_ndc).toHomogenous();
+    auto screen_position = algebra::Vec3f(x, y, z_ndc).toHomogenous();
 
-    auto viewPosition = camera.inverseProjectionMatrix() * screenPosition;
-    viewPosition = viewPosition * (1.f / viewPosition[3]);
-    auto worldPos = camera.inverseViewMatrix() * viewPosition;
-    _position = worldPos.fromHomogenous();
+    auto view_position = camera.inverseProjectionMatrix() * screen_position;
+    view_position = view_position * (1.f / view_position[3]);
+
+    auto world_position = camera.inverseViewMatrix() * view_position;
+    _position = world_position.fromHomogenous();
   }
 
   void updateMesh() override { _mesh = generateMesh(); }

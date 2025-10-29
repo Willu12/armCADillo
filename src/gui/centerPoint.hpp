@@ -1,7 +1,6 @@
 #pragma once
 #include "IEntity.hpp"
 #include "point.hpp"
-#include <memory>
 
 class CenterPoint {
 public:
@@ -20,13 +19,13 @@ private:
   Point _point;
 
   void updatePosition(const std::vector<IEntity *> &entities) {
-    auto averagePosition = algebra::Vec3f();
+    auto average_position = algebra::Vec3f();
 
     for (const auto &entity : entities) {
-      averagePosition = averagePosition + entity->getPosition();
+      average_position = average_position + entity->getPosition();
     }
-    averagePosition = averagePosition / static_cast<float>(entities.size());
+    average_position = average_position / static_cast<float>(entities.size());
 
-    _point.updatePosition(averagePosition);
+    _point.updatePosition(average_position);
   }
 };

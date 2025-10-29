@@ -1,11 +1,10 @@
 #pragma once
 
-#include "bezierSurface.hpp"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "pointEntity.hpp"
+#include "surface.hpp"
 #include "vec.hpp"
 #include <functional>
-#include <utility>
 
 class IEntity;
 class Scene;

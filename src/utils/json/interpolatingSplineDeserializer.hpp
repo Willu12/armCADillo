@@ -4,6 +4,8 @@
 #include "interpolatingSplineC2.hpp"
 #include <memory>
 
+#include "nlohmann/json.hpp"
+
 class InterpolatingSplineDeserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
@@ -16,13 +18,13 @@ public:
 
     const auto points = getPoints(j, scene);
 
-    auto interpolatingSpline = std::make_unique<InterpolatingSplineC2>(points);
+    auto interpolating_spline = std::make_unique<InterpolatingSplineC2>(points);
     if (j.contains("name")) {
       j.at("name").get_to(name);
-      interpolatingSpline->getName() = name;
+      interpolating_spline->getName() = name;
     }
-    interpolatingSpline->getId() = id;
-    return interpolatingSpline;
+    interpolating_spline->getId() = id;
+    return interpolating_spline;
   }
 
 private:

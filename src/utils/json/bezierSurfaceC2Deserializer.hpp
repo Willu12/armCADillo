@@ -2,9 +2,8 @@
 
 #include "bezierSurfaceC2.hpp"
 #include "entityDeserializer.hpp"
-#include "surface.hpp"
+#include "nlohmann/json.hpp"
 #include <memory>
-#include <ostream>
 #include <print>
 
 class BezierSurfaceC2Deserializer : public EntityDeserializer {
@@ -19,24 +18,24 @@ public:
 
     const auto points = getPoints(j, scene);
 
-    uint32_t uPoints{};
-    uint32_t vPoints{};
-    j.at("size").at("u").get_to(uPoints);
-    j.at("size").at("v").get_to(vPoints);
+    uint32_t u_points{};
+    uint32_t v_points{};
+    j.at("size").at("u").get_to(u_points);
+    j.at("size").at("v").get_to(v_points);
 
-    auto connectionType =
-        EntityDeserializer::getConnectionType(points, vPoints, uPoints, 3);
+    auto connection_type =
+        EntityDeserializer::getConnectionType(points, v_points, u_points, 3);
 
-    auto bezierSurfaceC2 = std::make_unique<BezierSurfaceC2>(
-        points, uPoints - 3, vPoints - 3, connectionType);
+    auto bezier_surface_c2 = std::make_unique<BezierSurfaceC2>(
+        points, u_points - 3, v_points - 3, connection_type);
     if (j.contains("name")) {
       j.at("name").get_to(name);
-      bezierSurfaceC2->getName() = name;
+      bezier_surface_c2->getName() = name;
     }
-    j.at("samples").at("u").get_to(bezierSurfaceC2->getMeshDensity().s);
-    j.at("samples").at("v").get_to(bezierSurfaceC2->getMeshDensity().t);
-    bezierSurfaceC2->getId() = id;
-    return bezierSurfaceC2;
+    j.at("samples").at("u").get_to(bezier_surface_c2->getMeshDensity().s);
+    j.at("samples").at("v").get_to(bezier_surface_c2->getMeshDensity().t);
+    bezier_surface_c2->getId() = id;
+    return bezier_surface_c2;
   }
 
 private:

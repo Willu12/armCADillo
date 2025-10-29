@@ -25,20 +25,20 @@ public:
 
   void loadScence(const std::string &path, Scene &scene) const {
     auto json = readJson(path);
-    auto geometryJson = json.at("geometry");
-    auto pointJson = json.at("points");
+    auto geometry_json = json.at("geometry");
+    auto point_json = json.at("points");
 
-    for (const auto &json : pointJson) {
+    for (const auto &json : point_json) {
       const auto &deserializer = _deserializerMap.at(EntityType::Point);
       auto entity = deserializer->deserializeEntity(json, scene);
       scene.addEntity(EntityType::Point, std::move(entity));
     }
 
-    for (const auto &json : geometryJson) {
-      const auto entityType = _typeMap.at(json.at("objectType"));
-      const auto &deserializer = _deserializerMap.at(entityType);
+    for (const auto &json : geometry_json) {
+      const auto entity_type = _typeMap.at(json.at("objectType"));
+      const auto &deserializer = _deserializerMap.at(entity_type);
       auto entity = deserializer->deserializeEntity(json, scene);
-      scene.addEntity(entityType, std::move(entity));
+      scene.addEntity(entity_type, std::move(entity));
     }
   }
 

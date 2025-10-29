@@ -6,7 +6,7 @@
 #include "texture.hpp"
 class CenterPointRenderer {
 public:
-  CenterPointRenderer(const Camera &camera)
+  explicit CenterPointRenderer(const Camera &camera)
       : _camera(camera),
         _shader("../resources/shaders/textureShader.vert",
                 "../resources/shaders/texturedBillboardShader.frag"),

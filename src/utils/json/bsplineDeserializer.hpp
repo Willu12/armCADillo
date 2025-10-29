@@ -2,8 +2,8 @@
 
 #include "bSplineCurve.hpp"
 #include "entityDeserializer.hpp"
+#include "nlohmann/json.hpp"
 #include <memory>
-
 class BSplineDeserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
@@ -16,13 +16,13 @@ public:
 
     const auto points = getPoints(j, scene);
 
-    auto bSplineCurve = std::make_unique<BSplineCurve>(points);
+    auto b_spline = std::make_unique<BSplineCurve>(points);
     if (j.contains("name")) {
       j.at("name").get_to(name);
-      bSplineCurve->getName() = name;
+      b_spline->getName() = name;
     }
-    bSplineCurve->getId() = id;
-    return bSplineCurve;
+    b_spline->getId() = id;
+    return b_spline;
   }
 
 private:

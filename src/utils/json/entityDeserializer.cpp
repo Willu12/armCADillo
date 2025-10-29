@@ -1,21 +1,19 @@
 #include "entityDeserializer.hpp"
-#include "IEntity.hpp"
-#include "bezierSurface.hpp"
+#include "nlohmann/json.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
 #include <functional>
-#include <memory>
 
 using json = nlohmann::json;
 
 algebra::Vec3f EntityDeserializer::deserializePosition(const json &j) const {
   algebra::Vec3f pos;
-  const auto &jPos = j.at("position");
-  jPos.at("x").get_to(pos[0]);
-  jPos.at("y").get_to(pos[1]);
-  jPos.at("z").get_to(pos[2]);
+  const auto &j_pos = j.at("position");
+  j_pos.at("x").get_to(pos[0]);
+  j_pos.at("y").get_to(pos[1]);
+  j_pos.at("z").get_to(pos[2]);
   return pos;
 }
 
@@ -29,72 +27,74 @@ algebra::Vec3f EntityDeserializer::deserializeScale(const json &j) const {
 
 algebra::Quaternion<float>
 EntityDeserializer::deserializeRotation(const json &j) const {
-  algebra::Quaternion<float> Q;
-  const auto &jQ = j.at("rotation");
-  jQ.at("x").get_to(Q.x());
-  jQ.at("y").get_to(Q.y());
-  jQ.at("z").get_to(Q.z());
-  jQ.at("w").get_to(Q.w());
-  return Q;
+  algebra::Quaternion<float> quaternion;
+  const auto &j_quaternion = j.at("rotation");
+  j_quaternion.at("x").get_to(quaternion.x());
+  j_quaternion.at("y").get_to(quaternion.y());
+  j_quaternion.at("z").get_to(quaternion.z());
+  j_quaternion.at("w").get_to(quaternion.w());
+  return quaternion;
 }
 
 std::vector<std::reference_wrapper<PointEntity>>
 EntityDeserializer::getPoints(const json &j, const Scene &scene) const {
-  const auto &controlPointsJson = j.at("controlPoints");
+  const auto &control_points_json = j.at("controlPoints");
   const auto &points = scene.getPoints();
-  std::vector<std::reference_wrapper<PointEntity>> pointsRef;
+  std::vector<std::reference_wrapper<PointEntity>> points_references;
 
-  for (const auto &point : controlPointsJson) {
-    const auto &Id = point.at("id");
+  for (const auto &point : control_points_json) {
+    const auto &id = point.at("id");
     const auto iter = std::ranges::find_if(
-        points, [Id](const auto &p) { return p->getId() == Id; });
+        points, [id](const auto &p) { return p->getId() == id; });
 
     if (iter != points.end()) {
       auto *entity = dynamic_cast<PointEntity *>(*iter);
-      pointsRef.emplace_back(*entity);
+      points_references.emplace_back(*entity);
     }
   }
-  return pointsRef;
+  return points_references;
 }
 
 algebra::ConnectionType EntityDeserializer::getConnectionType(
     const std::vector<std::reference_wrapper<PointEntity>> &points,
     size_t rowCount, size_t colCount, size_t degree) const {
 
-  bool wrapV = true;
+  bool wrap_v = true;
   for (size_t row = 0; row < rowCount; ++row) {
     for (size_t k = 0; k < degree; ++k) {
-      size_t leftIndex = row * colCount + k;
-      size_t rightIndex = row * colCount + (colCount - degree + k);
-      if (points[leftIndex].get().getId() != points[rightIndex].get().getId()) {
-        wrapV = false;
+      size_t left_index = row * colCount + k;
+      size_t right_index = row * colCount + (colCount - degree + k);
+      if (points[left_index].get().getId() !=
+          points[right_index].get().getId()) {
+        wrap_v = false;
         break;
       }
     }
-    if (!wrapV) {
+    if (!wrap_v) {
       break;
     }
   }
 
-  bool wrapU = true;
+  bool wrap_u = true;
   for (size_t col = 0; col < colCount; ++col) {
     for (size_t k = 0; k < degree; ++k) {
-      size_t topIndex = k * colCount + col;
-      size_t bottomIndex = (rowCount - degree + k) * colCount + col;
-      if (points[topIndex].get().getId() != points[bottomIndex].get().getId()) {
-        wrapU = false;
+      size_t top_index = k * colCount + col;
+      size_t bottom_index = (rowCount - degree + k) * colCount + col;
+      if (points[top_index].get().getId() !=
+          points[bottom_index].get().getId()) {
+        wrap_u = false;
         break;
       }
     }
-    if (!wrapU) {
+    if (!wrap_u) {
       break;
     }
   }
 
-  if (wrapU) {
+  if (wrap_u) {
     return algebra::ConnectionType::Rows;
   }
-  if (wrapV) {
+  if (wrap_v) {
     return algebra::ConnectionType::Columns;
   }
   return algebra::ConnectionType::Flat;

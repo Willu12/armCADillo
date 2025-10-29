@@ -1,5 +1,6 @@
 #include "bezierCurveC0.hpp"
 #include "bezierCurveC0Deserializer.hpp"
+#include "nlohmann/json.hpp"
 #include <memory>
 
 std::unique_ptr<IEntity>
@@ -11,11 +12,11 @@ BezierCurveC0Deserializer::deserializeEntity(const json &j,
 
   const auto points = getPoints(j, scene);
 
-  auto bezierCurveC0 = std::make_unique<BezierCurveC0>(points);
+  auto bezier_curve_c0 = std::make_unique<BezierCurveC0>(points);
   if (j.contains("name")) {
     j.at("name").get_to(name);
-    bezierCurveC0->getName() = name;
+    bezier_curve_c0->getName() = name;
   }
-  bezierCurveC0->getId() = id;
-  return std::move(bezierCurveC0);
+  bezier_curve_c0->getId() = id;
+  return std::move(bezier_curve_c0);
 }

@@ -4,12 +4,13 @@
 #include "pointEntity.hpp"
 #include <memory>
 
+#include "nlohmann/json.hpp"
 class PointDeserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
 public:
   std::unique_ptr<IEntity> deserializeEntity(const json &j,
-                                             Scene &scene) const final {
+                                             Scene & /*scene*/) const final {
     std::string name;
     int id = -1;
     j.at("id").get_to(id);
