@@ -109,6 +109,8 @@ void App::mainLoop() {
 }
 
 void App::cleanUp() {
+  scene_.reset();
+  gui_.reset();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();

@@ -5,10 +5,8 @@
 #include "intersectionTexture.hpp"
 #include "point.hpp"
 #include "polyline.hpp"
-#include "texture.hpp"
 #include "vec.hpp"
 #include <memory>
-#include <ranges>
 
 class IntersectionCurve : public IEntity {
 public:

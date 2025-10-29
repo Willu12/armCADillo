@@ -1,11 +1,8 @@
 #pragma once
 
 #include "IEntity.hpp"
-#include "IGroupedEntity.hpp"
-#include "ISubscriber.hpp"
 #include "mesh.hpp"
 #include "vec.hpp"
-#include <functional>
 
 class Polyline : public IEntity {
 public:
@@ -18,8 +15,8 @@ public:
   std::vector<algebra::Vec3f> getSparsePoints(float delta) const;
 
 private:
-  std::vector<algebra::Vec3f> _points;
-  std::unique_ptr<Mesh> _mesh;
+  std::vector<algebra::Vec3f> points_;
+  std::unique_ptr<Mesh> mesh_;
   inline static int kClassId = 0;
 
   std::unique_ptr<Mesh> generateMesh();

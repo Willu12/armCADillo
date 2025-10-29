@@ -11,6 +11,7 @@
 #include "bezierSurface.hpp"
 #include "interpolatingSplineC2.hpp"
 #include "intersectionCurve.hpp"
+#include "intersectionTexture.hpp"
 #include "pointEntity.hpp"
 #include "polyline.hpp"
 #include "scene.hpp"
@@ -40,12 +41,12 @@ bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   ImGui::InputText("Name", &bezierCurve.getName());
   ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
 
-  auto allPoints = _gui.getPoints();
+  auto all_points = _gui.getPoints();
   auto points = bezierCurve.getPoints();
-  auto remainingPoints = getRemainingPoints(allPoints, points);
+  auto remaining_points = getRemainingPoints(all_points, points);
 
   renderPointList(points, "Bezier curve points");
-  renderPointList(remainingPoints, "remainingPoints");
+  renderPointList(remaining_points, "remainingPoints");
   renderAddingSelectedPoints(bezierCurve);
   ImGui::SameLine();
   renderRemovingSelectedPoints(bezierCurve);
@@ -58,20 +59,20 @@ bool GuiVisitor::visitBSplineCurve(BSplineCurve &bezierCurve) {
   ImGui::Checkbox("Show Bezier Points", &bezierCurve.showBezierPoints());
   ImGui::Checkbox("Show Polygonal Line", &bezierCurve.showPolyLine());
 
-  auto allPoints = _gui.getPoints();
+  auto all_points = _gui.getPoints();
   auto points = bezierCurve.getPoints();
-  auto remainingPoints = getRemainingPoints(allPoints, points);
+  auto remaining_points = getRemainingPoints(all_points, points);
 
   renderPointList(points, "Bezier curve points");
-  renderPointList(remainingPoints, "remainingPoints");
+  renderPointList(remaining_points, "remainingPoints");
   renderAddingSelectedPoints(bezierCurve);
   ImGui::SameLine();
   renderRemovingSelectedPoints(bezierCurve);
 
   if (bezierCurve.showBezierPoints()) {
-    const auto &vPoints = bezierCurve.getVirtualPoints();
-    renderVirtualPointList(vPoints);
-    _gui.setVirtualPoints(vPoints, _selectedVirtualPoints);
+    const auto &virtual_points = bezierCurve.getVirtualPoints();
+    renderVirtualPointList(virtual_points);
+    _gui.setVirtualPoints(virtual_points, _selectedVirtualPoints);
   } else {
     _gui.clearVirtualPoints();
   }
@@ -98,12 +99,13 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
   if (ImGui::Button("Select Elements points")) {
     std::unordered_set<std::reference_wrapper<PointEntity>,
                        PointEntity::RefHash, PointEntity::RefEq>
-        pointSet;
+        points_set;
 
     for (const auto &point : bezierSurface.getPoints()) {
-      pointSet.insert(point);
+      points_set.insert(point);
     }
-    for (const auto &p : pointSet) {
+
+    for (const auto &p : points_set) {
       _gui.selectEntity(p);
     }
   }
@@ -145,99 +147,85 @@ bool GuiVisitor::visitGregorySurface(GregorySurface &gregorySurface) {
   ImGui::InputText("Name", &gregorySurface.getName());
   ImGui::Checkbox("Show Tangent Vectors", &gregorySurface.showTangentVectors());
 
-  auto &meshDensities = gregorySurface.getMeshDensities();
+  auto &mesh_densities = gregorySurface.getMeshDensities();
   bool change = false;
-  for (int i = 0; i < meshDensities.size(); ++i) {
+  for (int i = 0; i < mesh_densities.size(); ++i) {
     ImGui::Text("Density of Quad %d", i);
-    std::string labelH = "Horizontal Density##" + std::to_string(i);
-    std::string labelV = "Vertical Density##" + std::to_string(i);
-    change |= ImGui::SliderInt(labelH.c_str(), &meshDensities[i].s, 3, 64);
-    change |= ImGui::SliderInt(labelV.c_str(), &meshDensities[i].t, 3, 64);
+    std::string label_h = "Horizontal Density##" + std::to_string(i);
+    std::string label_v = "Vertical Density##" + std::to_string(i);
+    change |= ImGui::SliderInt(label_h.c_str(), &mesh_densities[i].s, 3, 64);
+    change |= ImGui::SliderInt(label_v.c_str(), &mesh_densities[i].t, 3, 64);
   }
   return change;
 }
-
 bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
   ImGui::InputText("Name", &intersectionCurve.getName());
 
   auto &texture1 = intersectionCurve.getFirstTexture();
   auto &texture2 = intersectionCurve.getSecondTexture();
 
-  static bool showFirstTexture = false;
-  static bool showSecondTexture = false;
-  ImGui::Checkbox("Show First intersection Texture", &showFirstTexture);
-  ImGui::Checkbox(" Show Second intersection Texture", &showSecondTexture);
+  static bool show_first_texture = false;
+  static bool show_second_texture = false;
 
-  if (showFirstTexture) {
-    ImGui::SetNextWindowSize(ImVec2(330, 330), ImGuiCond_Always);
-    ImGui::Begin("first Texture", nullptr, ImGuiWindowFlags_NoResize);
+  ImGui::Checkbox("Show First intersection Texture", &show_first_texture);
+  ImGui::Checkbox("Show Second intersection Texture", &show_second_texture);
 
-    ImVec2 imageSize(300, 300);
-    ImVec2 imagePos = ImGui::GetCursorScreenPos();
+  auto render_texture_window = [](const std::string &window_name,
+                                  bool show_texture,
+                                  IntersectionTexture &texture) {
+    if (show_texture) {
+      ImGui::SetNextWindowSize(ImVec2(330, 330), ImGuiCond_Always);
+      ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
 
-    ImGui::Image(static_cast<ImTextureID>(
-                     static_cast<intptr_t>(texture1.getTextureId())),
-                 imageSize);
+      ImVec2 image_size(300, 300);
+      ImVec2 image_pos = ImGui::GetCursorScreenPos();
+      ImGui::Image(static_cast<ImTextureID>(
+                       static_cast<intptr_t>(texture.getTextureId())),
+                   image_size);
 
-    if (ImGui::IsItemHovered()) {
-      ImVec2 mousePos = ImGui::GetMousePos();
-      ImVec2 localPos =
-          ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+      if (ImGui::IsItemHovered()) {
+        ImVec2 mouse_pos = ImGui::GetMousePos();
+        ImVec2 local_pos =
+            ImVec2(mouse_pos.x - image_pos.x, mouse_pos.y - image_pos.y);
 
-      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        texture1.floodFill(localPos.x, localPos.y, true);
-      } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-        texture1.floodFill(localPos.x, localPos.y, false);
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+          texture.floodFill(local_pos.x, local_pos.y, true);
+        } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+          texture.floodFill(local_pos.x, local_pos.y, false);
+        }
       }
+
+      ImGui::End();
     }
+  };
 
-    ImGui::End();
-  }
-  if (showSecondTexture) {
-    ImGui::SetNextWindowSize(ImVec2(330, 330), ImGuiCond_Always);
-    ImGui::Begin("second Texture", nullptr, ImGuiWindowFlags_NoResize);
+  render_texture_window("First Texture", show_first_texture, texture1);
+  render_texture_window("Second Texture", show_second_texture, texture2);
 
-    ImVec2 imageSize(300, 300);
-    ImVec2 imagePos = ImGui::GetCursorScreenPos();
-    ImGui::Image(static_cast<ImTextureID>(
-                     static_cast<intptr_t>(texture2.getTextureId())),
-                 imageSize);
-
-    if (ImGui::IsItemHovered()) {
-      ImVec2 mousePos = ImGui::GetMousePos();
-      ImVec2 localPos =
-          ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
-
-      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        texture2.floodFill(localPos.x, localPos.y, true);
-      } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-        texture2.floodFill(localPos.x, localPos.y, false);
-      }
-    }
-
-    ImGui::End();
-  }
-
-  if (ImGui::Button("Convert to interoplating spline")) {
-
+  // Convert to  spline
+  if (ImGui::Button("Convert to interpolating spline")) {
     std::vector<std::reference_wrapper<PointEntity>> points;
     auto &scene = _gui.getScene();
+
     for (const auto &p :
          intersectionCurve.getPolyline().getSparsePoints(0.5f)) {
       auto point = std::make_unique<PointEntity>(p);
       scene.addEntity(EntityType::Point, std::move(point));
       points.emplace_back(*point);
     }
+
     if (intersectionCurve.isLooped() &&
         points.front().get().getId() != points.back().get().getId()) {
       points.push_back(points.front());
     }
 
-    auto interpolatingSpline = std::make_unique<InterpolatingSplineC2>(points);
+    auto interpolating_spline = std::make_unique<InterpolatingSplineC2>(points);
     scene.addEntity(EntityType::InterpolatingSplineCurve,
-                    std::move(interpolatingSpline));
+                    std::move(interpolating_spline));
+
     intersectionCurve.isDead() = true;
   }
+
   return false;
 }
 
@@ -274,6 +262,11 @@ void GuiVisitor::renderPointList(
 
   std::unordered_map<uint32_t, uint32_t> pointCount;
   ImGui::LabelText("##", "%s", label.c_str());
+
+  const ImVec2 list_size = ImVec2(0, 100);
+  ImGui::BeginChild(label.c_str(), list_size, true,
+                    ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
   for (const auto &entity : entities) {
     bool isSelected = isEntitySelected(entity);
     auto id = entity.get().getId();
@@ -295,6 +288,8 @@ void GuiVisitor::renderPointList(
       }
     }
   }
+
+  ImGui::EndChild();
 }
 
 std::vector<std::reference_wrapper<PointEntity>> GuiVisitor::getRemainingPoints(

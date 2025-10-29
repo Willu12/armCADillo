@@ -62,9 +62,9 @@ Cursor *GUI::getCursor() {
 }
 
 const Cursor &GUI::getCursor() const {
-  auto cursorController = dynamic_cast<CursorController *>(
+  auto *cursor_controller = dynamic_cast<CursorController *>(
       _controllers[static_cast<int>(ControllerKind::Cursor)].get());
-  return *cursorController->getCursor();
+  return *cursor_controller->getCursor();
 }
 
 const algebra::Vec3f &GUI::getCursorPosition() const {
@@ -84,12 +84,12 @@ std::optional<const IRenderable *> GUI::getCenterPoint() {
 }
 
 void GUI::displayGUI() {
-  ImGuiWindowFlags windowFlags =
+  ImGuiWindowFlags window_flags =
       ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNavFocus;
   ImGui::SetNextWindowBgAlpha(0.9f);
   ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin("Settings", nullptr, windowFlags)) {
+  if (ImGui::Begin("Settings", nullptr, window_flags)) {
     showFPSCounter();
 
     renderModelSettings();
@@ -135,33 +135,35 @@ void GUI::initControllers() {
 }
 
 void GUI::renderModelControllSettings() {
-  const char *axisOptions[] = {"X axis", "Y axis", "Z axis"};
-  const char *transformationCenterOptions[] = {"Center Point", "Cursor"};
+  const char *axis_options[] = {"X axis", "Y axis", "Z axis"};
+  const char *transformation_center_options[] = {"Center Point", "Cursor"};
 
-  auto modelController = dynamic_cast<ModelController *>(
+  auto *model_controller = dynamic_cast<ModelController *>(
       _controllers[static_cast<int>(ControllerKind::Model)].get());
 
-  if (modelController) {
-    int selectedIndex = static_cast<int>(modelController->_transformationAxis);
-    if (ImGui::Combo("TransformationAxis", &selectedIndex, axisOptions,
-                     IM_ARRAYSIZE(axisOptions))) {
-      modelController->_transformationAxis = static_cast<Axis>(selectedIndex);
+  if (model_controller) {
+    int selected_index =
+        static_cast<int>(model_controller->_transformationAxis);
+    if (ImGui::Combo("TransformationAxis", &selected_index, axis_options,
+                     IM_ARRAYSIZE(axis_options))) {
+      model_controller->_transformationAxis = static_cast<Axis>(selected_index);
     }
 
-    selectedIndex = static_cast<int>(modelController->_transformationCenter);
-    if (ImGui::Combo("TransformationCenter", &selectedIndex,
-                     transformationCenterOptions,
-                     IM_ARRAYSIZE(transformationCenterOptions))) {
-      modelController->_transformationCenter =
-          static_cast<TransformationCenter>(selectedIndex);
+    selected_index = static_cast<int>(model_controller->_transformationCenter);
+    if (ImGui::Combo("TransformationCenter", &selected_index,
+                     transformation_center_options,
+                     IM_ARRAYSIZE(transformation_center_options))) {
+      model_controller->_transformationCenter =
+          static_cast<TransformationCenter>(selected_index);
     }
   }
 }
 
 void GUI::renderCursorControllerSettings() {
-  auto cursor = getCursor();
-  const auto &cursorPosition = cursor->getPosition();
-  float position[3] = {cursorPosition[0], cursorPosition[1], cursorPosition[2]};
+  auto *cursor = getCursor();
+  const auto &cursor_position = cursor->getPosition();
+  float position[3] = {cursor_position[0], cursor_position[1],
+                       cursor_position[2]};
   if (ImGui::InputFloat3("Cursor Position", position)) {
     cursor->updatePosition(position[0], position[1], position[2]);
   }
@@ -176,13 +178,13 @@ void GUI::removeButtonUI() {
 void GUI::createLoadSceneUI() {
   if (ImGui::Button("Load Scene")) {
     NFD_Init();
-    nfdu8char_t *outPath = nullptr;
+    nfdu8char_t *out_path = nullptr;
     // nfdu8filteritem_t filters[1] = {{"serializedFile", "json"}};
     nfdopendialogu8args_t args = {nullptr};
-    nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+    nfdresult_t result = NFD_OpenDialogU8_With(&out_path, &args);
     if (result == NFD_OKAY) {
-      _jsonDeserializer.loadScence(std::string(outPath), *_scene);
-      NFD_FreePathU8(outPath);
+      _jsonDeserializer.loadScence(std::string(out_path), *_scene);
+      NFD_FreePathU8(out_path);
     }
     NFD_Quit();
   }
@@ -191,12 +193,12 @@ void GUI::createLoadSceneUI() {
 void GUI::createSerializeUI() {
   if (ImGui::Button("Save scene")) {
     NFD_Init();
-    nfdu8char_t *outPath = nullptr;
+    nfdu8char_t *out_path = nullptr;
     nfdsavedialogu8args_t args = {nullptr};
-    nfdresult_t result = NFD_SaveDialogU8_With(&outPath, &args);
+    nfdresult_t result = NFD_SaveDialogU8_With(&out_path, &args);
     if (result == NFD_OKAY) {
-      _jsonSerializer.getSavePath() = std::string(outPath);
-      NFD_FreePathU8(outPath);
+      _jsonSerializer.getSavePath() = std::string(out_path);
+      NFD_FreePathU8(out_path);
       _jsonSerializer.serializeScene(*_scene);
     }
     NFD_Quit();
@@ -209,9 +211,9 @@ void GUI::renderModelSettings() {
   }
 
   clearVirtualPoints();
-  auto selectedEntity = *_selectedEntities.begin();
-  if (selectedEntity->acceptVisitor(_guiSettingsVisitor)) {
-    selectedEntity->updateMesh();
+  auto *selected_entity = *_selectedEntities.begin();
+  if (selected_entity->acceptVisitor(_guiSettingsVisitor)) {
+    selected_entity->updateMesh();
   }
 }
 
@@ -221,22 +223,22 @@ void GUI::displayEntitiesList() {
     return;
   }
   const float height =
-      entities.size() > 4 ? 300.f : 25.f * static_cast<float>(entities.size());
-  ImVec2 childSize(-1, height);
+      entities.size() > 4 ? 100.f : 25.f * static_cast<float>(entities.size());
+  ImVec2 child_size(-1, height);
 
-  ImGui::BeginChild("EntitiesListChild", childSize, static_cast<int>(true),
+  ImGui::BeginChild("EntitiesListChild", child_size, static_cast<int>(true),
                     ImGuiWindowFlags_HorizontalScrollbar);
   for (int i = 0; i < entities.size(); ++i) {
 
     auto name = entities[i]->getName();
     name = name.empty() ? "##" : name;
-    bool isSelected = std::ranges::find(_selectedEntities, entities[i]) !=
-                      _selectedEntities.end();
+    bool is_selected = std::ranges::find(_selectedEntities, entities[i]) !=
+                       _selectedEntities.end();
 
-    if (ImGui::Selectable(name.c_str(), isSelected,
+    if (ImGui::Selectable(name.c_str(), is_selected,
                           ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected) {
+        if (is_selected) {
           unselectEntity(i);
         } else {
           selectEntity(i);
@@ -257,19 +259,19 @@ void GUI::deleteSelectedEntities() {
 }
 
 void GUI::clearSelectedEntities() {
-  for (const auto &selectedEntity : _selectedEntities) {
-    selectedEntity->setColor(Color::White());
+  for (const auto &selected_entity : _selectedEntities) {
+    selected_entity->setColor(Color::White());
   }
   _selectedEntities.clear();
 }
 
 void GUI::calculateFPS() {
-  auto currentTime = std::chrono::high_resolution_clock::now();
+  auto current_time = std::chrono::high_resolution_clock::now();
 
-  std::chrono::duration<double> timeDiff = currentTime - _lastTime;
-  if (timeDiff.count() > 0.0) {
-    _fps = 1.0 / timeDiff.count();
-    _lastTime = currentTime;
+  std::chrono::duration<double> time_diff = current_time - _lastTime;
+  if (time_diff.count() > 0.0) {
+    _fps = 1.0 / time_diff.count();
+    _lastTime = current_time;
   }
 }
 
@@ -312,63 +314,63 @@ void GUI::unselectEntity(int entityIndex) {
 }
 
 std::vector<IController *> GUI::getActiveControllers() {
-  std::vector<IController *> activeControllers;
+  std::vector<IController *> active_controllers;
 
-  activeControllers.push_back(
+  active_controllers.push_back(
       _controllers[static_cast<int>(ControllerKind::Camera)].get());
-  activeControllers.push_back(
+  active_controllers.push_back(
       _controllers[static_cast<int>(ControllerKind::Cursor)].get());
-  // activeControllers.push_back(
+  // active_controllers.push_back(
   //   _controllers[static_cast<int>(ControllerKind::Selection)]);
 
-  activeControllers.push_back(
+  active_controllers.push_back(
       _controllers[static_cast<int>(ControllerKind::Model)].get());
 
-  return activeControllers;
+  return active_controllers;
 }
 
 std::vector<std::reference_wrapper<PointEntity>>
 GUI::getSelectedPoints() const {
-  std::vector<std::reference_wrapper<PointEntity>> pointEntities;
+  std::vector<std::reference_wrapper<PointEntity>> point_entities;
 
   for (auto *entity : _selectedEntities) {
     if (auto *point = dynamic_cast<PointEntity *>(entity)) {
-      pointEntities.emplace_back(*point);
+      point_entities.emplace_back(*point);
     }
   }
-  return pointEntities;
+  return point_entities;
 }
 
 std::vector<std::reference_wrapper<PointEntity>> GUI::getPoints() const {
-  std::vector<std::reference_wrapper<PointEntity>> pointEntities;
+  std::vector<std::reference_wrapper<PointEntity>> point_entities;
 
   for (auto *entity : _scene->getPoints()) {
     if (auto *point = dynamic_cast<PointEntity *>(entity)) {
-      pointEntities.emplace_back(*point);
+      point_entities.emplace_back(*point);
     }
   }
-  return pointEntities;
+  return point_entities;
 }
 
 std::vector<std::reference_wrapper<BezierCurve>>
 GUI::getSelectedBezierCurves() {
-  std::vector<std::reference_wrapper<BezierCurve>> bezierCurves;
+  std::vector<std::reference_wrapper<BezierCurve>> bezier_curves;
   for (auto &entity : _selectedEntities) {
     if (auto *bezier_curve = dynamic_cast<BezierCurve *>(entity)) {
-      bezierCurves.emplace_back(*bezier_curve);
+      bezier_curves.emplace_back(*bezier_curve);
     }
   }
-  return bezierCurves;
+  return bezier_curves;
 }
 
 void GUI::processControllers() {
 
-  auto selectedEntities = getSelectedEntities();
-  auto vPoints = getSelectedVirtualPoints();
-  _selectedEntities.insert(_selectedEntities.end(), vPoints.begin(),
-                           vPoints.end());
+  auto selected_entities = getSelectedEntities();
+  auto virtual_points = getSelectedVirtualPoints();
+  _selectedEntities.insert(_selectedEntities.end(), virtual_points.begin(),
+                           virtual_points.end());
 
-  _selectedEntities = selectedEntities;
+  _selectedEntities = selected_entities;
 
   _controllers[static_cast<int>(ControllerKind::Selection)]->process(_mouse);
   _mouse.process(getActiveControllers());
@@ -383,12 +385,12 @@ void GUI::setVirtualPoints(
   std::vector<VirtualPoint *> selected_virtual_points;
 
   for (const auto &ref : selectedVirtualPoints) {
-    const VirtualPoint *rawPtr = &ref.get();
+    const VirtualPoint *virtual_point_ptr = &ref.get();
 
-    auto it =
-        std::ranges::find_if(_virtualPoints, [rawPtr](const VirtualPoint *vp) {
-          return vp == rawPtr;
-        });
+    auto it = std::ranges::find_if(_virtualPoints,
+                                   [virtual_point_ptr](const VirtualPoint *vp) {
+                                     return vp == virtual_point_ptr;
+                                   });
 
     if (it != _virtualPoints.end()) {
       selected_virtual_points.push_back(*it);
@@ -401,21 +403,21 @@ void GUI::setVirtualPoints(
 }
 
 std::vector<IEntity *> GUI::getSelectedVirtualPoints() const {
-  std::vector<IEntity *> virtualPoints;
-  virtualPoints.reserve(_selectedVirtualPoints.size());
-  for (const auto &vPoint : _selectedVirtualPoints) {
-    virtualPoints.emplace_back(vPoint);
+  std::vector<IEntity *> virtual_points;
+  virtual_points.reserve(_selectedVirtualPoints.size());
+  for (const auto &virtual_point : _selectedVirtualPoints) {
+    virtual_points.emplace_back(virtual_point);
   }
-  return virtualPoints;
+  return virtual_points;
 }
 
 std::vector<IEntity *> GUI::getVirtualPoints() const {
-  std::vector<IEntity *> virtualPoints;
-  virtualPoints.reserve(_virtualPoints.size());
-  for (const auto &vPoint : _virtualPoints) {
-    virtualPoints.emplace_back(vPoint);
+  std::vector<IEntity *> virtual_points;
+  virtual_points.reserve(_virtualPoints.size());
+  for (const auto &virtual_point : _virtualPoints) {
+    virtual_points.emplace_back(virtual_point);
   }
-  return virtualPoints;
+  return virtual_points;
 }
 
 void GUI::clearVirtualPoints() {
@@ -451,7 +453,7 @@ GUI::getSelectedSurfacesC0() const {
   std::vector<std::reference_wrapper<BezierSurfaceC0>> surfaces;
 
   for (const auto &entity : _selectedEntities) {
-    if (auto surface = dynamic_cast<BezierSurfaceC0 *>(entity)) {
+    if (auto *surface = dynamic_cast<BezierSurfaceC0 *>(entity)) {
       surfaces.emplace_back(*surface);
     }
   }
@@ -497,50 +499,52 @@ void GUI::findIntersection() {
       std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>(
           bounds1, bounds2);
 
-  auto intersectionCurve = std::make_unique<IntersectionCurve>(
+  auto intersection_curve = std::make_unique<IntersectionCurve>(
       *intersection, bounds, intersection->looped);
 
-  intersectionCurve->setFirstPoint(intersection->firstPoint);
+  intersection_curve->setFirstPoint(intersection->firstPoint);
 
-  auto *surfInter0 = dynamic_cast<Intersectable *>(entities[0]);
-  auto *surfInter1 = entities.size() == 1
-                         ? surfInter0
-                         : dynamic_cast<Intersectable *>(entities[1]);
+  auto *surface_0_intersection = dynamic_cast<Intersectable *>(entities[0]);
+  auto *surface_1_intersection =
+      entities.size() == 1 ? surface_0_intersection
+                           : dynamic_cast<Intersectable *>(entities[1]);
 
-  intersectionCurve->getFirstTexture().setWrapping(surf0->wrapped(0),
-                                                   surf0->wrapped(1));
-  intersectionCurve->getSecondTexture().setWrapping(surf1->wrapped(0),
-                                                    surf1->wrapped(1));
-  surfInter0->setIntersectionTexture(intersectionCurve->getFirstTexturePtr());
-  surfInter1->setIntersectionTexture(intersectionCurve->getSecondTexturePtr());
+  intersection_curve->getFirstTexture().setWrapping(surf0->wrapped(0),
+                                                    surf0->wrapped(1));
+  intersection_curve->getSecondTexture().setWrapping(surf1->wrapped(0),
+                                                     surf1->wrapped(1));
+
+  surface_0_intersection->setIntersectionTexture(
+      intersection_curve->getFirstTexturePtr());
+  surface_1_intersection->setIntersectionTexture(
+      intersection_curve->getSecondTexturePtr());
 
   _scene->addEntity(EntityType::IntersectionCurve,
-
-                    std::move(intersectionCurve));
+                    std::move(intersection_curve));
 }
 
 void GUI::createEnitityUI() {
-  static EntityType selectedType = EntityType::Point;
-  std::string previewValue = "Select...";
+  static EntityType selected_type = EntityType::Point;
+  std::string preview_value = "Select...";
 
   for (const auto &[name, type] : _entityUtils.getStringEntityMap()) {
-    if (type == selectedType) {
-      previewValue = name;
+    if (type == selected_type) {
+      preview_value = name;
       break;
     }
   }
 
-  if (ImGui::BeginCombo("##Creatable Entities", previewValue.c_str())) {
+  if (ImGui::BeginCombo("##Creatable Entities", preview_value.c_str())) {
     for (const auto &[name, entityType] : _entityUtils.getStringEntityMap()) {
-      bool isSelected = (selectedType == entityType);
-      if (ImGui::Selectable(name.c_str(), isSelected)) {
-        selectedType = entityType;
+      bool is_selected = (selected_type == entityType);
+      if (ImGui::Selectable(name.c_str(), is_selected)) {
+        selected_type = entityType;
       }
-      if (isSelected) {
+      if (is_selected) {
         ImGui::SetItemDefaultFocus();
       }
     }
     ImGui::EndCombo();
   }
-  _entityUtils.getEntityBuilders().at(selectedType)->drawGui();
+  _entityUtils.getEntityBuilders().at(selected_type)->drawGui();
 }

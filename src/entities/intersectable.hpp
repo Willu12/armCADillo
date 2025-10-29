@@ -1,7 +1,6 @@
 #pragma once
 
 #include "intersectionTexture.hpp"
-#include <memory>
 class Intersectable {
 public:
   virtual ~Intersectable() = default;

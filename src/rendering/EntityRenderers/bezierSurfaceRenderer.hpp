@@ -1,10 +1,8 @@
 #pragma once
 
 #include "IEntityRenderer.hpp"
-#include "bezierSurfaceC0.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
-#include "pointRenderer.hpp"
 #include "shader.hpp"
 #include "surfaceMeshRenderer.hpp"
 
@@ -19,7 +17,6 @@ public:
                  ShaderPath{._path = "../resources/shaders/"
                                      "surfaceIsolineTeselationEvaluation.glsl",
                             ._type = GL_TESS_EVALUATION_SHADER},
-
                  ShaderPath{
                      ._path = "../resources/shaders/fragmentShaderTrimmed.hlsl",
                      ._type = GL_FRAGMENT_SHADER}}),
@@ -33,7 +30,7 @@ public:
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
 
-    for (const auto &entity : entities) {
+    for (auto *entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
       _shader.setVec4f("color", entity->getColor().toVector());
 

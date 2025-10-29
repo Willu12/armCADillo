@@ -13,7 +13,7 @@ class TorusEntity : public IEntity,
                     public Intersectable {
 public:
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position)
-      : _torus(innerRadius, tubeRadius), _mesh(generateMesh()) {
+      : torus_(innerRadius, tubeRadius), mesh_(generateMesh()) {
     _position = position;
     _id = kClassId++;
     _name = ("Torus_" + std::to_string(TorusEntity::_id));
@@ -21,8 +21,8 @@ public:
 
   TorusEntity(float innerRadius, float tubeRadius, algebra::Vec3f position,
               const MeshDensity &meshDensity)
-      : _torus(innerRadius, tubeRadius), _meshDensity(meshDensity),
-        _mesh(generateMesh()) {
+      : torus_(innerRadius, tubeRadius), meshDensity_(meshDensity),
+        mesh_(generateMesh()) {
     _position = position;
     _id = kClassId++;
     _name = ("Torus_" + std::to_string(TorusEntity::_id));
@@ -32,14 +32,14 @@ public:
     return visitor.visitTorus(*this);
   }
 
-  float &getInnerRadius() { return _torus.getInnerRadius(); }
-  float &getTubeRadius() { return _torus.getTubeRadius(); }
+  float &getInnerRadius() { return torus_.getInnerRadius(); }
+  float &getTubeRadius() { return torus_.getTubeRadius(); }
 
-  MeshDensity &getMeshDensity() { return _meshDensity; }
+  MeshDensity &getMeshDensity() { return meshDensity_; }
 
-  const Mesh &getMesh() const override { return *_mesh; }
+  const Mesh &getMesh() const override { return *mesh_; }
 
-  void updateMesh() override { _mesh = generateMesh(); }
+  void updateMesh() override { mesh_ = generateMesh(); }
 
   bool renderSettings(const GUI &gui) override {
     IEntity::renderSettings(gui);
@@ -60,19 +60,21 @@ public:
   }
   algebra::Vec3f value(const algebra::Vec2f &pos) const override {
     auto affine =
-        getModelMatrix() * (_torus.getPosition(pos[0], pos[1])).toHomogenous();
+        getModelMatrix() * (torus_.getPosition(pos[0], pos[1])).toHomogenous();
     return affine.fromHomogenous();
   }
+
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override {
-    auto R = getRotation().getRotationMatrix();
-    auto derivatives = _torus.getDerivative(pos[0], pos[1]);
+    auto rotation_matrix = getRotation().getRotationMatrix();
+    auto derivatives = torus_.getDerivative(pos[0], pos[1]);
     algebra::Vec3f du_world =
-        (R * derivatives.first.toHomogenous()).fromHomogenous();
+        (rotation_matrix * derivatives.first.toHomogenous()).fromHomogenous();
     algebra::Vec3f dv_world =
-        (R * derivatives.second.toHomogenous()).fromHomogenous();
+        (rotation_matrix * derivatives.second.toHomogenous()).fromHomogenous();
     return {du_world, dv_world};
   }
+
   algebra::Matrix<float, 3, 2>
   jacobian(const algebra::Vec2f &pos) const override {
     auto [du, dv] = derivatives(pos);
@@ -88,13 +90,13 @@ public:
   bool wrapped(size_t dim) const override { return true; }
 
 private:
-  algebra::Torus<float> _torus;
+  algebra::Torus<float> torus_;
+  MeshDensity meshDensity_;
+  std::unique_ptr<Mesh> mesh_;
 
-  MeshDensity _meshDensity;
-  std::unique_ptr<Mesh> _mesh;
   static inline int kClassId;
 
   std::unique_ptr<Mesh> generateMesh() {
-    return Mesh::fromParametrizationTextured(_torus, _meshDensity);
+    return Mesh::fromParametrizationTextured(torus_, meshDensity_);
   }
 };
