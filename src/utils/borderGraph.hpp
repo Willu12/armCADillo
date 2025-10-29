@@ -48,8 +48,9 @@ struct Edge {
 struct EdgeEqual {
   bool operator()(const Edge &a, const Edge &b) const {
     for (int i = 0; i < 4; ++i) {
-      if (a._points[i].get().getId() != b._points[i].get().getId())
+      if (a._points[i].get().getId() != b._points[i].get().getId()) {
         return false;
+      }
     }
     return true;
   }
@@ -60,7 +61,8 @@ struct EdgeHash {
     std::size_t seed = 0;
     for (int i = 0; i < 4; ++i) {
       auto id = e._points[i].get().getId();
-      seed ^= std::hash<int>{}(id) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= std::hash<unsigned int>{}(id) + 0x9e3779b9 + (seed << 6) +
+              (seed >> 2);
     }
     return seed;
   }
@@ -79,7 +81,7 @@ struct Border {
   uint32_t uLen;
   uint32_t vLen;
 
-  Border(BezierSurfaceC0 &surface);
+  explicit Border(BezierSurfaceC0 &surface);
 };
 
 class BorderGraph {
@@ -98,5 +100,5 @@ private:
   std::unordered_map<Edge, Edge, EdgeHash, EdgeEqual> _edgeInnerEdgeMap;
   void addBorder(const Border &border);
   std::array<BorderEdge, 3>
-  getEdge(const std::array<std::size_t, 3> triangle) const;
+  getEdge(const std::array<std::size_t, 3> &triangle) const;
 };

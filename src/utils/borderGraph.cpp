@@ -5,6 +5,7 @@
 #include <functional>
 #include <ranges>
 #include <vector>
+
 BorderGraph::BorderGraph(const std::vector<Border> &borders) {
   for (const auto &border : borders) {
     addBorder(border);
@@ -58,7 +59,7 @@ std::vector<std::array<BorderEdge, 3>> BorderGraph::findHoles() const {
 }
 
 std::array<BorderEdge, 3>
-BorderGraph::getEdge(const std::array<std::size_t, 3> triangle) const {
+BorderGraph::getEdge(const std::array<std::size_t, 3> &triangle) const {
 
   auto get_edge_from_triangle = [&](int u, int v) {
     return std::tie(_vertexPointMap.at(triangle[u]),

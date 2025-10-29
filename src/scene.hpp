@@ -11,7 +11,7 @@
 
 class Scene {
 public:
-  explicit Scene(Camera *camera) : _camera(camera){};
+  explicit Scene(Camera *camera) : camera_(camera){};
 
   std::vector<IEntity *> getEntites() const;
   void addEntity(EntityType entityType, std::unique_ptr<IEntity> entity);
@@ -27,10 +27,10 @@ public:
   friend class GUI;
 
 private:
-  Camera *_camera;
+  Camera *camera_;
   std::unordered_map<EntityType, std::vector<std::unique_ptr<IEntity>>>
-      _entities;
-  std::vector<IEntity *> _deadEntities;
+      entities_;
+  std::vector<IEntity *> deadEntities_;
 
   void filterEntitiesToRemove(std::vector<IEntity *> &entitiesToRemove);
 

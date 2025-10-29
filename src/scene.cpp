@@ -15,25 +15,25 @@
 
 std::vector<IEntity *> Scene::getEntites() const {
   std::vector<IEntity *> entities;
-  for (const auto &specificEntities : _entities) {
-    for (const auto &specificEntity : specificEntities.second) {
-      entities.push_back(specificEntity.get());
+  for (const auto &specific_entities : entities_) {
+    for (const auto &specifc_entity : specific_entities.second) {
+      entities.push_back(specifc_entity.get());
     }
   }
   return entities;
 }
 
 void Scene::addEntity(EntityType entityType, std::unique_ptr<IEntity> entity) {
-  _entities[entityType].emplace_back(std::move(entity));
+  entities_[entityType].emplace_back(std::move(entity));
 }
 
-Camera *Scene::getCamera() { return _camera; }
+Camera *Scene::getCamera() { return camera_; }
 
 void Scene::removeEntities(std::vector<IEntity *> &entitiesToRemove) {
 
   filterEntitiesToRemove(entitiesToRemove);
   enqueueSurfacePoints(entitiesToRemove);
-  for (auto it = _entities.begin(); it != _entities.end();) {
+  for (auto it = entities_.begin(); it != entities_.end();) {
     auto &vec = it->second;
 
     auto new_end = std::ranges::remove_if(vec, [&](const auto &e) {
@@ -43,7 +43,7 @@ void Scene::removeEntities(std::vector<IEntity *> &entitiesToRemove) {
     vec.erase(new_end.begin(), vec.end());
 
     if (vec.empty()) {
-      it = _entities.erase(it);
+      it = entities_.erase(it);
     } else {
       ++it;
     }
@@ -54,7 +54,7 @@ std::unordered_map<EntityType, std::vector<IEntity *>>
 Scene::getGroupedEntities() const {
   std::unordered_map<EntityType, std::vector<IEntity *>> grouped_entities;
 
-  for (const auto &pair : _entities) {
+  for (const auto &pair : entities_) {
     std::vector<IEntity *> specific_entities;
     specific_entities.reserve(pair.second.size());
 
@@ -69,39 +69,40 @@ Scene::getGroupedEntities() const {
 
 std::vector<IEntity *> Scene::getPickables() const {
   auto points = getPoints();
-  auto vPoints = getVirtualPoints();
-  points.insert(points.begin(), vPoints.begin(), vPoints.end());
+  auto virtual_points = getVirtualPoints();
+  points.insert(points.begin(), virtual_points.begin(), virtual_points.end());
 
   return points;
 }
 
 std::vector<IEntity *> Scene::getVirtualPoints() const {
-  std::vector<IEntity *> virtualPoints;
-  if (!_entities.contains(EntityType::BSplineCurve)) {
-    return virtualPoints;
+  std::vector<IEntity *> virtual_points;
+  if (!entities_.contains(EntityType::BSplineCurve)) {
+    return virtual_points;
   }
 
-  for (const auto &entity : _entities.at(EntityType::BSplineCurve)) {
-    auto *bezierCurve = dynamic_cast<BSplineCurve *>(entity.get());
-    if (!bezierCurve || !bezierCurve->showBezierPoints()) {
+  for (const auto &entity : entities_.at(EntityType::BSplineCurve)) {
+    auto *b_spline = dynamic_cast<BSplineCurve *>(entity.get());
+    if (!b_spline || !b_spline->showBezierPoints()) {
       continue;
     }
 
-    const auto &vPoints = bezierCurve->getVirtualPoints();
-    virtualPoints.insert(virtualPoints.end(), vPoints.begin(), vPoints.end());
+    const auto &bezier_virtual_points = b_spline->getVirtualPoints();
+    virtual_points.insert(virtual_points.end(), bezier_virtual_points.begin(),
+                          bezier_virtual_points.end());
   }
 
-  return virtualPoints;
+  return virtual_points;
 }
 
 std::vector<IEntity *> Scene::getPoints() const {
   std::vector<IEntity *> points;
-  if (!_entities.contains(EntityType::Point)) {
+  if (!entities_.contains(EntityType::Point)) {
     return points;
   }
 
-  points.reserve(_entities.at(EntityType::Point).size());
-  for (const auto &point : _entities.at(EntityType::Point)) {
+  points.reserve(entities_.at(EntityType::Point).size());
+  for (const auto &point : entities_.at(EntityType::Point)) {
     points.push_back(point.get());
   }
 
@@ -122,13 +123,14 @@ void Scene::enqueueSurfacePoints(
   const auto &points = getPoints();
 
   for (const auto &entity : entitiesToRemove) {
-    if (auto surface = dynamic_cast<BezierSurface *>(entity)) {
-      const auto &surfacePoints = surface->getPoints();
-      for (const auto &surfacePoint : surfacePoints) {
+    if (auto *surface = dynamic_cast<BezierSurface *>(entity)) {
+      const auto &surface_points = surface->getPoints();
+      for (const auto &surface_point : surface_points) {
         const auto it =
-            std::ranges::find_if(points, [&surfacePoint](const auto &point) {
-              return point->getId() == surfacePoint.get().getId();
+            std::ranges::find_if(points, [&surface_point](const auto &point) {
+              return point->getId() == surface_point.get().getId();
             });
+
         if (it != points.end()) {
           entitiesToRemove.push_back(*it);
         }
@@ -137,26 +139,31 @@ void Scene::enqueueSurfacePoints(
   }
 }
 
+/// i dont like this function
+/// it should be changed to somekind of clearDeadEntities()?
+/// 1. entities could have dead flag and that be removed
+/// 2. entities could somehow be added to killing queue
+///
 void Scene::enqueueDeadGregoryPatches() {
-  if (!_entities.contains(EntityType::GregorySurface)) {
+  if (!entities_.contains(EntityType::GregorySurface)) {
     return;
   }
 
-  for (const auto &entity : _entities.at(EntityType::GregorySurface)) {
-    auto gregory = dynamic_cast<GregorySurface *>(entity.get());
+  for (const auto &entity : entities_.at(EntityType::GregorySurface)) {
+    auto *gregory = dynamic_cast<GregorySurface *>(entity.get());
     if (gregory->isDead()) {
-      _deadEntities.push_back(gregory);
+      deadEntities_.push_back(gregory);
     }
   }
 
-  if (!_entities.contains(EntityType::IntersectionCurve)) {
+  if (!entities_.contains(EntityType::IntersectionCurve)) {
     return;
   }
 
-  for (const auto &entity : _entities.at(EntityType::IntersectionCurve)) {
-    auto gregory = dynamic_cast<IntersectionCurve *>(entity.get());
+  for (const auto &entity : entities_.at(EntityType::IntersectionCurve)) {
+    auto *gregory = dynamic_cast<IntersectionCurve *>(entity.get());
     if (gregory->isDead()) {
-      _deadEntities.push_back(gregory);
+      deadEntities_.push_back(gregory);
     }
   }
 }
@@ -170,7 +177,7 @@ IEntity *Scene::contractEdge(const PointEntity &p1, const PointEntity &p2) {
 
   rebindReferences(p1, *center_point_ptr);
   rebindReferences(p2, *center_point_ptr);
-  auto &points = _entities.at(EntityType::Point);
+  auto &points = entities_.at(EntityType::Point);
   std::erase_if(points, [&p1, &p2](const auto &p) {
     return p->getId() == p1.getId() || p->getId() == p2.getId();
   });
@@ -180,7 +187,7 @@ IEntity *Scene::contractEdge(const PointEntity &p1, const PointEntity &p2) {
 
 void Scene::rebindReferences(const PointEntity &oldPoint,
                              PointEntity &newPoint) {
-  for (auto &pair : _entities) {
+  for (auto &pair : entities_) {
     if (pair.first == EntityType::Point || pair.first == EntityType::Torus ||
         pair.first == EntityType::GregorySurface) {
       continue;
@@ -210,12 +217,12 @@ void Scene::rebindReferences(const PointEntity &oldPoint,
 
 void Scene::removeDeadEntities() {
   enqueueDeadGregoryPatches();
-  removeEntities(_deadEntities);
-  _deadEntities.clear();
+  removeEntities(deadEntities_);
+  deadEntities_.clear();
 }
 
 void Scene::updateDirtyEntities() {
-  for (const auto &entity_type_vector_pair : _entities) {
+  for (const auto &entity_type_vector_pair : entities_) {
     for (const auto &entity : entity_type_vector_pair.second) {
       if (entity->dirty()) {
         if (auto *subscriber = dynamic_cast<ISubscriber *>(entity.get())) {

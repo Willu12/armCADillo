@@ -4,18 +4,13 @@
 #include "IMeshable.hpp"
 #include "ISubscriber.hpp"
 #include "bezierSurfaceC0.hpp"
-#include "bezierSurfaceMesh.hpp"
 #include "borderGraph.hpp"
-#include "graph.hpp"
 #include "gregoryMesh.hpp"
 #include "gregoryQuad.hpp"
 #include "mesh.hpp"
-#include "pointEntity.hpp"
-#include "vec.hpp"
 #include <array>
 #include <functional>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 class GregorySurface : public IEntity, public ISubscriber {

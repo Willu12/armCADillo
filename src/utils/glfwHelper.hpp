@@ -5,19 +5,20 @@
 
 namespace GLFWHelper {
 static float getAspectRatio(GLFWwindow *window) {
-  int width, height;
+  int width = 0;
+  int height = 0;
   glfwGetFramebufferSize(window, &width, &height);
   return static_cast<float>(width) / static_cast<float>(height);
 }
 
 static int getWidth(GLFWwindow *window) {
-  int width;
+  int width = 0;
   glfwGetFramebufferSize(window, &width, nullptr);
   return width;
 }
 
 static int getHeight(GLFWwindow *window) {
-  int height;
+  int height = 0;
   glfwGetFramebufferSize(window, nullptr, &height);
   return height;
 }
