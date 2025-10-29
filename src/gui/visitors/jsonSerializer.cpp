@@ -26,8 +26,8 @@ void JsonSerializer::serializeScene(const Scene &scene) {
 }
 
 void JsonSerializer::createSceneJson(const Scene &scene) {
-  const auto &groupedEntites = scene.getGroupedEntities();
-  for (const auto &pair : groupedEntites) {
+  const auto &grouped_entities = scene.getGroupedEntities();
+  for (const auto &pair : grouped_entities) {
     for (const auto &entity : pair.second) {
       entity->acceptVisitor(*this);
     }
@@ -45,8 +45,8 @@ bool JsonSerializer::visitTorus(TorusEntity &torus) {
   serializePosition(j, torus);
   serializeRotation(j, torus);
   serializeScale(j, torus);
-  const auto &meshDensity = torus.getMeshDensity();
-  j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
+  const auto &mesh_density = torus.getMeshDensity();
+  j["samples"] = {{"u", mesh_density.s}, {"v", mesh_density.t}};
   j["smallRadius"] = torus.getTubeRadius();
   j["largeRadius"] = torus.getInnerRadius();
   _geometryJson.push_back(j);
@@ -100,8 +100,8 @@ bool JsonSerializer::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurfaceC0) {
   j["id"] = bezierSurfaceC0.getId();
   j["name"] = bezierSurfaceC0.getName();
   serializeControlPoints(j, bezierSurfaceC0);
-  const auto &meshDensity = bezierSurfaceC0.getMeshDensity();
-  j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
+  const auto &mesh_density = bezierSurfaceC0.getMeshDensity();
+  j["samples"] = {{"u", mesh_density.s}, {"v", mesh_density.t}};
   j["size"] = {{"v", bezierSurfaceC0.getRowCount()},
                {"u", bezierSurfaceC0.getColCount()}};
   _geometryJson.push_back(j);
@@ -114,8 +114,8 @@ bool JsonSerializer::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurfaceC2) {
   j["id"] = bezierSurfaceC2.getId();
   j["name"] = bezierSurfaceC2.getName();
   serializeControlPoints(j, bezierSurfaceC2);
-  const auto &meshDensity = bezierSurfaceC2.getMeshDensity();
-  j["samples"] = {{"u", meshDensity.s}, {"v", meshDensity.t}};
+  const auto &mesh_density = bezierSurfaceC2.getMeshDensity();
+  j["samples"] = {{"u", mesh_density.s}, {"v", mesh_density.t}};
   j["size"] = {{"u", bezierSurfaceC2.getRowCount()},
                {"v", bezierSurfaceC2.getColCount()}};
   _geometryJson.push_back(j);
@@ -142,13 +142,13 @@ void JsonSerializer::serializeScale(json &j, const IEntity &entity) {
 
 void JsonSerializer::serializeControlPoints(
     nlohmann::json &j, const IGroupedEntity &groupedEntity) {
-  json controlPoints = json::array();
-  const auto &pointsRef = groupedEntity.getPointsReferences();
+  json control_points = json::array();
+  const auto &points_ref = groupedEntity.getPointsReferences();
 
-  for (const auto &point : pointsRef) {
-    controlPoints.push_back({{"id", point.get().getId()}});
+  for (const auto &point : points_ref) {
+    control_points.push_back({{"id", point.get().getId()}});
   }
-  j["controlPoints"] = controlPoints;
+  j["controlPoints"] = control_points;
 }
 
 bool JsonSerializer::visitVirtualPoint(VirtualPoint & /*point*/) {

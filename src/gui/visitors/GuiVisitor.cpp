@@ -46,7 +46,7 @@ bool GuiVisitor::visitBezierCurve(BezierCurveC0 &bezierCurve) {
   auto remaining_points = getRemainingPoints(all_points, points);
 
   renderPointList(points, "Bezier curve points");
-  renderPointList(remaining_points, "remainingPoints");
+  renderPointList(remaining_points, "remaining_points");
   renderAddingSelectedPoints(bezierCurve);
   ImGui::SameLine();
   renderRemovingSelectedPoints(bezierCurve);
@@ -64,7 +64,7 @@ bool GuiVisitor::visitBSplineCurve(BSplineCurve &bezierCurve) {
   auto remaining_points = getRemainingPoints(all_points, points);
 
   renderPointList(points, "Bezier curve points");
-  renderPointList(remaining_points, "remainingPoints");
+  renderPointList(remaining_points, "remaining_points");
   renderAddingSelectedPoints(bezierCurve);
   ImGui::SameLine();
   renderRemovingSelectedPoints(bezierCurve);
@@ -189,9 +189,11 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
             ImVec2(mouse_pos.x - image_pos.x, mouse_pos.y - image_pos.y);
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-          texture.floodFill(local_pos.x, local_pos.y, true);
+          texture.floodFill(static_cast<uint32_t>(local_pos.x),
+                            static_cast<uint32_t>(local_pos.y), true);
         } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-          texture.floodFill(local_pos.x, local_pos.y, false);
+          texture.floodFill(static_cast<uint32_t>(local_pos.x),
+                            static_cast<uint32_t>(local_pos.y), false);
         }
       }
 
@@ -232,8 +234,8 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
 bool GuiVisitor::renderBasicEntitySettings(IEntity &entity) {
   ImGui::InputText("Name", &entity.getName());
   const auto &position = entity.getPosition();
-  float guiPosition[3] = {position[0], position[1], position[2]};
-  if (ImGui::InputFloat3("Position", guiPosition)) {
+  float gui_position[3] = {position[0], position[1], position[2]};
+  if (ImGui::InputFloat3("Position", gui_position)) {
     entity.updatePosition(
         algebra::Vec3f(position[0], position[1], position[2]));
     return true;
@@ -260,24 +262,24 @@ void GuiVisitor::renderPointList(
     const std::vector<std::reference_wrapper<PointEntity>> &entities,
     const std::string &label) {
 
-  std::unordered_map<uint32_t, uint32_t> pointCount;
+  std::unordered_map<uint32_t, uint32_t> point_count;
   ImGui::LabelText("##", "%s", label.c_str());
 
   const ImVec2 list_size = ImVec2(0, 100);
-  ImGui::BeginChild(label.c_str(), list_size, true,
+  ImGui::BeginChild(label.c_str(), list_size, 1,
                     ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
   for (const auto &entity : entities) {
-    bool isSelected = isEntitySelected(entity);
+    bool is_selected = isEntitySelected(entity);
     auto id = entity.get().getId();
-    pointCount[id]++;
+    point_count[id]++;
 
     if (ImGui::Selectable(
-            (entity.get().getName() + "##" + std::to_string(pointCount[id]))
+            (entity.get().getName() + "##" + std::to_string(point_count[id]))
                 .c_str(),
-            isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
+            is_selected, ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected) {
+        if (is_selected) {
           unselectEntity(entity);
         } else {
           selectEntity(entity);
@@ -296,24 +298,24 @@ std::vector<std::reference_wrapper<PointEntity>> GuiVisitor::getRemainingPoints(
     const std::vector<std::reference_wrapper<PointEntity>> &allPoints,
     const std::vector<std::reference_wrapper<PointEntity>> &currentPoints)
     const {
-  std::vector<std::reference_wrapper<PointEntity>> remainingPoints;
+  std::vector<std::reference_wrapper<PointEntity>> remaining_points;
 
   for (const auto &p : allPoints) {
     if (!std::ranges::any_of(currentPoints,
                              [&](auto &e) { return &e.get() == &p.get(); })) {
-      remainingPoints.push_back(p);
+      remaining_points.push_back(p);
     }
   }
-  return remainingPoints;
+  return remaining_points;
 }
 
 bool GuiVisitor::renderAddingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
   if (ImGui::Button("+")) {
     for (const auto &p : _selectedEntities) {
-      bool alreadyIn = std::ranges::any_of(
+      bool point_already_in = std::ranges::any_of(
           points, [&](const auto &q) { return &p.get() == &q.get(); });
-      if (!alreadyIn) {
+      if (!point_already_in) {
         bezierCurve.addPoint(p.get());
       }
     }
@@ -325,9 +327,9 @@ bool GuiVisitor::renderRemovingSelectedPoints(BezierCurve &bezierCurve) {
   auto points = bezierCurve.getPoints();
   if (ImGui::Button("-")) {
     for (auto &p : _selectedEntities) {
-      bool isIn = std::ranges::any_of(
+      bool point_included = std::ranges::any_of(
           points, [&](const auto &q) { return &p.get() == &q.get(); });
-      if (isIn) {
+      if (point_included) {
         bezierCurve.removePoint(p.get());
       }
     }
@@ -351,31 +353,31 @@ void GuiVisitor::unselectVirtualPoint(const VirtualPoint &point) {
 void GuiVisitor::renderVirtualPointList(
     const std::vector<VirtualPoint *> &virtualPoints) {
   ImGui::LabelText("##", "%s", "Virtual Points");
-  for (const auto &vPoint : virtualPoints) {
-    bool isSelected = isVirtualPointSelected(*vPoint);
-    if (ImGui::Selectable((vPoint->getName() + "##").c_str(), isSelected,
-                          ImGuiSelectableFlags_AllowDoubleClick)) {
+  for (const auto &virtual_point : virtualPoints) {
+    bool is_selected = isVirtualPointSelected(*virtual_point);
+    if (ImGui::Selectable((virtual_point->getName() + "##").c_str(),
+                          is_selected, ImGuiSelectableFlags_AllowDoubleClick)) {
       if (ImGui::GetIO().KeyCtrl) {
-        if (isSelected) {
-          unselectVirtualPoint(*vPoint);
+        if (is_selected) {
+          unselectVirtualPoint(*virtual_point);
         } else {
-          selectVirtualPoint(*vPoint);
+          selectVirtualPoint(*virtual_point);
         }
       } else {
         _selectedVirtualPoints.clear();
-        selectVirtualPoint(*vPoint);
+        selectVirtualPoint(*virtual_point);
       }
     }
   }
 }
 bool GuiVisitor::renderCurveGui(BezierCurve &curve) {
   ImGui::InputText("Name", &curve.getName());
-  auto allPoints = _gui.getPoints();
+  auto all_points = _gui.getPoints();
   auto points = curve.getPoints();
-  auto remainingPoints = getRemainingPoints(allPoints, points);
+  auto remaining_points = getRemainingPoints(all_points, points);
 
   renderPointList(points, "Bezier curve points");
-  renderPointList(remainingPoints, "remainingPoints");
+  renderPointList(remaining_points, "remainingPoints");
   renderAddingSelectedPoints(curve);
   ImGui::SameLine();
   renderRemovingSelectedPoints(curve);

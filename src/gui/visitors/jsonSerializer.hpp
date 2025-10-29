@@ -4,7 +4,6 @@
 #include "IGroupedEntity.hpp"
 #include "IVisitor.hpp"
 #include "nlohmann/json.hpp"
-#include "nlohmann/json_fwd.hpp"
 #include "scene.hpp"
 class IEntity;
 class JsonSerializer : IVisitor {
@@ -21,8 +20,11 @@ public:
   bool visitBezierSurface(BezierSurface &bezierSurface) override;
   bool visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) override;
   bool visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) override;
-  bool visitGregorySurface(GregorySurface &gregory) override { return false; };
-  bool visitIntersectionCurve(IntersectionCurve &intersectionCurve) override {
+  bool visitGregorySurface(GregorySurface & /*gregory*/) override {
+    return false;
+  };
+  bool
+  visitIntersectionCurve(IntersectionCurve & /*intersectionCurve*/) override {
     return false;
   }
 

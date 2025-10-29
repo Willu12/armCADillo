@@ -9,8 +9,9 @@ IntersectionCurve::IntersectionCurve(
   _id = kClassId++;
   _name = "IntersectionCurve" + std::to_string(_id);
   std::vector<algebra::Vec3f> points(intersection.points.size());
-  for (const auto &[u, p] : intersection.points | std::views::enumerate)
+  for (const auto &[u, p] : intersection.points | std::views::enumerate) {
     points[u] = p.point;
+  }
   polyline_ = std::make_unique<Polyline>(points);
 
   auto textures =
