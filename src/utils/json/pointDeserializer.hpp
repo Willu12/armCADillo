@@ -16,14 +16,14 @@ public:
 
     auto pos = deserializePosition(j);
 
-    auto point = PointEntity(pos);
+    auto point = std::make_unique<PointEntity>(pos);
     if (j.contains("name")) {
       j.at("name").get_to(name);
-      point.getName() = name;
+      point->getName() = name;
     }
-    auto p = std::make_unique<PointEntity>(point);
-    p->setId(id);
-    return p;
+    // auto p = std::make_unique<PointEntity>(std::move(point));
+    point->setId(id);
+    return std::move(point);
   }
 
 private:

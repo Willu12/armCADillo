@@ -15,9 +15,9 @@ public:
 protected:
   float _radius;
   MeshDensity _meshDensity;
-  std::shared_ptr<Mesh> _mesh;
+  std::unique_ptr<Mesh> _mesh;
 
-  std::shared_ptr<Mesh> generateMesh() {
+  std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices = {// left down             //text
                                    -_radius, -_radius, 0.f, 0.f, 0.f,
                                    // left up               //text

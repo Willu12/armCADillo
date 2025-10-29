@@ -91,10 +91,10 @@ private:
   algebra::Torus<float> _torus;
 
   MeshDensity _meshDensity;
-  std::shared_ptr<Mesh> _mesh;
+  std::unique_ptr<Mesh> _mesh;
   static inline int kClassId;
 
-  std::shared_ptr<Mesh> generateMesh() {
+  std::unique_ptr<Mesh> generateMesh() {
     return Mesh::fromParametrizationTextured(_torus, _meshDensity);
   }
 };

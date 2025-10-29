@@ -17,15 +17,16 @@ TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   auto scale = deserializeScale(j);
   auto rotation = deserializeRotation(j);
 
-  auto torus = TorusEntity(bigRadius, smallRadius, pos, meshDensity);
-  torus.getRotation() = rotation.normalized();
-  torus.getScale() = scale;
+  auto torus =
+      std::make_unique<TorusEntity>(bigRadius, smallRadius, pos, meshDensity);
+  torus->getRotation() = rotation.normalized();
+  torus->getScale() = scale;
 
   if (j.contains("name")) {
     j.at("name").get_to(name);
-    torus.getName() = name;
+    torus->getName() = name;
   }
 
-  torus.getId() = id;
-  return std::make_unique<TorusEntity>(torus);
+  torus->getId() = id;
+  return std::move(torus);
 }

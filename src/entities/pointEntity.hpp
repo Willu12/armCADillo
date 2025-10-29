@@ -5,6 +5,7 @@
 #include "IVisitor.hpp"
 #include "mesh.hpp"
 #include "vec.hpp"
+#include <memory>
 
 class PointEntity : public IEntity, public ISubscribable {
 public:
@@ -85,10 +86,10 @@ public:
 
 private:
   inline static int kClassId;
-  std::shared_ptr<Mesh> _mesh;
+  std::unique_ptr<Mesh> _mesh;
   bool _surfacePoint = false;
 
-  std::shared_ptr<Mesh> generateMesh() {
+  std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices = {// Front face
                                    -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
                                    0.5f, 0.5f, -0.5f, 0.5f, 0.5f,

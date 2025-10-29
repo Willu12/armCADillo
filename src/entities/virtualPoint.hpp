@@ -34,9 +34,9 @@ public:
 
 private:
   inline static int kClassId;
-  std::shared_ptr<Mesh> _mesh;
+  std::unique_ptr<Mesh> _mesh;
 
-  std::shared_ptr<Mesh> generateMesh() {
+  std::unique_ptr<Mesh> generateMesh() {
     std::vector<float> vertices = {// Front face
                                    -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
                                    0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
