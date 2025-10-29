@@ -55,6 +55,7 @@ public:
   void updateMesh() override { _mesh = generateMesh(); };
   const Mesh &getMesh() const override { return *_mesh; }
   bool &surfacePoint() { return _surfacePoint; }
+  bool surfacePoint() const { return _surfacePoint; }
 
   bool operator==(const PointEntity &other) const {
     return other._id == this->_id;

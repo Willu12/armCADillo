@@ -15,7 +15,7 @@
 class SelectionController : public IController {
 public:
   SelectionController(GLFWwindow *window, const Scene *scene,
-                      std::vector<std::shared_ptr<IEntity>> &selectedEntities)
+                      std::vector<IEntity *> &selectedEntities)
       : _window(window), _scene(scene), _selectedEntities(selectedEntities) {
 
     _pickingTexture.init(GLFWHelper::getWidth(_window),
@@ -30,14 +30,14 @@ public:
   PickingTexture &getPickingTexture() { return _pickingTexture; }
 
 private:
-  GLFWwindow *_window;
-  const Scene *_scene;
-  std::vector<std::shared_ptr<IEntity>> &_selectedEntities;
+  GLFWwindow *_window = nullptr;
+  const Scene *_scene = nullptr;
+  std::vector<IEntity *> &_selectedEntities;
   PickingTexture _pickingTexture;
   bool _selectionBoxActive = false;
 
-  std::optional<std::shared_ptr<IEntity>> getEntity(float x, float y);
-  std::vector<std::shared_ptr<IEntity>>
-  getEntities(const algebra::Vec2f &startPos, const algebra::Vec2f &endPos,
-              int stride = 1);
+  std::optional<IEntity *> getEntity(float x, float y);
+  std::vector<IEntity *> getEntities(const algebra::Vec2f &startPos,
+                                     const algebra::Vec2f &endPos,
+                                     int stride = 1);
 };

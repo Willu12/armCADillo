@@ -5,13 +5,12 @@
 class Intersectable {
 public:
   virtual ~Intersectable() = default;
-  bool hasIntersectionTexture() { return !intersectionTexture_.expired(); }
+  bool hasIntersectionTexture() { return intersectionTexture_ != nullptr; }
   const IntersectionTexture &getIntersectionTexutre() {
-    return *intersectionTexture_.lock();
+    return *intersectionTexture_;
   };
 
-  void setIntersectionTexture(
-      std::weak_ptr<IntersectionTexture> intersectionTexture) {
+  void setIntersectionTexture(IntersectionTexture *intersectionTexture) {
     intersectionTexture_ = intersectionTexture;
   }
 
@@ -19,6 +18,6 @@ public:
   const bool &isTrimmed() const { return isTrimmed_; }
 
 private:
-  std::weak_ptr<IntersectionTexture> intersectionTexture_;
+  IntersectionTexture *intersectionTexture_ = nullptr;
   bool isTrimmed_ = false;
 };

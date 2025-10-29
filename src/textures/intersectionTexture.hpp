@@ -3,12 +3,13 @@
 #include "texture.hpp"
 #include "vec.hpp"
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 class IntersectionTexture {
 public:
-  static std::pair<std::shared_ptr<IntersectionTexture>,
-                   std::shared_ptr<IntersectionTexture>>
+  static std::pair<std::unique_ptr<IntersectionTexture>,
+                   std::unique_ptr<IntersectionTexture>>
   createIntersectionTextures(
       const Intersection &intersection,
       std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>

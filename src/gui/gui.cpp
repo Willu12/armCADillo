@@ -2,6 +2,7 @@
 #include "IController.hpp"
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
+#include "bezierCurve.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "color.hpp"
 #include "cursor.hpp"
@@ -38,27 +39,26 @@ IController &GUI::getController() {
   return *_controllers[static_cast<int>(_selectedController)];
 }
 
-std::vector<std::shared_ptr<IEntity>> GUI::getEntities() const {
-  return _scene->getEntites();
-}
+std::vector<IEntity *> GUI::getEntities() const { return _scene->getEntites(); }
 
-const std::vector<std::shared_ptr<IEntity>> &GUI::getSelectedEntities() const {
+const std::vector<IEntity *> &GUI::getSelectedEntities() const {
   return _selectedEntities;
 }
-std::vector<std::shared_ptr<IEntity>> GUI::getSelectedPointsPointers() const {
-  std::vector<std::shared_ptr<IEntity>> selectedPoints;
+std::vector<IEntity *> GUI::getSelectedPointsPointers() const {
+  std::vector<IEntity *> selected_points;
   for (const auto &entity : _selectedEntities) {
-    if (std::dynamic_pointer_cast<PointEntity>(entity)) {
-      selectedPoints.emplace_back(entity);
+    if (dynamic_cast<PointEntity *>(entity)) {
+      selected_points.emplace_back(entity);
     }
   }
-  return selectedPoints;
+  return selected_points;
 }
 
-std::shared_ptr<Cursor> GUI::getCursor() {
-  auto cursorController = dynamic_cast<CursorController *>(
+Cursor *GUI::getCursor() {
+  auto *cursor_controller = dynamic_cast<CursorController *>(
       _controllers[static_cast<int>(ControllerKind::Cursor)].get());
-  return cursorController->getCursor();
+
+  return cursor_controller->getCursor();
 }
 
 const Cursor &GUI::getCursor() const {
@@ -331,9 +331,8 @@ std::vector<std::reference_wrapper<PointEntity>>
 GUI::getSelectedPoints() const {
   std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
-  for (const auto &entity : _selectedEntities) {
-    auto point = std::dynamic_pointer_cast<PointEntity>(entity);
-    if (point) {
+  for (auto *entity : _selectedEntities) {
+    if (auto *point = dynamic_cast<PointEntity *>(entity)) {
       pointEntities.emplace_back(*point);
     }
   }
@@ -343,9 +342,8 @@ GUI::getSelectedPoints() const {
 std::vector<std::reference_wrapper<PointEntity>> GUI::getPoints() const {
   std::vector<std::reference_wrapper<PointEntity>> pointEntities;
 
-  for (auto &entity : _scene->getPoints()) {
-    auto point = std::dynamic_pointer_cast<PointEntity>(entity);
-    if (point) {
+  for (auto *entity : _scene->getPoints()) {
+    if (auto *point = dynamic_cast<PointEntity *>(entity)) {
       pointEntities.emplace_back(*point);
     }
   }
@@ -356,9 +354,8 @@ std::vector<std::reference_wrapper<BezierCurve>>
 GUI::getSelectedBezierCurves() {
   std::vector<std::reference_wrapper<BezierCurve>> bezierCurves;
   for (auto &entity : _selectedEntities) {
-    auto bezierCurve = std::dynamic_pointer_cast<BezierCurve>(entity);
-    if (bezierCurve) {
-      bezierCurves.emplace_back(*bezierCurve);
+    if (auto *bezier_curve = dynamic_cast<BezierCurve *>(entity)) {
+      bezierCurves.emplace_back(*bezier_curve);
     }
   }
   return bezierCurves;
@@ -378,32 +375,33 @@ void GUI::processControllers() {
 }
 
 void GUI::setVirtualPoints(
-    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints,
+    const std::vector<VirtualPoint *> &virtualPoints,
     const std::vector<std::reference_wrapper<const VirtualPoint>>
         &selectedVirtualPoints) {
   _virtualPoints = virtualPoints;
 
-  std::vector<std::shared_ptr<VirtualPoint>> selectedVirtualPointsPtrs;
+  std::vector<VirtualPoint *> selected_virtual_points;
+
   for (const auto &ref : selectedVirtualPoints) {
     const VirtualPoint *rawPtr = &ref.get();
 
-    auto it = std::ranges::find_if(
-        _virtualPoints, [rawPtr](const std::shared_ptr<VirtualPoint> &vp) {
-          return vp.get() == rawPtr;
+    auto it =
+        std::ranges::find_if(_virtualPoints, [rawPtr](const VirtualPoint *vp) {
+          return vp == rawPtr;
         });
 
     if (it != _virtualPoints.end()) {
-      selectedVirtualPointsPtrs.push_back(*it);
+      selected_virtual_points.push_back(*it);
     } else {
       throw std::runtime_error(
           "Selected VirtualPoint not found in _virtualPoints");
     }
   }
-  _selectedVirtualPoints = selectedVirtualPointsPtrs;
+  _selectedVirtualPoints = selected_virtual_points;
 }
 
-std::vector<std::shared_ptr<IEntity>> GUI::getSelectedVirtualPoints() const {
-  std::vector<std::shared_ptr<IEntity>> virtualPoints;
+std::vector<IEntity *> GUI::getSelectedVirtualPoints() const {
+  std::vector<IEntity *> virtualPoints;
   virtualPoints.reserve(_selectedVirtualPoints.size());
   for (const auto &vPoint : _selectedVirtualPoints) {
     virtualPoints.emplace_back(vPoint);
@@ -411,8 +409,8 @@ std::vector<std::shared_ptr<IEntity>> GUI::getSelectedVirtualPoints() const {
   return virtualPoints;
 }
 
-std::vector<std::shared_ptr<IEntity>> GUI::getVirtualPoints() const {
-  std::vector<std::shared_ptr<IEntity>> virtualPoints;
+std::vector<IEntity *> GUI::getVirtualPoints() const {
+  std::vector<IEntity *> virtualPoints;
   virtualPoints.reserve(_virtualPoints.size());
   for (const auto &vPoint : _virtualPoints) {
     virtualPoints.emplace_back(vPoint);
@@ -453,7 +451,7 @@ GUI::getSelectedSurfacesC0() const {
   std::vector<std::reference_wrapper<BezierSurfaceC0>> surfaces;
 
   for (const auto &entity : _selectedEntities) {
-    if (auto surface = std::dynamic_pointer_cast<BezierSurfaceC0>(entity)) {
+    if (auto surface = dynamic_cast<BezierSurfaceC0 *>(entity)) {
       surfaces.emplace_back(*surface);
     }
   }
@@ -473,15 +471,14 @@ void GUI::findIntersection() {
     return;
   }
 
-  auto surf0 =
-      std::dynamic_pointer_cast<algebra::IDifferentialParametricForm<2, 3>>(
-          entities[0]);
+  auto *surf0 =
+      dynamic_cast<algebra::IDifferentialParametricForm<2, 3> *>(entities[0]);
 
-  auto surf1 =
+  auto *surf1 =
       entities.size() == 1
           ? surf0
-          : std::dynamic_pointer_cast<
-                algebra::IDifferentialParametricForm<2, 3>>(entities[1]);
+          : dynamic_cast<algebra::IDifferentialParametricForm<2, 3> *>(
+                entities[1]);
 
   _intersectionFinder.setSurfaces(surf0, surf1);
 
@@ -500,17 +497,15 @@ void GUI::findIntersection() {
       std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>(
           bounds1, bounds2);
 
-  auto intersectionCurve = std::make_shared<IntersectionCurve>(
+  auto intersectionCurve = std::make_unique<IntersectionCurve>(
       *intersection, bounds, intersection->looped);
+
   intersectionCurve->setFirstPoint(intersection->firstPoint);
 
-  _scene->addEntity(EntityType::IntersectionCurve, intersectionCurve);
-
-  auto surfInter0 = std::dynamic_pointer_cast<Intersectable>(entities[0]);
-
-  auto surfInter1 = entities.size() == 1
-                        ? surfInter0
-                        : std::dynamic_pointer_cast<Intersectable>(entities[1]);
+  auto *surfInter0 = dynamic_cast<Intersectable *>(entities[0]);
+  auto *surfInter1 = entities.size() == 1
+                         ? surfInter0
+                         : dynamic_cast<Intersectable *>(entities[1]);
 
   intersectionCurve->getFirstTexture().setWrapping(surf0->wrapped(0),
                                                    surf0->wrapped(1));
@@ -518,6 +513,10 @@ void GUI::findIntersection() {
                                                     surf1->wrapped(1));
   surfInter0->setIntersectionTexture(intersectionCurve->getFirstTexturePtr());
   surfInter1->setIntersectionTexture(intersectionCurve->getSecondTexturePtr());
+
+  _scene->addEntity(EntityType::IntersectionCurve,
+
+                    std::move(intersectionCurve));
 }
 
 void GUI::createEnitityUI() {

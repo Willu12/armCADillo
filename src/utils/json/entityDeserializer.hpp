@@ -15,7 +15,7 @@ class EntityDeserializer {
 
 public:
   virtual ~EntityDeserializer() = default;
-  virtual std::shared_ptr<IEntity> deserializeEntity(const json &j,
+  virtual std::unique_ptr<IEntity> deserializeEntity(const json &j,
                                                      Scene &scene) const = 0;
 
 protected:

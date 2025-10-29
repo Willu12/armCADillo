@@ -21,12 +21,8 @@ public:
   const IMeshable &getMesh() const override { return polyline_->getMesh(); };
   IntersectionTexture &getFirstTexture() { return *texture0_; }
   IntersectionTexture &getSecondTexture() { return *texture1_; }
-  std::weak_ptr<IntersectionTexture> getFirstTexturePtr() const {
-    return std::weak_ptr<IntersectionTexture>(texture0_);
-  }
-  std::weak_ptr<IntersectionTexture> getSecondTexturePtr() const {
-    return std::weak_ptr<IntersectionTexture>(texture1_);
-  }
+  IntersectionTexture *getFirstTexturePtr() const { return texture0_.get(); }
+  IntersectionTexture *getSecondTexturePtr() const { return texture1_.get(); }
   const Polyline &getPolyline() const { return *polyline_; }
   bool acceptVisitor(IVisitor &visitor) override {
     return visitor.visitIntersectionCurve(*this);
@@ -45,6 +41,6 @@ private:
   bool dead_ = false;
   bool looped_ = false;
   std::unique_ptr<Polyline> polyline_;
-  std::shared_ptr<IntersectionTexture> texture0_;
-  std::shared_ptr<IntersectionTexture> texture1_;
+  std::unique_ptr<IntersectionTexture> texture0_;
+  std::unique_ptr<IntersectionTexture> texture1_;
 };

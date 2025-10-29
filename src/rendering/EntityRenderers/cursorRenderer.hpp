@@ -17,10 +17,10 @@ public:
             Texture::createTexture("../resources/textures/cursorTexture.png")) {
   }
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities) {
+  void render(const std::vector<IEntity *> &entities) override {
     _texture->bind(0);
     _shader.use();
-    for (const auto &entity : entities) {
+    for (const auto *entity : entities) {
       const float cameraDistance = distanceFromCamera(entity);
       auto scaleMatrix = algebra::transformations::scaleMatrix(
           cameraDistance, cameraDistance, cameraDistance);
@@ -48,7 +48,7 @@ private:
   Shader _shader;
   std::unique_ptr<Texture> _texture;
 
-  float distanceFromCamera(const std::shared_ptr<IEntity> &entity) {
+  float distanceFromCamera(const IEntity *entity) {
     auto entityWorldPos =
         _camera.viewMatrix() * entity->getPosition().toHomogenous();
     return std::abs(entityWorldPos[2]);

@@ -8,7 +8,7 @@ class PointDeserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
 public:
-  std::shared_ptr<IEntity> deserializeEntity(const json &j,
+  std::unique_ptr<IEntity> deserializeEntity(const json &j,
                                              Scene &scene) const final {
     std::string name;
     int id = -1;
@@ -21,7 +21,7 @@ public:
       j.at("name").get_to(name);
       point.getName() = name;
     }
-    auto p = std::make_shared<PointEntity>(point);
+    auto p = std::make_unique<PointEntity>(point);
     p->setId(id);
     return p;
   }

@@ -10,7 +10,7 @@
 class CursorController : public IController {
 public:
   CursorController(GLFWwindow *window, Camera *camera)
-      : _window(window), _cursor(std::make_shared<Cursor>()), _camera(camera) {}
+      : _window(window), _cursor(std::make_unique<Cursor>()), _camera(camera) {}
 
   bool processMouse() override { return false; }
   bool processScroll() override { return false; }
@@ -32,10 +32,10 @@ public:
     }
   }
 
-  std::shared_ptr<Cursor> getCursor() { return _cursor; }
+  Cursor *getCursor() { return _cursor.get(); }
 
 private:
-  GLFWwindow *_window;
-  std::shared_ptr<Cursor> _cursor;
-  Camera *_camera;
+  GLFWwindow *_window = nullptr;
+  std::unique_ptr<Cursor> _cursor;
+  Camera *_camera = nullptr;
 };

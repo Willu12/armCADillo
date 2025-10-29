@@ -17,7 +17,7 @@ public:
                 "../resources/shaders/geometryBezier.gs",
                 "../resources/shaders/colorFragmentShader.hlsl") {}
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
+  void render(const std::vector<IEntity *> &entities) override {
     if (entities.empty()) {
       return;
     }

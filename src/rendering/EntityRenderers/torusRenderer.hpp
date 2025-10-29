@@ -12,7 +12,7 @@ public:
                 "../resources/shaders/fragmentShaderTrimmed.hlsl"),
         _camera(camera) {}
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
+  void render(const std::vector<IEntity *> &entities) override {
     if (entities.empty()) {
       return;
     }

@@ -50,7 +50,8 @@ EntityDeserializer::getPoints(const json &j, const Scene &scene) const {
         points, [Id](const auto &p) { return p->getId() == Id; });
 
     if (iter != points.end()) {
-      pointsRef.emplace_back(*std::dynamic_pointer_cast<PointEntity>(*iter));
+      auto *entity = dynamic_cast<PointEntity *>(*iter);
+      pointsRef.emplace_back(*entity);
     }
   }
   return pointsRef;

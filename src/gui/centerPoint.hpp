@@ -6,7 +6,7 @@
 class CenterPoint {
 public:
   CenterPoint() : _point(algebra::Vec3f()) {}
-  void display(const std::vector<std::shared_ptr<IEntity>> &entities) {
+  void display(const std::vector<IEntity *> &entities) {
     if (entities.size() < 1) {
       return;
     }
@@ -19,7 +19,7 @@ public:
 private:
   Point _point;
 
-  void updatePosition(const std::vector<std::shared_ptr<IEntity>> &entities) {
+  void updatePosition(const std::vector<IEntity *> &entities) {
     auto averagePosition = algebra::Vec3f();
 
     for (const auto &entity : entities) {

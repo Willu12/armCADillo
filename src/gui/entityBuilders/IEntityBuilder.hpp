@@ -17,7 +17,7 @@ public:
       create();
     }
   };
-  virtual std::optional<std::shared_ptr<IEntity>> create() const = 0;
+  virtual std::optional<IEntity *> create() const = 0;
 
 protected:
   GUI *gui_;

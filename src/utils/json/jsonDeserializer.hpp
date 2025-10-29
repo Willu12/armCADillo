@@ -30,15 +30,15 @@ public:
 
     for (const auto &json : pointJson) {
       const auto &deserializer = _deserializerMap.at(EntityType::Point);
-      const auto &entity = deserializer->deserializeEntity(json, scene);
-      scene.addEntity(EntityType::Point, entity);
+      auto entity = deserializer->deserializeEntity(json, scene);
+      scene.addEntity(EntityType::Point, std::move(entity));
     }
 
     for (const auto &json : geometryJson) {
       const auto entityType = _typeMap.at(json.at("objectType"));
       const auto &deserializer = _deserializerMap.at(entityType);
-      const auto &entity = deserializer->deserializeEntity(json, scene);
-      scene.addEntity(entityType, entity);
+      auto entity = deserializer->deserializeEntity(json, scene);
+      scene.addEntity(entityType, std::move(entity));
     }
   }
 

@@ -16,18 +16,21 @@
 #include <utility>
 #include <vector>
 
-std::vector<std::shared_ptr<GregorySurface>>
+std::vector<std::unique_ptr<GregorySurface>>
 GregorySurface::createGregorySurfaces(
     const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
-  std::vector<std::shared_ptr<GregorySurface>> gregorySurfaces;
+  std::vector<std::unique_ptr<GregorySurface>> gregorySurfaces;
   const auto borderGraph = createBorderGraph(surfaces);
+
   auto holes = borderGraph.findHoles();
-  if (holes.empty())
+  if (holes.empty()) {
     return gregorySurfaces;
+  }
 
   for (auto &hole : holes) {
-    gregorySurfaces.emplace_back(std::make_shared<GregorySurface>(hole));
+    gregorySurfaces.emplace_back(std::make_unique<GregorySurface>(hole));
   }
+
   return gregorySurfaces;
 }
 
@@ -35,10 +38,12 @@ GregorySurface::GregorySurface(const std::array<BorderEdge, 3> &edges)
     : _edges(edges) {
 
   for (auto &edge : _edges) {
-    for (auto &p : edge._edge._points)
+    for (auto &p : edge._edge._points) {
       subscribe(p.get());
-    for (auto &p : edge._innerEdge._points)
+    }
+    for (auto &p : edge._innerEdge._points) {
       subscribe(p.get());
+    }
   }
   createGregoryPatches();
   updateMesh();
@@ -52,7 +57,7 @@ BorderGraph GregorySurface::createBorderGraph(
   borders.reserve(surfaces.size());
 
   for (const auto &surface : surfaces) {
-    borders.push_back(Border(surface));
+    borders.emplace_back(surface);
   }
   return BorderGraph(borders);
 }
@@ -152,8 +157,9 @@ void GregorySurface::createGregoryPatches() {
 
 std::array<std::unique_ptr<GregoryMesh>, 3> GregorySurface::generateMesh() {
   std::array<std::unique_ptr<GregoryMesh>, 3> meshes;
-  for (const auto &[i, quad] : _gregoryPatches | std::views::enumerate)
+  for (const auto &[i, quad] : _gregoryPatches | std::views::enumerate) {
     meshes[i] = GregoryMesh::create(quad);
+  }
   return meshes;
 }
 

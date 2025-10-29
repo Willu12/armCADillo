@@ -11,5 +11,5 @@ public:
       : IEntityBuilder(gui, factory) {}
   void drawGui() override { IEntityBuilder::drawGui(); };
 
-  std::optional<std::shared_ptr<IEntity>> create() const override;
+  std::optional<IEntity *> create() const override;
 };

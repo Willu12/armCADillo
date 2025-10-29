@@ -1,7 +1,8 @@
 #include "bezierCurveC0.hpp"
 #include "bezierCurveC0Deserializer.hpp"
+#include <memory>
 
-std::shared_ptr<IEntity>
+std::unique_ptr<IEntity>
 BezierCurveC0Deserializer::deserializeEntity(const json &j,
                                              Scene &scene) const {
   std::string name;
@@ -10,11 +11,11 @@ BezierCurveC0Deserializer::deserializeEntity(const json &j,
 
   const auto points = getPoints(j, scene);
 
-  auto bezierCurveC0 = std::make_shared<BezierCurveC0>(points);
+  auto bezierCurveC0 = std::make_unique<BezierCurveC0>(points);
   if (j.contains("name")) {
     j.at("name").get_to(name);
     bezierCurveC0->getName() = name;
   }
   bezierCurveC0->getId() = id;
-  return bezierCurveC0;
+  return std::move(bezierCurveC0);
 }

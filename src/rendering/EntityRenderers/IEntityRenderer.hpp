@@ -6,12 +6,10 @@
 class IEntityRenderer {
 public:
   virtual ~IEntityRenderer() = default;
-  virtual void
-  render(const std::vector<std::shared_ptr<IEntity>> &entities) = 0;
+  virtual void render(const std::vector<IEntity *> &entities) = 0;
 
 protected:
-  GLuint prepareInstacedModelMatrices(
-      const std::vector<std::shared_ptr<IEntity>> &entities) {
+  GLuint prepareInstacedModelMatrices(const std::vector<IEntity *> &entities) {
     std::vector<algebra::Mat4f> modelMatrices;
     for (const auto &entity : entities) {
       modelMatrices.push_back(entity->getModelMatrix().transpose());

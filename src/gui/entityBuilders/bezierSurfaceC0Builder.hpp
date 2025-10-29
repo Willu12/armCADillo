@@ -10,5 +10,5 @@ public:
       : BezierSurfaceBuilder(gui, factory) {}
   void drawGui() override { BezierSurfaceBuilder::drawGui(); };
 
-  std::optional<std::shared_ptr<IEntity>> create() const override;
+  std::optional<IEntity *> create() const override;
 };

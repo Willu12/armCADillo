@@ -56,8 +56,7 @@ private:
 
   // Virtual Points Handlers
 
-  void renderVirtualPointList(
-      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints);
+  void renderVirtualPointList(const std::vector<VirtualPoint *> &virtualPoints);
   bool isVirtualPointSelected(const VirtualPoint &point) const;
   void selectVirtualPoint(const VirtualPoint &point);
   void unselectVirtualPoint(const VirtualPoint &point);

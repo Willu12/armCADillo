@@ -19,7 +19,7 @@ public:
       _points.emplace_back(p);
       subscribe(p);
     }
-    _bezierPoints = bezierPoints();
+    initBezierPoints();
     _mesh = generateMesh();
   }
 
@@ -28,8 +28,14 @@ public:
   }
 
   bool &showBezierPoints() { return _showBezierPoints; }
-  const std::vector<std::shared_ptr<VirtualPoint>> &getVirtualPoints() const {
-    return _bezierPoints;
+
+  std::vector<VirtualPoint *> getVirtualPoints() const {
+    std::vector<VirtualPoint *> points;
+    points.reserve(_bezierPoints.size());
+    for (const auto &p : _bezierPoints) {
+      points.push_back(p.get());
+    }
+    return points;
   }
 
   void update() override {
@@ -49,8 +55,8 @@ public:
 
     auto it = std::ranges::find_if(
         _bezierPoints,
-        [&point](const std::shared_ptr<VirtualPoint> &bezierPoint) {
-          return bezierPoint.get() == &point;
+        [&point](const std::unique_ptr<VirtualPoint> &bezierPoint) {
+          return bezierPoint->getId() == point.getId();
         });
 
     if (it == _bezierPoints.end()) {
@@ -96,7 +102,7 @@ public:
 
 private:
   inline static int kClassId;
-  std::vector<std::shared_ptr<VirtualPoint>> _bezierPoints;
+  std::vector<std::unique_ptr<VirtualPoint>> _bezierPoints;
   bool _showBezierPoints = false;
 
   void recalculateBezierPoints() {
@@ -134,8 +140,8 @@ private:
     }
   }
 
-  std::vector<std::shared_ptr<VirtualPoint>> bezierPoints() {
-    std::vector<std::shared_ptr<VirtualPoint>> bezierPoints;
+  std::vector<std::unique_ptr<VirtualPoint>> initBezierPoints() {
+    std::vector<std::unique_ptr<VirtualPoint>> bezierPoints;
 
     if (_points.size() < 4) {
       return bezierPoints;
@@ -143,22 +149,23 @@ private:
 
     for (int i = 0; i < _points.size() * 3 - 8; ++i) {
       bezierPoints.emplace_back(
-          std::make_shared<VirtualPoint>(algebra::Vec3f()));
+          std::make_unique<VirtualPoint>(algebra::Vec3f()));
     }
 
     for (const auto &p : bezierPoints) {
       p->subscribe(*this);
     }
-    _bezierPoints = bezierPoints;
+    _bezierPoints = std::move(bezierPoints);
     recalculateBezierPoints();
-    return _bezierPoints;
+
+    return bezierPoints;
   }
 
   void addBezierPoints() {
     for (int i = 0; i < 3; ++i) {
-      auto bernsteinPoint = std::make_shared<VirtualPoint>(algebra::Vec3f());
+      auto bernsteinPoint = std::make_unique<VirtualPoint>(algebra::Vec3f());
       bernsteinPoint->subscribe(*this);
-      _bezierPoints.emplace_back(bernsteinPoint);
+      _bezierPoints.emplace_back(std::move(bernsteinPoint));
     }
     recalculateBezierPoints();
   }

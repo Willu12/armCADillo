@@ -9,7 +9,7 @@ class BezierSurfaceC0Deserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
 public:
-  std::shared_ptr<IEntity> deserializeEntity(const json &j,
+  std::unique_ptr<IEntity> deserializeEntity(const json &j,
                                              Scene &scene) const final {
     std::string name;
     int id = -1;
@@ -22,7 +22,7 @@ public:
     j.at("size").at("u").get_to(rowCount);
     auto connectionType =
         EntityDeserializer::getConnectionType(points, rowCount, colCount, 1);
-    auto bezierSurfaceC0 = std::make_shared<BezierSurfaceC0>(
+    auto bezierSurfaceC0 = std::make_unique<BezierSurfaceC0>(
         points, (rowCount - 1) / 3, (colCount - 1) / 3, connectionType);
     if (j.contains("name")) {
       j.at("name").get_to(name);

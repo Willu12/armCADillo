@@ -8,8 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
-std::optional<std::shared_ptr<IEntity>>
-SelectionController::getEntity(float x, float y) {
+std::optional<IEntity *> SelectionController::getEntity(float x, float y) {
   PickingTexture::PixelInfo pixel =
       _pickingTexture.ReadPixel(x, GLFWHelper::getHeight(_window) - y - 1);
   if (pixel.ObjectId == 0) {
@@ -79,11 +78,11 @@ void SelectionController::process(const Mouse &mouse) {
   }
 }
 
-std::vector<std::shared_ptr<IEntity>>
+std::vector<IEntity *>
 SelectionController::getEntities(const algebra::Vec2f &startPos,
                                  const algebra::Vec2f &endPos,
                                  int stride /* = 1 */) {
-  std::vector<std::shared_ptr<IEntity>> selectedEntities;
+  std::vector<IEntity *> selectedEntities;
 
   int minX =
       std::min(static_cast<int>(startPos[0]), static_cast<int>(endPos[0]));

@@ -10,56 +10,57 @@
 #include <functional>
 #include <memory>
 
-std::shared_ptr<PointEntity>
-EntityFactory::createPoint(const algebra::Vec3f &position) {
-  auto point = std::make_shared<PointEntity>(position);
-  scene_->addEntity(EntityType::Point, point);
-  return point;
+PointEntity *EntityFactory::createPoint(const algebra::Vec3f &position) {
+  auto point = std::make_unique<PointEntity>(position);
+  auto point_ptr = point.get();
+  scene_->addEntity(EntityType::Point, std::move(point));
+  return point_ptr;
 }
 
-std::shared_ptr<TorusEntity>
-EntityFactory::createTorus(const algebra::Vec3f &position) {
-  auto torus = std::make_shared<TorusEntity>(1.0, 0.3, position);
-  scene_->addEntity(EntityType::Torus, torus);
-  return torus;
+TorusEntity *EntityFactory::createTorus(const algebra::Vec3f &position) {
+  auto torus = std::make_unique<TorusEntity>(1.0, 0.3, position);
+  auto torus_ptr = torus.get();
+  scene_->addEntity(EntityType::Torus, std::move(torus));
+  return torus_ptr;
 }
 
-std::optional<std::shared_ptr<BezierCurveC0>>
-EntityFactory::createBezierCurveC0(
+std::optional<BezierCurveC0 *> EntityFactory::createBezierCurveC0(
     const std::vector<std::reference_wrapper<PointEntity>> &points) {
   if (points.size() < 2) {
     return std::nullopt;
   }
 
-  auto bezierCurveC0 = std::make_shared<BezierCurveC0>(points);
-  scene_->addEntity(EntityType::BezierCurveC0, bezierCurveC0);
-  return bezierCurveC0;
+  auto bezier_c0 = std::make_unique<BezierCurveC0>(points);
+  auto *bezier_c0_ptr = bezier_c0.get();
+  scene_->addEntity(EntityType::BezierCurveC0, std::move(bezier_c0));
+  return bezier_c0_ptr;
 }
 
-std::optional<std::shared_ptr<BSplineCurve>> EntityFactory::createBSplineCurve(
+std::optional<BSplineCurve *> EntityFactory::createBSplineCurve(
     const std::vector<std::reference_wrapper<PointEntity>> &points) {
   if (points.size() < 2) {
     return std::nullopt;
   }
 
-  auto bSplineCurve = std::make_shared<BSplineCurve>(points);
-  scene_->addEntity(EntityType::BSplineCurve, bSplineCurve);
-  return bSplineCurve;
+  auto b_spline = std::make_unique<BSplineCurve>(points);
+  auto *b_spline_ptr = b_spline.get();
+  scene_->addEntity(EntityType::BSplineCurve, std::move(b_spline));
+  return b_spline_ptr;
 }
 
-std::optional<std::shared_ptr<InterpolatingSplineC2>>
-EntityFactory::createInterpolatingSpline(
+std::optional<InterpolatingSplineC2 *> EntityFactory::createInterpolatingSpline(
     const std::vector<std::reference_wrapper<PointEntity>> &points) {
   if (points.size() < 2) {
     return std::nullopt;
   }
 
-  auto spline = std::make_shared<InterpolatingSplineC2>(points);
-  scene_->addEntity(EntityType::InterpolatingSplineCurve, spline);
-  return spline;
+  auto spline = std::make_unique<InterpolatingSplineC2>(points);
+  auto *spline_ptr = spline.get();
+  scene_->addEntity(EntityType::InterpolatingSplineCurve, std::move(spline));
+  return spline_ptr;
 }
 
-std::optional<std::shared_ptr<BezierSurfaceC0>>
+std::optional<BezierSurfaceC0 *>
 EntityFactory::createBezierSurfaceC0(const algebra::Vec3f &position,
                                      uint32_t uPatches, uint32_t vPatches,
                                      float u, float v, bool cyllinder) {
@@ -71,11 +72,11 @@ EntityFactory::createBezierSurfaceC0(const algebra::Vec3f &position,
   if (!entity) {
     return std::nullopt;
   }
-
-  scene_->addEntity(EntityType::BezierSurfaceC0, *entity);
-  return entity;
+  auto *entity_ptr = entity->get();
+  scene_->addEntity(EntityType::BezierSurfaceC0, std::move(*entity));
+  return entity_ptr;
 }
-std::optional<std::shared_ptr<BezierSurfaceC2>>
+std::optional<BezierSurfaceC2 *>
 EntityFactory::createBezierSurfaceC2(const algebra::Vec3f &position,
                                      uint32_t uPatches, uint32_t vPatches,
                                      float u, float v, bool cyllinder) {
@@ -88,21 +89,22 @@ EntityFactory::createBezierSurfaceC2(const algebra::Vec3f &position,
     return std::nullopt;
   }
 
-  scene_->addEntity(EntityType::BezierSurfaceC2, *entity);
-  return entity;
+  auto *entity_ptr = entity->get();
+  scene_->addEntity(EntityType::BezierSurfaceC2, std::move(*entity));
+  return entity_ptr;
 }
 
-std::optional<std::shared_ptr<BezierSurfaceC0>>
+std::optional<std::unique_ptr<BezierSurfaceC0>>
 EntityFactory::createFlatBezierSurfaceC0(const algebra::Vec3f &position,
                                          uint32_t uPatches, uint32_t vPatches,
                                          float u, float v) {
   const auto &positions =
       BezierSurfaceC0::createFlatPositions(position, uPatches, vPatches, u, v);
   const auto &points = createSurfacePoints(positions);
-  return std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches,
+  return std::make_unique<BezierSurfaceC0>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Flat);
 }
-std::optional<std::shared_ptr<BezierSurfaceC0>>
+std::optional<std::unique_ptr<BezierSurfaceC0>>
 EntityFactory::createCyllinderBezierSurfaceC0(const algebra::Vec3f &position,
                                               uint32_t uPatches,
                                               uint32_t vPatches, float r,
@@ -113,10 +115,10 @@ EntityFactory::createCyllinderBezierSurfaceC0(const algebra::Vec3f &position,
   for (int i = 0; i < (3 * uPatches + 1); ++i) {
     points.push_back(points[i]);
   }
-  return std::make_shared<BezierSurfaceC0>(points, uPatches, vPatches,
+  return std::make_unique<BezierSurfaceC0>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Columns);
 }
-std::optional<std::shared_ptr<BezierSurfaceC2>>
+std::optional<std::unique_ptr<BezierSurfaceC2>>
 EntityFactory::createFlatBezierSurfaceC2(const algebra::Vec3f &position,
                                          uint32_t uPatches, uint32_t vPatches,
                                          float u, float v) {
@@ -124,10 +126,10 @@ EntityFactory::createFlatBezierSurfaceC2(const algebra::Vec3f &position,
       BezierSurfaceC2::createFlatPositions(position, uPatches, vPatches, u, v);
   auto points = createSurfacePoints(positions);
 
-  return std::make_shared<BezierSurfaceC2>(points, uPatches, vPatches,
+  return std::make_unique<BezierSurfaceC2>(points, uPatches, vPatches,
                                            algebra::ConnectionType::Flat);
 }
-std::optional<std::shared_ptr<BezierSurfaceC2>>
+std::optional<std::unique_ptr<BezierSurfaceC2>>
 EntityFactory::createCyllinderBezierSurfaceC2(const algebra::Vec3f &position,
                                               uint32_t uPatches,
                                               uint32_t vPatches, float r,
@@ -148,7 +150,7 @@ EntityFactory::createCyllinderBezierSurfaceC2(const algebra::Vec3f &position,
       fixedPoints.push_back(points[row * (uPoints - 3) + col]);
     }
   }
-  return std::make_shared<BezierSurfaceC2>(fixedPoints, uPatches, vPatches,
+  return std::make_unique<BezierSurfaceC2>(fixedPoints, uPatches, vPatches,
                                            algebra::ConnectionType::Columns);
 }
 
@@ -166,19 +168,21 @@ EntityFactory::createSurfacePoints(
   return points;
 }
 
-std::optional<std::shared_ptr<GregorySurface>>
-EntityFactory::createGregoryPatch(
+std::optional<GregorySurface *> EntityFactory::createGregoryPatch(
     const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces) {
-  auto gregorySurfaces = GregorySurface::createGregorySurfaces(surfaces);
-  for (const auto &gregorySurface : gregorySurfaces) {
-    scene_->addEntity(EntityType::GregorySurface, gregorySurface);
+  auto gregory_surfaces = GregorySurface::createGregorySurfaces(surfaces);
+  auto *gregory_surface_ptr = gregory_surfaces[0].get();
+
+  for (auto &gregorySurface : gregory_surfaces) {
+    scene_->addEntity(EntityType::GregorySurface, std::move(gregorySurface));
   }
-  return gregorySurfaces[0];
+  return gregory_surface_ptr;
 }
 
-std::optional<std::shared_ptr<Polyline>>
+std::optional<Polyline *>
 EntityFactory::createPolyline(const std::vector<algebra::Vec3f> &points) {
-  auto polyline = std::make_shared<Polyline>(points);
-  scene_->addEntity(EntityType::Polyline, polyline);
-  return polyline;
+  auto polyline = std::make_unique<Polyline>(points);
+  auto polyline_ptr = polyline.get();
+  scene_->addEntity(EntityType::Polyline, std::move(polyline));
+  return polyline_ptr;
 }

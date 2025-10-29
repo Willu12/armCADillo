@@ -20,7 +20,7 @@
 
 class GregorySurface : public IEntity, public ISubscriber {
 public:
-  static std::vector<std::shared_ptr<GregorySurface>> createGregorySurfaces(
+  static std::vector<std::unique_ptr<GregorySurface>> createGregorySurfaces(
       const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
   const IMeshable &getMesh() const override;
   const std::array<std::unique_ptr<GregoryMesh>, 3> &getMeshes() const {

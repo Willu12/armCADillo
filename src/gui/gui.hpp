@@ -38,15 +38,15 @@ public:
   GUI(GLFWwindow *window, Scene *scene);
   IController &getController();
 
-  std::vector<std::shared_ptr<IEntity>> getEntities() const;
+  std::vector<IEntity *> getEntities() const;
   std::vector<std::reference_wrapper<PointEntity>> getPoints() const;
-  const std::vector<std::shared_ptr<IEntity>> &getSelectedEntities() const;
-  std::vector<std::shared_ptr<IEntity>> getSelectedPointsPointers() const;
+  const std::vector<IEntity *> &getSelectedEntities() const;
+  std::vector<IEntity *> getSelectedPointsPointers() const;
   std::vector<std::reference_wrapper<PointEntity>> getSelectedPoints() const;
   std::vector<std::reference_wrapper<BezierSurfaceC0>>
   getSelectedSurfacesC0() const;
 
-  std::shared_ptr<Cursor> getCursor();
+  Cursor *getCursor();
   const Cursor &getCursor() const;
   const algebra::Vec3f &getCursorPosition() const;
 
@@ -57,12 +57,12 @@ public:
   const Mouse &getMouse();
   PickingTexture &getPickingTexture();
 
-  void setVirtualPoints(
-      const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints,
-      const std::vector<std::reference_wrapper<const VirtualPoint>>
-          &selectedVirtualPoints);
-  std::vector<std::shared_ptr<IEntity>> getSelectedVirtualPoints() const;
-  std::vector<std::shared_ptr<IEntity>> getVirtualPoints() const;
+  void
+  setVirtualPoints(const std::vector<VirtualPoint *> &virtualPoints,
+                   const std::vector<std::reference_wrapper<const VirtualPoint>>
+                       &selectedVirtualPoints);
+  std::vector<IEntity *> getSelectedVirtualPoints() const;
+  std::vector<IEntity *> getVirtualPoints() const;
   void clearVirtualPoints();
   bool &stereographicVision() { return _stereographicVision; }
   Scene &getScene() { return *_scene; }
@@ -72,9 +72,9 @@ private:
   GLFWwindow *_window;
   Scene *_scene;
   EntityFactory _entityFactory;
-  std::vector<std::shared_ptr<IEntity>> _selectedEntities;
-  std::vector<std::shared_ptr<VirtualPoint>> _selectedVirtualPoints;
-  std::vector<std::shared_ptr<VirtualPoint>> _virtualPoints;
+  std::vector<IEntity *> _selectedEntities;
+  std::vector<VirtualPoint *> _selectedVirtualPoints;
+  std::vector<VirtualPoint *> _virtualPoints;
   std::vector<std::unique_ptr<IController>> _controllers;
   ControllerKind _selectedController = ControllerKind::Camera;
   CenterPoint _centerPoint;

@@ -9,7 +9,7 @@ public:
   TorusBuilder(GUI *gui, EntityFactory *factory)
       : IEntityBuilder(gui, factory) {}
   void drawGui() override { IEntityBuilder::drawGui(); };
-  std::optional<std::shared_ptr<IEntity>> create() const override;
+  std::optional<IEntity *> create() const override;
 
 private:
   float radius_ = 1.0f;

@@ -17,40 +17,39 @@
 class EntityFactory {
 public:
   explicit EntityFactory(Scene *scene) : scene_(scene) {}
-  std::shared_ptr<PointEntity> createPoint(const algebra::Vec3f &position);
-  std::shared_ptr<TorusEntity> createTorus(const algebra::Vec3f &position);
+  PointEntity *createPoint(const algebra::Vec3f &position);
+  TorusEntity *createTorus(const algebra::Vec3f &position);
 
-  std::optional<std::shared_ptr<BezierCurveC0>> createBezierCurveC0(
+  std::optional<BezierCurveC0 *> createBezierCurveC0(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
-  std::optional<std::shared_ptr<BSplineCurve>> createBSplineCurve(
+  std::optional<BSplineCurve *> createBSplineCurve(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
-  std::optional<std::shared_ptr<InterpolatingSplineC2>>
-  createInterpolatingSpline(
+  std::optional<InterpolatingSplineC2 *> createInterpolatingSpline(
       const std::vector<std::reference_wrapper<PointEntity>> &points);
-  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  std::optional<BezierSurfaceC0 *>
   createBezierSurfaceC0(const algebra::Vec3f &position, uint32_t uPatches,
                         uint32_t vPatches, float u, float v, bool cyllinder);
-  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  std::optional<BezierSurfaceC2 *>
   createBezierSurfaceC2(const algebra::Vec3f &position, uint32_t uPatches,
                         uint32_t vPatches, float u, float v, bool cyllinder);
-  std::optional<std::shared_ptr<GregorySurface>> createGregoryPatch(
+  std::optional<GregorySurface *> createGregoryPatch(
       const std::vector<std::reference_wrapper<BezierSurfaceC0>> &surfaces);
 
-  std::optional<std::shared_ptr<Polyline>>
+  std::optional<Polyline *>
   createPolyline(const std::vector<algebra::Vec3f> &points);
 
 private:
-  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  std::optional<std::unique_ptr<BezierSurfaceC0>>
   createFlatBezierSurfaceC0(const algebra::Vec3f &position, uint32_t uPatches,
                             uint32_t vPatches, float u, float v);
-  std::optional<std::shared_ptr<BezierSurfaceC0>>
+  std::optional<std::unique_ptr<BezierSurfaceC0>>
   createCyllinderBezierSurfaceC0(const algebra::Vec3f &position,
                                  uint32_t uPatches, uint32_t vPatches, float r,
                                  float h);
-  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  std::optional<std::unique_ptr<BezierSurfaceC2>>
   createFlatBezierSurfaceC2(const algebra::Vec3f &position, uint32_t uPatches,
                             uint32_t vPatches, float u, float v);
-  std::optional<std::shared_ptr<BezierSurfaceC2>>
+  std::optional<std::unique_ptr<BezierSurfaceC2>>
   createCyllinderBezierSurfaceC2(const algebra::Vec3f &position,
                                  uint32_t uPatches, uint32_t vPatches, float r,
                                  float h);

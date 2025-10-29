@@ -11,7 +11,7 @@ class BezierSurfaceC2Deserializer : public EntityDeserializer {
   using json = nlohmann::json;
 
 public:
-  std::shared_ptr<IEntity> deserializeEntity(const json &j,
+  std::unique_ptr<IEntity> deserializeEntity(const json &j,
                                              Scene &scene) const final {
     std::string name;
     int id = -1;
@@ -27,7 +27,7 @@ public:
     auto connectionType =
         EntityDeserializer::getConnectionType(points, vPoints, uPoints, 3);
 
-    auto bezierSurfaceC2 = std::make_shared<BezierSurfaceC2>(
+    auto bezierSurfaceC2 = std::make_unique<BezierSurfaceC2>(
         points, uPoints - 3, vPoints - 3, connectionType);
     if (j.contains("name")) {
       j.at("name").get_to(name);

@@ -118,7 +118,7 @@ bool GuiVisitor::visitBezierSurfaceC0(BezierSurfaceC0 &bezierSurface) {
   if (ImGui::Button("Clone")) {
     auto points = clonePoints(bezierSurface);
     _gui.getScene().addEntity(EntityType::BezierSurfaceC0,
-                              std::make_shared<BezierSurfaceC0>(
+                              std::make_unique<BezierSurfaceC0>(
                                   points, bezierSurface.getPatches().colCount,
                                   bezierSurface.getPatches().rowCount,
                                   bezierSurface.getConnectionType()));
@@ -133,7 +133,7 @@ bool GuiVisitor::visitBezierSurfaceC2(BezierSurfaceC2 &bezierSurface) {
   if (ImGui::Button("Clone")) {
     auto points = clonePoints(bezierSurface);
     _gui.getScene().addEntity(EntityType::BezierSurfaceC2,
-                              std::make_shared<BezierSurfaceC2>(
+                              std::make_unique<BezierSurfaceC2>(
                                   points, bezierSurface.getPatches().colCount,
                                   bezierSurface.getPatches().rowCount,
                                   bezierSurface.getConnectionType()));
@@ -224,8 +224,8 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
     auto &scene = _gui.getScene();
     for (const auto &p :
          intersectionCurve.getPolyline().getSparsePoints(0.5f)) {
-      auto point = std::make_shared<PointEntity>(p);
-      scene.addEntity(EntityType::Point, point);
+      auto point = std::make_unique<PointEntity>(p);
+      scene.addEntity(EntityType::Point, std::move(point));
       points.emplace_back(*point);
     }
     if (intersectionCurve.isLooped() &&
@@ -233,8 +233,9 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
       points.push_back(points.front());
     }
 
-    auto interpolatingSpline = std::make_shared<InterpolatingSplineC2>(points);
-    scene.addEntity(EntityType::InterpolatingSplineCurve, interpolatingSpline);
+    auto interpolatingSpline = std::make_unique<InterpolatingSplineC2>(points);
+    scene.addEntity(EntityType::InterpolatingSplineCurve,
+                    std::move(interpolatingSpline));
     intersectionCurve.isDead() = true;
   }
   return false;
@@ -353,7 +354,7 @@ void GuiVisitor::unselectVirtualPoint(const VirtualPoint &point) {
 }
 
 void GuiVisitor::renderVirtualPointList(
-    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints) {
+    const std::vector<VirtualPoint *> &virtualPoints) {
   ImGui::LabelText("##", "%s", "Virtual Points");
   for (const auto &vPoint : virtualPoints) {
     bool isSelected = isVirtualPointSelected(*vPoint);

@@ -40,9 +40,8 @@ public:
     initEntityRenderers();
   }
 
-  void
-  render(const std::unordered_map<
-         EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+  void render(const std::unordered_map<EntityType, std::vector<IEntity *>>
+                  &groupedEntities) {
     _camera->updateProjectionMatrix(_camera->projectionMatrix());
     _grid.render(_camera);
     for (const auto &entityGroup : groupedEntities) {
@@ -52,8 +51,8 @@ public:
   }
 
   void stereoscopicRender(
-      const std::unordered_map<
-          EntityType, std::vector<std::shared_ptr<IEntity>>> &groupedEntities) {
+      const std::unordered_map<EntityType, std::vector<IEntity *>>
+          &groupedEntities) {
     _grid.render(_camera);
     _camera->updateProjectionMatrix(_camera->leftEyeProjectionMatrix());
     glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -74,11 +73,10 @@ public:
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
   }
 
-  void
-  renderPicking(const std::vector<std::shared_ptr<IEntity>> &pickableEntities) {
+  void renderPicking(const std::vector<IEntity *> &pickableEntities) {
     _pickingRenderer.render(pickableEntities, *_camera);
   }
-  void renderCursor(const std::shared_ptr<Cursor> &cursor) {
+  void renderCursor(Cursor *cursor) {
     auto &cursorRenderer = _entityRenderers.at(EntityType::Cursor);
     cursorRenderer->render({cursor});
   }
@@ -87,8 +85,7 @@ public:
     _centerPointRenderer.render(centerPoint);
   }
 
-  void renderVirtualPoints(
-      const std::vector<std::shared_ptr<IEntity>> &virtualPoints) {
+  void renderVirtualPoints(const std::vector<IEntity *> &virtualPoints) {
     auto &virtualPointRenderer = _entityRenderers.at(EntityType::VirtualPoint);
     virtualPointRenderer->render(virtualPoints);
   }
@@ -98,8 +95,7 @@ public:
       _selectionBoxRenderer.render(*_camera, mouse, _window);
   }
 
-  void renderSelectedPoints(
-      const std::vector<std::shared_ptr<IEntity>> &selectedPoints) {
+  void renderSelectedPoints(const std::vector<IEntity *> &selectedPoints) {
     _selectedPointsRenderer.render(selectedPoints);
   }
 

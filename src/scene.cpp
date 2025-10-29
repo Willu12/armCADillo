@@ -13,23 +13,23 @@
 #include <functional>
 #include <memory>
 
-std::vector<std::shared_ptr<IEntity>> Scene::getEntites() const {
-  std::vector<std::shared_ptr<IEntity>> entities;
+std::vector<IEntity *> Scene::getEntites() const {
+  std::vector<IEntity *> entities;
   for (const auto &specificEntities : _entities) {
-    entities.insert(entities.end(), specificEntities.second.begin(),
-                    specificEntities.second.end());
+    for (const auto &specificEntity : specificEntities.second) {
+      entities.push_back(specificEntity.get());
+    }
   }
   return entities;
 }
 
-void Scene::addEntity(EntityType entityType,
-                      const std::shared_ptr<IEntity> &entity) {
-  _entities[entityType].emplace_back(entity);
+void Scene::addEntity(EntityType entityType, std::unique_ptr<IEntity> entity) {
+  _entities[entityType].emplace_back(std::move(entity));
 }
 
 Camera *Scene::getCamera() { return _camera; }
-void Scene::removeEntities(
-    std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
+
+void Scene::removeEntities(std::vector<IEntity *> &entitiesToRemove) {
 
   filterEntitiesToRemove(entitiesToRemove);
   enqueueSurfacePoints(entitiesToRemove);
@@ -37,7 +37,8 @@ void Scene::removeEntities(
     auto &vec = it->second;
 
     auto new_end = std::ranges::remove_if(vec, [&](const auto &e) {
-      return std::ranges::find(entitiesToRemove, e) != entitiesToRemove.end();
+      return std::ranges::find(entitiesToRemove, e.get()) !=
+             entitiesToRemove.end();
     });
     vec.erase(new_end.begin(), vec.end());
 
@@ -49,12 +50,24 @@ void Scene::removeEntities(
   }
 }
 
-const std::unordered_map<EntityType, std::vector<std::shared_ptr<IEntity>>> &
+std::unordered_map<EntityType, std::vector<IEntity *>>
 Scene::getGroupedEntities() const {
-  return _entities;
+  std::unordered_map<EntityType, std::vector<IEntity *>> grouped_entities;
+
+  for (const auto &pair : _entities) {
+    std::vector<IEntity *> specific_entities;
+    specific_entities.reserve(pair.second.size());
+
+    for (const auto &entity : pair.second) {
+      specific_entities.push_back(entity.get());
+    }
+    grouped_entities.insert({pair.first, specific_entities});
+  }
+
+  return grouped_entities;
 }
 
-std::vector<std::shared_ptr<IEntity>> Scene::getPickables() const {
+std::vector<IEntity *> Scene::getPickables() const {
   auto points = getPoints();
   auto vPoints = getVirtualPoints();
   points.insert(points.begin(), vPoints.begin(), vPoints.end());
@@ -62,14 +75,14 @@ std::vector<std::shared_ptr<IEntity>> Scene::getPickables() const {
   return points;
 }
 
-std::vector<std::shared_ptr<IEntity>> Scene::getVirtualPoints() const {
-  std::vector<std::shared_ptr<IEntity>> virtualPoints;
+std::vector<IEntity *> Scene::getVirtualPoints() const {
+  std::vector<IEntity *> virtualPoints;
   if (!_entities.contains(EntityType::BSplineCurve)) {
     return virtualPoints;
   }
 
   for (const auto &entity : _entities.at(EntityType::BSplineCurve)) {
-    auto bezierCurve = std::dynamic_pointer_cast<BSplineCurve>(entity);
+    auto *bezierCurve = dynamic_cast<BSplineCurve *>(entity.get());
     if (!bezierCurve || !bezierCurve->showBezierPoints()) {
       continue;
     }
@@ -81,18 +94,23 @@ std::vector<std::shared_ptr<IEntity>> Scene::getVirtualPoints() const {
   return virtualPoints;
 }
 
-std::vector<std::shared_ptr<IEntity>> Scene::getPoints() const {
+std::vector<IEntity *> Scene::getPoints() const {
+  std::vector<IEntity *> points;
   if (!_entities.contains(EntityType::Point)) {
-    return std::vector<std::shared_ptr<IEntity>>();
+    return points;
   }
 
-  return _entities.at(EntityType::Point);
+  points.reserve(_entities.at(EntityType::Point).size());
+  for (const auto &point : _entities.at(EntityType::Point)) {
+    points.push_back(point.get());
+  }
+
+  return points;
 }
 
-void Scene::filterEntitiesToRemove(
-    std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) {
-  std::erase_if(entitiesToRemove, [](const std::shared_ptr<IEntity> &entity) {
-    if (auto point = std::dynamic_pointer_cast<PointEntity>(entity)) {
+void Scene::filterEntitiesToRemove(std::vector<IEntity *> &entitiesToRemove) {
+  std::erase_if(entitiesToRemove, [](const IEntity *entity) {
+    if (const auto *point = dynamic_cast<const PointEntity *>(entity)) {
       return point->surfacePoint();
     }
     return false;
@@ -100,11 +118,11 @@ void Scene::filterEntitiesToRemove(
 }
 
 void Scene::enqueueSurfacePoints(
-    std::vector<std::shared_ptr<IEntity>> &entitiesToRemove) const {
+    std::vector<IEntity *> &entitiesToRemove) const {
   const auto &points = getPoints();
 
   for (const auto &entity : entitiesToRemove) {
-    if (auto surface = std::dynamic_pointer_cast<BezierSurface>(entity)) {
+    if (auto surface = dynamic_cast<BezierSurface *>(entity)) {
       const auto &surfacePoints = surface->getPoints();
       for (const auto &surfacePoint : surfacePoints) {
         const auto it =
@@ -125,7 +143,7 @@ void Scene::enqueueDeadGregoryPatches() {
   }
 
   for (const auto &entity : _entities.at(EntityType::GregorySurface)) {
-    auto gregory = std::dynamic_pointer_cast<GregorySurface>(entity);
+    auto gregory = dynamic_cast<GregorySurface *>(entity.get());
     if (gregory->isDead()) {
       _deadEntities.push_back(gregory);
     }
@@ -136,26 +154,28 @@ void Scene::enqueueDeadGregoryPatches() {
   }
 
   for (const auto &entity : _entities.at(EntityType::IntersectionCurve)) {
-    auto gregory = std::dynamic_pointer_cast<IntersectionCurve>(entity);
+    auto gregory = dynamic_cast<IntersectionCurve *>(entity.get());
     if (gregory->isDead()) {
       _deadEntities.push_back(gregory);
     }
   }
 }
 
-std::shared_ptr<IEntity> Scene::contractEdge(const PointEntity &p1,
-                                             const PointEntity &p2) {
-  const auto avgPos = (p1.getPosition() + p2.getPosition()) / 2.f;
-  const auto centerPoint = std::make_shared<PointEntity>(avgPos);
-  addEntity(EntityType::Point, centerPoint);
+IEntity *Scene::contractEdge(const PointEntity &p1, const PointEntity &p2) {
+  const auto avg_pos = (p1.getPosition() + p2.getPosition()) / 2.f;
+  auto center_point = std::make_unique<PointEntity>(avg_pos);
 
-  rebindReferences(p1, *centerPoint);
-  rebindReferences(p2, *centerPoint);
+  PointEntity *center_point_ptr = center_point.get();
+  addEntity(EntityType::Point, std::move(center_point));
+
+  rebindReferences(p1, *center_point_ptr);
+  rebindReferences(p2, *center_point_ptr);
   auto &points = _entities.at(EntityType::Point);
   std::erase_if(points, [&p1, &p2](const auto &p) {
     return p->getId() == p1.getId() || p->getId() == p2.getId();
   });
-  return centerPoint;
+
+  return center_point_ptr;
 }
 
 void Scene::rebindReferences(const PointEntity &oldPoint,
@@ -172,14 +192,16 @@ void Scene::rebindReferences(const PointEntity &oldPoint,
     }
     auto &entities = pair.second;
     for (auto &entitity : entities) {
-      auto groupedEntity = std::dynamic_pointer_cast<IGroupedEntity>(entitity);
-      if (groupedEntity == nullptr) {
+      auto *grouped_entity = dynamic_cast<IGroupedEntity *>(entitity.get());
+
+      if (grouped_entity == nullptr) {
         return;
       }
-      auto &points = groupedEntity->getPointsReferences();
-      for (auto &pointRef : points) {
-        if (pointRef.get().getId() == oldPoint.getId()) {
-          pointRef = std::ref(newPoint);
+
+      auto &points = grouped_entity->getPointsReferences();
+      for (auto &point_ref : points) {
+        if (point_ref.get().getId() == oldPoint.getId()) {
+          point_ref = std::ref(newPoint);
         }
       }
     }
@@ -193,10 +215,10 @@ void Scene::removeDeadEntities() {
 }
 
 void Scene::updateDirtyEntities() {
-  for (const auto &entityTypeVectorPair : _entities) {
-    for (const auto &entity : entityTypeVectorPair.second) {
+  for (const auto &entity_type_vector_pair : _entities) {
+    for (const auto &entity : entity_type_vector_pair.second) {
       if (entity->dirty()) {
-        if (auto subscriber = std::dynamic_pointer_cast<ISubscriber>(entity)) {
+        if (auto *subscriber = dynamic_cast<ISubscriber *>(entity.get())) {
           subscriber->update();
         }
       }

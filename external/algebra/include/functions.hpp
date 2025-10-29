@@ -23,31 +23,25 @@ private:
 
 class SurfacePointL2DistanceSquared : public IDifferentiableScalarFunction<2> {
 public:
-  SurfacePointL2DistanceSquared(
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface,
-      const Vec3f &point)
-      : surface_(std::move(surface)), point_(point) {}
+  SurfacePointL2DistanceSquared(IDifferentialParametricForm<2, 3> *surface,
+                                const Vec3f &point)
+      : surface_(surface), point_(point) {}
 
-  bool wrapped(size_t dim) const override {
-    return surface_.lock()->wrapped(dim);
-  }
-  std::array<Vec2f, 2> bounds() const override {
-    return surface_.lock()->bounds();
-  }
+  bool wrapped(size_t dim) const override { return surface_->wrapped(dim); }
+  std::array<Vec2f, 2> bounds() const override { return surface_->bounds(); }
 
   float value(const Vec<float, 2> &x) const override {
-    return std::pow((surface_.lock()->value(x) - point_).length(), 2.f);
+    return std::pow((surface_->value(x) - point_).length(), 2.f);
   }
   Vec<float, 2> gradient(const Vec<float, 2> &x) const override {
-    auto surface = surface_.lock();
-    if (!surface) {
+    if (!surface_) {
       return {0.f, 0.f};
     }
 
-    Vec3f S = surface->value(x);
+    Vec3f S = surface_->value(x);
     Vec3f diff = S - point_;
 
-    auto [Su, Sv] = surface->derivatives(x);
+    auto [Su, Sv] = surface_->derivatives(x);
 
     float grad_u = 2.0f * Su.dot(diff);
     float grad_v = 2.0f * Sv.dot(diff);
@@ -57,44 +51,43 @@ public:
   bool same() const override { return false; }
 
 private:
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface_;
+  IDifferentialParametricForm<2, 3> *surface_;
   Vec3f point_;
 };
 
 class SurfaceSurfaceL2DistanceSquared
     : public IDifferentiableScalarFunction<4> {
 public:
-  SurfaceSurfaceL2DistanceSquared(
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0,
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1)
-      : surface0_(std::move(surface0)), surface1_(std::move(surface1)) {}
+  SurfaceSurfaceL2DistanceSquared(IDifferentialParametricForm<2, 3> *surface0,
+                                  IDifferentialParametricForm<2, 3> *surface1)
+      : surface0_(surface0), surface1_(surface1) {}
 
   std::array<Vec2f, 4> bounds() const override {
-    auto bounds0 = surface0_.lock()->bounds();
-    auto bounds1 = surface1_.lock()->bounds();
+    auto bounds0 = surface0_->bounds();
+    auto bounds1 = surface1_->bounds();
 
     return {bounds0[0], bounds0[1], bounds1[0], bounds1[1]};
   }
 
   bool wrapped(size_t dim) const override {
     if (dim == 0 || dim == 1) {
-      return surface0_.lock()->wrapped(dim);
+      return surface0_->wrapped(dim);
     }
     if (dim == 2 || dim == 3) {
-      return surface1_.lock()->wrapped(dim - 2);
+      return surface1_->wrapped(dim - 2);
     }
 
     return false;
   }
   float value(const Vec<float, 4> &x) const override {
-    auto val1 = surface0_.lock()->value(Vec2f(x[0], x[1]));
-    auto val2 = surface1_.lock()->value(Vec2f(x[2], x[3]));
+    auto val1 = surface0_->value(Vec2f(x[0], x[1]));
+    auto val2 = surface1_->value(Vec2f(x[2], x[3]));
     return std::pow((val1 - val2).length(), 2.f);
   }
 
   Vec<float, 4> gradient(const Vec<float, 4> &x) const override {
-    auto s0 = surface0_.lock();
-    auto s1 = surface1_.lock();
+    auto s0 = surface0_;
+    auto s1 = surface1_;
     if (!s0 || !s1) {
       return Vec<float, 4>();
     }
@@ -117,34 +110,31 @@ public:
     return Vec<float, 4>{df_du0, df_dv0, df_du1, df_dv1};
   }
 
-  bool same() const override {
-    return surface0_.lock().get() == surface1_.lock().get();
-  }
+  bool same() const override { return surface0_ == surface1_; }
 
 private:
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0_;
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1_;
+  IDifferentialParametricForm<2, 3> *surface0_;
+  IDifferentialParametricForm<2, 3> *surface1_;
 };
 
 class IntersectionStepFunction : public IDifferentialParametricForm<4, 4> {
 public:
-  IntersectionStepFunction(
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0,
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1,
-      const Vec3f &lastCommonPoint, const Vec3f &dir)
+  IntersectionStepFunction(IDifferentialParametricForm<2, 3> *surface0,
+                           IDifferentialParametricForm<2, 3> *surface1,
+                           const Vec3f &lastCommonPoint, const Vec3f &dir)
       : surface0_(surface0), surface1_(surface1),
         lastCommonPoint_(lastCommonPoint), direction_(dir) {}
 
   void setStep(float step) { step_ = step; }
   inline std::array<Vec2f, 4> bounds() const override {
-    auto bounds0 = surface0_.lock()->bounds();
-    auto bounds1 = surface1_.lock()->bounds();
+    auto bounds0 = surface0_->bounds();
+    auto bounds1 = surface1_->bounds();
 
     return {bounds0[0], bounds0[1], bounds1[0], bounds1[1]};
   }
   inline Vec4f value(const Vec4f &pos) const override {
-    auto surf0Val = surface0_.lock()->value(Vec2f(pos[0], pos[1]));
-    auto surf1Val = surface1_.lock()->value(Vec2f(pos[2], pos[3]));
+    auto surf0Val = surface0_->value(Vec2f(pos[0], pos[1]));
+    auto surf1Val = surface1_->value(Vec2f(pos[2], pos[3]));
     auto surfDiff = surf0Val - surf1Val;
     auto midPoint = (surf0Val + surf1Val) / 2.f;
 
@@ -157,9 +147,9 @@ public:
 
   inline bool wrapped(size_t dim) const override {
     if (dim == 0 || dim == 1)
-      return surface0_.lock()->wrapped(dim);
+      return surface0_->wrapped(dim);
     if (dim == 2 || dim == 3)
-      return surface1_.lock()->wrapped(dim - 2);
+      return surface1_->wrapped(dim - 2);
 
     return false;
   }
@@ -170,8 +160,8 @@ public:
     Vec2f uv0{pos[0], pos[1]};
     Vec2f uv1{pos[2], pos[3]};
 
-    auto surf0 = surface0_.lock();
-    auto surf1 = surface1_.lock();
+    auto surf0 = surface0_;
+    auto surf1 = surface1_;
 
     auto [du0, dv0] = surf0->derivatives(uv0); // ∂p0/∂u0, ∂p0/∂v0
     auto [du1, dv1] = surf1->derivatives(uv1); // ∂p1/∂u1, ∂p1/∂v1
@@ -195,8 +185,8 @@ public:
   }
 
 private:
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0_;
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1_;
+  IDifferentialParametricForm<2, 3> *surface0_;
+  IDifferentialParametricForm<2, 3> *surface1_;
   Vec3f lastCommonPoint_;
   Vec3f direction_;
   float step_ = 0.05f;
@@ -204,20 +194,19 @@ private:
 
 class IntersectionFunction : public IDifferentialParametricForm<4, 4> {
 public:
-  IntersectionFunction(
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0,
-      std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1)
+  IntersectionFunction(IDifferentialParametricForm<2, 3> *surface0,
+                       IDifferentialParametricForm<2, 3> *surface1)
       : surface0_(surface0), surface1_(surface1) {}
 
   inline std::array<Vec2f, 4> bounds() const override {
-    auto bounds0 = surface0_.lock()->bounds();
-    auto bounds1 = surface1_.lock()->bounds();
+    auto bounds0 = surface0_->bounds();
+    auto bounds1 = surface1_->bounds();
     return {bounds0[0], bounds0[1], bounds1[0], bounds1[1]};
   }
 
   inline Vec4f value(const Vec4f &pos) const override {
-    auto surf0Val = surface0_.lock()->value(Vec2f(pos[0], pos[1]));
-    auto surf1Val = surface1_.lock()->value(Vec2f(pos[2], pos[3]));
+    auto surf0Val = surface0_->value(Vec2f(pos[0], pos[1]));
+    auto surf1Val = surface1_->value(Vec2f(pos[2], pos[3]));
     Vec3f diff = surf0Val - surf1Val;
 
     auto J = getExactJacobian(pos);
@@ -226,33 +215,34 @@ public:
     return (JT * Matrix<float, 3, 1>::fromVector(diff)).toVector();
   }
 
-  inline bool wrapped(size_t dim) const override {
-    if (dim < 2)
-      return surface0_.lock()->wrapped(dim);
-    else
-      return surface1_.lock()->wrapped(dim - 2);
+  bool wrapped(size_t dim) const override {
+    if (dim < 2) {
+      return surface0_->wrapped(dim);
+    } else {
+      return surface1_->wrapped(dim - 2);
+    }
   }
 
-  inline std::pair<Vec4f, Vec4f> derivatives(const Vec4f &pos) const override {
+  std::pair<Vec4f, Vec4f> derivatives(const Vec4f &pos) const override {
     throw std::runtime_error("NOT Implemented");
   }
 
-  inline Matrix<float, 4, 4> jacobian(const Vec4f &pos) const override {
+  Matrix<float, 4, 4> jacobian(const Vec4f &pos) const override {
     auto J = getExactJacobian(pos);
 
     return J.transpose() * J;
   }
 
 private:
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface0_;
-  std::weak_ptr<IDifferentialParametricForm<2, 3>> surface1_;
+  IDifferentialParametricForm<2, 3> *surface0_;
+  IDifferentialParametricForm<2, 3> *surface1_;
 
-  inline Matrix<float, 3, 4> getExactJacobian(const Vec4f &pos) const {
+  Matrix<float, 3, 4> getExactJacobian(const Vec4f &pos) const {
     Vec2f uv0{pos[0], pos[1]};
     Vec2f uv1{pos[2], pos[3]};
 
-    auto surf0 = surface0_.lock();
-    auto surf1 = surface1_.lock();
+    auto surf0 = surface0_;
+    auto surf1 = surface1_;
 
     auto [du0, dv0] = surf0->derivatives(uv0);
     auto [du1, dv1] = surf1->derivatives(uv1);

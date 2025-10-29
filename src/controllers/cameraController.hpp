@@ -46,7 +46,7 @@ public:
   }
 
 private:
-  Camera *_camera;
+  Camera *_camera = nullptr;
 
   static constexpr float kCameraRotationSpeed =
       std::numbers::pi_v<float> / 401.f;

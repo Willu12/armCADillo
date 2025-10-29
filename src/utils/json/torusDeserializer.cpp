@@ -1,6 +1,6 @@
 #include "torusDeserializer.hpp"
 #include "torusEntity.hpp"
-std::shared_ptr<IEntity>
+std::unique_ptr<IEntity>
 TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   std::string name;
   int id = -1;
@@ -27,5 +27,5 @@ TorusDeserializer::deserializeEntity(const json &j, Scene &scene) const {
   }
 
   torus.getId() = id;
-  return std::make_shared<TorusEntity>(torus);
+  return std::make_unique<TorusEntity>(torus);
 }

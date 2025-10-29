@@ -12,8 +12,7 @@ public:
         _shader("../resources/shaders/vertexPickingShader.hlsl",
                 "../resources/shaders/pickingShader.frag") {}
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities,
-              const Camera &camera) {
+  void render(const std::vector<IEntity *> &entities, const Camera &camera) {
 
     if (entities.empty()) {
       return;
@@ -43,8 +42,7 @@ private:
   PickingTexture &_pickingTexture;
   Shader _shader;
 
-  GLuint preparePickingInstacedBuffers(
-      const std::vector<std::shared_ptr<IEntity>> &entities) {
+  GLuint preparePickingInstacedBuffers(const std::vector<IEntity *> &entities) {
     struct InstanceData {
       algebra::Mat4f modelMatrix;
       uint32_t objectIndex{};

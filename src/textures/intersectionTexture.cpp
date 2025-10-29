@@ -1,9 +1,10 @@
 #include "intersectionTexture.hpp"
 #include "color.hpp"
+#include <memory>
 #include <queue>
 
-std::pair<std::shared_ptr<IntersectionTexture>,
-          std::shared_ptr<IntersectionTexture>>
+std::pair<std::unique_ptr<IntersectionTexture>,
+          std::unique_ptr<IntersectionTexture>>
 IntersectionTexture::createIntersectionTextures(
     const Intersection &intersection,
     std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
@@ -17,8 +18,8 @@ IntersectionTexture::createIntersectionTextures(
     points2[i] = p.surface1;
   }
 
-  auto texture1 = std::make_shared<IntersectionTexture>(points1, bounds.first);
-  auto texture2 = std::make_shared<IntersectionTexture>(points2, bounds.second);
+  auto texture1 = std::make_unique<IntersectionTexture>(points1, bounds.first);
+  auto texture2 = std::make_unique<IntersectionTexture>(points2, bounds.second);
   return {std::move(texture1), std::move(texture2)};
 }
 

@@ -17,7 +17,7 @@ public:
     firstPointRenderer_ = std::make_unique<CenterPointRenderer>(camera);
   }
 
-  void render(const std::vector<std::shared_ptr<IEntity>> &entities) override {
+  void render(const std::vector<IEntity *> &entities) override {
     if (entities.empty())
       return;
     _shader.use();

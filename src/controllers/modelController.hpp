@@ -18,10 +18,8 @@ public:
   TransformationCenter _transformationCenter =
       TransformationCenter::CenterPoint;
 
-  ModelController(const CenterPoint &centerPoint,
-                  const std::shared_ptr<Cursor> &cursor,
-                  const std::vector<std::shared_ptr<IEntity>> &entites,
-                  const Camera &camera)
+  ModelController(const CenterPoint &centerPoint, const Cursor *cursor,
+                  const std::vector<IEntity *> &entites, const Camera &camera)
       : _entites(entites), _centerPoint(centerPoint), _cursor(cursor),
         _camera(camera) {}
 
@@ -42,10 +40,10 @@ public:
   }
 
 private:
-  const std::vector<std::shared_ptr<IEntity>> &_entites;
+  const std::vector<IEntity *> &_entites;
   static constexpr float kMoveSpeed = 0.01f;
   const CenterPoint &_centerPoint;
-  const std::shared_ptr<Cursor> _cursor;
+  const Cursor *_cursor = nullptr;
   const Camera &_camera;
 
   void translate(float x, float y) {
@@ -101,8 +99,7 @@ private:
                : _cursor->getPosition();
   }
 
-  void updateFromCamera(const std::shared_ptr<IEntity> &entity, float x,
-                        float y) {
+  void updateFromCamera(IEntity *entity, float x, float y) {
     auto projection = _camera.projectionMatrix();
     auto sceneCursorPosition =
         projection *
