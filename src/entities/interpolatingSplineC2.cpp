@@ -15,9 +15,9 @@ InterpolatingSplineC2::InterpolatingSplineC2(
 std::vector<float> InterpolatingSplineC2::calculateChordLengthKnotsDists() {
   std::vector<float> dists(_points.size() - 1);
   for (std::size_t i = 1; i < _points.size(); ++i) {
-    auto deltaP =
+    auto pos_delta =
         _points[i].get().getPosition() - _points[i - 1].get().getPosition();
-    dists[i - 1] = deltaP.length() == 0.f ? 10e-6f : deltaP.length();
+    dists[i - 1] = pos_delta.length() == 0.f ? 10e-6f : pos_delta.length();
   }
   return dists;
 }
@@ -32,10 +32,12 @@ std::vector<algebra::Vec3f> InterpolatingSplineC2::calculateBezierPoints() {
     float d0 = dists[i - 1];
     float d1 = dists[i];
 
-    if (i != 1)
+    if (i != 1) {
       alpha.push_back(d0 / (d0 + d1));
-    if (i != dists.size() - 1)
+    }
+    if (i != dists.size() - 1) {
       beta.push_back(d1 / (d0 + d1));
+    }
 
     auto p0 =
         (_points[i].get().getPosition() - _points[i - 1].get().getPosition()) /
@@ -46,8 +48,8 @@ std::vector<algebra::Vec3f> InterpolatingSplineC2::calculateBezierPoints() {
     r.push_back(((p1 - p0) * 3.f) / (d0 + d1));
   }
   auto c = solveTridiagonalMatrix(alpha, beta, r);
-  auto bezierPoints = convertPowertoBezier(c, dists);
-  return bezierPoints;
+  auto bezier_points = convertPowertoBezier(c, dists);
+  return bezier_points;
 }
 
 std::vector<algebra::Vec3f>
@@ -61,32 +63,34 @@ InterpolatingSplineC2::convertPowertoBezier(std::vector<algebra::Vec3f> &c,
   std::vector<algebra::Vec3f> b(c.size());
   std::vector<algebra::Vec3f> d(c.size());
 
-  for (int i = 0; i < d.size(); ++i)
+  for (int i = 0; i < d.size(); ++i) {
     d[i] = (c[i + 1] - c[i]) / dists[i] / 3.f;
+  }
 
-  for (int i = 0; i < a.size(); ++i)
+  for (int i = 0; i < a.size(); ++i) {
     a[i] = _points[i].get().getPosition();
+  }
 
   for (int i = 0; i < b.size() - 1; i++) {
     b[i] = (a[i + 1] - a[i]) / dists[i] - c[i] * dists[i] -
            d[i] * dists[i] * dists[i];
   }
 
-  std::vector<algebra::Vec3f> bezierPoints;
+  std::vector<algebra::Vec3f> bezier_points;
 
-  bezierPoints.reserve(4 * dists.size());
+  bezier_points.reserve(4 * dists.size());
   for (int i = 0; i < dists.size(); ++i) {
     auto ai = a[i];
     auto bi = b[i] * dists[i];
     auto ci = c[i] * dists[i] * dists[i];
     auto di = d[i] * dists[i] * dists[i] * dists[i];
 
-    bezierPoints.emplace_back(ai);
-    bezierPoints.emplace_back(ai + bi / 3.f);
-    bezierPoints.emplace_back(ai + bi * 2.f / 3.f + ci / 3.f);
-    bezierPoints.emplace_back(ai + bi + ci + di);
+    bezier_points.emplace_back(ai);
+    bezier_points.emplace_back(ai + bi / 3.f);
+    bezier_points.emplace_back(ai + bi * 2.f / 3.f + ci / 3.f);
+    bezier_points.emplace_back(ai + bi + ci + di);
   }
-  return bezierPoints;
+  return bezier_points;
 }
 
 std::vector<algebra::Vec3f>
@@ -124,8 +128,7 @@ InterpolatingSplineC2::solveTridiagonalMatrix(std::vector<float> &alpha,
 }
 
 std::unique_ptr<BezierMesh> InterpolatingSplineC2::generateMesh() {
-  auto bezierPositions = calculateBezierPoints();
-  return BezierMesh::createC2(bezierPositions);
+  return BezierMesh::createC2(calculateBezierPoints());
 };
 
 bool InterpolatingSplineC2::acceptVisitor(IVisitor &visitor) {

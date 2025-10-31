@@ -1,7 +1,5 @@
 #pragma once
-#include "IDifferentialParametricForm.hpp"
 #include "bezierSurface.hpp"
-#include "bezierSurfaceC0.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
 #include <array>
