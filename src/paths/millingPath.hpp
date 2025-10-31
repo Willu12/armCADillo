@@ -3,6 +3,7 @@
 #include "cutter.hpp"
 #include "vec.hpp"
 #include <vector>
+
 class MillingPath {
 public:
   const Cutter &cutter() const { return cutter_; }
