@@ -18,6 +18,51 @@ public:
     requires(sizeof...(Args) == Length)
   Vec(Args... args) : values{static_cast<T>(args)...} {}
 
+  // --- Component accessors --------------------------------------------------
+  T &x()
+    requires(Length >= 1)
+  {
+    return values[0];
+  }
+  const T &x() const
+    requires(Length >= 1)
+  {
+    return values[0];
+  }
+
+  T &y()
+    requires(Length >= 2)
+  {
+    return values[1];
+  }
+  const T &y() const
+    requires(Length >= 2)
+  {
+    return values[1];
+  }
+
+  T &z()
+    requires(Length >= 3)
+  {
+    return values[2];
+  }
+  const T &z() const
+    requires(Length >= 3)
+  {
+    return values[2];
+  }
+
+  T &w()
+    requires(Length >= 4)
+  {
+    return values[3];
+  }
+  const T &w() const
+    requires(Length >= 4)
+  {
+    return values[3];
+  }
+
   T &operator[](size_t index) { return values[index]; }
   const T &operator[](size_t index) const { return values[index]; }
 
