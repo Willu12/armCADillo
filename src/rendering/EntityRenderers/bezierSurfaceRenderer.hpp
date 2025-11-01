@@ -9,17 +9,18 @@
 class BezierSurfaceRenderer : public IEntityRenderer {
 public:
   explicit BezierSurfaceRenderer(const Camera &camera)
-      : _shader({ShaderPath{._path = "../resources/shaders/vertexSurface.glsl",
-                            ._type = GL_VERTEX_SHADER},
-                 ShaderPath{._path = "../resources/shaders/"
-                                     "surfaceTesselationControl.glsl",
-                            ._type = GL_TESS_CONTROL_SHADER},
-                 ShaderPath{._path = "../resources/shaders/"
-                                     "surfaceIsolineTeselationEvaluation.glsl",
-                            ._type = GL_TESS_EVALUATION_SHADER},
-                 ShaderPath{
-                     ._path = "../resources/shaders/fragmentShaderTrimmed.hlsl",
-                     ._type = GL_FRAGMENT_SHADER}}),
+      : _shader(
+            {ShaderPath{._path = "../../resources/shaders/vertexSurface.glsl",
+                        ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path = "../../resources/shaders/"
+                                 "surfaceTesselationControl.glsl",
+                        ._type = GL_TESS_CONTROL_SHADER},
+             ShaderPath{._path = "../../resources/shaders/"
+                                 "surfaceIsolineTeselationEvaluation.glsl",
+                        ._type = GL_TESS_EVALUATION_SHADER},
+             ShaderPath{
+                 ._path = "../../resources/shaders/fragmentShaderTrimmed.hlsl",
+                 ._type = GL_FRAGMENT_SHADER}}),
         _meshRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<IEntity *> &entities) override {

@@ -8,8 +8,8 @@
 class SelectionBoxRenderer {
 public:
   SelectionBoxRenderer()
-      : _shader("../resources/shaders/selectionBoxVS.glsl",
-                "../resources/shaders/selectionBoxFS.glsl") {}
+      : _shader("../../resources/shaders/selectionBoxVS.glsl",
+                "../../resources/shaders/selectionBoxFS.glsl") {}
   void render(const Camera &camera, const Mouse &mouse, GLFWwindow *window) {
     _shader.use();
     _shader.setViewMatrix(camera.viewMatrix());
@@ -27,7 +27,7 @@ public:
     endPos[1] = 1.0f - 2.0f * endPos[1] / static_cast<float>(windowHeight);
     if (startPos[0] > endPos[0]) {
       std::swap(startPos[0], endPos[0]);
-	}
+    }
     if (startPos[1] > endPos[1])
       std::swap(startPos[1], endPos[1]);
 

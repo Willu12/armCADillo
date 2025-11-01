@@ -8,8 +8,8 @@
 class TorusRenderer : public IEntityRenderer {
 public:
   explicit TorusRenderer(const Camera &camera)
-      : _shader("../resources/shaders/torusShader.vs",
-                "../resources/shaders/fragmentShaderTrimmed.hlsl"),
+      : _shader("../../resources/shaders/torusShader.vs",
+                "../../resources/shaders/fragmentShaderTrimmed.hlsl"),
         _camera(camera) {}
 
   void render(const std::vector<IEntity *> &entities) override {

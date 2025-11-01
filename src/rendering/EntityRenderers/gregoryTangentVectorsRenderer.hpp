@@ -13,11 +13,12 @@
 class GregoryTangentVectorsRenderer : public IEntityRenderer {
 public:
   explicit GregoryTangentVectorsRenderer(const Camera &camera)
-      : _shader({ShaderPath{._path = "../resources/shaders/vertexMesh.hlsl",
-                            ._type = GL_VERTEX_SHADER},
-                 ShaderPath{._path =
-                                "../resources/shaders/colorFragmentShader.hlsl",
-                            ._type = GL_FRAGMENT_SHADER}}),
+      : _shader(
+            {ShaderPath{._path = "../../resources/shaders/vertexMesh.hlsl",
+                        ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path =
+                            "../../resources/shaders/colorFragmentShader.hlsl",
+                        ._type = GL_FRAGMENT_SHADER}}),
         _camera(camera) {}
 
   void render(const std::vector<IEntity *> &entities) override {

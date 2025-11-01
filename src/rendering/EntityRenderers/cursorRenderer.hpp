@@ -11,11 +11,10 @@ class CursorRenderer : public IEntityRenderer {
 public:
   explicit CursorRenderer(const Camera &camera)
       : _camera(camera),
-        _shader("../resources/shaders/textureShader.vert",
-                "../resources/shaders/texturedBillboardShader.frag"),
-        _texture(
-            Texture::createTexture("../resources/textures/cursorTexture.png")) {
-  }
+        _shader("../../resources/shaders/textureShader.vert",
+                "../../resources/shaders/texturedBillboardShader.frag"),
+        _texture(Texture::createTexture(
+            "../../resources/textures/cursorTexture.png")) {}
 
   void render(const std::vector<IEntity *> &entities) override {
     _texture->bind(0);

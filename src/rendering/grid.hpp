@@ -7,8 +7,8 @@
 class Grid {
 public:
   Grid()
-      : _shader("../resources/shaders/gridVertexShader.hlsl",
-                "../resources/shaders/gridFragmentShader.hlsl") {}
+      : _shader("../../resources/shaders/gridVertexShader.hlsl",
+                "../../resources/shaders/gridFragmentShader.hlsl") {}
 
   void render(const Camera *camera) {
     _shader.use();

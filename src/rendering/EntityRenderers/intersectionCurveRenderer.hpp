@@ -8,11 +8,12 @@
 class IntersectionCurveRenderer : public IEntityRenderer {
 public:
   explicit IntersectionCurveRenderer(const Camera &camera)
-      : _shader({ShaderPath{._path = "../resources/shaders/vertexMesh.hlsl",
-                            ._type = GL_VERTEX_SHADER},
-                 ShaderPath{._path =
-                                "../resources/shaders/colorFragmentShader.hlsl",
-                            ._type = GL_FRAGMENT_SHADER}}),
+      : _shader(
+            {ShaderPath{._path = "../../resources/shaders/vertexMesh.hlsl",
+                        ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path =
+                            "../../resources/shaders/colorFragmentShader.hlsl",
+                        ._type = GL_FRAGMENT_SHADER}}),
         _camera(camera) {
     firstPointRenderer_ = std::make_unique<CenterPointRenderer>(camera);
   }

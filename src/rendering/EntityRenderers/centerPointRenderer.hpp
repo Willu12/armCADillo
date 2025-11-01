@@ -8,10 +8,10 @@ class CenterPointRenderer {
 public:
   explicit CenterPointRenderer(const Camera &camera)
       : _camera(camera),
-        _shader("../resources/shaders/textureShader.vert",
-                "../resources/shaders/texturedBillboardShader.frag"),
-        _texture(
-            Texture::createTexture("../resources/textures/ballTexture.png")) {}
+        _shader("../../resources/shaders/textureShader.vert",
+                "../../resources/shaders/texturedBillboardShader.frag"),
+        _texture(Texture::createTexture(
+            "../../resources/textures/ballTexture.png")) {}
 
   void render(const IRenderable &renderable) {
     _texture->bind(0);

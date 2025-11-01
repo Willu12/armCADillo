@@ -9,18 +9,19 @@
 class GregorySurfaceRenderer : public IEntityRenderer {
 public:
   explicit GregorySurfaceRenderer(const Camera &camera)
-      : _shader({ShaderPath{._path = "../resources/shaders/vertexSurface.glsl",
-                            ._type = GL_VERTEX_SHADER},
-                 ShaderPath{._path = "../resources/shaders/"
-                                     "gregoryTesselationControl.glsl",
-                            ._type = GL_TESS_CONTROL_SHADER},
-                 ShaderPath{._path = "../resources/shaders/"
-                                     "gregoryTesselationEval.glsl",
-                            ._type = GL_TESS_EVALUATION_SHADER},
+      : _shader(
+            {ShaderPath{._path = "../../resources/shaders/vertexSurface.glsl",
+                        ._type = GL_VERTEX_SHADER},
+             ShaderPath{._path = "../../resources/shaders/"
+                                 "gregoryTesselationControl.glsl",
+                        ._type = GL_TESS_CONTROL_SHADER},
+             ShaderPath{._path = "../../resources/shaders/"
+                                 "gregoryTesselationEval.glsl",
+                        ._type = GL_TESS_EVALUATION_SHADER},
 
-                 ShaderPath{._path =
-                                "../resources/shaders/colorFragmentShader.hlsl",
-                            ._type = GL_FRAGMENT_SHADER}}),
+             ShaderPath{._path =
+                            "../../resources/shaders/colorFragmentShader.hlsl",
+                        ._type = GL_FRAGMENT_SHADER}}),
         _tangentVectorRenderer(camera), _camera(camera) {}
 
   void render(const std::vector<IEntity *> &entities) override {

@@ -12,9 +12,9 @@ class BezierCurveRenderer : public IEntityRenderer {
 public:
   BezierCurveRenderer(const Camera &camera, GLFWwindow *window)
       : _camera(camera), _window(window),
-        _shader("../resources/shaders/vertexBezier.vs",
-                "../resources/shaders/geometryBezier.gs",
-                "../resources/shaders/colorFragmentShader.hlsl") {}
+        _shader("../../resources/shaders/vertexBezier.vs",
+                "../../resources/shaders/geometryBezier.gs",
+                "../../resources/shaders/colorFragmentShader.hlsl") {}
 
   void render(const std::vector<IEntity *> &entities) override {
     if (entities.empty()) {

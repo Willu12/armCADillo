@@ -9,8 +9,8 @@ class PickingRenderer {
 public:
   explicit PickingRenderer(PickingTexture &pickingTexture)
       : _pickingTexture(pickingTexture),
-        _shader("../resources/shaders/vertexPickingShader.hlsl",
-                "../resources/shaders/pickingShader.frag") {}
+        _shader("../../resources/shaders/vertexPickingShader.hlsl",
+                "../../resources/shaders/pickingShader.frag") {}
 
   void render(const std::vector<IEntity *> &entities, const Camera &camera) {
 

@@ -8,8 +8,8 @@
 class PointRenderer : public IEntityRenderer {
 public:
   explicit PointRenderer(const Camera &camera, algebra::Vec4f color)
-      : _shader("../resources/shaders/vertexShader.hlsl",
-                "../resources/shaders/colorFragmentShader.hlsl"),
+      : _shader("../../resources/shaders/vertexShader.hlsl",
+                "../../resources/shaders/colorFragmentShader.hlsl"),
         _camera(camera), _color(color) {}
 
   void render(const std::vector<IEntity *> &entities) override {
