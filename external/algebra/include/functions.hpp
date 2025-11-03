@@ -4,7 +4,6 @@
 #include "parametricForms/IDifferentialParametricForm.hpp"
 #include "vec.hpp"
 #include <cstddef>
-#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -79,8 +78,8 @@ public:
       return {0.f, 0.f};
     }
 
-    Vec3f S = surface_->value(x);
-    Vec3f diff = S - point_;
+    Vec3f surface_point = surface_->value(x);
+    Vec3f diff = surface_point - point_;
 
     auto [Su, Sv] = surface_->derivatives(x);
 
@@ -168,13 +167,15 @@ public:
         lastCommonPoint_(lastCommonPoint), direction_(dir) {}
 
   void setStep(float step) { step_ = step; }
-  inline std::array<Vec2f, 4> bounds() const override {
+
+  std::array<Vec2f, 4> bounds() const override {
     auto bounds0 = surface0_->bounds();
     auto bounds1 = surface1_->bounds();
 
     return {bounds0[0], bounds0[1], bounds1[0], bounds1[1]};
   }
-  inline Vec4f value(const Vec4f &pos) const override {
+
+  Vec4f value(const Vec4f &pos) const override {
     auto surf0Val = surface0_->value(Vec2f(pos[0], pos[1]));
     auto surf1Val = surface1_->value(Vec2f(pos[2], pos[3]));
     auto surfDiff = surf0Val - surf1Val;
@@ -187,7 +188,7 @@ public:
                           displacementProjectionLength};
   }
 
-  inline bool wrapped(size_t dim) const override {
+  bool wrapped(size_t dim) const override {
     if (dim == 0 || dim == 1)
       return surface0_->wrapped(dim);
     if (dim == 2 || dim == 3)
@@ -195,10 +196,12 @@ public:
 
     return false;
   }
-  inline std::pair<Vec4f, Vec4f> derivatives(const Vec4f &pos) const override {
+
+  std::pair<Vec4f, Vec4f> derivatives(const Vec4f &pos) const override {
     throw std::runtime_error("NOT Implemented");
   }
-  inline Mat4f jacobian(const Vec4f &pos) const override {
+
+  Mat4f jacobian(const Vec4f &pos) const override {
     Vec2f uv0{pos[0], pos[1]};
     Vec2f uv1{pos[2], pos[3]};
 

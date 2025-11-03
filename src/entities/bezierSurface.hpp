@@ -9,9 +9,9 @@
 #include "pointEntity.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
+#include <cstdint>
 #include <functional>
 #include <memory>
-#include <surface.hpp>
 #include <vector>
 
 struct Patches {
@@ -52,25 +52,14 @@ public:
   };
 
   void markToUpdate() override { _dirty = true; }
+  void update() override;
+  void onSubscribableDestroyed(ISubscribable &publisher) override {}
 
-  void update() override {
-    _polyMesh = createPolyMesh();
-    updateAlgebraicSurfaceC0();
-    updateMesh();
-  }
-  void
-  onSubscribableDestroyed(ISubscribable &publisher) override { /* update();*/ }
   virtual uint32_t getColCount() const = 0;
   virtual uint32_t getRowCount() const = 0;
   std::vector<std::reference_wrapper<const PointEntity>>
-  getPointsReferences() const override {
-    std::vector<std::reference_wrapper<const PointEntity>> pointsReferences;
-    pointsReferences.reserve(_points.size());
-    for (const auto &point : _points) {
-      pointsReferences.emplace_back(point);
-    }
-    return pointsReferences;
-  }
+  getPointsReferences() const override;
+
   std::vector<std::reference_wrapper<PointEntity>> &
   getPointsReferences() override {
     return _points;
@@ -110,37 +99,5 @@ protected:
     return *_algebraSurfaceC0;
   };
 
-  std::unique_ptr<Mesh> createPolyMesh() {
-    std::vector<float> vertices(3 * _points.size());
-
-    for (int i = 0; i < _points.size(); ++i) {
-      vertices[3 * i] = _points[i].get().getPosition()[0];
-      vertices[3 * i + 1] = _points[i].get().getPosition()[1];
-      vertices[3 * i + 2] = _points[i].get().getPosition()[2];
-    }
-
-    auto rowCount = getRowCount();
-    auto colCount = getColCount();
-
-    std::vector<unsigned int> indices;
-
-    for (int row = 0; row < rowCount; ++row) {
-      for (int col = 0; col < colCount - 1; ++col) {
-        int a = row * colCount + col;
-        int b = a + 1;
-        indices.push_back(a);
-        indices.push_back(b);
-      }
-    }
-
-    for (int col = 0; col < colCount; ++col) {
-      for (int row = 0; row < rowCount - 1; ++row) {
-        int a = row * colCount + col;
-        int b = a + colCount;
-        indices.push_back(a);
-        indices.push_back(b);
-      }
-    }
-    return Mesh::create(vertices, indices);
-  }
+  std::unique_ptr<Mesh> createPolyMesh();
 };

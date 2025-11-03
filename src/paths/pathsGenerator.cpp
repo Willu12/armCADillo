@@ -20,7 +20,12 @@ std::vector<algebra::Vec3f>
 PathsGenerator::calculateRoughMillingPoints(const HeightMap &heightMap,
                                             const Cutter &cutter) const {
   std::vector<algebra::Vec3f> milling_points;
-  auto starting_point = algebra::Vec3f(-10.f, 5.f + cutter.height_, 10.f);
+
+  const auto &block = heightMap.block();
+  const float safe_offset = cutter.diameter_;
+  auto starting_point = algebra::Vec3f(
+      -block.dimensions_.x_ / 2.f - safe_offset,
+      block.dimensions_.y_ + safe_offset, block.dimensions_.z_ + safe_offset);
 
   return milling_points;
 }

@@ -13,8 +13,10 @@ add_executable(${PROJECT_NAME}
  src/app/app.cpp
  src/controllers/selectionController.cpp
  src/entities/IEntity.cpp
+ src/entities/bezierSurface.cpp
  src/entities/bezierSurfaceC0.cpp
  src/entities/bezierSurfaceC2.cpp
+ src/entities/bSplineCurve.cpp
  src/entities/entityFactory/entityFactory.cpp
  src/entities/gregorySurface.cpp
  src/entities/interpolatingSplineC2.cpp

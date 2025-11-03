@@ -1,11 +1,9 @@
 #pragma once
-#include "IDifferentialParametricForm.hpp"
 #include "bezierSurface.hpp"
 #include "bezierSurfaceMesh.hpp"
 #include "pointEntity.hpp"
 #include "surface.hpp"
 #include "vec.hpp"
-#include <array>
 #include <functional>
 #include <memory>
 #include <vector>

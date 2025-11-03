@@ -12,6 +12,9 @@
 #include <random>
 #include <vector>
 
+static constexpr float kProjectionTolerance = 0.5f;
+static constexpr std::pair<int, int> kGridSearchResMinMax = {200, 300};
+
 using algebra::Vec3f;
 
 void IntersectionFinder::setSurfaces(
@@ -26,19 +29,18 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
 }
 
 std::optional<Intersection> IntersectionFinder::find(bool same) const {
-  std::optional<IntersectionPoint> firstPoint = findFirstPoint(same);
-  if (!firstPoint) {
+  std::optional<IntersectionPoint> first_point = findFirstPoint(same);
+  if (!first_point) {
     return std::nullopt;
   }
 
-  auto nextPoints = findNextPoints(*firstPoint, false);
-  if (nextPoints && nextPoints->looped) {
-    return nextPoints;
+  auto next_points = findNextPoints(*first_point, false);
+  if (next_points && next_points->looped) {
+    return next_points;
   }
 
-  auto previousPoints = findNextPoints(*firstPoint, true);
-
-  return connectFoundPoints(nextPoints, previousPoints);
+  auto previous_points = findNextPoints(*first_point, true);
+  return connectFoundPoints(next_points, previous_points);
 }
 
 std::optional<IntersectionPoint>
@@ -48,20 +50,20 @@ IntersectionFinder::findFirstPointStochastic() const {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_->bounds()[0][0],
                                              surface0_->bounds()[0][1]);
-  for (std::size_t stochTry = 0; stochTry <= kStochasticTries; ++stochTry) {
-    if (stochTry > 0 && stochTry % 100 == 0) {
-      std::println("stochastic try {}", stochTry);
+  for (std::size_t stoch_try = 0; stoch_try <= kStochasticTries; ++stoch_try) {
+    if (stoch_try > 0 && stoch_try % 100 == 0) {
+      std::println("stochastic try {}", stoch_try);
     }
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
-    const auto point0Value = surface0_->value(point0);
+    const auto point_0_value = surface0_->value(point0);
 
-    const auto point1 = findPointProjection(surface1_, point0Value);
+    const auto point1 = findPointProjection(surface1_, point_0_value);
     if (!point1) {
       continue;
     }
 
-    if (auto intersectionPoint = findCommonSurfacePoint(point0, *point1)) {
-      return intersectionPoint;
+    if (auto intersection_point = findCommonSurfacePoint(point0, *point1)) {
+      return intersection_point;
     }
   }
   return std::nullopt;
@@ -74,12 +76,12 @@ IntersectionFinder::findFirstPointSameStochastic() const {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_->bounds()[0][0],
                                              surface0_->bounds()[0][1]);
-  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+  for (std::size_t stoch_try = 0; stoch_try < kStochasticTries; ++stoch_try) {
     const auto point0 = algebra::Vec2f(dist(gen), dist(gen));
     const auto point1 = algebra::Vec2f(dist(gen), dist(gen));
 
-    if (auto intersectionPoint = findCommonSurfacePoint(point0, point1)) {
-      return intersectionPoint;
+    if (auto intersection_point = findCommonSurfacePoint(point0, point1)) {
+      return intersection_point;
     }
   }
   return std::nullopt;
@@ -87,11 +89,11 @@ IntersectionFinder::findFirstPointSameStochastic() const {
 
 std::optional<IntersectionPoint>
 IntersectionFinder::findFirstPointWithGuidance() const {
-  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
-    if (stochTry > 0 && stochTry % 10 == 0) {
-      std::println("stochastic try {}", stochTry);
+  for (std::size_t stoch_try = 0; stoch_try < kStochasticTries; ++stoch_try) {
+    if (stoch_try > 0 && stoch_try % 10 == 0) {
       config_.numericalStep_ *= 2.f;
     }
+
     auto point0 = findPointProjection(surface0_, *guidancePoint_);
     if (!point0) {
       continue;
@@ -102,8 +104,8 @@ IntersectionFinder::findFirstPointWithGuidance() const {
       continue;
     }
 
-    if (auto intersectionPoint = findCommonSurfacePoint(*point0, *point1)) {
-      return intersectionPoint;
+    if (auto intersection_point = findCommonSurfacePoint(*point0, *point1)) {
+      return intersection_point;
     }
   }
   return std::nullopt;
@@ -115,18 +117,21 @@ IntersectionFinder::findFirstPointSameWithGuidance() const {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_->bounds()[0][0],
                                              surface0_->bounds()[0][1]);
-  for (std::size_t stochTry = 0; stochTry < kStochasticTries; ++stochTry) {
+  for (std::size_t stoch_try = 0; stoch_try < kStochasticTries; ++stoch_try) {
     auto point0 = findPointProjection(surface0_, *guidancePoint_);
     if (!point0) {
       continue;
     }
-    const auto point0Value = surface0_->value(*point0);
-    const auto point1 = findPointProjection(surface0_, point0Value);
+
+    const auto point1 =
+        findPointProjection(surface0_, surface0_->value(*point0));
+
     if (!point1) {
       continue;
     }
-    if (auto intersectionPoint = findCommonSurfacePoint(*point0, *point1)) {
-      return intersectionPoint;
+
+    if (auto intersection_point = findCommonSurfacePoint(*point0, *point1)) {
+      return intersection_point;
     }
   }
   return std::nullopt;
@@ -137,39 +142,35 @@ IntersectionFinder::findCommonSurfacePoint(const algebra::Vec2f &start0,
                                            const algebra::Vec2f &start1) const {
   auto function = std::make_unique<algebra::SurfaceSurfaceL2DistanceSquared>(
       surface0_, surface1_);
-  algebra::GradientDescent<4> gradientDescent(std::move(function));
+  algebra::GradientDescent<4> gradient_descent(std::move(function));
 
-  gradientDescent.setLearningRate(config_.numericalStep_);
-  gradientDescent.setStartingPoint(
+  gradient_descent.setLearningRate(config_.numericalStep_);
+  gradient_descent.setStartingPoint(
       algebra::Vec4f(start0[0], start0[1], start1[0], start1[1]));
 
-  auto gradientResult = gradientDescent.calculate();
-  if (!gradientResult) {
+  auto gradient_result = gradient_descent.calculate();
+  if (!gradient_result) {
     return std::nullopt;
   }
-  auto minimum = *gradientResult;
-  auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
-  auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
+  auto minimum = *gradient_result;
+  auto surface_0_minimum = algebra::Vec2f{minimum[0], minimum[1]};
+  auto surface_1_minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
-  auto surface0Val = surface0_->value(surface0Minimum);
-  auto surface1Val = surface1_->value(surface1Minimum);
+  auto surface_0_val = surface0_->value(surface_0_minimum);
+  auto surface_1_val = surface1_->value(surface_1_minimum);
 
-  if ((surface0Val - surface1Val).length() > 0.1) {
+  if ((surface_0_val - surface_1_val).length() > 0.1) {
     std::println("Failed to find max prec = {}\n",
-                 (surface0Val - surface1Val).length());
+                 (surface_0_val - surface_1_val).length());
     return std::nullopt;
   }
 
-  std::println("found first approximation of dist == {}",
-               (surface0Val - surface1Val).length());
+  auto first_intersection =
+      IntersectionPoint{.surface0 = surface_0_minimum,
+                        .surface1 = surface_1_minimum,
+                        .point = (surface_0_val + surface_1_val) / 2.f};
 
-  auto firstIntersection =
-      IntersectionPoint{.surface0 = surface0Minimum,
-                        .surface1 = surface1Minimum,
-                        .point = (surface0Val + surface1Val) / 2.f};
-
-  // return firstIntersection;
-  return newtowRefinment(firstIntersection);
+  return newtowRefinment(first_intersection);
 }
 
 std::optional<IntersectionPoint>
@@ -177,65 +178,61 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
   auto function =
       std::make_unique<algebra::IntersectionFunction>(surface0_, surface1_);
 
-  algebra::Vec4f startingPoint{point.surface0[0], point.surface0[1],
-                               point.surface1[0], point.surface1[1]};
-  algebra::NewtonMethod<4, 4> newton(std::move(function), startingPoint);
+  algebra::Vec4f starting_point{point.surface0[0], point.surface0[1],
+                                point.surface1[0], point.surface1[1]};
+  algebra::NewtonMethod<4, 4> newton(std::move(function), starting_point);
   // newton.setIterationCount(2);
 
-  auto newtonResult = newton.calculate();
-  if (!newtonResult) {
-    std::println("Newton failed to calculate\n");
+  auto newton_result = newton.calculate();
+  if (!newton_result) {
     return std::nullopt;
   }
-  auto minimum = *newtonResult;
-  auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
-  auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
-  auto surface0Val = surface0_->value(surface0Minimum);
-  auto surface1Val = surface1_->value(surface1Minimum);
+  auto minimum = *newton_result;
+  auto surface_0_minimum = algebra::Vec2f{minimum[0], minimum[1]};
+  auto surface_1_minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
-  if ((surface0Val - surface1Val).length() > 10e-3) {
+  auto surface_0_val = surface0_->value(surface_0_minimum);
+  auto surface_1_val = surface1_->value(surface_1_minimum);
+
+  if ((surface_0_val - surface_1_val).length() > 10e-3) {
     std::println("Newton Refinment fail maxPreccsion == {}",
-                 (surface0Val - surface1Val).length());
+                 (surface_0_val - surface_1_val).length());
     return std::nullopt;
   }
 
-  std::println("found Newton Refinment of size  approximation of dist == {}",
-               (surface0Val - surface1Val).length());
-
-  return IntersectionPoint{.surface0 = surface0Minimum,
-                           .surface1 = surface1Minimum,
-                           .point = (surface0Val + surface1Val) / 2.f};
+  return IntersectionPoint{.surface0 = surface_0_minimum,
+                           .surface1 = surface_1_minimum,
+                           .point = (surface_0_val + surface_1_val) / 2.f};
 }
 
 std::optional<algebra::Vec2f> IntersectionFinder::findPointProjection(
     algebra::IDifferentialParametricForm<2, 3> *surface,
     algebra::Vec3f surfacePoint) const {
-
   for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
-
     auto guess = findInitialGuessWithGuidance(
-        surface, surfacePoint, algebra::Distribution::randomInt(200, 300));
+        surface, surfacePoint,
+        algebra::Distribution::randomInt(kGridSearchResMinMax.first,
+                                         kGridSearchResMinMax.second));
 
     auto function = std::make_unique<algebra::SurfacePointL2DistanceSquared>(
         surface, surfacePoint);
-    algebra::GradientDescent<2> gradientDescent(std::move(function));
-    gradientDescent.setStartingPoint(guess);
-    auto result = *gradientDescent.calculate();
+    algebra::GradientDescent<2> gradient_descent(std::move(function));
+
+    gradient_descent.setStartingPoint(guess);
+    auto result = *gradient_descent.calculate();
     auto pos = surface->value(result);
 
-    if ((surfacePoint - pos).length() > 0.5f) {
-      std::println(
-          "found Point Projection [{},{},{}], from [{},{},{}], dist = {}",
-          pos[0], pos[1], pos[2], surfacePoint[0], surfacePoint[1],
-          surfacePoint[2], (surfacePoint - pos).length());
-      //    std::println("failed to find starting points dist == {}",
+    if ((surfacePoint - pos).length() > kProjectionTolerance) {
       continue;
     }
+
+    /// Increase learning rate to escape local minima
     if (i > kMaxIntersectionCurvePoint / 10) {
-      gradientDescent.setLearningRate(gradientDescent.getLearningRate() * 2.f);
+      gradient_descent.setLearningRate(gradient_descent.getLearningRate() *
+                                       2.f);
     }
-    std::println("found starting point [{},{}]", result[0], result[1]);
+
     return result;
   }
   return std::nullopt;
@@ -257,21 +254,18 @@ IntersectionFinder::getTangent(const IntersectionPoint &firstPoint) const {
 std::optional<Intersection>
 IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
                                    bool reversed) const {
-  std::vector<IntersectionPoint> points;
-  points.push_back(firstPoint);
-  for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
-    auto nextPoint = nextIntersectionPoint(points.back(), reversed);
+  std::vector<IntersectionPoint> points = {firstPoint};
 
-    if (i > 0 && i % 300 == 0) {
-      std::println("Newton found first {} points", i);
-    }
+  for (std::size_t i = 1; i < kMaxIntersectionCurvePoint; ++i) {
+    auto next_point = nextIntersectionPoint(points.back(), reversed);
+
     if (i > 2 && intersectionLooped(Intersection{.points = points})) {
-      std::println("Found loop ending Newton");
       points.back() = points.front();
       return Intersection{.points = points, .looped = true};
     }
-    if (nextPoint) {
-      points.push_back(*nextPoint);
+
+    if (next_point) {
+      points.push_back(*next_point);
     } else {
       std::println("Newton method failed to find next point on {} iteration",
                    i);
@@ -285,7 +279,6 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
 std::optional<IntersectionPoint>
 IntersectionFinder::nextIntersectionPoint(const IntersectionPoint &lastPoint,
                                           bool reversed) const {
-
   auto tangent = getTangent(lastPoint);
   if (reversed) {
     tangent = tangent * -1.f;
@@ -294,23 +287,25 @@ IntersectionFinder::nextIntersectionPoint(const IntersectionPoint &lastPoint,
   auto function = std::make_unique<algebra::IntersectionStepFunction>(
       surface0_, surface1_, lastPoint.point, tangent);
   function->setStep(config_.intersectionStep_);
+
   algebra::NewtonMethod<4, 4> newton(
       std::move(function),
       algebra::Vec4f(lastPoint.surface0[0], lastPoint.surface0[1],
                      lastPoint.surface1[0], lastPoint.surface1[1]));
-  const auto nextIntersection = newton.calculate();
 
-  if (nextIntersection) {
-    auto minimum = *nextIntersection;
-    auto surface0Minimum = algebra::Vec2f{minimum[0], minimum[1]};
-    auto surface1Minimum = algebra::Vec2f{minimum[2], minimum[3]};
+  const auto next_intersection = newton.calculate();
 
-    auto surface0Val = surface0_->value(surface0Minimum);
-    auto surface1Val = surface1_->value(surface1Minimum);
+  if (next_intersection) {
+    auto minimum = *next_intersection;
+    auto surface_0_minimum = algebra::Vec2f{minimum[0], minimum[1]};
+    auto surface_1_minimum = algebra::Vec2f{minimum[2], minimum[3]};
 
-    return IntersectionPoint{.surface0 = surface0Minimum,
-                             .surface1 = surface1Minimum,
-                             .point = (surface0Val + surface1Val) / 2.f};
+    auto surface_0_val = surface0_->value(surface_0_minimum);
+    auto surface_1_val = surface1_->value(surface_1_minimum);
+
+    return IntersectionPoint{.surface0 = surface_0_minimum,
+                             .surface1 = surface_1_minimum,
+                             .point = (surface_0_val + surface_1_val) / 2.f};
   }
 
   return std::nullopt;
@@ -330,8 +325,6 @@ std::optional<Intersection> IntersectionFinder::connectFoundPoints(
     points.insert(points.end(), nextPoints->points.begin(),
                   nextPoints->points.end());
   }
-
-  // fixIntersectionPointsEdges(points);
 
   if (points.size() == 0) {
     return std::nullopt;
@@ -367,14 +360,12 @@ void IntersectionFinder::fixIntersectionPointsEdges(
     }
   };
 
-  const auto surface0 = surface0_;
-  const auto surface1 = surface1_;
-  if (!surface0 || !surface1) {
+  if (!surface0_ || !surface1_) {
     return;
   }
 
-  const auto bounds0 = surface0->bounds();
-  const auto bounds1 = surface1->bounds();
+  const auto bounds0 = surface0_->bounds();
+  const auto bounds1 = surface1_->bounds();
 
   for (int i : {0, static_cast<int>(points.size()) - 1}) {
     snap(points[i].surface0[0], bounds0[0], bounds0[1], 0);
@@ -386,24 +377,24 @@ void IntersectionFinder::fixIntersectionPointsEdges(
 
 bool IntersectionFinder::intersectionLooped(
     const Intersection &intersection) const {
-  const auto &firstPoint = intersection.points.front();
-  const auto &lastPoint = intersection.points.back();
-  auto surf0Wrapped = surface0_->wrapped(0) || surface0_->wrapped(1);
-  auto surf1Wrapped = surface1_->wrapped(0) || surface1_->wrapped(1);
+  const auto &first_point = intersection.points.front();
+  const auto &last_point = intersection.points.back();
+  auto surf_0_wrapped = surface0_->wrapped(0) || surface0_->wrapped(1);
+  auto surf_1_wrapped = surface1_->wrapped(0) || surface1_->wrapped(1);
 
   const auto dist = 0.005f;
-  return ((firstPoint.surface0 - lastPoint.surface0).length() < dist &&
-          surf0Wrapped) &&
-         ((firstPoint.surface1 - lastPoint.surface1).length() < dist &&
-          surf1Wrapped);
+  return ((first_point.surface0 - last_point.surface0).length() < dist &&
+          surf_0_wrapped) &&
+         ((first_point.surface1 - last_point.surface1).length() < dist &&
+          surf_1_wrapped);
 }
 
 algebra::Vec2f IntersectionFinder::findInitialGuessWithGuidance(
     algebra::IDifferentialParametricForm<2, 3> *surface,
     const algebra::Vec3f &targetPoint, uint32_t gridResolution) const {
   auto bounds = surface->bounds();
-  float minDistSq = std::numeric_limits<float>::max();
-  algebra::Vec2f bestUV;
+  float min_dist_sq = std::numeric_limits<float>::max();
+  algebra::Vec2f best_uv;
 
   for (int i = 0; i < gridResolution; ++i) {
     for (int j = 0; j < gridResolution; ++j) {
@@ -415,13 +406,13 @@ algebra::Vec2f IntersectionFinder::findInitialGuessWithGuidance(
                                     static_cast<float>(gridResolution - 1));
 
       auto p = surface->value({u, v});
-      float distSq = std::pow((p - targetPoint).length(), 2.f);
+      float dist_sq = std::pow((p - targetPoint).length(), 2.f);
 
-      if (distSq < minDistSq) {
-        minDistSq = distSq;
-        bestUV = algebra::Vec2f(u, v);
+      if (dist_sq < min_dist_sq) {
+        min_dist_sq = dist_sq;
+        best_uv = algebra::Vec2f(u, v);
       }
     }
   }
-  return bestUV;
+  return best_uv;
 }

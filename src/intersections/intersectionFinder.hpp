@@ -4,7 +4,7 @@
 #include "intersectionConfig.hpp"
 #include "vec.hpp"
 
-#include <memory>
+#include <cstdint>
 #include <optional>
 #include <vector>
 
