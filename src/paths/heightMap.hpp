@@ -15,6 +15,8 @@ public:
 
   const Divisions &divisions() const { return divisions_; }
   float baseHeight() const { return baseHeight_; }
+  float &at(uint32_t index) { return data_[index]; }
+  float at(uint32_t index) const { return data_[index]; }
 
 private:
   Divisions divisions_;

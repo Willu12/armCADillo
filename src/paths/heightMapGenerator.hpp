@@ -15,20 +15,7 @@ public:
 
 private:
   Block *block_ = nullptr;
-
-  ///
-  float geModelHeightInPosition(const Model &model,
-                                const algebra::Vec3f &position) const;
-
-  float getSurfaceHeightInPosition(const BezierSurface &surface,
-                                   const algebra::Vec2f &positionXZ) const;
-
-  algebra::Vec2f findInitialUVWithGridSearch(const BezierSurface &surface,
-                                             const algebra::Vec2f &positionXZ,
-                                             uint32_t gridSize) const;
-
-  ///
-  std::vector<algebra::Vec3f>
-  generateZigZagPointsForCutter(const Cutter &cutter,
-                                const HeightMap &heightMap) const;
+  void processSurface(const BezierSurface &surface, HeightMap &heightMap) const;
+  uint32_t getHeightMapIndex(const algebra::Vec3f &pos,
+                             const HeightMap &heightMap) const;
 };
