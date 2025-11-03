@@ -1,23 +1,18 @@
 #include "heightMapGenerator.hpp"
-#include "IDifferentialParametricForm.hpp"
 #include "bezierSurface.hpp"
 #include "block.hpp"
-#include "cutter.hpp"
-#include "functions.hpp"
-#include "gradientDescent.hpp"
 #include "heightMap.hpp"
-#include "newtonMethod.hpp"
 #include "vec.hpp"
 #include <algorithm>
-#include <vector>
 
 static constexpr float kBaseHeight = 0.f;
 static constexpr uint32_t kDivisions = 1000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
-HeightMap HeightMapGenerator::generateHeightMap(const Model &model) {
+HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
+                                                const Block &block) {
   HeightMap height_map(Divisions{.x_ = kBaseDivisions, .z_ = kBaseDivisions},
-                       kBaseHeight);
+                       kBaseHeight, &block);
 
   for (const auto *surface : model.surfaces()) {
     processSurface(*surface, height_map);
@@ -63,10 +58,12 @@ HeightMapGenerator::getHeightMapIndex(const algebra::Vec3f &pos,
                             ((x + len / 2.f) / len));
   };
 
+  const auto &block = heightMap.block();
+
   int x_index =
-      get_index(pos.x(), block_->dimensions_.x_, heightMap.divisions().x_);
+      get_index(pos.x(), block.dimensions_.x_, heightMap.divisions().x_);
   int z_index =
-      get_index(pos.z(), block_->dimensions_.z_, heightMap.divisions().z_);
+      get_index(pos.z(), block.dimensions_.z_, heightMap.divisions().z_);
 
   return z_index * heightMap.divisions().x_ + x_index;
 }
