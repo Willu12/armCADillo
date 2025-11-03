@@ -21,10 +21,51 @@ public:
 private:
 };
 
+class SurfacePointL2DistanceSquaredXZ
+    : public IDifferentiableScalarFunction<2> {
+
+public:
+  SurfacePointL2DistanceSquaredXZ(
+      const IDifferentialParametricForm<2, 3> *surface, const Vec2f &point)
+      : surface_(surface), point_(algebra::Vec3f(point.x(), 0.f, point.y())) {}
+
+  bool wrapped(size_t dim) const override { return surface_->wrapped(dim); }
+  std::array<Vec2f, 2> bounds() const override { return surface_->bounds(); }
+
+  float value(const Vec<float, 2> &uv) const override {
+    Vec3f surface_point = surface_->value(uv);
+    Vec3f diff = surface_point - point_;
+    return diff.x() * diff.x() + diff.z() + diff.z();
+  }
+
+  Vec<float, 2> gradient(const Vec<float, 2> &x) const override {
+    if (!surface_) {
+      return {0.f, 0.f};
+    }
+
+    Vec3f surface_point = surface_->value(x);
+    Vec3f diff = surface_point - point_;
+
+    auto [Su, Sv] = surface_->derivatives(x);
+
+    // Only use x and z components
+    float grad_u = 2.0f * (Su.x() * diff.x() + Su.z() * diff.z());
+    float grad_v = 2.0f * (Sv.x() * diff.x() + Sv.z() * diff.z());
+
+    return {grad_u, grad_v};
+  }
+
+  bool same() const override { return false; }
+
+private:
+  const IDifferentialParametricForm<2, 3> *surface_;
+  Vec3f point_;
+};
+
 class SurfacePointL2DistanceSquared : public IDifferentiableScalarFunction<2> {
 public:
-  SurfacePointL2DistanceSquared(IDifferentialParametricForm<2, 3> *surface,
-                                const Vec3f &point)
+  SurfacePointL2DistanceSquared(
+      const IDifferentialParametricForm<2, 3> *surface, const Vec3f &point)
       : surface_(surface), point_(point) {}
 
   bool wrapped(size_t dim) const override { return surface_->wrapped(dim); }
@@ -51,15 +92,16 @@ public:
   bool same() const override { return false; }
 
 private:
-  IDifferentialParametricForm<2, 3> *surface_;
+  const IDifferentialParametricForm<2, 3> *surface_;
   Vec3f point_;
 };
 
 class SurfaceSurfaceL2DistanceSquared
     : public IDifferentiableScalarFunction<4> {
 public:
-  SurfaceSurfaceL2DistanceSquared(IDifferentialParametricForm<2, 3> *surface0,
-                                  IDifferentialParametricForm<2, 3> *surface1)
+  SurfaceSurfaceL2DistanceSquared(
+      const IDifferentialParametricForm<2, 3> *surface0,
+      const IDifferentialParametricForm<2, 3> *surface1)
       : surface0_(surface0), surface1_(surface1) {}
 
   std::array<Vec2f, 4> bounds() const override {
@@ -86,8 +128,8 @@ public:
   }
 
   Vec<float, 4> gradient(const Vec<float, 4> &x) const override {
-    auto s0 = surface0_;
-    auto s1 = surface1_;
+    const auto *s0 = surface0_;
+    const auto *s1 = surface1_;
     if (!s0 || !s1) {
       return Vec<float, 4>();
     }
@@ -113,8 +155,8 @@ public:
   bool same() const override { return surface0_ == surface1_; }
 
 private:
-  IDifferentialParametricForm<2, 3> *surface0_;
-  IDifferentialParametricForm<2, 3> *surface1_;
+  const IDifferentialParametricForm<2, 3> *surface0_;
+  const IDifferentialParametricForm<2, 3> *surface1_;
 };
 
 class IntersectionStepFunction : public IDifferentialParametricForm<4, 4> {
