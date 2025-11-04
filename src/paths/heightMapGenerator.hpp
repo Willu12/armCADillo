@@ -4,7 +4,6 @@
 #include "block.hpp"
 #include "heightMap.hpp"
 #include "model.hpp"
-#include "vec.hpp"
 
 class HeightMapGenerator {
 public:

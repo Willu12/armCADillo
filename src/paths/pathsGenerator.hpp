@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GCodeSerializer.hpp"
 #include "bezierSurface.hpp"
 #include "block.hpp"
 #include "cutter.hpp"
@@ -11,15 +12,17 @@
 #include <vector>
 class PathsGenerator {
 public:
-  explicit PathsGenerator(std::vector<BezierSurface *> surfaces)
-      : model_(std::move(surfaces)) {}
-
-  MillingPath roughingPath();
+  void setModel(const std::vector<BezierSurface *> &surfaces);
+  void run();
 
 private:
-  Model model_;
+  std::unique_ptr<Model> model_ = nullptr;
   HeightMapGenerator heightMapGenerator_;
+  GCodeSerializer gCodeSerializer_;
+
   Block block_ = Block::defaultBlock();
+
+  MillingPath roughingPath();
 
   std::vector<algebra::Vec3f>
   calculateRoughMillingPoints(const HeightMap &heightMap,

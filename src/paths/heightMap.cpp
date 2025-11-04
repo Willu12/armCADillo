@@ -24,7 +24,8 @@ float HeightMap::findMinimumSafeHeightForCut(uint32_t index,
   for (int32_t x_cut = -cutter_radius_px; x_cut < cutter_radius_px; ++x_cut) {
     for (int32_t z_cut = -cutter_radius_px; z_cut < cutter_radius_px; ++z_cut) {
       if (x_index + x_cut < 0 || z_cut + z_index < 0 ||
-          x_index + x_cut > divisions_.x_ || z_index + z_cut > divisions_.z_) {
+          x_index + x_cut >= divisions_.x_ ||
+          z_index + z_cut >= divisions_.z_) {
         continue;
       }
 
@@ -68,7 +69,7 @@ algebra::Vec3f HeightMap::indexToPos(uint32_t index) const {
 
   auto world_position = [](float length, uint32_t index, uint32_t maxIndex) {
     return -length / 2.f +
-           static_cast<float>(index) / static_cast<float>(maxIndex);
+           length * static_cast<float>(index) / static_cast<float>(maxIndex);
   };
 
   const auto x = world_position(block_->dimensions_.x_, x_index, divisions_.x_);

@@ -31,7 +31,7 @@
 
 GUI::GUI(GLFWwindow *window, Scene *scene)
     : _window(window), _scene(scene), _entityFactory(_scene),
-      _guiSettingsVisitor(*this), _entityUtils(this, &_entityFactory) {
+      _guiSettingsVisitor(*this), entityUtils_(this, &_entityFactory) {
   initControllers();
 }
 
@@ -109,6 +109,8 @@ void GUI::displayGUI() {
     ImGui::Separator();
     stereoscopicSettings();
     processControllers();
+
+    renderPathGeneratorUI();
 
     ImGui::End();
   }
@@ -223,7 +225,7 @@ void GUI::displayEntitiesList() {
     return;
   }
   const float height =
-      entities.size() > 4 ? 100.f : 25.f * static_cast<float>(entities.size());
+      entities.size() > 4 ? 200.f : 25.f * static_cast<float>(entities.size());
   ImVec2 child_size(-1, height);
 
   ImGui::BeginChild("EntitiesListChild", child_size, static_cast<int>(true),
@@ -351,20 +353,7 @@ std::vector<std::reference_wrapper<PointEntity>> GUI::getPoints() const {
   }
   return point_entities;
 }
-
-std::vector<std::reference_wrapper<BezierCurve>>
-GUI::getSelectedBezierCurves() {
-  std::vector<std::reference_wrapper<BezierCurve>> bezier_curves;
-  for (auto &entity : _selectedEntities) {
-    if (auto *bezier_curve = dynamic_cast<BezierCurve *>(entity)) {
-      bezier_curves.emplace_back(*bezier_curve);
-    }
-  }
-  return bezier_curves;
-}
-
 void GUI::processControllers() {
-
   auto selected_entities = getSelectedEntities();
   auto virtual_points = getSelectedVirtualPoints();
   _selectedEntities.insert(_selectedEntities.end(), virtual_points.begin(),
@@ -527,7 +516,7 @@ void GUI::createEnitityUI() {
   static EntityType selected_type = EntityType::Point;
   std::string preview_value = "Select...";
 
-  for (const auto &[name, type] : _entityUtils.getStringEntityMap()) {
+  for (const auto &[name, type] : entityUtils_.getStringEntityMap()) {
     if (type == selected_type) {
       preview_value = name;
       break;
@@ -535,7 +524,7 @@ void GUI::createEnitityUI() {
   }
 
   if (ImGui::BeginCombo("##Creatable Entities", preview_value.c_str())) {
-    for (const auto &[name, entityType] : _entityUtils.getStringEntityMap()) {
+    for (const auto &[name, entityType] : entityUtils_.getStringEntityMap()) {
       bool is_selected = (selected_type == entityType);
       if (ImGui::Selectable(name.c_str(), is_selected)) {
         selected_type = entityType;
@@ -546,5 +535,28 @@ void GUI::createEnitityUI() {
     }
     ImGui::EndCombo();
   }
-  _entityUtils.getEntityBuilders().at(selected_type)->drawGui();
+  entityUtils_.getEntityBuilders().at(selected_type)->drawGui();
+}
+
+void GUI::renderPathGeneratorUI() {
+  ImGui::Begin("Path generation");
+  if (ImGui::Button("set selected surfaces as model")) {
+    pathsGenerator_.setModel(getSelectedSurfaces());
+  }
+  if (ImGui::Button("Generate Paths")) {
+    pathsGenerator_.run();
+  }
+  ImGui::End();
+}
+
+std::vector<BezierSurface *> GUI::getSelectedSurfaces() const {
+  std::vector<BezierSurface *> surfaces;
+
+  const auto &selected_entities = getSelectedEntities();
+  for (auto *entity : selected_entities) {
+    if (auto *surface = dynamic_cast<BezierSurface *>(entity)) {
+      surfaces.push_back(surface);
+    }
+  }
+  return surfaces;
 }

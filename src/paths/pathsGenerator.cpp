@@ -1,7 +1,12 @@
 #include "pathsGenerator.hpp"
 #include "cutter.hpp"
 #include "millingPath.hpp"
+#include "model.hpp"
 #include "vec.hpp"
+
+void PathsGenerator::setModel(const std::vector<BezierSurface *> &surfaces) {
+  model_ = std::make_unique<Model>(surfaces);
+}
 
 MillingPath PathsGenerator::roughingPath() {
   /// change later
@@ -11,7 +16,7 @@ MillingPath PathsGenerator::roughingPath() {
       .height_ = 2.f * 1.6f,
   };
 
-  auto height_map = heightMapGenerator_.generateHeightMap(model_, block_);
+  auto height_map = heightMapGenerator_.generateHeightMap(*model_, block_);
   auto milling_points = calculateRoughMillingPoints(height_map, cutter);
   return MillingPath(std::move(milling_points), cutter);
 };
@@ -34,14 +39,14 @@ PathsGenerator::calculateRoughMillingPoints(const HeightMap &heightMap,
   /// we would like to offset cutter
   const auto min_height = block.dimensions_.y_ - cutter.height_;
   const auto dz = cutter.diameter_;
-  auto current_z = 0;
 
   for (int z = 0; static_cast<float>(z) < block_.dimensions_.z_ / dz; z++) {
     const bool left_to_right = z % 2 == 0;
 
+    uint32_t real_z = z * dz * heightMap.pixelCmRatio().first;
     for (uint32_t x = 0; x < heightMap.divisions().x_; ++x) {
       uint32_t real_x = left_to_right ? x : heightMap.divisions().x_ - 1 - x;
-      auto global_index = heightMap.globalIndex(real_x, current_z);
+      auto global_index = heightMap.globalIndex(real_x, real_z);
 
       /// cut
       auto safe_cut_height =
@@ -54,11 +59,19 @@ PathsGenerator::calculateRoughMillingPoints(const HeightMap &heightMap,
       }
     }
 
-    current_z++;
     auto real_x = left_to_right ? heightMap.divisions().x_ - 1 : 0;
-    auto pos = heightMap.indexToPos(heightMap.globalIndex(real_x, current_z));
+    auto pos = heightMap.indexToPos(heightMap.globalIndex(real_x, real_z));
+    auto next_pos = heightMap.indexToPos(heightMap.globalIndex(
+        real_x, (z + 1) * dz * heightMap.pixelCmRatio().first));
+
     milling_points.emplace_back(pos.x(), min_height, pos.z());
+    milling_points.emplace_back(pos.x(), min_height, next_pos.z());
   }
 
   return milling_points;
+}
+
+void PathsGenerator::run() {
+  auto roughing_path = roughingPath();
+  gCodeSerializer_.serializePath(roughing_path, "1.k16");
 }

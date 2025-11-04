@@ -3,6 +3,7 @@
 #include "GuiVisitor.hpp"
 #include "IController.hpp"
 #include "IEntity.hpp"
+#include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "centerPoint.hpp"
 #include "controllers.hpp"
@@ -15,6 +16,7 @@
 #include "modelController.hpp"
 #include "mouse.hpp"
 #include "optional"
+#include "pathsGenerator.hpp"
 #include "pointEntity.hpp"
 #include "selectionController.hpp"
 #include "utils.hpp"
@@ -83,7 +85,8 @@ private:
   JsonSerializer _jsonSerializer;
   JsonDeserializer _jsonDeserializer;
   IntersectionFinder _intersectionFinder;
-  EntityUtils _entityUtils;
+  EntityUtils entityUtils_;
+  PathsGenerator pathsGenerator_;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();
@@ -103,6 +106,7 @@ private:
   void contractEdgeUI();
   void findIntersectionUI();
   void findIntersection();
+  void renderPathGeneratorUI();
 
   void renderModelSettings();
   void stereoscopicSettings();
@@ -121,5 +125,5 @@ private:
   SelectionController *getSelectionController();
   std::vector<IController *> getActiveControllers();
 
-  std::vector<std::reference_wrapper<BezierCurve>> getSelectedBezierCurves();
+  std::vector<BezierSurface *> getSelectedSurfaces() const;
 };

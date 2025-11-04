@@ -13,7 +13,8 @@ void GCodeSerializer::serializePath(
   }
 
   for (const auto &[i, point] : millingPath.points() | std::views::enumerate) {
-    out << std::format("N{}G01X{:.3f}Y{:.3f}Z{:.3f}", i, point.x(), point.y(),
-                       point.z());
+    out << std::format("N{}G01X{:.3f}Y{:.3f}Z{:.3f}\n", i, point.x() * 10.f,
+                       point.z() * 10.f,
+                       point.y() * 10.f); /// we reverse y and z here
   }
 }
