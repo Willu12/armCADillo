@@ -2,7 +2,6 @@
 
 #include "block.hpp"
 #include "cutter.hpp"
-#include "flatPathGenerator.hpp"
 #include "vec.hpp"
 #include <cstdint>
 #include <vector>
