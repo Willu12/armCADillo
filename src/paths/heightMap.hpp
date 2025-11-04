@@ -2,6 +2,7 @@
 
 #include "block.hpp"
 #include "cutter.hpp"
+#include "flatPathGenerator.hpp"
 #include "vec.hpp"
 #include <cstdint>
 #include <vector>
@@ -23,11 +24,14 @@ public:
   float &at(uint32_t index) { return data_[index]; }
   float at(uint32_t index) const { return data_[index]; }
   const Block &block() const { return *block_; }
-  float findMinimumSafeHeightForCut(uint32_t index, const Cutter &cutter) const;
+
+  float findMinimumSafeHeightForCut(
+      uint32_t index, const Cutter &cutter) const; // this should be moved
 
   friend class HeightMapGenerator;
   friend class PathsGenerator;
   friend class RoughingPathGenerator;
+  friend class FlatPathGenerator;
 
 private:
   Divisions divisions_;
