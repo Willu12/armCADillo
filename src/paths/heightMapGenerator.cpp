@@ -33,37 +33,10 @@ void HeightMapGenerator::processSurface(const BezierSurface &surface,
       float v = static_cast<float>(v_index) / static_cast<float>(v_divisions);
 
       auto surface_point = surface.value(algebra::Vec2f(u, v));
-      auto height_map_index = getHeightMapIndex(surface_point, heightMap);
+      auto height_map_index = heightMap.posToIndex(surface_point);
 
       heightMap.at(height_map_index) =
           std::max(heightMap.at(height_map_index), surface_point.y());
     }
   }
-}
-
-uint32_t
-HeightMapGenerator::getHeightMapIndex(const algebra::Vec3f &pos,
-                                      const HeightMap &heightMap) const {
-
-  //// height map looks like
-  /// Z|
-  ///  |
-  ///  |
-  ///  |
-  /// 0*---------
-  ///  0       X
-
-  auto get_index = [&](float x, float len, uint32_t divisions) {
-    return static_cast<int>(static_cast<float>(divisions) *
-                            ((x + len / 2.f) / len));
-  };
-
-  const auto &block = heightMap.block();
-
-  int x_index =
-      get_index(pos.x(), block.dimensions_.x_, heightMap.divisions().x_);
-  int z_index =
-      get_index(pos.z(), block.dimensions_.z_, heightMap.divisions().z_);
-
-  return z_index * heightMap.divisions().x_ + x_index;
 }

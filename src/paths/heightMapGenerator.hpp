@@ -12,6 +12,4 @@ public:
 
 private:
   void processSurface(const BezierSurface &surface, HeightMap &heightMap) const;
-  uint32_t getHeightMapIndex(const algebra::Vec3f &pos,
-                             const HeightMap &heightMap) const;
 };

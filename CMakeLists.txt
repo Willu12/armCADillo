@@ -35,6 +35,7 @@ add_executable(${PROJECT_NAME}
  src/meshes/mesh.cpp
  src/notifications/ISubsriber.cpp
  src/paths/GCodeSerializer.cpp
+ src/paths/heightMap.cpp
  src/paths/heightMapGenerator.cpp
  src/paths/pathsGenerator.cpp
  src/scene.cpp
