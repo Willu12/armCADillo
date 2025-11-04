@@ -27,6 +27,7 @@ public:
 
   friend class HeightMapGenerator;
   friend class PathsGenerator;
+  friend class RoughingPathGenerator;
 
 private:
   Divisions divisions_;

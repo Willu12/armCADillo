@@ -3,13 +3,13 @@
 #include "GCodeSerializer.hpp"
 #include "bezierSurface.hpp"
 #include "block.hpp"
-#include "cutter.hpp"
+#include "flatPathGenerator.hpp"
 #include "heightMap.hpp"
 #include "heightMapGenerator.hpp"
-#include "millingPath.hpp"
 #include "model.hpp"
-#include "vec.hpp"
+#include "roughingPathGenerator.hpp"
 #include <vector>
+
 class PathsGenerator {
 public:
   void setModel(const std::vector<BezierSurface *> &surfaces);
@@ -19,12 +19,11 @@ private:
   std::unique_ptr<Model> model_ = nullptr;
   HeightMapGenerator heightMapGenerator_;
   GCodeSerializer gCodeSerializer_;
-
   Block block_ = Block::defaultBlock();
 
-  MillingPath roughingPath();
+  /// Generators
+  RoughingPathGenerator roughingPathGenerator_;
+  FlatPathGenerator flatPathGenerator_;
 
-  std::vector<algebra::Vec3f>
-  calculateRoughMillingPoints(const HeightMap &heightMap,
-                              const Cutter &cutter) const;
+  /// Helpers
 };

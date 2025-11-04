@@ -115,6 +115,7 @@ private:
   void clearSelectedEntities();
   void selectEntity(int entityIndex);
   void selectEntity(const IEntity &entity);
+  void selectAllPointsUI();
   void unselectEntity(int entityIndex);
   void contractSelectedEdge();
 

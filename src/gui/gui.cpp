@@ -94,6 +94,7 @@ void GUI::displayGUI() {
 
     renderModelSettings();
     renderModelControllSettings();
+    selectAllPointsUI();
     displayEntitiesList();
     renderCursorControllerSettings();
 
@@ -559,4 +560,13 @@ std::vector<BezierSurface *> GUI::getSelectedSurfaces() const {
     }
   }
   return surfaces;
+}
+
+void GUI::selectAllPointsUI() {
+  if (ImGui::Button("Select all points")) {
+    auto points = getPoints();
+    for (const auto &point : points) {
+      selectEntity(point);
+    }
+  }
 }
