@@ -1,5 +1,6 @@
 #include "flatPathGenerator.hpp"
 #include "cutter.hpp"
+#include "heightMap.hpp"
 #include "millingPath.hpp"
 #include <queue>
 #include <vector>
@@ -18,6 +19,19 @@ MillingPath FlatPathGenerator::generate(const HeightMap &heightMap) const {
   auto milling_points = findCutterPositionsFromBoundary(boundary_indices);
   return MillingPath(std::move(milling_points), cutter);
 };
+
+namespace {
+bool checkBounds(const HeightMap &heightMap, uint32_t index, uint32_t d) {
+  const auto index_x = index % heightMap.divisions().x_;
+  const auto index_z = index / heightMap.divisions().x_;
+
+  const auto d_x = d % heightMap.divisions().x_;
+  const auto d_z = d / heightMap.divisions().z_;
+
+  return index_x - d_x >= 0 && index_x + d_x < heightMap.divisions().x_ &&
+         index_z - d_z >= 0 && index_z + d_z < heightMap.divisions().z_;
+}
+} // namespace
 
 std::vector<uint32_t>
 FlatPathGenerator::findBoundaryIndices(const HeightMap &heightMap) const {
@@ -53,13 +67,15 @@ FlatPathGenerator::findBoundaryIndices(const HeightMap &heightMap) const {
 
     /// here check wheter we dont need additional check
     for (int d : d_index) {
-      const auto current_index = index + d;
+      if (!checkBounds(heightMap, index, d)) {
+        continue;
+      }
 
-      visited[current_index] = true;
-      queue.push(current_index);
+      const auto neighbour_index = index + d;
+      visited[neighbour_index] = true;
+      queue.push(neighbour_index);
     }
   }
-
   return boundary_indices;
 }
 
