@@ -5,7 +5,7 @@
 #include "vec.hpp"
 #include <algorithm>
 
-static constexpr float kBaseHeight = 0.f;
+static constexpr float kBaseHeight = 1.5f;
 static constexpr uint32_t kDivisions = 1000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
@@ -32,11 +32,19 @@ void HeightMapGenerator::processSurface(const BezierSurface &surface,
       float u = static_cast<float>(u_index) / static_cast<float>(u_divisions);
       float v = static_cast<float>(v_index) / static_cast<float>(v_divisions);
 
-      auto surface_point = surface.value(algebra::Vec2f(u, v));
-      auto height_map_index = heightMap.posToIndex(surface_point);
+      auto surface_point = surface.value({u, v});
 
-      heightMap.at(height_map_index) =
-          std::max(heightMap.at(height_map_index), surface_point.y() + 1.5f);
+      if (surface_point.y() < 0.f) {
+        continue;
+      }
+
+      auto height_map_index = heightMap.posToIndex(surface_point);
+      if (surface_point.y() + kBaseHeight > heightMap.at(height_map_index)) {
+        heightMap.at(height_map_index) = surface_point.y() + kBaseHeight;
+
+        // here we may need to change normal orientation
+        heightMap.normalAtIndex(height_map_index) = surface.normal({u, v});
+      }
     }
   }
 }

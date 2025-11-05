@@ -12,6 +12,8 @@ public:
 
 private:
   std::vector<uint32_t> findBoundaryIndices(const HeightMap &heightMap) const;
-  std::vector<algebra::Vec3f> findCutterPositionsFromBoundary(
-      const std::vector<uint32_t> &boundaryIndices) const;
+  std::vector<algebra::Vec3f>
+  findCutterPositionsFromBoundary(const HeightMap &heightMap,
+                                  const std::vector<uint32_t> &boundaryIndices,
+                                  const Cutter &cutter) const;
 };

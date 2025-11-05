@@ -25,6 +25,9 @@ public:
   float at(uint32_t index) const { return data_[index]; }
   const Block &block() const { return *block_; }
 
+  algebra::Vec3f &normalAtIndex(uint32_t index);
+  const algebra::Vec3f &normalAtIndex(uint32_t index) const;
+
   float findMinimumSafeHeightForCut(
       uint32_t index, const Cutter &cutter) const; // this should be moved
 
@@ -44,6 +47,9 @@ private:
 
   std::vector<float> data_ =
       std::vector<float>(divisions_.x_ * divisions_.z_, baseHeight_);
+
+  std::vector<algebra::Vec3f> normalData_ =
+      std::vector<algebra::Vec3f>(divisions_.x_ * divisions_.z_);
 
   std::pair<uint32_t, uint32_t> pixelCmRatio() const;
   algebra::Vec3f indexToPos(uint32_t index) const;

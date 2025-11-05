@@ -31,7 +31,7 @@ RoughingPathGenerator::calculateRoughMillingPoints(const HeightMap &heightMap,
 
   /// we would like to offset cutter
   const auto min_height = block.dimensions_.y_ - cutter.height_;
-  const auto dz = cutter.diameter_;
+  const auto dz = cutter.diameter_ / 2.f;
 
   for (int z = 0; static_cast<float>(z) < block.dimensions_.z_ / dz; z++) {
     const bool left_to_right = z % 2 == 0;

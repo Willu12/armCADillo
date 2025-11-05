@@ -78,6 +78,12 @@ public:
   derivatives(const algebra::Vec2f &pos) const override {
     return getAlgebraSurfaceC0().derivatives(pos);
   }
+
+  algebra::Vec3f normal(const algebra::Vec2f &pos) const {
+    auto derivates = derivatives(pos);
+    return (derivates.first.cross(derivates.second)).normalize();
+  }
+
   algebra::Matrix<float, 3, 2>
   jacobian(const algebra::Vec2f &pos) const override {
     return getAlgebraSurfaceC0().jacobian(pos);

@@ -2,7 +2,9 @@
 #include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
+#include "vec.hpp"
 #include <queue>
+#include <ranges>
 #include <vector>
 
 static constexpr float kFloorheight = 1.5f;
@@ -16,7 +18,8 @@ MillingPath FlatPathGenerator::generate(const HeightMap &heightMap) const {
   };
 
   auto boundary_indices = findBoundaryIndices(heightMap);
-  auto milling_points = findCutterPositionsFromBoundary(boundary_indices);
+  auto milling_points =
+      findCutterPositionsFromBoundary(heightMap, boundary_indices, cutter);
   return MillingPath(std::move(milling_points), cutter);
 };
 
@@ -60,7 +63,7 @@ FlatPathGenerator::findBoundaryIndices(const HeightMap &heightMap) const {
     queue.pop();
 
     /// check if is border
-    if (is_floor(index)) {
+    if (!is_floor(index)) {
       boundary_indices.push_back(index);
       continue;
     }
@@ -72,15 +75,29 @@ FlatPathGenerator::findBoundaryIndices(const HeightMap &heightMap) const {
       }
 
       const auto neighbour_index = index + d;
-      visited[neighbour_index] = true;
-      queue.push(neighbour_index);
+      if (!visited[neighbour_index]) {
+        visited[neighbour_index] = true;
+        queue.push(neighbour_index);
+      }
     }
   }
   return boundary_indices;
 }
 
 std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
-    const std::vector<uint32_t> &boundaryIndices) const {
+    const HeightMap &heightMap, const std::vector<uint32_t> &boundaryIndices,
+    const Cutter &cutter) const {
   /// here we may need normal map since we have border positions
   /// but we need to offset in direction from normal vector by radius of cutter
+
+  std::vector<algebra::Vec3f> milling_points(boundaryIndices.size());
+  for (const auto &[i, index] : boundaryIndices | std::views::enumerate) {
+    auto boundary_pos = heightMap.indexToPos(index);
+    auto normal = heightMap.normalAtIndex(index);
+    auto cut_point = boundary_pos; //+ normal * cutter.diameter_ / 2.f;
+    cut_point.y() = kFloorheight;
+    milling_points[i] = cut_point;
+  }
+
+  return milling_points;
 }

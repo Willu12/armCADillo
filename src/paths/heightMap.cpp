@@ -109,3 +109,10 @@ void HeightMap::updateTexture() {
 
   texture_->fill(texture_data);
 }
+
+algebra::Vec3f &HeightMap::normalAtIndex(uint32_t index) {
+  return normalData_[index];
+}
+const algebra::Vec3f &HeightMap::normalAtIndex(uint32_t index) const {
+  return normalData_[index];
+}
