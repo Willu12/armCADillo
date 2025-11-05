@@ -11,6 +11,7 @@ void PathsGenerator::setModel(const std::vector<BezierSurface *> &surfaces) {
 void PathsGenerator::run() {
   heightMap_ = std::make_unique<HeightMap>(
       heightMapGenerator_.generateHeightMap(*model_, block_));
+  heightMap_->updateTexture();
 
   /*
 /// roughing path

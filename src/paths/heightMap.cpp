@@ -98,13 +98,16 @@ uint32_t HeightMap::globalIndex(uint32_t x, uint32_t z) const {
 }
 
 void HeightMap::updateTexture() {
-  std::vector<uint8_t> texture_data(data_.size());
+  std::vector<uint8_t> texture_data(4 * data_.size());
 
-  const auto min_height = 0.f;
-  const auto max_height = 5.f;
+  const auto max_height = 6.f;
 
-  for (int i = 0; i < texture_data.size(); ++i) {
-    texture_data[i] = static_cast<uint8_t>((data_[i] / max_height) * 255.f);
+  for (int i = 0; i < data_.size(); ++i) {
+    auto channel_value = static_cast<uint8_t>((data_[i] / max_height) * 255.f);
+    texture_data[4 * i] = channel_value;
+    texture_data[4 * i + 1] = channel_value;
+    texture_data[4 * i + 2] = channel_value;
+    texture_data[4 * i + 3] = 255;
   }
 
   texture_->fill(texture_data);

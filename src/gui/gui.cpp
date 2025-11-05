@@ -549,6 +549,8 @@ void GUI::renderPathGeneratorUI() {
     pathsGenerator_.run();
   }
 
+  static bool show_height_map_texture = false;
+
   auto render_texture_window = [](const std::string &window_name,
                                   bool show_texture, uint32_t textureId) {
     if (show_texture) {
@@ -564,6 +566,7 @@ void GUI::renderPathGeneratorUI() {
   };
 
   if (pathsGenerator_.heightMap() != nullptr) {
+    ImGui::Checkbox("Show heightMap Texture", &show_height_map_texture);
     render_texture_window("heightMap", true,
                           pathsGenerator_.heightMap()->textureId());
   }
