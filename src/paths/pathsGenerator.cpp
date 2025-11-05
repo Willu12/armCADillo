@@ -17,9 +17,8 @@ void PathsGenerator::run() {
 /// roughing path
 auto roughing_path = roughingPathGenerator_.generate(*heightMap_);
 gCodeSerializer_.serializePath(roughing_path, "1.k16");
-
-/// flat path
-auto flat_path = flatPathGenerator_.generate(*heightMap_);
-gCodeSerializer_.serializePath(flat_path, "2.f10");
 */
+  /// flat path
+  auto flat_path = flatPathGenerator_.generate(*heightMap_);
+  //  gCodeSerializer_.serializePath(flat_path, "2.f10");
 }

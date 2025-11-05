@@ -47,6 +47,8 @@ private:
 
   std::vector<float> data_ =
       std::vector<float>(divisions_.x_ * divisions_.z_, baseHeight_);
+  std::vector<uint8_t> textureData_ =
+      std::vector<uint8_t>(4 * divisions_.x_ * divisions_.z_, 0);
 
   std::vector<algebra::Vec3f> normalData_ =
       std::vector<algebra::Vec3f>(divisions_.x_ * divisions_.z_);

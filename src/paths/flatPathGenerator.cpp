@@ -10,7 +10,7 @@
 static constexpr float kFloorheight = 1.5f;
 static constexpr uint32_t kStartingIndex = 0;
 
-MillingPath FlatPathGenerator::generate(const HeightMap &heightMap) const {
+MillingPath FlatPathGenerator::generate(HeightMap &heightMap) const {
   Cutter cutter{
       .type_ = Cutter::Type::Flat,
       .diameter_ = 1.0f,
@@ -18,6 +18,8 @@ MillingPath FlatPathGenerator::generate(const HeightMap &heightMap) const {
   };
 
   auto boundary_indices = findBoundaryIndices(heightMap);
+  paintBorderRed(heightMap, boundary_indices);
+
   auto milling_points =
       findCutterPositionsFromBoundary(heightMap, boundary_indices, cutter);
   return MillingPath(std::move(milling_points), cutter);
@@ -37,7 +39,7 @@ bool checkBounds(const HeightMap &heightMap, uint32_t index, uint32_t d) {
 } // namespace
 
 std::vector<uint32_t>
-FlatPathGenerator::findBoundaryIndices(const HeightMap &heightMap) const {
+FlatPathGenerator::findBoundaryIndices(HeightMap &heightMap) const {
   /// find boundary points using flood fill
   std::vector<uint32_t> boundary_indices;
 
@@ -100,4 +102,14 @@ std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
   }
 
   return milling_points;
+}
+
+void FlatPathGenerator::paintBorderRed(
+    HeightMap &heightMap, const std::vector<uint32_t> &boundaryIndices) const {
+  for (const auto &index : boundaryIndices) {
+    heightMap.textureData_[4 * index] = 255;
+    heightMap.textureData_[4 * index + 1] = 0;
+    heightMap.textureData_[4 * index + 2] = 0;
+  }
+  heightMap.texture_->fill(heightMap.textureData_);
 }

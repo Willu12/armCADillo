@@ -560,7 +560,6 @@ void GUI::renderPathGeneratorUI() {
       ImVec2 image_size(800, 800);
       ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(textureId)),
                    image_size);
-
       ImGui::End();
     }
   };
