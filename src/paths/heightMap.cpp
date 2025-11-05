@@ -4,6 +4,7 @@
 #include "vec.hpp"
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 float HeightMap::findMinimumSafeHeightForCut(uint32_t index,
                                              const Cutter &cutter) const {
@@ -94,4 +95,17 @@ uint32_t HeightMap::posToIndex(const algebra::Vec3f &position) const {
 
 uint32_t HeightMap::globalIndex(uint32_t x, uint32_t z) const {
   return z * divisions_.x_ + x;
+}
+
+void HeightMap::updateTexture() {
+  std::vector<uint8_t> texture_data(data_.size());
+
+  const auto min_height = 0.f;
+  const auto max_height = 5.f;
+
+  for (int i = 0; i < texture_data.size(); ++i) {
+    texture_data[i] = static_cast<uint8_t>((data_[i] / max_height) * 255.f);
+  }
+
+  texture_->fill(texture_data);
 }

@@ -19,6 +19,7 @@
 #include "pointEntity.hpp"
 #include "scene.hpp"
 #include "selectionController.hpp"
+#include "texture.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
@@ -547,6 +548,26 @@ void GUI::renderPathGeneratorUI() {
   if (ImGui::Button("Generate Paths")) {
     pathsGenerator_.run();
   }
+
+  auto render_texture_window = [](const std::string &window_name,
+                                  bool show_texture, uint32_t textureId) {
+    if (show_texture) {
+      ImGui::SetNextWindowSize(ImVec2(800, 800), ImGuiCond_Always);
+      ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
+
+      ImVec2 image_size(800, 800);
+      ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(textureId)),
+                   image_size);
+
+      ImGui::End();
+    }
+  };
+
+  if (pathsGenerator_.heightMap() != nullptr) {
+    render_texture_window("heightMap", true,
+                          pathsGenerator_.heightMap()->textureId());
+  }
+
   ImGui::End();
 }
 

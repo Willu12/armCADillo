@@ -6,7 +6,7 @@
 #include <algorithm>
 
 static constexpr float kBaseHeight = 0.f;
-static constexpr uint32_t kDivisions = 10000;
+static constexpr uint32_t kDivisions = 1000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
 HeightMap HeightMapGenerator::generateHeightMap(const Model &model,

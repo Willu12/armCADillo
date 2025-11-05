@@ -2,6 +2,7 @@
 
 #include "block.hpp"
 #include "cutter.hpp"
+#include "texture.hpp"
 #include "vec.hpp"
 #include <cstdint>
 #include <vector>
@@ -27,6 +28,8 @@ public:
   float findMinimumSafeHeightForCut(
       uint32_t index, const Cutter &cutter) const; // this should be moved
 
+  uint32_t textureId() const { return texture_->getTextureId(); }
+
   friend class HeightMapGenerator;
   friend class PathsGenerator;
   friend class RoughingPathGenerator;
@@ -36,6 +39,8 @@ private:
   Divisions divisions_;
   float baseHeight_;
   const Block *block_;
+  std::unique_ptr<Texture> texture_ =
+      Texture::createTexture(divisions_.x_, divisions_.z_);
 
   std::vector<float> data_ =
       std::vector<float>(divisions_.x_ * divisions_.z_, baseHeight_);
@@ -44,4 +49,5 @@ private:
   algebra::Vec3f indexToPos(uint32_t index) const;
   uint32_t globalIndex(uint32_t x, uint32_t z) const;
   uint32_t posToIndex(const algebra::Vec3f &position) const;
+  void updateTexture();
 };
