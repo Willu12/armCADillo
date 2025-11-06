@@ -554,10 +554,10 @@ void GUI::renderPathGeneratorUI() {
   auto render_texture_window = [](const std::string &window_name,
                                   bool show_texture, uint32_t textureId) {
     if (show_texture) {
-      ImGui::SetNextWindowSize(ImVec2(800, 800), ImGuiCond_Always);
+      ImGui::SetNextWindowSize(ImVec2(1500, 1500), ImGuiCond_Always);
       ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
 
-      ImVec2 image_size(800, 800);
+      ImVec2 image_size(1500, 1500);
       ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(textureId)),
                    image_size);
       ImGui::End();

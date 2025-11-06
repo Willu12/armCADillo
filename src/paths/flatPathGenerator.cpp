@@ -26,15 +26,13 @@ MillingPath FlatPathGenerator::generate(HeightMap &heightMap) const {
 };
 
 namespace {
-bool checkBounds(const HeightMap &heightMap, uint32_t index, uint32_t d) {
+bool checkBounds(const HeightMap &heightMap, uint32_t index, uint32_t dx,
+                 uint32_t dz) {
   const auto index_x = index % heightMap.divisions().x_;
   const auto index_z = index / heightMap.divisions().x_;
 
-  const auto d_x = d % heightMap.divisions().x_;
-  const auto d_z = d / heightMap.divisions().z_;
-
-  return index_x - d_x >= 0 && index_x + d_x < heightMap.divisions().x_ &&
-         index_z - d_z >= 0 && index_z + d_z < heightMap.divisions().z_;
+  return index_x - dx >= 0 && index_x + dx < heightMap.divisions().x_ &&
+         index_z - dz >= 0 && index_z + dz < heightMap.divisions().z_;
 }
 } // namespace
 
@@ -57,8 +55,8 @@ FlatPathGenerator::findBoundaryIndices(HeightMap &heightMap) const {
   queue.emplace(kStartingIndex);
   visited[kStartingIndex] = true;
 
-  const int d_index[4] = {-1, 1, static_cast<int>(heightMap.divisions_.x_),
-                          -static_cast<int>(heightMap.divisions().x_)};
+  const auto d_x = {1, -1, 0, 0};
+  const auto d_z = {0, 0, 1, -1};
 
   while (!queue.empty()) {
     auto index = queue.front();
@@ -71,15 +69,19 @@ FlatPathGenerator::findBoundaryIndices(HeightMap &heightMap) const {
     }
 
     /// here check wheter we dont need additional check
-    for (int d : d_index) {
-      if (!checkBounds(heightMap, index, d)) {
-        continue;
-      }
+    for (int dx : d_x) {
+      for (int dz : d_z) {
 
-      const auto neighbour_index = index + d;
-      if (!visited[neighbour_index]) {
-        visited[neighbour_index] = true;
-        queue.push(neighbour_index);
+        if (!checkBounds(heightMap, index, dx, dz)) {
+          continue;
+        }
+
+        auto d = dx + dz * heightMap.divisions_.x_;
+        const auto neighbour_index = index + d;
+        if (!visited[neighbour_index]) {
+          visited[neighbour_index] = true;
+          queue.push(neighbour_index);
+        }
       }
     }
   }
