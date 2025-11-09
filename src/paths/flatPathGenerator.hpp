@@ -1,23 +1,34 @@
 #pragma once
 
+#include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
+#include "segment.hpp"
 #include "vec.hpp"
 #include <cstdint>
+#include <list>
 #include <vector>
 
 class FlatPathGenerator {
 public:
-  MillingPath generate(HeightMap &heightMap) const;
+  MillingPath generate() const;
+  void setCutter(const Cutter *cutter);
+  void setHeightMap(HeightMap *heightMap);
 
 private:
-  std::vector<uint32_t> findBoundaryIndices(HeightMap &heightMap) const;
-  std::vector<algebra::Vec3f>
-  findCutterPositionsFromBoundary(const HeightMap &heightMap,
-                                  const std::vector<uint32_t> &boundaryIndices,
-                                  const Cutter &cutter) const;
+  const Cutter *cutter_ = nullptr;
+  HeightMap *heightMap_ = nullptr;
+
+  std::vector<uint32_t> findBoundaryIndices() const;
+  std::vector<algebra::Vec3f> findCutterPositionsFromBoundary(
+      const std::vector<uint32_t> &boundaryIndices) const;
+
+  std::vector<std::list<Segment>>
+  generateSegments(const std::vector<algebra::Vec3f> &countourPoints) const;
+
+  std::vector<std::vector<algebra::Vec3f>>
+  generatePaths(std::vector<std::list<Segment>> &segments) const;
 
   /// helperFunction
-  void paintBorderRed(HeightMap &heightMap,
-                      const std::vector<uint32_t> &boundaryIndices) const;
+  void paintBorderRed(const std::vector<uint32_t> &boundaryIndices) const;
 };

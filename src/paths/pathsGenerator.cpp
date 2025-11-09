@@ -1,7 +1,6 @@
 #include "pathsGenerator.hpp"
 #include "heightMap.hpp"
 #include "model.hpp"
-#include "roughingPathGenerator.hpp"
 #include <memory>
 
 void PathsGenerator::setModel(const std::vector<BezierSurface *> &surfaces) {
@@ -18,7 +17,16 @@ void PathsGenerator::run() {
 auto roughing_path = roughingPathGenerator_.generate(*heightMap_);
 gCodeSerializer_.serializePath(roughing_path, "1.k16");
 */
+
   /// flat path
-  auto flat_path = flatPathGenerator_.generate(*heightMap_);
+  Cutter cutter{
+      .type_ = Cutter::Type::Flat,
+      .diameter_ = 1.0f,
+      .height_ = 1.0f,
+  };
+
+  flatPathGenerator_.setCutter(&cutter);
+  flatPathGenerator_.setHeightMap(heightMap_.get());
+  auto flat_path = flatPathGenerator_.generate();
   //  gCodeSerializer_.serializePath(flat_path, "2.f10");
 }
