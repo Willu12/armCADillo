@@ -26,6 +26,9 @@ private:
   std::vector<std::list<Segment>>
   generateSegments(const std::vector<algebra::Vec3f> &countourPoints) const;
 
+  void
+  removeSelfIntersections(std::vector<algebra::Vec3f> &contourPoints) const;
+
   std::vector<std::vector<algebra::Vec3f>>
   generatePaths(std::vector<std::list<Segment>> &segments) const;
 

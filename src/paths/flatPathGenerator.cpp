@@ -4,9 +4,11 @@
 #include "millingPath.hpp"
 #include "segment.hpp"
 #include "vec.hpp"
+#include <cstdint>
 #include <limits>
 #include <queue>
 #include <ranges>
+#include <utility>
 #include <vector>
 
 static constexpr float kFloorheight = 1.5f;
@@ -25,9 +27,11 @@ MillingPath FlatPathGenerator::generate() const {
   auto boundary_indices = findBoundaryIndices();
   paintBorderRed(boundary_indices);
 
-  auto countour_points = findCutterPositionsFromBoundary(boundary_indices);
-  auto segments = generateSegments(countour_points);
-  auto milling_paths = generatePaths(segments);
+  MillingPath path({}, *cutter_);
+  return path;
+  // auto countour_points = findCutterPositionsFromBoundary(boundary_indices);
+  // auto segments = generateSegments(countour_points);
+  // auto milling_paths = generatePaths(segments);
 };
 
 namespace {
@@ -42,51 +46,46 @@ bool checkBounds(const HeightMap &heightMap, uint32_t index, uint32_t dx,
 } // namespace
 
 std::vector<uint32_t> FlatPathGenerator::findBoundaryIndices() const {
-  /// find boundary points using flood fill
   std::vector<uint32_t> boundary_indices;
-
-  std::vector<bool> visited(
-      heightMap_->divisions().x_ * heightMap_->divisions().z_, false);
+  auto &divisions = heightMap_->divisions_;
+  uint32_t start = 0;
 
   const auto is_floor = [&](uint32_t index) {
     auto position = heightMap_->indexToPos(index);
     return position.y() <= kFloorheight;
   };
 
-  std::queue<uint32_t> queue;
+  while (start < divisions.x_ * divisions.z_ && is_floor(start)) {
+    ++start;
+  }
 
-  /// init with (0,0)
-  queue.emplace(kStartingIndex);
-  visited[kStartingIndex] = true;
+  /// get them in correct order
+  int dir = 0;
+  auto current = start;
+  while (true) {
 
-  const auto d_x = {1, -1, 0, 0};
-  const auto d_z = {0, 0, 1, -1};
+    boundary_indices.push_back(current);
+    bool found_next = false;
 
-  while (!queue.empty()) {
-    auto index = queue.front();
-    queue.pop();
+    for (int turn = -1; turn <= 2 && !found_next; ++turn) {
+      int ndir = (dir + turn + 4) % 4;
+      int dx = (ndir == 0) - (ndir == 2);
+      int dz = (ndir == 1) - (ndir == 3);
 
-    /// check if is border
-    if (!is_floor(index)) {
-      boundary_indices.push_back(index);
-      continue;
+      if (!checkBounds(*heightMap_, current, dx, dz)) {
+        continue;
+      }
+
+      auto next = current + dx + dz * heightMap_->divisions().x_;
+      if (!is_floor(next)) {
+        current = next;
+        dir = ndir;
+        found_next = true;
+      }
     }
 
-    /// here check wheter we dont need additional check
-    for (int dx : d_x) {
-      for (int dz : d_z) {
-
-        if (!checkBounds(*heightMap_, index, dx, dz)) {
-          continue;
-        }
-
-        auto d = dx + dz * heightMap_->divisions_.x_;
-        const auto neighbour_index = index + d;
-        if (!visited[neighbour_index]) {
-          visited[neighbour_index] = true;
-          queue.push(neighbour_index);
-        }
-      }
+    if (!found_next || current == start) {
+      break;
     }
   }
   return boundary_indices;
@@ -95,7 +94,8 @@ std::vector<uint32_t> FlatPathGenerator::findBoundaryIndices() const {
 std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
     const std::vector<uint32_t> &boundaryIndices) const {
   /// here we may need normal map since we have border positions
-  /// but we need to offset in direction from normal vector by radius of cutter
+  /// but we need to offset in direction from normal vector by radius of
+  /// cutter
 
   std::vector<algebra::Vec3f> milling_points(boundaryIndices.size());
   for (const auto &[i, index] : boundaryIndices | std::views::enumerate) {
@@ -115,6 +115,8 @@ std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
 
 void FlatPathGenerator::paintBorderRed(
     const std::vector<uint32_t> &boundaryIndices) const {
+
+  ;
   for (const auto &index : boundaryIndices) {
     heightMap_->textureData_[4 * index] = 255;
     heightMap_->textureData_[4 * index + 1] = 0;
@@ -266,4 +268,9 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
     paths.push_back(path);
   }
   return paths;
+}
+
+void FlatPathGenerator::removeSelfIntersections(
+    std::vector<algebra::Vec3f> &contourPoints) const {
+  ///
 }
