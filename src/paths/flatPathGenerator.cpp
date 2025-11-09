@@ -96,10 +96,13 @@ std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
 
   std::vector<algebra::Vec3f> milling_points(boundaryIndices.size());
   for (const auto &[i, index] : boundaryIndices | std::views::enumerate) {
-    auto boundary_pos = heightMap.indexToPos(index);
-    auto normal = heightMap.normalAtIndex(index);
-    auto cut_point = boundary_pos; //+ normal * cutter.diameter_ / 2.f;
-    cut_point.y() = kFloorheight;
+    const auto boundary_pos = heightMap.indexToPos(index);
+    const auto normal = heightMap.normalAtIndex(index);
+    const auto flat_normal =
+        algebra::Vec3f{normal.x(), 0.f, normal.z()}.normalize();
+
+    const auto cut_point = boundary_pos + flat_normal * cutter.diameter_ / 2.f;
+    // cut_point.y() = kFloorheight;
     milling_points[i] = cut_point;
   }
 

@@ -5,7 +5,7 @@
 #include "vec.hpp"
 
 static constexpr float kBaseHeight = 1.5f;
-static constexpr uint32_t kDivisions = 3000;
+static constexpr uint32_t kDivisions = 2000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
 HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
