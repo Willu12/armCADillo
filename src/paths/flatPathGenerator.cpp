@@ -4,15 +4,15 @@
 #include "millingPath.hpp"
 #include "segment.hpp"
 #include "vec.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <queue>
 #include <ranges>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 static constexpr float kFloorheight = 1.5f;
-static constexpr uint32_t kStartingIndex = 0;
 static constexpr float kEpsilon = 1e-3;
 static constexpr float kMillingPrecision = 0.0001f;
 static constexpr int kMaxIndex = std::numeric_limits<int>::max();
@@ -24,12 +24,16 @@ void FlatPathGenerator::setHeightMap(HeightMap *heightMap) {
 
 MillingPath FlatPathGenerator::generate() const {
 
+  auto boundary_normal_map = createBoundaryNormalMap();
   auto boundary_indices = findBoundaryIndices();
-  paintBorderRed(boundary_indices);
+  // paintBorderRed(boundary_indices);
 
+  auto countour_points =
+      findCutterPositionsFromBoundary(boundary_indices, boundary_normal_map);
+  // countour_points = removeSelfIntersections(countour_points);
+  paintBorderRed(countour_points);
   MillingPath path({}, *cutter_);
   return path;
-  // auto countour_points = findCutterPositionsFromBoundary(boundary_indices);
   // auto segments = generateSegments(countour_points);
   // auto milling_paths = generatePaths(segments);
 };
@@ -88,11 +92,14 @@ std::vector<uint32_t> FlatPathGenerator::findBoundaryIndices() const {
       break;
     }
   }
+  std::ranges::reverse(boundary_indices);
   return boundary_indices;
 }
 
 std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
-    const std::vector<uint32_t> &boundaryIndices) const {
+    const std::vector<uint32_t> &boundaryIndices,
+    const std::unordered_map<uint32_t, algebra::Vec3f> &boundaryNormalMap)
+    const {
   /// here we may need normal map since we have border positions
   /// but we need to offset in direction from normal vector by radius of
   /// cutter
@@ -100,13 +107,12 @@ std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
   std::vector<algebra::Vec3f> milling_points(boundaryIndices.size());
   for (const auto &[i, index] : boundaryIndices | std::views::enumerate) {
     const auto boundary_pos = heightMap_->indexToPos(index);
-    const auto normal = heightMap_->normalAtIndex(index);
+    const auto normal = boundaryNormalMap.at(index);
     const auto flat_normal =
         algebra::Vec3f{normal.x(), 0.f, normal.z()}.normalize();
 
     const auto cut_point =
         boundary_pos + flat_normal * cutter_->diameter_ / 2.f;
-    // cut_point.y() = kFloorheight;
     milling_points[i] = cut_point;
   }
 
@@ -116,8 +122,20 @@ std::vector<algebra::Vec3f> FlatPathGenerator::findCutterPositionsFromBoundary(
 void FlatPathGenerator::paintBorderRed(
     const std::vector<uint32_t> &boundaryIndices) const {
 
-  ;
   for (const auto &index : boundaryIndices) {
+    heightMap_->textureData_[4 * index] = 255;
+    heightMap_->textureData_[4 * index + 1] = 0;
+    heightMap_->textureData_[4 * index + 2] = 0;
+  }
+  heightMap_->texture_->fill(heightMap_->textureData_);
+}
+
+void FlatPathGenerator::paintBorderRed(
+    const std::vector<algebra::Vec3f> &contour) const {
+
+  for (const auto &point : contour) {
+    auto index = heightMap_->posToIndex(point);
+
     heightMap_->textureData_[4 * index] = 255;
     heightMap_->textureData_[4 * index + 1] = 0;
     heightMap_->textureData_[4 * index + 2] = 0;
@@ -269,8 +287,122 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
   }
   return paths;
 }
+std::vector<algebra::Vec3f> FlatPathGenerator::removeSelfIntersections(
+    const std::vector<algebra::Vec3f> &points) const {
+  {
+    auto contour_points = std::vector<algebra::Vec3f>();
+    // contour_points.reserve(border_count);
 
-void FlatPathGenerator::removeSelfIntersections(
-    std::vector<algebra::Vec3f> &contourPoints) const {
-  ///
+    if (points.size() < 4) {
+      return points;
+    }
+
+    auto intersects = [](const algebra::Vec2f &p1, const algebra::Vec2f &p2,
+                         const algebra::Vec2f &q1, const algebra::Vec2f &q2) {
+      auto c1 = (q1 - p1).cross2D(p2 - p1);
+      auto c2 = (q2 - p1).cross2D(p2 - p1);
+      auto c3 = (p1 - q1).cross2D(q2 - q1);
+      auto c4 = (p2 - p1).cross2D(q2 - q1);
+      return c1 * c2 < 0 && c3 * c4 < 0;
+    };
+
+    auto ind = 0;
+    contour_points.push_back(points[ind]);
+
+    for (uint32_t steps = 0; steps < points.size(); ++steps) {
+      uint32_t next_ind = (ind + 1) % points.size();
+      algebra::Vec2f p0(points[ind].x(), points[ind].z());
+      algebra::Vec2f p1(points[next_ind].x(), points[next_ind].z());
+
+      bool found_intersection = false;
+
+      for (uint32_t j = 0; j < points.size() - 1; ++j) {
+        uint32_t next_j = (j + 1) % points.size();
+        if (j == ind || next_j == ind || j == next_ind || next_j == next_ind) {
+          continue; // skip adjacent or identical segments
+        }
+
+        algebra::Vec2f q0(points[j].x(), points[j].z());
+        algebra::Vec2f q1(points[next_j].x(), points[next_j].z());
+
+        if (intersects(p0, p1, q0, q1)) {
+          // jump to intersection region
+          ind = next_j;
+          found_intersection = true;
+          break;
+        }
+      }
+
+      contour_points.push_back(points[next_ind]);
+
+      if (found_intersection) {
+        ind = (ind + 1) % points.size();
+        contour_points.push_back(points[ind]);
+      } else {
+        ind = next_ind;
+      }
+
+      if (ind == 0) {
+        break;
+      }
+    }
+
+    return contour_points;
+  }
+}
+
+std::unordered_map<uint32_t, algebra::Vec3f>
+FlatPathGenerator::createBoundaryNormalMap() const {
+  /// find boundary points using flood fill
+  std::unordered_map<uint32_t, algebra::Vec3f> boundary_normal_map;
+
+  std::vector<bool> visited(
+      heightMap_->divisions().x_ * heightMap_->divisions().z_, false);
+
+  const auto is_floor = [&](uint32_t index) {
+    auto position = heightMap_->indexToPos(index);
+    return position.y() <= kFloorheight;
+  };
+
+  std::queue<uint32_t> queue;
+
+  /// We start from the middle
+  const uint32_t starting_index =
+      heightMap_->divisions_.x_ * heightMap_->divisions().z_ / 2;
+
+  queue.emplace(starting_index);
+  visited[starting_index] = true;
+
+  const auto d_x = {1, -1, 0, 0};
+  const auto d_z = {0, 0, 1, -1};
+
+  while (!queue.empty()) {
+    auto index = queue.front();
+    queue.pop();
+
+    for (int dx : d_x) {
+      for (int dz : d_z) {
+
+        if (!checkBounds(*heightMap_, index, dx, dz)) {
+          continue;
+        }
+
+        auto d = dx + dz * heightMap_->divisions_.x_;
+        const auto neighbour_index = index + d;
+        if (!visited[neighbour_index]) {
+          visited[neighbour_index] = true;
+
+          /// check if is border
+          if (is_floor(neighbour_index)) {
+            boundary_normal_map.insert(
+                {neighbour_index, heightMap_->normalAtIndex(index)});
+            continue;
+          }
+
+          queue.push(neighbour_index);
+        }
+      }
+    }
+  }
+  return boundary_normal_map;
 }

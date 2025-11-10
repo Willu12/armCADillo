@@ -11,4 +11,7 @@ public:
 
 private:
   void processSurface(const BezierSurface &surface, HeightMap &heightMap) const;
+  void generateFromFiles(const std::string &height_file,
+                         const std::string &normal_file,
+                         HeightMap &heightMap) const;
 };

@@ -1,22 +1,29 @@
 #include "heightMapGenerator.hpp"
 #include "bezierSurface.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "block.hpp"
 #include "heightMap.hpp"
 #include "vec.hpp"
+#include <fstream>
+#include <sstream>
 
 static constexpr float kBaseHeight = 1.5f;
-static constexpr uint32_t kDivisions = 2000;
+static constexpr uint32_t kDivisions = 4000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
 HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
                                                 const Block &block) {
   HeightMap height_map(Divisions{.x_ = kBaseDivisions, .z_ = kBaseDivisions},
                        kBaseHeight, &block);
-
+  /*
   for (const auto *surface : model.surfaces()) {
     processSurface(*surface, height_map);
   }
 
+  height_map.saveToFile();
+*/
+  generateFromFiles("../../resources/maps/height_map.txt",
+                    "../../resources/maps/normal_map.txt", height_map);
   return height_map;
 }
 
@@ -42,8 +49,77 @@ void HeightMapGenerator::processSurface(const BezierSurface &surface,
         heightMap.at(height_map_index) = surface_point.y() + kBaseHeight;
 
         // here we may need to change normal orientation
-        heightMap.normalAtIndex(height_map_index) = surface.normal({u, v});
+        if (const auto *surfaceC0 =
+                dynamic_cast<const BezierSurfaceC0 *>(&surface)) {
+          heightMap.normalAtIndex(height_map_index) =
+              -1.f * surface.normal({u, v});
+        } else {
+          heightMap.normalAtIndex(height_map_index) = surface.normal({u, v});
+        }
       }
     }
+  }
+}
+
+void HeightMapGenerator::generateFromFiles(const std::string &height_file,
+                                           const std::string &normal_file,
+                                           HeightMap &heightMap) const {
+  {
+    std::ifstream in(height_file);
+    if (!in) {
+      throw std::runtime_error("Failed to open " + height_file +
+                               " for reading.");
+    }
+
+    std::vector<float> heights;
+    std::string line;
+
+    while (std::getline(in, line)) {
+      std::istringstream iss(line);
+      float h{};
+      while (iss >> h) {
+        heights.push_back(h);
+      }
+    }
+
+    if (heights.empty()) {
+      throw std::runtime_error("Height map file is empty or invalid: " +
+                               height_file);
+    }
+
+    heightMap.data_ = std::move(heights);
+  }
+
+  // --- Load normal map ---
+  {
+    std::ifstream in(normal_file);
+    if (!in) {
+      throw std::runtime_error("Failed to open " + normal_file +
+                               " for reading.");
+    }
+
+    std::vector<algebra::Vec3f> normals;
+    std::string line;
+
+    while (std::getline(in, line)) {
+      std::istringstream iss(line);
+      float nx = NAN;
+      float ny = NAN;
+      float nz = NAN;
+      while (iss >> nx >> ny >> nz) {
+        normals.emplace_back(nx, ny, nz);
+      }
+    }
+
+    if (normals.empty()) {
+      throw std::runtime_error("Normal map file is empty or invalid: " +
+                               normal_file);
+    }
+
+    heightMap.normalData_ = std::move(normals);
+  }
+
+  if (heightMap.data_.size() != heightMap.normalData_.size()) {
+    throw std::runtime_error("Height and normal maps have mismatched sizes.");
   }
 }

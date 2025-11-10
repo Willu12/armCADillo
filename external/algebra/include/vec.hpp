@@ -105,6 +105,12 @@ public:
     return sum;
   }
 
+  T cross2D(const Vec &other) const
+    requires(Length == 2)
+  {
+    return values[0] * other[1] - values[1] * other[0];
+  }
+
   Vec cross(const Vec &other) const
     requires(Length == 3)
   {

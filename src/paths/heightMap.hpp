@@ -33,6 +33,8 @@ public:
 
   uint32_t textureId() const { return texture_->getTextureId(); }
 
+  void saveToFile() const;
+
   friend class HeightMapGenerator;
   friend class PathsGenerator;
   friend class RoughingPathGenerator;

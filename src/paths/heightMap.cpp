@@ -3,6 +3,8 @@
 #include "cutter.hpp"
 #include "vec.hpp"
 #include <cstdint>
+#include <fstream>
+#include <iomanip>
 #include <stdexcept>
 #include <vector>
 
@@ -117,4 +119,47 @@ algebra::Vec3f &HeightMap::normalAtIndex(uint32_t index) {
 }
 const algebra::Vec3f &HeightMap::normalAtIndex(uint32_t index) const {
   return normalData_[index];
+}
+
+void HeightMap::saveToFile() const {
+  // File names
+  const std::string height_file = "height_map.txt";
+  const std::string normal_file = "normal_map.txt";
+
+  // Save height map
+  {
+    std::ofstream out(height_file);
+    if (!out) {
+      throw std::runtime_error("Failed to open " + height_file +
+                               " for writing.");
+    }
+
+    out << std::fixed << std::setprecision(6);
+
+    for (int z = 0; z < divisions_.z_; ++z) {
+      for (int x = 0; x < divisions_.x_; ++x) {
+        out << data_[z * divisions_.x_ + x] << " ";
+      }
+      out << "\n";
+    }
+  }
+
+  // Save normal map
+  {
+    std::ofstream out(normal_file);
+    if (!out) {
+      throw std::runtime_error("Failed to open " + normal_file +
+                               " for writing.");
+    }
+
+    out << std::fixed << std::setprecision(6);
+
+    for (int z = 0; z < divisions_.z_; ++z) {
+      for (int x = 0; x < divisions_.x_; ++x) {
+        const auto &n = normalData_[z * divisions_.x_ + x];
+        out << n.x() << " " << n.y() << " " << n.z() << "  ";
+      }
+      out << "\n";
+    }
+  }
 }
