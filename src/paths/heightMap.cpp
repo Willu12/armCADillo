@@ -163,3 +163,10 @@ void HeightMap::saveToFile() const {
     }
   }
 }
+std::pair<uint32_t, uint32_t>
+HeightMap::indexFromGlobalIndex(uint32_t globalIndex) const {
+  auto x_index = globalIndex % divisions_.x_;
+  auto z_index = globalIndex / divisions_.x_;
+
+  return {x_index, z_index};
+}

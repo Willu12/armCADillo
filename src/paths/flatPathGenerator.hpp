@@ -12,20 +12,18 @@
 
 class FlatPathGenerator {
 public:
-  MillingPath generate() const;
+  MillingPath generate();
   void setCutter(const Cutter *cutter);
   void setHeightMap(HeightMap *heightMap);
 
 private:
   const Cutter *cutter_ = nullptr;
   HeightMap *heightMap_ = nullptr;
+  std::unordered_map<uint32_t, algebra::Vec3f> boundaryNormalMap_;
 
-  std::unordered_map<uint32_t, algebra::Vec3f> createBoundaryNormalMap() const;
-  std::vector<uint32_t> findBoundaryIndices() const;
+  std::vector<uint32_t> findBoundaryIndices();
   std::vector<algebra::Vec3f> findCutterPositionsFromBoundary(
-      const std::vector<uint32_t> &boundaryIndices,
-      const std::unordered_map<uint32_t, algebra::Vec3f> &boundaryNormalMap)
-      const;
+      const std::vector<uint32_t> &boundaryIndices) const;
 
   std::vector<std::list<Segment>>
   generateSegments(const std::vector<algebra::Vec3f> &countourPoints) const;
