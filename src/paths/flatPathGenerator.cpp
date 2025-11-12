@@ -15,7 +15,7 @@
 static constexpr float kFloorheight = 1.5f;
 static constexpr float kSafeHeight = 5.f;
 static constexpr float kEpsilon = 1e-3;
-static constexpr float kMillingPrecision = 0.01f;
+static constexpr uint32_t kInitialContourPoint = 500;
 
 void FlatPathGenerator::setCutter(const Cutter *cutter) { cutter_ = cutter; }
 void FlatPathGenerator::setHeightMap(HeightMap *heightMap) {
@@ -25,7 +25,6 @@ void FlatPathGenerator::setHeightMap(HeightMap *heightMap) {
 MillingPath FlatPathGenerator::generate() {
 
   auto boundary_indices = findBoundaryIndices();
-  // paintBorderRed(boundary_indices);
 
   contourPoints_ = findCutterPositionsFromBoundary(boundary_indices);
   removeSelfIntersections();
@@ -366,26 +365,29 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
     path.push_back(start_point);
     path.push_back(second_point);
 
+    Segment prev_segment = *previous_segment;
     first_line.erase(previous_segment);
 
+    int count = 0;
     for (int line_index = first_line_index + 1; line_index < segments.size();
          ++line_index) {
       auto &line_segments = segments[line_index];
       /// 1. there are no more segments in this line
       if (line_segments.empty()) {
-        continue;
+        break;
       }
 
-      bool reversed = ((line_index - first_line_index) % 2) != 0;
-
+      bool reversed =
+          count % 2 == 0; // ((line_index - first_line_index) % 2) != 0;
+      count++;
       auto best_segment = line_segments.begin();
       float min_dist = std::numeric_limits<float>::max();
 
       for (auto segment_it = segments[line_index].begin();
            segment_it != segments[line_index].end(); ++segment_it) {
-        auto dist =
-            reversed ? (previous_segment->end_ - segment_it->end_).length()
-                     : (previous_segment->start_ - segment_it->start_).length();
+        auto dist = reversed
+                        ? (prev_segment.end_ - segment_it->end_).length()
+                        : (prev_segment.start_ - segment_it->start_).length();
         if (dist < min_dist) {
           min_dist = dist;
           best_segment = segment_it;
@@ -400,12 +402,12 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
       if (reversed) {
         first_point = best_segment->end_;
         second_point = best_segment->start_;
-        start_contour_index = previous_segment->endContourIndex_;
+        start_contour_index = prev_segment.endContourIndex_;
         end_contour_index = best_segment->endContourIndex_;
       } else {
         first_point = best_segment->start_;
         second_point = best_segment->end_;
-        start_contour_index = previous_segment->startContourIndex_;
+        start_contour_index = prev_segment.startContourIndex_;
         end_contour_index = best_segment->startContourIndex_;
       }
 
@@ -414,9 +416,31 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
       }
 
       if (start_contour_index != kMaxIndex && end_contour_index != kMaxIndex) {
+        /// ensure proper order
+
         for (uint32_t contour_index = start_contour_index;
              contour_index < end_contour_index; ++contour_index) {
           path.emplace_back(contourPoints_[contour_index]);
+        }
+
+      } else if (start_contour_index != kMaxIndex &&
+                 end_contour_index == kMaxIndex) {
+        auto closest_contour_it = std::ranges::min_element(
+            contourPoints_,
+            [&first_point](const algebra::Vec3f &a, const algebra::Vec3f &b) {
+              algebra::Vec2f pa{a.x(), a.z()};
+              algebra::Vec2f pb{b.x(), b.z()};
+              return (first_point - pa).length() < (first_point - pb).length();
+            });
+        int closest_contour_index = static_cast<int>(
+            std::distance(contourPoints_.begin(), closest_contour_it));
+
+        /// go alongisde contour until you can safely exit
+        auto contour_index = start_contour_index;
+
+        while (contour_index != closest_contour_index) {
+          path.emplace_back(contourPoints_[contour_index]);
+          contour_index = (contour_index + 1) % contourPoints_.size();
         }
       }
 
@@ -424,31 +448,11 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
 
       path.emplace_back(first_point.x(), kFloorheight, first_point.y());
 
-      /// add points alongside contour
-
-      ///
-
       path.emplace_back(second_point.x(), kFloorheight, second_point.y());
 
-      /*
-        // Zig Zag order
-        if (reversed) {
-          path.emplace_back(best_segment->end_.x(), kFloorheight,
-                            best_segment->end_.y());
-          path.emplace_back(best_segment->start_.x(), kFloorheight,
-                            best_segment->start_.y());
-        } else {
-          path.emplace_back(best_segment->start_.x(), kFloorheight,
-                            best_segment->start_.y());
-          path.emplace_back(best_segment->end_.x(), kFloorheight,
-                            best_segment->end_.y());
-        }
-
-        */
-
       /// remove previous segment
+      prev_segment = *best_segment;
       line_segments.erase(best_segment);
-      previous_segment = best_segment;
     }
 
     paths.push_back(path);
@@ -458,24 +462,7 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
 
 void FlatPathGenerator::removeSelfIntersections() {
 
-  /*
-const auto block = heightMap_->block();
-const auto diag = algebra::Vec2f{0.F, block.dimensions_.x_};
-const auto p = algebra::Vec2f{0.F, block.dimensions_.x_ / 2.F};
-size_t outer_ind = kMaxIndex;
-for (auto i = 0U; i < points.size() - 1; ++i) {
-auto p0 = algebra::Vec2f{points[i].x(), points[i].z()};
-auto p1 = algebra::Vec2f{points[i + 1].x(), points[i + 1].z()};
-if ((p0 - p).cross2D(diag) * (p1 - p).cross2D(diag) > 0.F) {
-  continue;
-}
-if (outer_ind == kMaxIndex || points[outer_ind].z() < points[i].z()) {
-  outer_ind = i;
-}
-}
-*/
-
-  auto start_index = 500;
+  auto start_index = kInitialContourPoint;
   auto ind = start_index;
   auto contour_points = std::vector<algebra::Vec3f>();
   // contour_points.reserve(border_count);

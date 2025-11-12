@@ -20,8 +20,8 @@ void PathsGenerator::run() {
   };
   roughingPathGenerator_.setHeightMap(heightMap_.get());
   roughingPathGenerator_.setCutter(&roughing_cutter);
-  // auto roughing_path = roughingPathGenerator_.generate();
-  // gCodeSerializer_.serializePath(roughing_path, "1.k16");
+  auto roughing_path = roughingPathGenerator_.generate();
+  gCodeSerializer_.serializePath(roughing_path, "1.k16");
 
   // ------ Flat Path ---------------------------
   Cutter flat_cutter{

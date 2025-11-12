@@ -13,5 +13,5 @@ CMakeUserPresets.json
 .vscode/
 build/
 .cache/
-data
+local_data
 .old_data
