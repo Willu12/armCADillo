@@ -43,7 +43,7 @@ public:
   void render(const std::unordered_map<EntityType, std::vector<IEntity *>>
                   &groupedEntities) {
     _camera->updateProjectionMatrix(_camera->projectionMatrix());
-    _grid.render(_camera);
+    gridRenderer_.render(_camera);
     for (const auto &entityGroup : groupedEntities) {
       auto &renderer = _entityRenderers.at(entityGroup.first);
       renderer->render(entityGroup.second);
@@ -53,7 +53,7 @@ public:
   void stereoscopicRender(
       const std::unordered_map<EntityType, std::vector<IEntity *>>
           &groupedEntities) {
-    _grid.render(_camera);
+    gridRenderer_.render(_camera);
     _camera->updateProjectionMatrix(_camera->leftEyeProjectionMatrix());
     glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_FALSE);
 
@@ -109,7 +109,7 @@ private:
   PointRenderer _selectedPointsRenderer;
   Camera *_camera;
   GLFWwindow *_window;
-  Grid _grid;
+  GridRenderer gridRenderer_;
 
   void initEntityRenderers() {
     _entityRenderers.insert(

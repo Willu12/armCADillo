@@ -34,6 +34,9 @@ private:
   std::vector<std::vector<algebra::Vec3f>>
   generatePaths(std::vector<std::list<Segment>> &segments) const;
 
+  MillingPath combineLocalPaths(
+      const std::vector<std::vector<algebra::Vec3f>> &localPaths) const;
+
   /// helperFunction
   void paintBorderRed(const std::vector<uint32_t> &boundaryIndices) const;
   void paintBorderRed(const std::vector<algebra::Vec3f> &contour) const;

@@ -18,7 +18,7 @@ public:
   Shader(const std::string &vertexPath, const std::string &geometryPath,
          const std::string &fragmentPath);
 
-  void use();
+  void use() const;
 
   void setMat4f(const std::string &name, const algebra::Mat4f &mat) const;
   void setVec2f(const std::string &name, const algebra::Vec2f &value) const;

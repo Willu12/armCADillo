@@ -16,14 +16,14 @@ HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
   HeightMap height_map(Divisions{.x_ = kBaseDivisions, .z_ = kBaseDivisions},
                        kBaseHeight, &block);
 
-  for (const auto *surface : model.surfaces()) {
-    processSurface(*surface, height_map);
-  }
+  //  for (const auto *surface : model.surfaces()) {
+  //    processSurface(*surface, height_map);
+  //  }
 
-  height_map.saveToFile();
+  // height_map.saveToFile();
 
-  //  generateFromFiles("../../resources/maps/height_map.txt",
-  //                    "../../resources/maps/normal_map.txt", height_map);
+  generateFromFiles("../../resources/maps/height_map.txt",
+                    "../../resources/maps/normal_map.txt", height_map);
   return height_map;
 }
 

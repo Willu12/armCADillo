@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 
-void Shader::use() { glUseProgram(_id); }
+void Shader::use() const { glUseProgram(_id); }
 
 Shader::Shader(const std::vector<ShaderPath> &shaderPaths) {
   std::vector<GLuint> shaderIds;

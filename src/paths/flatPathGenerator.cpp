@@ -14,8 +14,9 @@
 #include <vector>
 
 static constexpr float kFloorheight = 1.5f;
+static constexpr float kSafeHeight = 5.f;
 static constexpr float kEpsilon = 1e-3;
-static constexpr float kMillingPrecision = 0.0001f;
+static constexpr float kMillingPrecision = 0.01f;
 static constexpr int kMaxIndex = std::numeric_limits<int>::max();
 
 void FlatPathGenerator::setCutter(const Cutter *cutter) { cutter_ = cutter; }
@@ -30,11 +31,11 @@ MillingPath FlatPathGenerator::generate() {
 
   auto countour_points = findCutterPositionsFromBoundary(boundary_indices);
   countour_points = removeSelfIntersections(countour_points);
+  auto segments = generateSegments(countour_points);
   paintBorderRed(countour_points);
-  MillingPath path({}, *cutter_);
-  return path;
-  // auto segments = generateSegments(countour_points);
-  // auto milling_paths = generatePaths(segments);
+  auto local_paths = generatePaths(segments);
+
+  return combineLocalPaths(local_paths);
 };
 
 std::vector<uint32_t> FlatPathGenerator::findBoundaryIndices() {
@@ -245,48 +246,75 @@ std::vector<std::list<Segment>> FlatPathGenerator::generateSegments(
 
   /// process one line with some step
 
-  auto intersects_contour = [&countourPoints](const algebra::Vec2f &point) {
-    auto it = std::ranges::find_if(
-        countourPoints, [&point](const algebra::Vec3f &contourPoint) {
-          algebra::Vec2f countour_point_xz{contourPoint.x(), contourPoint.z()};
-          return (countour_point_xz - point).length() < kEpsilon;
-        });
-    return it != countourPoints.end();
+  auto intersects =
+      [](const algebra::Vec2f &p0, const algebra::Vec2f &p1,
+         const algebra::Vec2f &q0,
+         const algebra::Vec2f &q1) -> std::optional<algebra::Vec2f> {
+    const auto p01 = p1 - p0;
+    const auto q01 = q1 - q0;
+    const auto c0 = (q0 - p1).cross2D(p01);
+    const auto c1 = (q1 - p1).cross2D(p01);
+    const auto c2 = (p0 - q1).cross2D(q01);
+    const auto c3 = (p1 - q1).cross2D(q01);
+    if (c0 * c1 < 0.f && c2 * c3 < 0.f) {
+      const auto w = (p01).cross2D(-1.f * q01);
+      const auto w_u = (q0 - p0).cross2D(-1.f * q01);
+      return p0 + w_u / w * p01;
+    }
+    return std::nullopt;
   };
-  /// precision is one mm - this may be super slow
 
+  std::vector<std::list<Segment>> segments;
   const auto min_z = -half_z - line_distance;
-  const auto max_z = -min_z;
+  const auto max_z = half_z + line_distance;
   const auto min_x = -half_x - line_distance;
   const auto max_x = -min_x;
 
-  bool inside_border = false;
-  std::vector<std::list<Segment>> segments;
+  //// process each line and check all possible cuts with countour
+  auto line_count = static_cast<uint32_t>((max_z - min_z) / line_distance);
+  for (uint32_t i = 0; i < line_count; ++i) {
+    std::list<Segment> line_segments;
+    auto curr_z = min_z + static_cast<float>(i) * line_distance;
 
-  /// these could be changed to go along the contour
-  for (float zz = min_z; zz < max_z; zz += line_distance) {
-    float last_x = min_x;
-    std::list<Segment> current_line_segments;
-    for (float xx = min_x; xx < max_x; xx += kMillingPrecision) {
-      const algebra::Vec2f p(xx, zz);
+    algebra::Vec2f p0 = {min_x, curr_z};
+    algebra::Vec2f p1 = {max_x, curr_z};
 
-      if (intersects_contour(p)) {
-        if (!inside_border) {
-          current_line_segments.push_back(
-              {.start_ = {last_x, zz}, .end_ = {xx, zz}});
-          // last_x = xx;
-          inside_border = true;
-        } else {
-          inside_border = false;
-          last_x = xx;
-        }
+    std::vector<algebra::Vec2f> line_intersections;
+
+    for (int point_index = 0; point_index < countourPoints.size();
+         ++point_index) {
+      const auto point = countourPoints[point_index];
+      const auto next_point =
+          countourPoints[(point_index + 1) % countourPoints.size()];
+
+      const auto q0 = algebra::Vec2f{point.x(), point.z()};
+      const auto q1 = algebra::Vec2f{next_point.x(), next_point.z()};
+
+      auto intersection = intersects(p0, p1, q0, q1);
+      if (intersection) {
+        line_intersections.push_back(*intersection);
       }
     }
-    // add final segment
-    current_line_segments.push_back(
-        {.start_ = {last_x, zz}, .end_ = {max_x, zz}});
 
-    segments.push_back(current_line_segments);
+    std::ranges::sort(line_intersections,
+                      [](const algebra::Vec2f &p, const algebra::Vec2f &q) {
+                        return p.x() < q.x();
+                      });
+
+    auto prev = p0;
+    bool inside = false;
+    for (const auto &intersection : line_intersections) {
+      Segment segment{.start_ = prev, .end_ = intersection};
+      if (!inside) {
+        line_segments.push_back(segment);
+      }
+      inside = !inside;
+      prev = intersection;
+    }
+
+    line_segments.emplace_back(prev, p1);
+
+    segments.push_back(line_segments);
   }
 
   return segments;
@@ -309,86 +337,94 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
     }
 
     /// all segments are cleared
-    if (first_line_index == kMaxIndex) {
+    if (first_line_index >= kMaxIndex) {
       break;
     }
 
     /// process paths
-
     std::vector<algebra::Vec3f> path;
-    const auto &first_segment = segments[first_line_index].front();
-    const auto start_point = algebra::Vec3f(
-        first_segment.start_.x(), kFloorheight, first_segment.start_.y());
-    const auto second_point = algebra::Vec3f(
-        first_segment.end_.x(), kFloorheight, first_segment.end_.y());
-
+    auto &first_line = segments[first_line_index];
     auto previous_segment = segments[first_line_index].begin();
-    auto previous_line_index = first_line_index;
+
+    const auto start_point =
+        algebra::Vec3f(previous_segment->start_.x(), kFloorheight,
+                       previous_segment->start_.y());
+    const auto second_point = algebra::Vec3f(
+        previous_segment->end_.x(), kFloorheight, previous_segment->end_.y());
+
     path.push_back(start_point);
     path.push_back(second_point);
 
-    for (int line_index = first_line_index + 1; line_index < segments.size();
-         line_index++) {
+    auto previous_line_index = first_line_index;
+    first_line.erase(previous_segment);
 
+    for (int line_index = first_line_index + 1; line_index < segments.size();
+         ++line_index) {
+      auto &line_segments = segments[line_index];
       /// 1. there are no more segments in this line
-      if (segments[line_index].size() == 0) {
+      if (line_segments.empty()) {
         continue;
       }
 
-      bool reversed = (line_index - first_line_index) % 2 != 0;
+      bool reversed = ((line_index - first_line_index) % 2) != 0;
 
-      auto curr_segment = segments[line_index].begin();
+      auto best_segment = line_segments.begin();
       float min_dist = std::numeric_limits<float>::max();
+
       for (auto segment_it = segments[line_index].begin();
            segment_it != segments[line_index].end(); ++segment_it) {
-
         auto dist =
             reversed ? (previous_segment->end_ - segment_it->end_).length()
                      : (previous_segment->start_ - segment_it->start_).length();
         if (dist < min_dist) {
           min_dist = dist;
-          curr_segment = segment_it;
+          best_segment = segment_it;
         }
       }
 
+      // Zig Zag order
       if (reversed) {
-        path.emplace_back(curr_segment->end_.x(), kFloorheight,
-                          curr_segment->end_.y());
-        path.emplace_back(curr_segment->start_.x(), kFloorheight,
-                          curr_segment->start_.y());
+        path.emplace_back(best_segment->end_.x(), kFloorheight,
+                          best_segment->end_.y());
+        path.emplace_back(best_segment->start_.x(), kFloorheight,
+                          best_segment->start_.y());
       } else {
-        path.emplace_back(curr_segment->start_.x(), kFloorheight,
-                          curr_segment->start_.y());
-        path.emplace_back(curr_segment->end_.x(), kFloorheight,
-                          curr_segment->end_.y());
+        path.emplace_back(best_segment->start_.x(), kFloorheight,
+                          best_segment->start_.y());
+        path.emplace_back(best_segment->end_.x(), kFloorheight,
+                          best_segment->end_.y());
       }
 
       /// remove previous segment
-      segments[previous_line_index].erase(previous_segment);
-      previous_segment = curr_segment;
-      previous_line_index = line_index;
+      line_segments.erase(best_segment);
+      previous_segment = best_segment;
+      // previous_line_index = line_index;
     }
 
     paths.push_back(path);
   }
   return paths;
 }
+
 std::vector<algebra::Vec3f> FlatPathGenerator::removeSelfIntersections(
     const std::vector<algebra::Vec3f> &points) const {
-  const auto block = heightMap_->block();
-  const auto diag = algebra::Vec2f{0.F, block.dimensions_.x_};
-  const auto p = algebra::Vec2f{0.F, block.dimensions_.x_ / 2.F};
-  size_t outer_ind = 99999;
-  for (auto i = 0U; i < points.size() - 1; ++i) {
-    auto p0 = algebra::Vec2f{points[i].x(), points[i].z()};
-    auto p1 = algebra::Vec2f{points[i + 1].x(), points[i + 1].z()};
-    if ((p0 - p).cross2D(diag) * (p1 - p).cross2D(diag) > 0.F) {
-      continue;
-    }
-    if (outer_ind == 99999 || points[outer_ind].z() < points[i].z()) {
-      outer_ind = i;
-    }
-  }
+
+  /*
+const auto block = heightMap_->block();
+const auto diag = algebra::Vec2f{0.F, block.dimensions_.x_};
+const auto p = algebra::Vec2f{0.F, block.dimensions_.x_ / 2.F};
+size_t outer_ind = kMaxIndex;
+for (auto i = 0U; i < points.size() - 1; ++i) {
+auto p0 = algebra::Vec2f{points[i].x(), points[i].z()};
+auto p1 = algebra::Vec2f{points[i + 1].x(), points[i + 1].z()};
+if ((p0 - p).cross2D(diag) * (p1 - p).cross2D(diag) > 0.F) {
+  continue;
+}
+if (outer_ind == kMaxIndex || points[outer_ind].z() < points[i].z()) {
+  outer_ind = i;
+}
+}
+*/
 
   auto start_index = 500;
   auto ind = start_index;
@@ -433,4 +469,20 @@ std::vector<algebra::Vec3f> FlatPathGenerator::removeSelfIntersections(
     }
   }
   return contour_points;
+}
+
+MillingPath FlatPathGenerator::combineLocalPaths(
+    const std::vector<std::vector<algebra::Vec3f>> &localPaths) const {
+  std::vector<algebra::Vec3f> global_path;
+
+  for (const auto &path : localPaths) {
+    auto first_point = path.front();
+    auto last_point = path.back();
+
+    global_path.emplace_back(first_point.x(), kSafeHeight, first_point.z());
+    global_path.insert(global_path.end(), path.begin(), path.end());
+    global_path.emplace_back(last_point.x(), kSafeHeight, last_point.z());
+  }
+
+  return MillingPath(global_path, *cutter_);
 }

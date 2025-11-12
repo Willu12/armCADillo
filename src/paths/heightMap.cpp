@@ -23,7 +23,7 @@ float HeightMap::findMinimumSafeHeightForCut(uint32_t index,
 
   auto max_height = std::numeric_limits<float>::lowest();
 
-  /// we create bounding box
+  ///  create bounding box
   for (int32_t x_cut = -cutter_radius_px; x_cut < cutter_radius_px; ++x_cut) {
     for (int32_t z_cut = -cutter_radius_px; z_cut < cutter_radius_px; ++z_cut) {
       if (x_index + x_cut < 0 || z_cut + z_index < 0 ||
@@ -42,7 +42,7 @@ float HeightMap::findMinimumSafeHeightForCut(uint32_t index,
         continue;
       }
 
-      float cut_height = center_position.y() - cutter.diameter_ / 2.f +
+      float cut_height = center_position.y() + cutter.diameter_ / 2.f -
                          std::sqrt(r_squared - x_diff_sq - z_diff_sq);
       max_height = std::max(cut_height, max_height);
     }
