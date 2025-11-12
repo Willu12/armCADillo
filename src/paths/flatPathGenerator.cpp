@@ -2,7 +2,6 @@
 #include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
-#include "segment.hpp"
 #include "vec.hpp"
 #include <algorithm>
 #include <cstdint>
@@ -17,7 +16,6 @@ static constexpr float kFloorheight = 1.5f;
 static constexpr float kSafeHeight = 5.f;
 static constexpr float kEpsilon = 1e-3;
 static constexpr float kMillingPrecision = 0.01f;
-static constexpr int kMaxIndex = std::numeric_limits<int>::max();
 
 void FlatPathGenerator::setCutter(const Cutter *cutter) { cutter_ = cutter; }
 void FlatPathGenerator::setHeightMap(HeightMap *heightMap) {
@@ -29,10 +27,10 @@ MillingPath FlatPathGenerator::generate() {
   auto boundary_indices = findBoundaryIndices();
   // paintBorderRed(boundary_indices);
 
-  auto countour_points = findCutterPositionsFromBoundary(boundary_indices);
-  countour_points = removeSelfIntersections(countour_points);
-  auto segments = generateSegments(countour_points);
-  paintBorderRed(countour_points);
+  contourPoints_ = findCutterPositionsFromBoundary(boundary_indices);
+  removeSelfIntersections();
+  auto segments = generateSegments();
+  paintBorderRed(contourPoints_);
   auto local_paths = generatePaths(segments);
 
   return combineLocalPaths(local_paths);
@@ -230,8 +228,8 @@ void FlatPathGenerator::paintBorderRed(
   heightMap_->texture_->fill(heightMap_->textureData_);
 }
 
-std::vector<std::list<Segment>> FlatPathGenerator::generateSegments(
-    const std::vector<algebra::Vec3f> &countourPoints) const {
+std::vector<std::list<FlatPathGenerator::Segment>>
+FlatPathGenerator::generateSegments() const {
   ///
   float line_distance = cutter_->diameter_ - kEpsilon;
 
@@ -270,7 +268,7 @@ std::vector<std::list<Segment>> FlatPathGenerator::generateSegments(
   const auto min_x = -half_x - line_distance;
   const auto max_x = -min_x;
 
-  //// process each line and check all possible cuts with countour
+  //// process each line and check all possible cuts with contour
   auto line_count = static_cast<uint32_t>((max_z - min_z) / line_distance);
   for (uint32_t i = 0; i < line_count; ++i) {
     std::list<Segment> line_segments;
@@ -279,40 +277,53 @@ std::vector<std::list<Segment>> FlatPathGenerator::generateSegments(
     algebra::Vec2f p0 = {min_x, curr_z};
     algebra::Vec2f p1 = {max_x, curr_z};
 
-    std::vector<algebra::Vec2f> line_intersections;
+    struct ContourIntersection {
+      algebra::Vec2f position;
+      uint32_t contour_index;
+    };
 
-    for (int point_index = 0; point_index < countourPoints.size();
-         ++point_index) {
-      const auto point = countourPoints[point_index];
+    std::vector<ContourIntersection> line_intersections;
+
+    for (uint32_t contour_index = 0; contour_index < contourPoints_.size();
+         ++contour_index) {
+      const auto point = contourPoints_[contour_index];
       const auto next_point =
-          countourPoints[(point_index + 1) % countourPoints.size()];
+          contourPoints_[(contour_index + 1) % contourPoints_.size()];
 
       const auto q0 = algebra::Vec2f{point.x(), point.z()};
       const auto q1 = algebra::Vec2f{next_point.x(), next_point.z()};
 
       auto intersection = intersects(p0, p1, q0, q1);
       if (intersection) {
-        line_intersections.push_back(*intersection);
+        line_intersections.emplace_back(*intersection, contour_index);
       }
     }
 
-    std::ranges::sort(line_intersections,
-                      [](const algebra::Vec2f &p, const algebra::Vec2f &q) {
-                        return p.x() < q.x();
-                      });
+    std::ranges::sort(line_intersections, [](const ContourIntersection &p,
+                                             const ContourIntersection &q) {
+      return p.position.x() < q.position.x();
+    });
 
     auto prev = p0;
     bool inside = false;
+    uint32_t prev_contour_index = kMaxIndex;
     for (const auto &intersection : line_intersections) {
-      Segment segment{.start_ = prev, .end_ = intersection};
+      Segment segment{.start_ = prev,
+                      .end_ = intersection.position,
+                      .startContourIndex_ = prev_contour_index,
+                      .endContourIndex_ = intersection.contour_index};
       if (!inside) {
         line_segments.push_back(segment);
       }
       inside = !inside;
-      prev = intersection;
+      prev = intersection.position;
+      prev_contour_index = intersection.contour_index;
     }
 
-    line_segments.emplace_back(prev, p1);
+    line_segments.push_back({.start_ = prev,
+                             .end_ = p1,
+                             .startContourIndex_ = prev_contour_index,
+                             .endContourIndex_ = kMaxIndex});
 
     segments.push_back(line_segments);
   }
@@ -355,7 +366,6 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
     path.push_back(start_point);
     path.push_back(second_point);
 
-    auto previous_line_index = first_line_index;
     first_line.erase(previous_segment);
 
     for (int line_index = first_line_index + 1; line_index < segments.size();
@@ -382,23 +392,63 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
         }
       }
 
-      // Zig Zag order
+      algebra::Vec2f first_point;
+      algebra::Vec2f second_point;
+      uint32_t start_contour_index = 0;
+      uint32_t end_contour_index = 0;
+
       if (reversed) {
-        path.emplace_back(best_segment->end_.x(), kFloorheight,
-                          best_segment->end_.y());
-        path.emplace_back(best_segment->start_.x(), kFloorheight,
-                          best_segment->start_.y());
+        first_point = best_segment->end_;
+        second_point = best_segment->start_;
+        start_contour_index = previous_segment->endContourIndex_;
+        end_contour_index = best_segment->endContourIndex_;
       } else {
-        path.emplace_back(best_segment->start_.x(), kFloorheight,
-                          best_segment->start_.y());
-        path.emplace_back(best_segment->end_.x(), kFloorheight,
-                          best_segment->end_.y());
+        first_point = best_segment->start_;
+        second_point = best_segment->end_;
+        start_contour_index = previous_segment->startContourIndex_;
+        end_contour_index = best_segment->startContourIndex_;
       }
+
+      if (start_contour_index > end_contour_index) {
+        std::swap(start_contour_index, end_contour_index);
+      }
+
+      if (start_contour_index != kMaxIndex && end_contour_index != kMaxIndex) {
+        for (uint32_t contour_index = start_contour_index;
+             contour_index < end_contour_index; ++contour_index) {
+          path.emplace_back(contourPoints_[contour_index]);
+        }
+      }
+
+      /// Go alongside contour points
+
+      path.emplace_back(first_point.x(), kFloorheight, first_point.y());
+
+      /// add points alongside contour
+
+      ///
+
+      path.emplace_back(second_point.x(), kFloorheight, second_point.y());
+
+      /*
+        // Zig Zag order
+        if (reversed) {
+          path.emplace_back(best_segment->end_.x(), kFloorheight,
+                            best_segment->end_.y());
+          path.emplace_back(best_segment->start_.x(), kFloorheight,
+                            best_segment->start_.y());
+        } else {
+          path.emplace_back(best_segment->start_.x(), kFloorheight,
+                            best_segment->start_.y());
+          path.emplace_back(best_segment->end_.x(), kFloorheight,
+                            best_segment->end_.y());
+        }
+
+        */
 
       /// remove previous segment
       line_segments.erase(best_segment);
       previous_segment = best_segment;
-      // previous_line_index = line_index;
     }
 
     paths.push_back(path);
@@ -406,8 +456,7 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
   return paths;
 }
 
-std::vector<algebra::Vec3f> FlatPathGenerator::removeSelfIntersections(
-    const std::vector<algebra::Vec3f> &points) const {
+void FlatPathGenerator::removeSelfIntersections() {
 
   /*
 const auto block = heightMap_->block();
@@ -430,21 +479,23 @@ if (outer_ind == kMaxIndex || points[outer_ind].z() < points[i].z()) {
   auto ind = start_index;
   auto contour_points = std::vector<algebra::Vec3f>();
   // contour_points.reserve(border_count);
-  contour_points.push_back(points[ind]);
-  for (auto steps = 0U; steps < points.size(); ++steps) {
-    auto next_ind = (ind + 1) % points.size();
+  contour_points.push_back(contourPoints_[ind]);
+  for (auto steps = 0U; steps < contourPoints_.size(); ++steps) {
+    auto next_ind = (ind + 1) % contourPoints_.size();
 
-    auto p0 = algebra::Vec2f{points[ind].x(), points[ind].z()};
-    auto p1 = algebra::Vec2f{points[next_ind].x(), points[next_ind].z()};
+    auto p0 = algebra::Vec2f{contourPoints_[ind].x(), contourPoints_[ind].z()};
+    auto p1 = algebra::Vec2f{contourPoints_[next_ind].x(),
+                             contourPoints_[next_ind].z()};
     auto dirp = p1 - p0;
 
     auto old_ind = ind;
     ind = next_ind;
-    for (auto j = next_ind; j != old_ind; j = (j + 1) % points.size()) {
-      auto next_j = (j + 1) % points.size();
+    for (auto j = next_ind; j != old_ind; j = (j + 1) % contourPoints_.size()) {
+      auto next_j = (j + 1) % contourPoints_.size();
 
-      auto q0 = algebra::Vec2f{points[j].x(), points[j].z()};
-      auto q1 = algebra::Vec2f{points[next_j].x(), points[next_j].z()};
+      auto q0 = algebra::Vec2f{contourPoints_[j].x(), contourPoints_[j].z()};
+      auto q1 = algebra::Vec2f{contourPoints_[next_j].x(),
+                               contourPoints_[next_j].z()};
       auto dirq = q1 - q0;
 
       auto c1 = (q0 - p1).cross2D(dirp);
@@ -463,12 +514,12 @@ if (outer_ind == kMaxIndex || points[outer_ind].z() < points[i].z()) {
       }
     }
 
-    contour_points.push_back(points[ind]);
+    contour_points.push_back(contourPoints_[ind]);
     if (ind == start_index) {
       break;
     }
   }
-  return contour_points;
+  contourPoints_ = contour_points;
 }
 
 MillingPath FlatPathGenerator::combineLocalPaths(
