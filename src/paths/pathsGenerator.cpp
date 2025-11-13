@@ -17,10 +17,10 @@ void PathsGenerator::setScene(Scene *scene) {
 }
 
 void PathsGenerator::run() {
-  heightMap_ = std::make_unique<HeightMap>(
+  /*heightMap_ = std::make_unique<HeightMap>(
       heightMapGenerator_.generateHeightMap(*model_, block_));
   heightMap_->updateTexture();
-
+*/
   // ------ Roughing Path ---------------------------
   /*
   Cutter roughing_cutter{

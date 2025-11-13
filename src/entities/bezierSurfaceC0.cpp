@@ -33,11 +33,11 @@ BezierSurfaceC0::createCyllinderPositions(const algebra::Vec3f &position,
   const uint32_t v_points = 3 * vPatches + 1;
   std::vector<algebra::Vec3f> control_points;
   control_points.reserve(u_points * v_points);
-  for (uint32_t j = 0; j < v_points; ++j) { // v = vertical
+  for (uint32_t j = 0; j < v_points; ++j) {
     float v_ratio = static_cast<float>(j) / static_cast<float>(v_points - 1);
     float z = v_ratio * h;
 
-    for (uint32_t i = 0; i < u_points; ++i) { // u = angle
+    for (uint32_t i = 0; i < u_points; ++i) {
       float u_ratio = static_cast<float>(i) / static_cast<float>(u_points - 1);
       float angle = u_ratio * 2.0f * std::numbers::pi_v<float>;
       float x = std::cos(angle) * r;

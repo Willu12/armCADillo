@@ -10,7 +10,6 @@ void DetailedPathGenerator::generate() {
     offsetSurfaces_.push_back(offset_surface);
   }
 
-  return;
   /// for all pairs of surfaces
   for (int i = 0; i < offsetSurfaces_.size(); ++i) {
     for (int j = i + 1; j < offsetSurfaces_.size(); ++j) {
