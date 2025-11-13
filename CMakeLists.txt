@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}
  src/meshes/gregoryMesh.cpp
  src/meshes/mesh.cpp
  src/notifications/ISubsriber.cpp
+ src/paths/detailedPathGenerator.cpp
  src/paths/flatPathGenerator.cpp
  src/paths/GCodeSerializer.cpp
  src/paths/heightMap.cpp

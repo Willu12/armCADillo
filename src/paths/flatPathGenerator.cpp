@@ -27,13 +27,11 @@ void FlatPathGenerator::setHeightMap(HeightMap *heightMap) {
 MillingPath FlatPathGenerator::generate() {
 
   auto boundary_indices = findBoundaryIndices();
-
   contourPoints_ = findCutterPositionsFromBoundary(boundary_indices);
   removeSelfIntersections();
   contourPoints_ =
       algebra::RDP::reducePoints(contourPoints_, kEpsilon, algebra::Plane::XZ);
   auto segments = generateSegments();
-  paintBorderRed(contourPoints_);
   auto local_paths = generatePaths(segments);
 
   return combineLocalPaths(local_paths);

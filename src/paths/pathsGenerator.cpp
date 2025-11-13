@@ -1,10 +1,19 @@
 #include "pathsGenerator.hpp"
 #include "heightMap.hpp"
+#include "intersectionFinder.hpp"
 #include "model.hpp"
 #include <memory>
 
 void PathsGenerator::setModel(const std::vector<BezierSurface *> &surfaces) {
   model_ = std::make_unique<Model>(surfaces);
+}
+
+void PathsGenerator::setIntersectionFinder(
+    IntersectionFinder *intersectionFinder) {
+  detailedPathGenerator_.setIntersectionFinder(intersectionFinder);
+}
+void PathsGenerator::setScene(Scene *scene) {
+  detailedPathGenerator_.setScene(scene);
 }
 
 void PathsGenerator::run() {
@@ -13,6 +22,7 @@ void PathsGenerator::run() {
   heightMap_->updateTexture();
 
   // ------ Roughing Path ---------------------------
+  /*
   Cutter roughing_cutter{
       .type_ = Cutter::Type::Ball,
       .diameter_ = 1.6f,
@@ -22,8 +32,9 @@ void PathsGenerator::run() {
   roughingPathGenerator_.setCutter(&roughing_cutter);
   auto roughing_path = roughingPathGenerator_.generate();
   gCodeSerializer_.serializePath(roughing_path, "1.k16");
-
+  */
   // ------ Flat Path ---------------------------
+  /*
   Cutter flat_cutter{
       .type_ = Cutter::Type::Flat,
       .diameter_ = 1.0f,
@@ -34,4 +45,14 @@ void PathsGenerator::run() {
   flatPathGenerator_.setHeightMap(heightMap_.get());
   auto flat_path = flatPathGenerator_.generate();
   gCodeSerializer_.serializePath(flat_path, "2.f10");
+  */
+  // ------ Detailed Path ---------------------
+  Cutter detailed_cutter{
+      .type_ = Cutter::Type::Ball,
+      .diameter_ = 0.8f,
+      .height_ = 0.8f,
+  };
+  detailedPathGenerator_.setModel(model_.get());
+  detailedPathGenerator_.setCutter(&detailed_cutter);
+  detailedPathGenerator_.generate();
 }

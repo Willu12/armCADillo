@@ -80,8 +80,7 @@ public:
   }
 
   algebra::Vec3f normal(const algebra::Vec2f &pos) const {
-    auto derivates = derivatives(pos);
-    return (derivates.first.cross(derivates.second)).normalize();
+    return getAlgebraSurfaceC0().normal(pos);
   }
 
   algebra::Matrix<float, 3, 2>
@@ -89,6 +88,10 @@ public:
     return getAlgebraSurfaceC0().jacobian(pos);
   }
   algebra::BezierSurfaceC0 getBezierC0Patch() const;
+
+  const algebra::BezierSurfaceC0 &getAlgebraSurfaceC0() const {
+    return *_algebraSurfaceC0;
+  };
 
 protected:
   std::vector<std::reference_wrapper<PointEntity>> _points;
@@ -101,9 +104,6 @@ protected:
   std::unique_ptr<algebra::BezierSurfaceC0> _algebraSurfaceC0;
 
   virtual void updateAlgebraicSurfaceC0() = 0;
-  const algebra::BezierSurfaceC0 &getAlgebraSurfaceC0() const {
-    return *_algebraSurfaceC0;
-  };
 
   std::unique_ptr<Mesh> createPolyMesh();
 };

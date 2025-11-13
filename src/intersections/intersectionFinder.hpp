@@ -22,16 +22,16 @@ struct Intersection {
 
 class IntersectionFinder {
 public:
-  void setSurfaces(algebra::IDifferentialParametricForm<2, 3> *surface0,
-                   algebra::IDifferentialParametricForm<2, 3> *surface1);
+  void setSurfaces(const algebra::IDifferentialParametricForm<2, 3> *surface0,
+                   const algebra::IDifferentialParametricForm<2, 3> *surface1);
   void setGuidancePoint(const algebra::Vec3f &guidancePoint);
   std::optional<Intersection> find(bool same) const;
 
   IntersectionConfig &getIntersectionConfig() { return config_; }
 
 private:
-  algebra::IDifferentialParametricForm<2, 3> *surface0_;
-  algebra::IDifferentialParametricForm<2, 3> *surface1_;
+  const algebra::IDifferentialParametricForm<2, 3> *surface0_;
+  const algebra::IDifferentialParametricForm<2, 3> *surface1_;
   std::optional<algebra::Vec3f> guidancePoint_;
   static constexpr std::size_t kStochasticTries = 300;
   static constexpr std::size_t kMaxIntersectionCurvePoint = 2000;
@@ -51,11 +51,11 @@ private:
   findCommonSurfacePoint(const algebra::Vec2f &start0,
                          const algebra::Vec2f &start1) const;
   std::optional<algebra::Vec2f>
-  findPointProjection(algebra::IDifferentialParametricForm<2, 3> *surface,
+  findPointProjection(const algebra::IDifferentialParametricForm<2, 3> *surface,
                       algebra::Vec3f surfacePoint) const;
 
   algebra::Vec2f findInitialGuessWithGuidance(
-      algebra::IDifferentialParametricForm<2, 3> *surface,
+      const algebra::IDifferentialParametricForm<2, 3> *surface,
       const algebra::Vec3f &targetPoint, uint32_t gridResolution = 10) const;
 
   algebra::Vec3f getTangent(const IntersectionPoint &firstPoint) const;

@@ -12,6 +12,7 @@
 void BezierSurfaceC2::updateBezierSurface() {
   _bezierControlPoints.clear();
   _rowOrderBezierControlPoints.clear();
+
   const uint32_t col_patches = _patches.colCount;
   const uint32_t row_patches = _patches.rowCount;
   const uint32_t bezier_cols = 3 * col_patches + 1;
@@ -22,8 +23,8 @@ void BezierSurfaceC2::updateBezierSurface() {
     for (uint32_t col_patch = 0; col_patch < col_patches; ++col_patch) {
 
       std::array<std::array<algebra::Vec3f, 4>, 4> patch;
-      for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
+      for (int j = 0; j < 4; ++j) {
+        for (int i = 0; i < 4; ++i) {
           patch[i][j] =
               _points[(row_patch + i) * col_deboor_points + col_patch + j]
                   .get()

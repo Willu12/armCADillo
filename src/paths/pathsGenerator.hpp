@@ -3,9 +3,11 @@
 #include "GCodeSerializer.hpp"
 #include "bezierSurface.hpp"
 #include "block.hpp"
+#include "detailedPathGenerator.hpp"
 #include "flatPathGenerator.hpp"
 #include "heightMap.hpp"
 #include "heightMapGenerator.hpp"
+#include "intersectionFinder.hpp"
 #include "model.hpp"
 #include "roughingPathGenerator.hpp"
 #include <memory>
@@ -13,8 +15,10 @@
 
 class PathsGenerator {
 public:
-  void setModel(const std::vector<BezierSurface *> &surfaces);
   void run();
+  void setIntersectionFinder(IntersectionFinder *intersectionFinder);
+  void setModel(const std::vector<BezierSurface *> &surfaces);
+  void setScene(Scene *scene);
 
   const HeightMap *heightMap() const { return heightMap_.get(); }
 
@@ -29,6 +33,7 @@ private:
   /// Generators
   RoughingPathGenerator roughingPathGenerator_;
   FlatPathGenerator flatPathGenerator_;
+  DetailedPathGenerator detailedPathGenerator_;
 
   /// Helpers
 };

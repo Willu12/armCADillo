@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../parametricForms/IDifferentialParametricForm.hpp"
+#include "../vec.hpp"
 #include <algorithm>
 #include <cstdint>
 
@@ -8,8 +9,9 @@ namespace algebra {
 
 static inline float bernstein(int i, int n, float t) {
   float coeff = 1.0f;
-  for (int k = 0; k < i; ++k)
-    coeff *= static_cast<float>(n - k) / (k + 1);
+  for (int k = 0; k < i; ++k) {
+    coeff *= static_cast<float>(n - k) / static_cast<float>(k + 1);
+  }
   return coeff * std::pow(t, i) * std::pow(1 - t, n - i);
 }
 struct Patches {
@@ -23,6 +25,14 @@ struct LocalBezierPatch {
   std::array<std::array<algebra::Vec3f, 4>, 4> patch;
   algebra::Vec2f localPos;
 };
+
+struct SecondDerivatives {
+  Vec3f duu;
+  Vec3f duv;
+  Vec3f dvu;
+  Vec3f dvv;
+};
+
 class BezierSurfaceC0 : public IDifferentialParametricForm<2, 3> {
 public:
   BezierSurfaceC0(const std::vector<algebra::Vec3f> &points, uint32_t uCount,
@@ -43,19 +53,21 @@ public:
 
   algebra::Vec3f value(const algebra::Vec2f &pos) const override {
     auto patch = getCorrespondingBezierPatch(pos);
-    const auto &P = patch.patch;
+    const auto &p = patch.patch;
     const auto &uv = patch.localPos;
 
     algebra::Vec3f result{0.f, 0.f, 0.f};
     for (uint32_t i = 0; i < 4; ++i) {
-      float bU = bernstein(i, 3, uv[1]);
+      float b_u = bernstein(i, 3, uv[1]);
       for (uint32_t j = 0; j < 4; ++j) {
-        float bV = bernstein(j, 3, uv[0]);
-        result = result + bU * bV * P[i][j];
+        float b_v = bernstein(j, 3, uv[0]);
+        result = result + b_u * b_v * p[i][j];
       }
     }
     return result;
   }
+
+  // ---- First order derivatives -----------------
   std::pair<algebra::Vec3f, algebra::Vec3f>
   derivatives(const algebra::Vec2f &pos) const override {
     auto patch = getCorrespondingBezierPatch(pos);
@@ -89,16 +101,72 @@ public:
   jacobian(const algebra::Vec2f &pos) const override {
     auto [du, dv] = derivatives(pos);
 
-    algebra::Matrix<float, 3, 2> J;
-    J(0, 0) = du[0];
-    J(1, 0) = du[1];
-    J(2, 0) = du[2];
+    algebra::Matrix<float, 3, 2> jacobian;
+    jacobian(0, 0) = du[0];
+    jacobian(1, 0) = du[1];
+    jacobian(2, 0) = du[2];
 
-    J(0, 1) = dv[0];
-    J(1, 1) = dv[1];
-    J(2, 1) = dv[2];
+    jacobian(0, 1) = dv[0];
+    jacobian(1, 1) = dv[1];
+    jacobian(2, 1) = dv[2];
 
-    return J;
+    return jacobian;
+  }
+
+  // ----- Second order derivatives ---------------------
+  SecondDerivatives secondDerivatives(const algebra::Vec2f &pos) const {
+    auto local_patch = getCorrespondingBezierPatch(pos);
+    const auto &patch = local_patch.patch;
+    const auto &uv = local_patch.localPos;
+
+    const float u = uv.x();
+    const float v = uv.y();
+
+    Vec3f duu;
+    Vec3f duv;
+    Vec3f dvu;
+    Vec3f dvv;
+
+    // ---- duu ----
+    for (uint32_t i = 0; i < 4; ++i) {
+      float b_v = bernstein(i, 3, v);
+      for (uint32_t j = 0; j < 2; ++j) {
+        float b_u = bernstein(j, 1, u);
+        Vec3f delta = patch[i][j + 2] - 2.f * patch[i][j + 1] + patch[i][j];
+        duu = duu + delta * (b_u * b_v);
+      }
+    }
+    duu = duu * 3.f * 2.f *
+          static_cast<float>(patches_.colCount * patches_.colCount);
+
+    // dvv
+    for (uint32_t i = 0; i < 2; ++i) {
+      float b_v = bernstein(i, 1, v);
+      for (uint32_t j = 0; j < 4; ++j) {
+        float b_u = bernstein(j, 3, u);
+        Vec3f delta = patch[i + 2][j] - 2.f * patch[i + 1][j] + patch[i][j];
+        dvv = dvv + delta * (b_u * b_v);
+      }
+    }
+    dvv = dvv * 3.f * 2.f *
+          static_cast<float>(patches_.rowCount * patches_.rowCount);
+
+    // ---- duv
+    for (uint32_t i = 0; i < 3; ++i) {
+      float b_v = bernstein(i, 2, v);
+      for (uint32_t j = 0; j < 3; ++j) {
+        float b_u = bernstein(j, 2, u);
+        Vec3f delta = patch[i + 1][j + 1] - patch[i + 1][j] - patch[i][j + 1] +
+                      patch[i][j];
+        duv = duv + delta * (b_u * b_v);
+      }
+    }
+
+    duv = duv * 3.f * 3.f *
+          static_cast<float>(patches_.colCount * patches_.rowCount);
+    dvu = duv;
+
+    return {.duu = duu, .duv = duv, .dvu = dvu, .dvv = dvv};
   }
 
   bool wrapped(size_t dim) const override {
@@ -111,43 +179,45 @@ public:
     return false;
   }
 
+  Vec3f normal(const Vec2f &pos) const {
+    auto deriv = derivatives(pos);
+    const Vec3f &du = deriv.first;
+    const Vec3f &dv = deriv.second;
+    return du.cross(dv).normalize();
+  }
+
   LocalBezierPatch
   getCorrespondingBezierPatch(const algebra::Vec2f &pos) const {
-    // Clamp to just below 1 to avoid falling out of bounds
-    float clampedU = std::clamp(pos[0], 0.0f, 1.0f);
+    float u = std::clamp(pos[0], 0.0f, 1.0f);
+    float v = std::clamp(pos[1], 0.0f, 1.0f);
 
-    float clampedV = std::clamp(pos[1], 0.0f, 1.0f);
+    uint32_t patch_column_index = std::min(
+        static_cast<uint32_t>(u * patches_.colCount), patches_.colCount - 1);
+    uint32_t patch_row_index = std::min(
+        static_cast<uint32_t>(v * patches_.rowCount), patches_.rowCount - 1);
 
-    // Compute which patch we're in
-    uint32_t colPatchIndex =
-        std::min(static_cast<uint32_t>(clampedU * patches_.colCount),
-                 patches_.colCount - 1);
-    uint32_t rowPatchIndex =
-        std::min(static_cast<uint32_t>(clampedV * patches_.rowCount),
-                 patches_.rowCount - 1);
+    float patch_u_start =
+        static_cast<float>(patch_column_index) / patches_.colCount;
+    float patch_v_start =
+        static_cast<float>(patch_row_index) / patches_.rowCount;
 
-    // Compute local position within patch
-    float patchUStart = static_cast<float>(colPatchIndex) / patches_.colCount;
-    float patchVStart = static_cast<float>(rowPatchIndex) / patches_.rowCount;
+    float u_local = (u - patch_u_start) * patches_.colCount;
+    float v_local = (v - patch_v_start) * patches_.rowCount;
 
-    float localU = (clampedU - patchUStart) * patches_.colCount;
-    float localV = (clampedV - patchVStart) * patches_.rowCount;
-
-    // Extract 4x4 control points for the patch
     std::array<std::array<algebra::Vec3f, 4>, 4> patch;
-    uint32_t u_offset = colPatchIndex * 3;
-    uint32_t v_offset = rowPatchIndex * 3;
+    uint32_t u_offset = patch_column_index * 3;
+    uint32_t v_offset = patch_row_index * 3;
     uint32_t u_points = 3 * patches_.colCount + 1;
 
     for (uint32_t row = 0; row < 4; ++row) {
       for (uint32_t col = 0; col < 4; ++col) {
-        uint32_t globalRow = v_offset + row;
-        uint32_t globalCol = u_offset + col;
-        patch[row][col] = points_[globalRow * u_points + globalCol];
+        uint32_t global_row = v_offset + row;
+        uint32_t global_col = u_offset + col;
+        patch[row][col] = points_[global_row * u_points + global_col];
       }
     }
 
-    return LocalBezierPatch{.patch = patch, .localPos = {localU, localV}};
+    return LocalBezierPatch{.patch = patch, .localPos = {u_local, v_local}};
   }
 
   // private:

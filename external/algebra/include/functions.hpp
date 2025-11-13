@@ -160,8 +160,8 @@ private:
 
 class IntersectionStepFunction : public IDifferentialParametricForm<4, 4> {
 public:
-  IntersectionStepFunction(IDifferentialParametricForm<2, 3> *surface0,
-                           IDifferentialParametricForm<2, 3> *surface1,
+  IntersectionStepFunction(const IDifferentialParametricForm<2, 3> *surface0,
+                           const IDifferentialParametricForm<2, 3> *surface1,
                            const Vec3f &lastCommonPoint, const Vec3f &dir)
       : surface0_(surface0), surface1_(surface1),
         lastCommonPoint_(lastCommonPoint), direction_(dir) {}
@@ -230,8 +230,8 @@ public:
   }
 
 private:
-  IDifferentialParametricForm<2, 3> *surface0_;
-  IDifferentialParametricForm<2, 3> *surface1_;
+  const IDifferentialParametricForm<2, 3> *surface0_;
+  const IDifferentialParametricForm<2, 3> *surface1_;
   Vec3f lastCommonPoint_;
   Vec3f direction_;
   float step_ = 0.05f;
@@ -239,8 +239,8 @@ private:
 
 class IntersectionFunction : public IDifferentialParametricForm<4, 4> {
 public:
-  IntersectionFunction(IDifferentialParametricForm<2, 3> *surface0,
-                       IDifferentialParametricForm<2, 3> *surface1)
+  IntersectionFunction(const IDifferentialParametricForm<2, 3> *surface0,
+                       const IDifferentialParametricForm<2, 3> *surface1)
       : surface0_(surface0), surface1_(surface1) {}
 
   inline std::array<Vec2f, 4> bounds() const override {
@@ -263,9 +263,8 @@ public:
   bool wrapped(size_t dim) const override {
     if (dim < 2) {
       return surface0_->wrapped(dim);
-    } else {
-      return surface1_->wrapped(dim - 2);
     }
+    return surface1_->wrapped(dim - 2);
   }
 
   std::pair<Vec4f, Vec4f> derivatives(const Vec4f &pos) const override {
@@ -279,8 +278,8 @@ public:
   }
 
 private:
-  IDifferentialParametricForm<2, 3> *surface0_;
-  IDifferentialParametricForm<2, 3> *surface1_;
+  const IDifferentialParametricForm<2, 3> *surface0_;
+  const IDifferentialParametricForm<2, 3> *surface1_;
 
   Matrix<float, 3, 4> getExactJacobian(const Vec4f &pos) const {
     Vec2f uv0{pos[0], pos[1]};

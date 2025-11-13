@@ -34,6 +34,8 @@ GUI::GUI(GLFWwindow *window, Scene *scene)
     : _window(window), _scene(scene), _entityFactory(_scene),
       _guiSettingsVisitor(*this), entityUtils_(this, &_entityFactory) {
   initControllers();
+  pathsGenerator_.setIntersectionFinder(&_intersectionFinder);
+  pathsGenerator_.setScene(scene);
 }
 
 IController &GUI::getController() {

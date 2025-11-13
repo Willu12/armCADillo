@@ -18,8 +18,8 @@ static constexpr std::pair<int, int> kGridSearchResMinMax = {200, 300};
 using algebra::Vec3f;
 
 void IntersectionFinder::setSurfaces(
-    algebra::IDifferentialParametricForm<2, 3> *surface0,
-    algebra::IDifferentialParametricForm<2, 3> *surface1) {
+    const algebra::IDifferentialParametricForm<2, 3> *surface0,
+    const algebra::IDifferentialParametricForm<2, 3> *surface1) {
   surface0_ = surface0;
   surface1_ = surface1;
 }
@@ -30,9 +30,13 @@ void IntersectionFinder::setGuidancePoint(const algebra::Vec3f &guidancePoint) {
 
 std::optional<Intersection> IntersectionFinder::find(bool same) const {
   std::optional<IntersectionPoint> first_point = findFirstPoint(same);
+  std::println("Starts looking for first point!");
   if (!first_point) {
+    std::println("failed to find first point!");
     return std::nullopt;
   }
+
+  std::println("Found first point!");
 
   auto next_points = findNextPoints(*first_point, false);
   if (next_points && next_points->looped) {
@@ -45,11 +49,12 @@ std::optional<Intersection> IntersectionFinder::find(bool same) const {
 
 std::optional<IntersectionPoint>
 IntersectionFinder::findFirstPointStochastic() const {
-
+  std::println("Find first stochastic start");
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dist(surface0_->bounds()[0][0],
                                              surface0_->bounds()[0][1]);
+
   for (std::size_t stoch_try = 0; stoch_try <= kStochasticTries; ++stoch_try) {
     if (stoch_try > 0 && stoch_try % 100 == 0) {
       std::println("stochastic try {}", stoch_try);
@@ -59,9 +64,11 @@ IntersectionFinder::findFirstPointStochastic() const {
 
     const auto point1 = findPointProjection(surface1_, point_0_value);
     if (!point1) {
+      std::println("Couldn't find poitn projection");
       continue;
     }
 
+    std::println("Found point projection");
     if (auto intersection_point = findCommonSurfacePoint(point0, *point1)) {
       return intersection_point;
     }
@@ -207,9 +214,12 @@ IntersectionFinder::newtowRefinment(const IntersectionPoint &point) const {
 }
 
 std::optional<algebra::Vec2f> IntersectionFinder::findPointProjection(
-    algebra::IDifferentialParametricForm<2, 3> *surface,
+    const algebra::IDifferentialParametricForm<2, 3> *surface,
     algebra::Vec3f surfacePoint) const {
-  for (std::size_t i = 0; i < kMaxIntersectionCurvePoint; ++i) {
+  for (std::size_t i = 0; i < 1; ++i) {
+    if (i > 0 && i % 100 == 0) {
+      std::println("point projection try {}", i);
+    }
     auto guess = findInitialGuessWithGuidance(
         surface, surfacePoint,
         algebra::Distribution::randomInt(kGridSearchResMinMax.first,
@@ -224,6 +234,8 @@ std::optional<algebra::Vec2f> IntersectionFinder::findPointProjection(
     auto pos = surface->value(result);
 
     if ((surfacePoint - pos).length() > kProjectionTolerance) {
+      std::println("found too far point (length = {})",
+                   (surfacePoint - pos).length());
       continue;
     }
 
@@ -261,6 +273,7 @@ IntersectionFinder::findNextPoints(const IntersectionPoint &firstPoint,
 
     if (i > 2 && intersectionLooped(Intersection{.points = points})) {
       points.back() = points.front();
+      std::println("Intersection is looped!");
       return Intersection{.points = points, .looped = true};
     }
 
@@ -377,6 +390,7 @@ void IntersectionFinder::fixIntersectionPointsEdges(
 
 bool IntersectionFinder::intersectionLooped(
     const Intersection &intersection) const {
+  return false;
   const auto &first_point = intersection.points.front();
   const auto &last_point = intersection.points.back();
   auto surf_0_wrapped = surface0_->wrapped(0) || surface0_->wrapped(1);
@@ -390,7 +404,7 @@ bool IntersectionFinder::intersectionLooped(
 }
 
 algebra::Vec2f IntersectionFinder::findInitialGuessWithGuidance(
-    algebra::IDifferentialParametricForm<2, 3> *surface,
+    const algebra::IDifferentialParametricForm<2, 3> *surface,
     const algebra::Vec3f &targetPoint, uint32_t gridResolution) const {
   auto bounds = surface->bounds();
   float min_dist_sq = std::numeric_limits<float>::max();
