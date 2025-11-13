@@ -1,6 +1,11 @@
 #include "roughingPathGenerator.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
+#include "plane.hpp"
+#include "rdp.hpp"
+#include "vec.hpp"
+
+static constexpr float kRDPEpsilon = 0.001f;
 
 MillingPath RoughingPathGenerator::generate() {
   /// change later
@@ -33,12 +38,12 @@ RoughingPathGenerator::calculateRoughMillingPoints() const {
   /// start at bottom left corner of the grid
   milling_points.emplace_back(left_x, safe_y, bottom_z);
 
-  // const auto min_height = block.dimensions_.y_ - cutter_->height_;
   const auto dz = radius;
   const auto dz_pixels = static_cast<uint32_t>(
       dz * static_cast<float>(heightMap_->pixelCmRatio().first));
 
-  const auto segments_count = static_cast<uint32_t>(block.dimensions_.z_ / dz);
+  const auto segments_count =
+      static_cast<uint32_t>((block.dimensions_.z_ + safe_offset) / dz);
 
   const uint32_t x_divisions = heightMap_->divisions().x_;
   auto roughing_layer = [&](const float min_height) {
@@ -46,6 +51,7 @@ RoughingPathGenerator::calculateRoughMillingPoints() const {
       const bool forward = i % 2 == 0;
       uint32_t real_z = i * dz_pixels;
 
+      std::vector<algebra::Vec3f> current_z_points;
       for (uint32_t x = 0; x < x_divisions; ++x) {
         uint32_t real_x = forward ? x : x_divisions - 1 - x;
         auto global_index = heightMap_->globalIndex(real_x, real_z);
@@ -56,15 +62,23 @@ RoughingPathGenerator::calculateRoughMillingPoints() const {
             heightMap_->findMinimumSafeHeightForCut(global_index, *cutter_));
 
         /// add point only if height changes
-        if (safe_cut_height != milling_points.back().y()) {
+        if (current_z_points.empty() ||
+            safe_cut_height != current_z_points.back().y()) {
           auto point = heightMap_->indexToPos(global_index);
-          milling_points.emplace_back(point.x(), safe_cut_height, point.z());
+          current_z_points.emplace_back(point.x(), safe_cut_height, point.z());
         }
       }
+
+      /// RDP reduction
+      auto reduced_points = algebra::RDP::reducePoints(
+          current_z_points, kRDPEpsilon, algebra::Plane::XY);
+      milling_points.insert(milling_points.end(), reduced_points.begin(),
+                            reduced_points.end());
 
       auto last_x = forward ? x_divisions - 1 : 0;
       auto pos =
           heightMap_->indexToPos(heightMap_->globalIndex(last_x, real_z));
+
       auto next_pos = heightMap_->indexToPos(heightMap_->globalIndex(
           last_x,
           static_cast<float>(i + 1) * dz * heightMap_->pixelCmRatio().first));
@@ -78,6 +92,7 @@ RoughingPathGenerator::calculateRoughMillingPoints() const {
 
   const auto max_y = block.dimensions_.y_;
   roughing_layer(max_y - cutter_->diameter_);
+  milling_points.emplace_back(left_x, max_y - cutter_->diameter_, top_z);
   roughing_layer(max_y - 2.f * cutter_->diameter_);
 
   return milling_points;

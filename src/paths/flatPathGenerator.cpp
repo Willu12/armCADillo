@@ -2,6 +2,8 @@
 #include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
+#include "plane.hpp"
+#include "rdp.hpp"
 #include "vec.hpp"
 #include <algorithm>
 #include <cstdint>
@@ -28,6 +30,8 @@ MillingPath FlatPathGenerator::generate() {
 
   contourPoints_ = findCutterPositionsFromBoundary(boundary_indices);
   removeSelfIntersections();
+  contourPoints_ =
+      algebra::RDP::reducePoints(contourPoints_, kEpsilon, algebra::Plane::XZ);
   auto segments = generateSegments();
   paintBorderRed(contourPoints_);
   auto local_paths = generatePaths(segments);
