@@ -20,7 +20,7 @@ void DetailedPathGenerator::generate() {
       intersectionFinder_->setSurfaces(&first_surface, &second_surface);
       auto intersection = intersectionFinder_->find(false);
       if (!intersection) {
-        continue; // intersections_.push_back(*intersection);
+        continue;
       }
 
       auto bounds = std::pair<std::array<algebra::Vec2f, 2>,

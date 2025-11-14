@@ -2,8 +2,8 @@
 #include "IController.hpp"
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
-#include "bezierCurve.hpp"
 #include "bezierSurfaceC0.hpp"
+#include "bezierSurfaceRenderer.hpp"
 #include "color.hpp"
 #include "cursor.hpp"
 #include "cursorController.hpp"
@@ -18,8 +18,8 @@
 #include "nfd.h"
 #include "pointEntity.hpp"
 #include "scene.hpp"
+#include "sceneRenderer.hpp"
 #include "selectionController.hpp"
-#include "texture.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
 #include "virtualPoint.hpp"
@@ -554,22 +554,46 @@ void GUI::renderPathGeneratorUI() {
   static bool show_height_map_texture = false;
 
   auto render_texture_window = [](const std::string &window_name,
-                                  bool show_texture, uint32_t textureId) {
-    if (show_texture) {
-      ImGui::SetNextWindowSize(ImVec2(1500, 1500), ImGuiCond_Always);
-      ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
+                                  uint32_t textureId) {
+    ImGui::SetNextWindowSize(ImVec2(1500, 1500), ImGuiCond_Always);
+    ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
 
-      ImVec2 image_size(1500, 1500);
-      ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(textureId)),
-                   image_size);
-      ImGui::End();
-    }
+    ImVec2 image_size(1500, 1500);
+    ImGui::Image(static_cast<ImTextureID>(static_cast<intptr_t>(textureId)),
+                 image_size);
+    ImGui::End();
   };
 
-  if (pathsGenerator_.heightMap() != nullptr) {
-    ImGui::Checkbox("Show heightMap Texture", &show_height_map_texture);
-    render_texture_window("heightMap", true,
+  ImGui::BeginDisabled(pathsGenerator_.heightMap() == nullptr);
+  ImGui::Checkbox("Show heightMap Texture", &show_height_map_texture);
+  if (show_height_map_texture) {
+    render_texture_window("heightMap",
                           pathsGenerator_.heightMap()->textureId());
+  }
+  ImGui::EndDisabled();
+
+  /// ------ it should be removed later ---------------------------------
+  auto &bezier_surface_renderer =
+      sceneRenderer_->getEntityRenderer(EntityType::BezierSurfaceC0);
+  auto &bezier_surface_renderer_2 =
+      sceneRenderer_->getEntityRenderer(EntityType::BezierSurfaceC2);
+
+  auto *bezier_renderer_c0 =
+      dynamic_cast<BezierSurfaceRenderer *>(&bezier_surface_renderer);
+  auto *bezier_renderer_c2 =
+      dynamic_cast<BezierSurfaceRenderer *>(&bezier_surface_renderer_2);
+
+  if (ImGui::Checkbox("Show offset surface",
+                      &bezier_renderer_c2->offsetSurface())) {
+    bezier_renderer_c0->offsetSurface() = bezier_renderer_c2->offsetSurface();
+    if (bezier_renderer_c2->offsetSurface()) {
+      bezier_renderer_c0->normalDirection() = 1.f;
+      bezier_renderer_c2->normalDirection() = -1.f;
+    } else {
+
+      bezier_renderer_c0->normalDirection() = 0.f;
+      bezier_renderer_c2->normalDirection() = 0.f;
+    }
   }
 
   ImGui::End();

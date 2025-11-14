@@ -3,6 +3,7 @@
 #include "IEntityRenderer.hpp"
 #include "IRenderable.hpp"
 #include "bezierCurveRenderer.hpp"
+#include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceRenderer.hpp"
 #include "camera.hpp"
 #include "centerPointRenderer.hpp"
@@ -97,6 +98,10 @@ public:
 
   void renderSelectedPoints(const std::vector<IEntity *> &selectedPoints) {
     _selectedPointsRenderer.render(selectedPoints);
+  }
+
+  IEntityRenderer &getEntityRenderer(const EntityType &entityType) {
+    return *_entityRenderers.at(entityType);
   }
 
 private:

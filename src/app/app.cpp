@@ -47,6 +47,7 @@ void App::init() {
   gui_ = std::make_unique<GUI>(window_, scene_.get());
   sceneRenderer_ = std::make_unique<SceneRenderer>(
       camera_.get(), gui_->getPickingTexture(), window_);
+  gui_->setSceneRenderer(sceneRenderer_.get());
 
   initImgui();
 }

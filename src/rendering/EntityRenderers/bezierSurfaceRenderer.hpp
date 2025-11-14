@@ -27,6 +27,7 @@ public:
     if (entities.empty()) {
       return;
     }
+
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
@@ -34,13 +35,14 @@ public:
     for (auto *entity : entities) {
       auto &bezierSurface = dynamic_cast<BezierSurface &>(*entity);
       _shader.setVec4f("color", entity->getColor().toVector());
-
       _shader.setUInt("u_patches", bezierSurface.getPatches().rowCount);
       _shader.setUInt("v_patches", bezierSurface.getPatches().colCount);
       _shader.setUInt("u_subdivisions", bezierSurface.getMeshDensity().s);
       _shader.setUInt("v_subdivisions", bezierSurface.getMeshDensity().t);
-      _shader.setInt("renderPolyLine",
-                     static_cast<int>(bezierSurface.wireframe()));
+      _shader.setInt("polyline", static_cast<int>(bezierSurface.wireframe()));
+      // _shader.setInt("offset_surface", static_cast<int>(offsetSurface_));
+      _shader.setFloat("offset_surface", normalDirection_);
+
       const auto &mesh = bezierSurface.getMesh();
       if (bezierSurface.isTrimmed()) {
         _shader.setInt("trim", 1);
@@ -66,8 +68,13 @@ public:
     _meshRenderer.render(entities);
   }
 
+  bool &offsetSurface() { return offsetSurface_; }
+  float &normalDirection() { return normalDirection_; }
+
 private:
   Shader _shader;
   SurfaceMeshRenderer _meshRenderer;
   const Camera &_camera;
+  float normalDirection_ = 0.f;
+  bool offsetSurface_;
 };

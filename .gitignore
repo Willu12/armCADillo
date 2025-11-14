@@ -15,3 +15,4 @@ build/
 .cache/
 local_data
 .old_data
+data/

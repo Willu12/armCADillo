@@ -18,6 +18,7 @@
 #include "optional"
 #include "pathsGenerator.hpp"
 #include "pointEntity.hpp"
+#include "sceneRenderer.hpp"
 #include "selectionController.hpp"
 #include "utils.hpp"
 #include "vec.hpp"
@@ -68,11 +69,16 @@ public:
   void clearVirtualPoints();
   bool &stereographicVision() { return _stereographicVision; }
   Scene &getScene() { return *_scene; }
+  void setSceneRenderer(SceneRenderer *sceneRenderer) {
+    sceneRenderer_ = sceneRenderer;
+  }
   friend class GuiVisitor;
 
 private:
   GLFWwindow *_window;
   Scene *_scene;
+  SceneRenderer *sceneRenderer_ = nullptr;
+
   EntityFactory _entityFactory;
   std::vector<IEntity *> _selectedEntities;
   std::vector<VirtualPoint *> _selectedVirtualPoints;
