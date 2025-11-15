@@ -596,6 +596,17 @@ void GUI::renderPathGeneratorUI() {
     }
   }
 
+  ////
+  auto &detailed_path_generator = pathsGenerator_.getDetailedPathGenerator();
+
+  if (ImGui::Button("Prepare detailed path")) {
+    detailed_path_generator.prepare();
+  }
+
+  if (ImGui::Button("generate detail path")) {
+    detailed_path_generator.generate();
+  }
+
   ImGui::End();
 }
 

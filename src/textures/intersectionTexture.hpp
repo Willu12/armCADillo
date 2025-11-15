@@ -29,20 +29,27 @@ public:
   void floodFill(uint32_t x, uint32_t y, bool transparent);
   bool wrapU() const { return wrapU_; }
   bool wrapV() const { return wrapV_; }
+
   void setWrapping(bool wrapU, bool wrapV) {
     wrapU_ = wrapU;
     wrapV_ = wrapV;
   }
 
+  algebra::Vec2f uv(uint32_t x, uint32_t y) const;
+
   Dimensions getSize() const {
     return Dimensions{.height = kHeight, .width = kWidth};
   }
 
+  void setCellType(uint32_t x, uint32_t y, CellType cellType);
   CellType getCellType(uint32_t x, uint32_t y) const;
+  bool isTrimmed(uint32_t x, uint32_t y) const;
+
+  void update();
 
 private:
-  static int constexpr kWidth = 1500;
-  static int constexpr kHeight = 1500;
+  static int constexpr kWidth = 800;
+  static int constexpr kHeight = 800;
   bool wrapU_ = false;
   bool wrapV_ = false;
   std::unique_ptr<Texture> texture_;

@@ -371,12 +371,13 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
     first_line.erase(previous_segment);
 
     int count = 0;
-    for (int line_index = first_line_index + 1; line_index < segments.size();
-         ++line_index) {
+    for (uint32_t line_index = first_line_index + 1;
+         line_index < segments.size(); ++line_index) {
       auto &line_segments = segments[line_index];
       /// 1. there are no more segments in this line
       if (line_segments.empty()) {
         break;
+        // continue;
       }
 
       bool reversed =

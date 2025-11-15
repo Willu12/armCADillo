@@ -19,6 +19,9 @@ public:
   void setIntersectionFinder(IntersectionFinder *intersectionFinder);
   void setModel(const std::vector<BezierSurface *> &surfaces);
   void setScene(Scene *scene);
+  DetailedPathGenerator &getDetailedPathGenerator() {
+    return detailedPathGenerator_;
+  }
 
   const HeightMap *heightMap() const { return heightMap_.get(); }
 

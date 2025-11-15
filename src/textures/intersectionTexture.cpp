@@ -1,5 +1,6 @@
 #include "intersectionTexture.hpp"
 #include "color.hpp"
+#include "vec.hpp"
 #include <memory>
 #include <queue>
 
@@ -160,15 +161,42 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
   texture_->fill(canvas_.getData());
 }
 
+void IntersectionTexture::setCellType(uint32_t x, uint32_t y,
+                                      CellType cellType) {
+  Color color{};
+  switch (cellType) {
+  case CellType::Intersection:
+    color = Color::Green();
+  case CellType::Keep:
+    color = Color::Black();
+  case CellType::Trim:
+    color = Color::Transparent();
+  };
+
+  canvas_.fillAtIndex(x * kWidth + y, color);
+}
+
 IntersectionTexture::CellType
 IntersectionTexture::getCellType(uint32_t x, uint32_t y) const {
   auto color = canvas_.colorAtIndex(y + kWidth * x);
   if (color == Color::Green()) {
-    return IntersectionTexture::CellType::Intersection;
+    return CellType::Intersection;
   }
   if (color == Color::Transparent()) {
-    return IntersectionTexture::CellType::Trim;
+    return CellType::Trim;
   }
 
-  return IntersectionTexture::CellType::Keep;
+  return CellType::Keep;
 }
+
+bool IntersectionTexture::isTrimmed(uint32_t x, uint32_t y) const {
+  return getCellType(x, y) == CellType::Trim;
+}
+
+algebra::Vec2f IntersectionTexture::uv(uint32_t x, uint32_t y) const {
+  float u = static_cast<float>(x) / static_cast<float>(kWidth);
+  float v = static_cast<float>(y) / static_cast<float>(kHeight);
+  return {u, v};
+};
+
+void IntersectionTexture::update() { texture_->fill(canvas_.getData()); }

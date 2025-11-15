@@ -9,6 +9,10 @@ public:
     return *intersectionTexture_;
   };
 
+  IntersectionTexture &getIntersectionTexture() {
+    return *intersectionTexture_;
+  }
+
   void setIntersectionTexture(IntersectionTexture *intersectionTexture) {
     intersectionTexture_ = intersectionTexture;
   }

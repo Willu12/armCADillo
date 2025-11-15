@@ -1,15 +1,26 @@
 #include "detailedPathGenerator.hpp"
+#include "bezierSurface.hpp"
 #include "entitiesTypes.hpp"
 #include "intersectable.hpp"
 #include "intersectionCurve.hpp"
 #include "intersectionTexture.hpp"
 #include "millingPath.hpp"
 #include "normalOffsetSurface.hpp"
+#include "plane.hpp"
+#include "rdp.hpp"
 #include "vec.hpp"
+#include <algorithm>
 #include <cstdint>
-#include <queue>
+#include <iterator>
+#include <limits>
+#include <memory>
 #include <stdexcept>
 #include <sys/types.h>
+#include <vector>
+
+static constexpr float kFloorHeight = 0.f;
+static constexpr float kFloorHeightPath = 1.5f;
+static constexpr uint32_t kMaxIndex = std::numeric_limits<uint32_t>::max();
 
 void DetailedPathGenerator::prepare() {
 
@@ -27,14 +38,18 @@ void DetailedPathGenerator::prepare() {
       auto *first_surface = model_->surfaces()[i];
       auto *second_surface = model_->surfaces()[j];
 
-      auto first_offset_surface = algebra::NormalOffsetSurface(
-          &first_surface->getAlgebraSurfaceC0(), cutter_->diameter_ / 2.f);
+      auto first_algebra_surface = first_surface->getAlgebraSurfaceC0();
+      auto second_algebra_surface = second_surface->getAlgebraSurfaceC0();
 
-      auto second_offset_surface = algebra::NormalOffsetSurface(
-          &first_surface->getAlgebraSurfaceC0(), cutter_->diameter_ / 2.f);
+      offset_surfaces_[i] = std::make_unique<algebra::NormalOffsetSurface>(
+          &first_algebra_surface, cutter_.diameter_ / 2.f);
 
-      intersectionFinder_->setSurfaces(&first_offset_surface,
-                                       &second_offset_surface);
+      offset_surfaces_[j] = std::make_unique<algebra::NormalOffsetSurface>(
+          &second_algebra_surface, cutter_.diameter_ / 2.f);
+
+      intersectionFinder_->setSurfaces(offset_surfaces_[i].get(),
+                                       offset_surfaces_[j].get());
+
       auto intersection = intersectionFinder_->find(false);
       if (!intersection) {
         continue;
@@ -48,8 +63,6 @@ void DetailedPathGenerator::prepare() {
 
       intersection_curve->setFirstPoint(intersection->firstPoint);
       intersections_.push_back(intersection_curve.get());
-      scene_->addEntity(EntityType::IntersectionCurve,
-                        std::move(intersection_curve));
 
       intersection_curve->getFirstTexture().setWrapping(
           first_surface->wrapped(0), first_surface->wrapped(1));
@@ -60,6 +73,9 @@ void DetailedPathGenerator::prepare() {
           intersection_curve->getFirstTexturePtr());
       second_surface->setIntersectionTexture(
           intersection_curve->getSecondTexturePtr());
+
+      scene_->addEntity(EntityType::IntersectionCurve,
+                        std::move(intersection_curve));
     }
   }
 }
@@ -68,87 +84,234 @@ void DetailedPathGenerator::generate() {
   /// the part the we want to discard should be specified in the interstcion
   /// texture
 
-  for (const auto *surface : model_->surfaces()) {
-    auto starting_index = findMillingStart(*surface);
-    auto milling_points = createMillingPoints(*surface, starting_index);
-    auto milling_path = MillingPath{milling_points, *cutter_};
-    gCodeSerializer_->serializePath(milling_path, surface->getName() + ".8f");
+  for (auto *surface : model_->surfaces()) {
+    //// set floor
+    setFloorAsTrimmed(*surface);
+    auto segments = generateLineSegments(*surface, Direction::Horizontal, 200);
+    auto surface_paths = generateSurfacePaths(*surface, segments);
+    auto path = combineSurfacePaths(surface_paths);
+
+    auto milling_path = MillingPath{path, cutter_};
+    gCodeSerializer_->serializePath(milling_path, surface->getName() + ".k08");
   }
 }
 
-DetailedPathGenerator::Coord DetailedPathGenerator::findMillingStart(
-    const Intersectable &intersectableSurface) const {
-  const auto &intersection_texture =
-      intersectableSurface.getIntersectionTexture();
-  const auto size = intersection_texture.getSize();
+void DetailedPathGenerator::setFloorAsTrimmed(
+    BezierSurface &intersectableSurface) const {
+  auto &intersection_texture = intersectableSurface.getIntersectionTexture();
 
-  for (int y = 0; y < size.height; ++y) {
-    for (int x = 0; x < size.width; ++x) {
-      if (intersection_texture.getCellType(x, y) ==
-          IntersectionTexture::CellType::Keep) {
-        return {.x = x, .y = y};
+  auto size = intersection_texture.getSize();
+  auto offset_surface = algebra::NormalOffsetSurface(
+      &intersectableSurface.getAlgebraSurfaceC0(), cutter_.radius());
+
+  for (int x = 0; x < size.width; ++x) {
+    for (int y = 0; y < size.height; ++y) {
+      auto uv = intersection_texture.uv(x, y);
+      auto p = offset_surface.value(uv);
+
+      if (p.y() < kFloorHeight + cutter_.radius()) {
+        intersection_texture.setCellType(x, y,
+                                         IntersectionTexture::CellType::Trim);
       }
     }
   }
+  intersection_texture.update();
+}
 
-  throw std::runtime_error("Failed to find detailed milling starting point");
+std::vector<std::vector<DetailedPathGenerator::Coord>>
+DetailedPathGenerator::generateLineSegments(BezierSurface &surface,
+                                            Direction direction,
+                                            uint32_t lineCount) {
+  std::vector<std::vector<Coord>> lines;
+  lines.reserve(lineCount);
+
+  const auto &tex = surface.getIntersectionTexture();
+  const auto size = tex.getSize();
+  const uint32_t max_index = size.height;
+  const uint32_t step = max_index / lineCount;
+
+  for (uint32_t line = 0; line < max_index; line += step) {
+    std::vector<Coord> segments;
+
+    for (uint32_t i = 0; i < max_index; ++i) {
+      uint32_t x = (direction == Direction::Horizontal) ? i : line;
+      uint32_t y = (direction == Direction::Horizontal) ? line : i;
+
+      bool curr_trim = tex.isTrimmed(x, y);
+
+      if ((i == 0 || i == max_index - 1) && !curr_trim) {
+        segments.emplace_back(x, y);
+      }
+
+      if (i < max_index - 1) {
+        uint32_t x_next = (direction == Direction::Horizontal) ? i + 1 : line;
+        uint32_t y_next = (direction == Direction::Horizontal) ? line : i + 1;
+
+        bool next_trim = tex.isTrimmed(x_next, y_next);
+
+        if (curr_trim != next_trim) {
+          segments.emplace_back(x, y);
+        }
+      }
+    }
+
+    lines.emplace_back(std::move(segments));
+  }
+
+  return lines;
+}
+
+std::vector<std::vector<algebra::Vec3f>>
+DetailedPathGenerator::generateSurfacePaths(
+    const BezierSurface &surface,
+    std::vector<std::vector<Coord>> &segments) const {
+  using Coord = DetailedPathGenerator::Coord;
+
+  std::vector<std::vector<algebra::Vec3f>> paths;
+
+  const int lines_count = static_cast<int>(segments.size());
+
+  while (true) {
+
+    int line = -1;
+    for (int i = 0; i < lines_count; ++i) {
+      if (!segments[i].empty()) {
+        line = i;
+        break;
+      }
+    }
+
+    if (line == -1) {
+      break;
+    }
+
+    std::vector<algebra::Vec3f> path;
+    bool reverse = false;
+
+    auto &first_line = segments[line];
+    if (first_line.size() < 2) {
+      throw std::runtime_error("invalid size of line");
+      break;
+    }
+
+    Coord s0 = first_line[0];
+    Coord s1 = first_line[1];
+    first_line.erase(first_line.begin(), first_line.begin() + 2);
+
+    {
+      auto pts = generateLinePoints(surface, s0, s1);
+      path.insert(path.end(), pts.begin(), pts.end());
+    }
+
+    Coord last_point = s1;
+
+    for (int next_line_index = line + 1; next_line_index < lines_count;
+         ++next_line_index) {
+
+      auto &next_line = segments[next_line_index];
+      if (next_line.size() < 2) {
+        // throw std::runtime_error("invalid size of line");
+        break;
+      }
+
+      reverse = !reverse;
+      auto next_point_start_it = std::ranges::min_element(
+          next_line, [&last_point](const Coord &a, const Coord &b) {
+            auto da =
+                std::abs(a.x - last_point.x) + std::abs(a.y - last_point.y);
+            auto db =
+                std::abs(b.x - last_point.x) + std::abs(b.y - last_point.y);
+            return da < db;
+          });
+      auto best_index = std::distance(next_line.begin(), next_point_start_it);
+
+      Coord start = next_line[best_index];
+      Coord end =
+          reverse ? next_line[best_index - 1] : next_line[best_index + 1];
+
+      // Coord start = reverse ? b : a;
+      // Coord end = reverse ? a : b;
+
+      /// TODO:
+      /// Maybe go along the intersection curve till x/y are proper.
+
+      auto pts = generateLinePoints(surface, start, end);
+      path.insert(path.end(), pts.begin(), pts.end());
+
+      last_point = end;
+      if (reverse) {
+        best_index = best_index - 1;
+      }
+
+      next_line.erase(next_line.begin() + best_index,
+                      next_line.begin() + best_index + 2);
+    }
+
+    paths.push_back(std::move(path));
+  }
+
+  return paths;
 }
 
 std::vector<algebra::Vec3f>
-DetailedPathGenerator::createMillingPoints(const BezierSurface &surface,
-                                           Coord startingIndex) const {
-  const auto &intersection_texture = surface.getIntersectionTexture();
-  const auto size = intersection_texture.getSize();
+DetailedPathGenerator::generateLinePoints(const BezierSurface &surface,
+                                          Coord start, Coord end) const {
+  std::vector<algebra::Vec3f> points;
 
-  const auto &offset_surface = algebra::NormalOffsetSurface(
-      &surface.getAlgebraSurfaceC0(), cutter_->diameter_ / 2.f);
+  const auto &texture = surface.getIntersectionTexture();
+  auto offset_surface = algebra::NormalOffsetSurface(
+      &surface.getAlgebraSurfaceC0(), cutter_.radius());
+  bool reversed = false;
+  if (start.x > end.x || start.y > end.y) {
+    reversed = true;
+    std::swap(start, end);
+  }
 
-  std::array<Coord, 4> directions = {{{.x = 1, .y = 0},
-                                      {.x = -1, .y = 0},
-                                      {.x = 0, .y = 1},
-                                      {.x = 0, .y = -1}}};
+  Coord delta =
+      start.y == end.y ? Coord{.x = 1, .y = 0} : Coord{.x = 0, .y = 1};
 
-  std::vector<bool> visited(size.height * size.width, false);
-  std::queue<Coord> queue;
+  Coord current_coord{.x = start.x, .y = start.y};
+  while (current_coord != end) {
+    auto uv = texture.uv(current_coord.x, current_coord.y);
+    auto offset_point = offset_surface.value(uv);
+    offset_point.y() += kFloorHeightPath;
+    points.emplace_back(offset_point);
 
-  auto global_index = [&size](Coord index) {
-    return index.y * size.width + index.x;
-  };
+    current_coord.x += delta.x;
+    current_coord.y += delta.y;
+  }
 
-  auto uv = [&size](const Coord &index) -> algebra::Vec2f {
-    float u = static_cast<float>(index.x) / static_cast<float>(size.width);
-    float v = static_cast<float>(index.y) / static_cast<float>(size.height);
-    return {u, v};
-  };
+  /// last_point
+  auto uv = texture.uv(end.x, end.y);
+  auto offset_point = offset_surface.value(uv);
+  offset_point.y() += kFloorHeightPath;
+  points.emplace_back(offset_point);
 
-  queue.push(startingIndex);
-  visited[global_index(startingIndex)] = true;
-  std::vector<algebra::Vec3f> milling_points;
+  if (reversed) {
+    std::ranges::reverse(points);
+  }
 
-  while (!queue.empty()) {
-    auto coord = queue.front();
-    queue.pop();
+  algebra::Plane plane =
+      start.x == end.x ? algebra::Plane::YZ : algebra::Plane::XZ;
+  // auto rdp = algebra::RDP
+  return algebra::RDP::reducePoints(points, 10e-5, plane);
+}
 
-    milling_points.push_back(offset_surface.value(uv(coord)));
+std::vector<algebra::Vec3f> DetailedPathGenerator::combineSurfacePaths(
+    const std::vector<std::vector<algebra::Vec3f>> &surfacePaths) const {
+  std::vector<algebra::Vec3f> combined_path;
 
-    for (const auto &direction : directions) {
-      if (coord.x + direction.x < 0 || coord.x + direction.x >= size.width ||
-          coord.y + direction.y < 0 || coord.y + direction.y >= size.height) {
-        continue;
-      }
+  for (int i = 0; i < surfacePaths.size(); ++i) {
+    const auto &path = surfacePaths.at(i);
+    combined_path.insert(combined_path.end(), path.begin(), path.end());
 
-      Coord next_coord = {.x = coord.x + direction.x,
-                          .y = coord.y + direction.y};
-
-      if (intersection_texture.getCellType(coord.x, coord.y) !=
-          IntersectionTexture::CellType::Keep) {
-        continue;
-      }
-
-      if (!visited[global_index(next_coord)]) {
-        queue.push(next_coord);
-        visited[global_index(next_coord)] = true;
-      }
+    if (i < surfacePaths.size() - 1) {
+      const auto &next_path = surfacePaths.at(i + 1);
+      combined_path.emplace_back(path.back().x(), 5.f, path.back().z());
+      combined_path.emplace_back(next_path.front().x(), 5.f,
+                                 next_path.front().z());
     }
   }
+
+  return combined_path;
 }
