@@ -31,7 +31,7 @@ public:
         _shader.setInt("trim", 0);
       }
       if (torus.hasIntersectionTexture()) {
-        const auto &texture = torus.getIntersectionTexutre();
+        const auto &texture = torus.getIntersectionTexture();
         texture.bind();
       }
       glBindVertexArray(mesh.getVAO());

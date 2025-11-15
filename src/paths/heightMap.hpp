@@ -39,6 +39,7 @@ public:
   friend class PathsGenerator;
   friend class RoughingPathGenerator;
   friend class FlatPathGenerator;
+  friend class DetailedPathGenerator;
 
 private:
   Divisions divisions_;

@@ -159,3 +159,16 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
   }
   texture_->fill(canvas_.getData());
 }
+
+IntersectionTexture::CellType
+IntersectionTexture::getCellType(uint32_t x, uint32_t y) const {
+  auto color = canvas_.colorAtIndex(y + kWidth * x);
+  if (color == Color::Green()) {
+    return IntersectionTexture::CellType::Intersection;
+  }
+  if (color == Color::Transparent()) {
+    return IntersectionTexture::CellType::Trim;
+  }
+
+  return IntersectionTexture::CellType::Keep;
+}

@@ -50,7 +50,7 @@ public:
         _shader.setInt("trim", 0);
       }
       if (bezierSurface.hasIntersectionTexture()) {
-        const auto &texture = bezierSurface.getIntersectionTexutre();
+        const auto &texture = bezierSurface.getIntersectionTexture();
         texture.bind();
       }
       // glLineWidth(2.0f);

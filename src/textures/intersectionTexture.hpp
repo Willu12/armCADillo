@@ -8,6 +8,13 @@
 
 class IntersectionTexture {
 public:
+  struct Dimensions {
+    int height;
+    int width;
+  };
+
+  enum class CellType : uint8_t { Keep, Intersection, Trim };
+
   static std::pair<std::unique_ptr<IntersectionTexture>,
                    std::unique_ptr<IntersectionTexture>>
   createIntersectionTextures(
@@ -27,9 +34,15 @@ public:
     wrapV_ = wrapV;
   }
 
+  Dimensions getSize() const {
+    return Dimensions{.height = kHeight, .width = kWidth};
+  }
+
+  CellType getCellType(uint32_t x, uint32_t y) const;
+
 private:
-  static int constexpr kWidth = 300;
-  static int constexpr kHeight = 300;
+  static int constexpr kWidth = 1500;
+  static int constexpr kHeight = 1500;
   bool wrapU_ = false;
   bool wrapV_ = false;
   std::unique_ptr<Texture> texture_;

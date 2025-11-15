@@ -5,7 +5,7 @@ class Intersectable {
 public:
   virtual ~Intersectable() = default;
   bool hasIntersectionTexture() { return intersectionTexture_ != nullptr; }
-  const IntersectionTexture &getIntersectionTexutre() {
+  const IntersectionTexture &getIntersectionTexture() const {
     return *intersectionTexture_;
   };
 

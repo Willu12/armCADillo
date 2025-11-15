@@ -54,5 +54,6 @@ void PathsGenerator::run() {
   };
   detailedPathGenerator_.setModel(model_.get());
   detailedPathGenerator_.setCutter(&detailed_cutter);
+  detailedPathGenerator_.setHeightMap(heightMap_.get());
   detailedPathGenerator_.generate();
 }

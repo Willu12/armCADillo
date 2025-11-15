@@ -467,9 +467,8 @@ void FlatPathGenerator::removeSelfIntersections() {
   auto start_index = kInitialContourPoint;
   auto ind = start_index;
   auto contour_points = std::vector<algebra::Vec3f>();
-  // contour_points.reserve(border_count);
   contour_points.push_back(contourPoints_[ind]);
-  for (auto steps = 0U; steps < contourPoints_.size(); ++steps) {
+  for (auto steps = 0u; steps < contourPoints_.size(); ++steps) {
     auto next_ind = (ind + 1) % contourPoints_.size();
 
     auto p0 = algebra::Vec2f{contourPoints_[ind].x(), contourPoints_[ind].z()};
@@ -492,7 +491,7 @@ void FlatPathGenerator::removeSelfIntersections() {
       auto c3 = (p0 - q1).cross2D(dirq);
       auto c4 = (p1 - q1).cross2D(dirq);
 
-      if (c1 * c2 < 0.F && c3 * c4 < 0.F) {
+      if (c1 * c2 < 0.f && c3 * c4 < 0.f) {
         if (c1 > c2) {
           ind = j;
         } else {
