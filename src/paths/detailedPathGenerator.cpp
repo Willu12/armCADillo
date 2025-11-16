@@ -87,7 +87,7 @@ void DetailedPathGenerator::generate() {
   for (auto *surface : model_->surfaces()) {
     //// set floor
     setFloorAsTrimmed(*surface);
-    auto segments = generateLineSegments(*surface, Direction::Horizontal, 200);
+    auto segments = generateLineSegments(*surface, Direction::Vertical, 200);
     auto surface_paths = generateSurfacePaths(*surface, segments);
     auto path = combineSurfacePaths(surface_paths);
 
@@ -104,8 +104,8 @@ void DetailedPathGenerator::setFloorAsTrimmed(
   auto offset_surface = algebra::NormalOffsetSurface(
       &intersectableSurface.getAlgebraSurfaceC0(), cutter_.radius());
 
-  for (int x = 0; x < size.width; ++x) {
-    for (int y = 0; y < size.height; ++y) {
+  for (int y = 0; y < size.height; ++y) {
+    for (int x = 0; x < size.width; ++x) {
       auto uv = intersection_texture.uv(x, y);
       auto p = offset_surface.value(uv);
 
@@ -214,37 +214,42 @@ DetailedPathGenerator::generateSurfacePaths(
         break;
       }
 
-      reverse = !reverse;
-      auto next_point_start_it = std::ranges::min_element(
-          next_line, [&last_point](const Coord &a, const Coord &b) {
-            auto da =
-                std::abs(a.x - last_point.x) + std::abs(a.y - last_point.y);
-            auto db =
-                std::abs(b.x - last_point.x) + std::abs(b.y - last_point.y);
-            return da < db;
-          });
-      auto best_index = std::distance(next_line.begin(), next_point_start_it);
+      int best_index = -1;
+      float best_dist = std::numeric_limits<float>::infinity();
+      for (auto i = 0; i < next_line.size(); i += 2) {
+        Coord a = next_line[i];
+        Coord b = next_line[i + 1];
+
+        Coord probe = reverse ? a : b;
+
+        float d =
+            std::abs(probe.x - last_point.x) + std::abs(probe.y - last_point.y);
+
+        if (d < best_dist) {
+          best_dist = d;
+          best_index = i;
+        }
+      }
 
       Coord start = next_line[best_index];
-      Coord end =
-          reverse ? next_line[best_index - 1] : next_line[best_index + 1];
-
-      // Coord start = reverse ? b : a;
-      // Coord end = reverse ? a : b;
+      Coord end = next_line[best_index + 1];
 
       /// TODO:
       /// Maybe go along the intersection curve till x/y are proper.
 
+      // Correct directional ordering
+      if (reverse) {
+        std::swap(start, end);
+      }
+
       auto pts = generateLinePoints(surface, start, end);
       path.insert(path.end(), pts.begin(), pts.end());
 
-      last_point = end;
-      if (reverse) {
-        best_index = best_index - 1;
-      }
-
       next_line.erase(next_line.begin() + best_index,
                       next_line.begin() + best_index + 2);
+
+      last_point = end;
+      reverse = !reverse;
     }
 
     paths.push_back(std::move(path));
@@ -293,7 +298,6 @@ DetailedPathGenerator::generateLinePoints(const BezierSurface &surface,
 
   algebra::Plane plane =
       start.x == end.x ? algebra::Plane::YZ : algebra::Plane::XZ;
-  // auto rdp = algebra::RDP
   return algebra::RDP::reducePoints(points, 10e-5, plane);
 }
 

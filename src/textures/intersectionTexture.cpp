@@ -114,7 +114,7 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
 
   std::queue<std::pair<uint32_t, uint32_t>> q;
   q.emplace(x, y);
-  visited[x][y] = true;
+  visited[y][x] = true;
 
   const int dx[4] = {-1, 1, 0, 0};
   const int dy[4] = {0, 0, -1, 1};
@@ -133,7 +133,6 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
       int nx = x + dx[d];
       int ny = y + dy[d];
 
-      // Handle wrapping if enabled
       if (wrapU_) {
         if (nx < 0)
           nx += kWidth;
@@ -167,18 +166,21 @@ void IntersectionTexture::setCellType(uint32_t x, uint32_t y,
   switch (cellType) {
   case CellType::Intersection:
     color = Color::Green();
+    break;
   case CellType::Keep:
     color = Color::Black();
+    break;
   case CellType::Trim:
     color = Color::Transparent();
+    break;
   };
 
-  canvas_.fillAtIndex(x * kWidth + y, color);
+  canvas_.fillAtIndex(y * kWidth + x, color);
 }
 
 IntersectionTexture::CellType
 IntersectionTexture::getCellType(uint32_t x, uint32_t y) const {
-  auto color = canvas_.colorAtIndex(y + kWidth * x);
+  auto color = canvas_.colorAtIndex(y * kWidth + x);
   if (color == Color::Green()) {
     return CellType::Intersection;
   }

@@ -4,7 +4,6 @@
 #include "bezierSurface.hpp"
 #include "cutter.hpp"
 #include "heightMap.hpp"
-#include "intersectable.hpp"
 #include "intersectionCurve.hpp"
 #include "intersectionFinder.hpp"
 #include "model.hpp"
