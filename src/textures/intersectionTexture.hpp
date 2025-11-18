@@ -43,6 +43,7 @@ public:
 
   void setCellType(uint32_t x, uint32_t y, CellType cellType);
   CellType getCellType(uint32_t x, uint32_t y) const;
+  void setColor(uint32_t x, uint32_t y, Color color);
   bool isTrimmed(uint32_t x, uint32_t y) const;
 
   void update();

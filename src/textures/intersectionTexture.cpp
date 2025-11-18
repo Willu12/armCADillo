@@ -178,6 +178,10 @@ void IntersectionTexture::setCellType(uint32_t x, uint32_t y,
   canvas_.fillAtIndex(y * kWidth + x, color);
 }
 
+void IntersectionTexture::setColor(uint32_t x, uint32_t y, Color color) {
+  canvas_.fillAtIndex(y * kWidth + x, color);
+}
+
 IntersectionTexture::CellType
 IntersectionTexture::getCellType(uint32_t x, uint32_t y) const {
   auto color = canvas_.colorAtIndex(y * kWidth + x);

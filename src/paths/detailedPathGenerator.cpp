@@ -85,7 +85,8 @@ void DetailedPathGenerator::generate() {
   for (auto *surface : model_->surfaces()) {
     //// set floor
     setFloorAsTrimmed(*surface);
-    auto segments = generateLineSegments(*surface, Direction::Vertical, 200);
+    auto segments = generateLineSegments(*surface, Direction::Vertical, 100);
+    //  colorSegments(*surface, segments);
     auto surface_paths = generateSurfacePaths(*surface, segments);
     auto path = combineSurfacePaths(surface_paths);
 
@@ -159,6 +160,18 @@ DetailedPathGenerator::generateLineSegments(BezierSurface &surface,
   return lines;
 }
 
+void DetailedPathGenerator::colorSegments(
+    BezierSurface &surface, const std::vector<std::vector<Coord>> &segments) {
+  auto &intersection_texture = *surface.getIntersectionTexture();
+
+  for (const auto &line : segments) {
+    for (const auto &coord : line) {
+      intersection_texture.setColor(coord.x, coord.y, Color::Red());
+    }
+  }
+  intersection_texture.update();
+}
+
 std::vector<std::vector<algebra::Vec3f>>
 DetailedPathGenerator::generateSurfacePaths(
     const BezierSurface &surface,
@@ -166,6 +179,8 @@ DetailedPathGenerator::generateSurfacePaths(
   using Coord = DetailedPathGenerator::Coord;
 
   std::vector<std::vector<algebra::Vec3f>> paths;
+  const algebra::NormalOffsetSurface offset_surface(
+      &surface.getAlgebraSurfaceC0(), cutter_.radius());
 
   const int lines_count = static_cast<int>(segments.size());
 
@@ -184,7 +199,7 @@ DetailedPathGenerator::generateSurfacePaths(
     }
 
     std::vector<algebra::Vec3f> path;
-    bool reverse = false;
+    bool reverse = true;
 
     auto &first_line = segments[line];
     if (first_line.size() < 2) {
@@ -201,7 +216,8 @@ DetailedPathGenerator::generateSurfacePaths(
       path.insert(path.end(), pts.begin(), pts.end());
     }
 
-    Coord last_point = s1;
+    Coord last_segment_start = s0;
+    Coord last_segment_end = s1;
 
     for (int next_line_index = line + 1; next_line_index < lines_count;
          ++next_line_index) {
@@ -215,17 +231,31 @@ DetailedPathGenerator::generateSurfacePaths(
       int best_index = -1;
       float best_dist = std::numeric_limits<float>::infinity();
       for (auto i = 0; i < next_line.size(); i += 2) {
-        Coord a = next_line[i];
-        Coord b = next_line[i + 1];
 
-        Coord probe = reverse ? a : b;
+        if (reverse) {
+          auto curr_segment_start = next_line[i];
+          auto prev = offset_surface.value(surface.getIntersectionTexture().uv(
+              last_segment_start.x, last_segment_start.y));
+          auto curr = offset_surface.value(surface.getIntersectionTexture().uv(
+              curr_segment_start.x, curr_segment_start.y));
 
-        float d =
-            std::abs(probe.x - last_point.x) + std::abs(probe.y - last_point.y);
+          auto d = (prev - curr).length();
+          if (d < best_dist) {
+            best_dist = d;
+            best_index = i;
+          }
+        } else {
+          auto curr_segment_end = next_line[i + 1];
+          auto prev = offset_surface.value(surface.getIntersectionTexture().uv(
+              last_segment_end.x, last_segment_end.y));
+          auto curr = offset_surface.value(surface.getIntersectionTexture().uv(
+              curr_segment_end.x, curr_segment_end.y));
 
-        if (d < best_dist) {
-          best_dist = d;
-          best_index = i;
+          auto d = (prev - curr).length();
+          if (d < best_dist) {
+            best_dist = d;
+            best_index = i;
+          }
         }
       }
 
@@ -245,7 +275,9 @@ DetailedPathGenerator::generateSurfacePaths(
       next_line.erase(next_line.begin() + best_index,
                       next_line.begin() + best_index + 2);
 
-      last_point = end;
+      // last_point = end;
+      last_segment_start = start;
+      last_segment_end = end;
       reverse = !reverse;
     }
 

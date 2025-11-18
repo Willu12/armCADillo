@@ -41,6 +41,9 @@ public:
     return intersections_;
   }
 
+  void colorSegments(BezierSurface &surface,
+                     const std::vector<std::vector<Coord>> &segments);
+
 private:
   const Model *model_ = nullptr;
   Cutter cutter_;
