@@ -1,7 +1,6 @@
 #include "detailedPathGenerator.hpp"
 #include "bezierSurface.hpp"
 #include "entitiesTypes.hpp"
-#include "intersectable.hpp"
 #include "intersectionCurve.hpp"
 #include "intersectionTexture.hpp"
 #include "millingPath.hpp"
@@ -11,7 +10,6 @@
 #include "vec.hpp"
 #include <algorithm>
 #include <cstdint>
-#include <iterator>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -69,9 +67,9 @@ void DetailedPathGenerator::prepare() {
       intersection_curve->getSecondTexture().setWrapping(
           second_surface->wrapped(0), second_surface->wrapped(1));
 
-      first_surface->setIntersectionTexture(
+      first_surface->combineIntersectionTexture(
           intersection_curve->getFirstTexturePtr());
-      second_surface->setIntersectionTexture(
+      second_surface->combineIntersectionTexture(
           intersection_curve->getSecondTexturePtr());
 
       scene_->addEntity(EntityType::IntersectionCurve,
@@ -98,7 +96,7 @@ void DetailedPathGenerator::generate() {
 
 void DetailedPathGenerator::setFloorAsTrimmed(
     BezierSurface &intersectableSurface) const {
-  auto &intersection_texture = intersectableSurface.getIntersectionTexture();
+  auto &intersection_texture = *intersectableSurface.getIntersectionTexture();
 
   auto size = intersection_texture.getSize();
   auto offset_surface = algebra::NormalOffsetSurface(
@@ -125,7 +123,7 @@ DetailedPathGenerator::generateLineSegments(BezierSurface &surface,
   std::vector<std::vector<Coord>> lines;
   lines.reserve(lineCount);
 
-  const auto &tex = surface.getIntersectionTexture();
+  const auto &tex = *surface.getIntersectionTexture();
   const auto size = tex.getSize();
   const uint32_t max_index = size.height;
   const uint32_t step = max_index / lineCount;
@@ -237,7 +235,6 @@ DetailedPathGenerator::generateSurfacePaths(
       /// TODO:
       /// Maybe go along the intersection curve till x/y are proper.
 
-      // Correct directional ordering
       if (reverse) {
         std::swap(start, end);
       }
