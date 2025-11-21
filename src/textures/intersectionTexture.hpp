@@ -1,9 +1,11 @@
 #pragma once
 #include "canvas.hpp"
+#include "color.hpp"
 #include "texture.hpp"
 #include "vec.hpp"
 #include <cstdint>
 #include <memory>
+#include <print>
 #include <vector>
 
 class IntersectionTexture {
@@ -11,6 +13,16 @@ public:
   struct Dimensions {
     int height;
     int width;
+  };
+
+  struct Coord {
+    uint32_t x;
+    uint32_t y;
+  };
+
+  struct Segment {
+    Coord start;
+    Coord end;
   };
 
   enum class CellType : uint8_t { Keep, Intersection, Trim };
@@ -36,6 +48,7 @@ public:
   }
 
   algebra::Vec2f uv(uint32_t x, uint32_t y) const;
+  static Coord uvToCoord(const algebra::Vec2f &uv);
 
   Dimensions getSize() const {
     return Dimensions{.height = kHeight, .width = kWidth};
@@ -48,6 +61,16 @@ public:
 
   void update();
 
+  std::vector<Segment> &getIntersectionCurve() { return intersectionCurve_; }
+  void setIntersectionCurve(const std::vector<Segment> &intersectionCurve) {
+    intersectionCurve_ = intersectionCurve;
+  }
+
+  void closeIntersectionCurve();
+
+  void drawLine(const std::vector<algebra::Vec2f> &surfacePoints,
+                Color color = Color::Green());
+
 private:
   static int constexpr kWidth = 800;
   static int constexpr kHeight = 800;
@@ -56,7 +79,7 @@ private:
   std::unique_ptr<Texture> texture_;
   std::array<algebra::Vec2f, 2> bounds_;
   Canvas canvas_;
+  std::vector<Segment> intersectionCurve_;
 
-  void drawLine(const std::vector<algebra::Vec2f> &surfacePoints);
   void fillCanvas(const std::vector<algebra::Vec2f> &surfacePoints);
 };

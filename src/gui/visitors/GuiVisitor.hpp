@@ -6,6 +6,7 @@
 #include "bezierSurface.hpp"
 #include "gregorySurface.hpp"
 #include "interpolatingSplineC2.hpp"
+#include "intersectionTexture.hpp"
 #include <functional>
 #include <vector>
 class TorusEntity;
@@ -64,4 +65,6 @@ private:
   bool renderCurveGui(BezierCurve &curve);
   std::vector<std::reference_wrapper<PointEntity>>
   clonePoints(const BezierSurface &bezierSurface);
+  void renderTextureWindow(const std::string &windowName, bool showTexture,
+                           IntersectionTexture &texture);
 };

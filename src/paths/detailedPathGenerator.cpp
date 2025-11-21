@@ -22,8 +22,8 @@ static constexpr uint32_t kMaxIndex = std::numeric_limits<uint32_t>::max();
 
 void DetailedPathGenerator::prepare() {
 
-  //// TODO:
-  //// 1. add proper interface for specyfing on which surfaces we want
+  /// TODO:
+  /// 1. add proper interface for specyfing on which surfaces we want
   /// intersection.
   ///  2. add option to combine intersection textures.
   /// The result of this phase is that every surface of the model has proper
@@ -78,9 +78,8 @@ void DetailedPathGenerator::prepare() {
   }
 }
 void DetailedPathGenerator::generate() {
-  /// for each surface we should have refernce to proper
-  /// the part the we want to discard should be specified in the interstcion
-  /// texture
+  /// This section assumes that every model surface has proper intersection
+  /// texture and all sections that should be trimmed are set.
 
   for (auto *surface : model_->surfaces()) {
     //// set floor

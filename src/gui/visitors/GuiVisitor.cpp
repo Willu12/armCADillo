@@ -110,6 +110,20 @@ bool GuiVisitor::visitBezierSurface(BezierSurface &bezierSurface) {
     }
   }
 
+  static bool show_intersection_texture = false;
+  ImGui::BeginDisabled(!bezierSurface.hasIntersectionTexture());
+  ImGui::Checkbox("Show Intersection Texture", &show_intersection_texture);
+  ImGui::EndDisabled();
+
+  if (bezierSurface.hasIntersectionTexture()) {
+    renderTextureWindow("Intersection Texture", show_intersection_texture,
+                        *bezierSurface.getIntersectionTexture());
+
+    if (ImGui::Button("Close intersection curve")) {
+      bezierSurface.getIntersectionTexture()->closeIntersectionCurve();
+    }
+  }
+
   return change;
 }
 
@@ -393,4 +407,35 @@ GuiVisitor::clonePoints(const BezierSurface &bezierSurface) {
         *_gui._entityFactory.createPoint(p.get().getPosition()));
   }
   return points;
+}
+
+void GuiVisitor::renderTextureWindow(const std::string &windowName,
+                                     bool showTexture,
+                                     IntersectionTexture &texture) {
+  if (showTexture) {
+    ImGui::SetNextWindowSize(ImVec2(800, 800), ImGuiCond_Always);
+    ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoResize);
+
+    ImVec2 image_size(800, 800);
+    ImVec2 image_pos = ImGui::GetCursorScreenPos();
+    ImGui::Image(
+        static_cast<ImTextureID>(static_cast<intptr_t>(texture.getTextureId())),
+        image_size);
+
+    if (ImGui::IsItemHovered()) {
+      ImVec2 mouse_pos = ImGui::GetMousePos();
+      ImVec2 local_pos =
+          ImVec2(mouse_pos.x - image_pos.x, mouse_pos.y - image_pos.y);
+
+      if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        texture.floodFill(static_cast<uint32_t>(local_pos.x),
+                          static_cast<uint32_t>(local_pos.y), true);
+      } else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+        texture.floodFill(static_cast<uint32_t>(local_pos.x),
+                          static_cast<uint32_t>(local_pos.y), false);
+      }
+    }
+
+    ImGui::End();
+  }
 }

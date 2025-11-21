@@ -2,6 +2,7 @@
 #include "IController.hpp"
 #include "IDifferentialParametricForm.hpp"
 #include "IEntity.hpp"
+#include "bezierSurface.hpp"
 #include "bezierSurfaceC0.hpp"
 #include "bezierSurfaceRenderer.hpp"
 #include "color.hpp"
@@ -16,6 +17,7 @@
 #include "jsonSerializer.hpp"
 #include "modelController.hpp"
 #include "nfd.h"
+#include "normalOffsetSurface.hpp"
 #include "pointEntity.hpp"
 #include "scene.hpp"
 #include "sceneRenderer.hpp"
@@ -92,6 +94,7 @@ void GUI::displayGUI() {
       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNavFocus;
   ImGui::SetNextWindowBgAlpha(0.9f);
   ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+
   if (ImGui::Begin("Settings", nullptr, window_flags)) {
     showFPSCounter();
 
@@ -260,11 +263,16 @@ void GUI::displayEntitiesList() {
 }
 
 void GUI::deleteSelectedEntities() {
-  _scene->removeEntities(_selectedEntities);
+  auto old_selected_entities = getSelectedEntities();
   clearSelectedEntities();
+  _scene->removeEntities(old_selected_entities);
+  // clearSelectedEntities();
 }
 
 void GUI::clearSelectedEntities() {
+  // std::erase_if(_selectedEntities,
+  //               [](IEntity *entity) { return entity == nullptr; });
+
   for (const auto &selected_entity : _selectedEntities) {
     selected_entity->setColor(Color::White());
   }
@@ -475,8 +483,20 @@ void GUI::findIntersection() {
           : dynamic_cast<algebra::IDifferentialParametricForm<2, 3> *>(
                 entities[1]);
 
-  _intersectionFinder.setSurfaces(surf0, surf1);
+  auto *bezier_surface_0 = dynamic_cast<BezierSurface *>(surf0);
+  auto *bezier_surface_1 = dynamic_cast<BezierSurface *>(surf1);
 
+  const auto offset_value =
+      _intersectionFinder.getIntersectionConfig().offsetValue_;
+  auto surf_0_offset = std::make_unique<algebra::NormalOffsetSurface>(
+      &bezier_surface_0->getAlgebraSurfaceC0(), offset_value);
+  auto surf_1_offset = std::make_unique<algebra::NormalOffsetSurface>(
+      &bezier_surface_1->getAlgebraSurfaceC0(), offset_value);
+  if (_intersectionFinder.getIntersectionConfig().useOffsetSurface_) {
+    _intersectionFinder.setSurfaces(surf_0_offset.get(), surf_1_offset.get());
+  } else {
+    _intersectionFinder.setSurfaces(surf0, surf1);
+  }
   if (_intersectionFinder.getIntersectionConfig().useCursor_) {
     _intersectionFinder.setGuidancePoint(getCursorPosition());
   }
@@ -507,9 +527,9 @@ void GUI::findIntersection() {
   intersection_curve->getSecondTexture().setWrapping(surf1->wrapped(0),
                                                      surf1->wrapped(1));
 
-  surface_0_intersection->setIntersectionTexture(
+  surface_0_intersection->combineAndConnectIntersectionTexture(
       intersection_curve->getFirstTexturePtr());
-  surface_1_intersection->setIntersectionTexture(
+  surface_1_intersection->combineAndConnectIntersectionTexture(
       intersection_curve->getSecondTexturePtr());
 
   _scene->addEntity(EntityType::IntersectionCurve,

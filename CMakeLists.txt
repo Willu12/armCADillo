@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME}
  src/entities/entityFactory/entityFactory.cpp
  src/entities/gregorySurface.cpp
  src/entities/interpolatingSplineC2.cpp
+ src/entities/intersectable.cpp
  src/entities/intersectionCurve.cpp
  src/entities/polyline.cpp
  src/entities/virtualPoint.cpp

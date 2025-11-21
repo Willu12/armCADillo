@@ -2,6 +2,7 @@
 #include "color.hpp"
 #include "vec.hpp"
 #include <memory>
+#include <print>
 #include <queue>
 
 std::pair<std::unique_ptr<IntersectionTexture>,
@@ -10,18 +11,31 @@ IntersectionTexture::createIntersectionTextures(
     const Intersection &intersection,
     std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
         bounds) {
+  std::vector<algebra::Vec2f> points0(intersection.points.size());
   std::vector<algebra::Vec2f> points1(intersection.points.size());
-  std::vector<algebra::Vec2f> points2(intersection.points.size());
 
   for (const auto &[i, p] :
        intersection.points | std::ranges::views::enumerate) {
-    points1[i] = p.surface0;
-    points2[i] = p.surface1;
+    points0[i] = p.surface0;
+    points1[i] = p.surface1;
   }
 
-  auto texture1 = std::make_unique<IntersectionTexture>(points1, bounds.first);
-  auto texture2 = std::make_unique<IntersectionTexture>(points2, bounds.second);
-  return {std::move(texture1), std::move(texture2)};
+  /// Intersection Curve
+  auto start_surface_0 = uvToCoord(intersection.points.front().surface0);
+  auto start_surface_1 = uvToCoord(intersection.points.front().surface1);
+  auto end_surface_0 = uvToCoord(intersection.points.back().surface0);
+  auto end_surface_1 = uvToCoord(intersection.points.back().surface0);
+
+  Segment curve_0 = {.start = start_surface_0, .end = end_surface_0};
+  Segment curve_1 = {.start = start_surface_1, .end = end_surface_1};
+
+  auto texture0 = std::make_unique<IntersectionTexture>(points0, bounds.first);
+  auto texture1 = std::make_unique<IntersectionTexture>(points1, bounds.second);
+
+  texture0->setIntersectionCurve({curve_0});
+  texture1->setIntersectionCurve({curve_1});
+
+  return {std::move(texture0), std::move(texture1)};
 }
 
 void IntersectionTexture::bind() const { texture_->bind(0); }
@@ -40,7 +54,7 @@ uint32_t IntersectionTexture::getTextureId() const {
 }
 
 void IntersectionTexture::drawLine(
-    const std::vector<algebra::Vec2f> &surfacePoints) {
+    const std::vector<algebra::Vec2f> &surfacePoints, Color color) {
   const algebra::Vec2f u = bounds_[0];
   const algebra::Vec2f v = bounds_[1];
 
@@ -58,7 +72,7 @@ void IntersectionTexture::drawLine(
     int ix = std::clamp(x, 0, kWidth - 1);
     int iy = std::clamp(y, 0, kHeight - 1);
     int index = iy * kWidth + ix;
-    canvas_.fillAtIndex(index, Color::Green());
+    canvas_.fillAtIndex(index, color);
   };
 
   for (size_t i = 1; i < surfacePoints.size(); ++i) {
@@ -71,7 +85,7 @@ void IntersectionTexture::drawLine(
     int sy = y0 < y1 ? 1 : -1;
     int err = dx - dy;
 
-    if (std::max(dx, dy) > 100) {
+    if (std::max(dx, dy) > 100 && surfacePoints.size() > 2) {
       continue;
     }
 
@@ -206,3 +220,26 @@ algebra::Vec2f IntersectionTexture::uv(uint32_t x, uint32_t y) const {
 };
 
 void IntersectionTexture::update() { texture_->fill(canvas_.getData()); }
+IntersectionTexture::Coord
+
+IntersectionTexture::uvToCoord(const algebra::Vec2f &uv) {
+  auto x = static_cast<uint32_t>(uv.x() * static_cast<float>(kWidth));
+  auto y = static_cast<uint32_t>(uv.y() * static_cast<float>(kHeight));
+
+  return {.x = x, .y = y};
+}
+
+void IntersectionTexture::closeIntersectionCurve() {
+  if (intersectionCurve_.size() < 2) {
+    return;
+  }
+
+  auto first_segment = intersectionCurve_.front();
+  auto last_segment = intersectionCurve_.back();
+  auto start_uv = uv(first_segment.start.x, first_segment.start.y);
+  auto end_uv = uv(last_segment.end.x, last_segment.end.y);
+
+  drawLine({start_uv, end_uv}, Color::Red());
+
+  update();
+}

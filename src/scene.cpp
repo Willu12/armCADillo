@@ -30,6 +30,9 @@ void Scene::addEntity(EntityType entityType, std::unique_ptr<IEntity> entity) {
 Camera *Scene::getCamera() { return camera_; }
 
 void Scene::removeEntities(std::vector<IEntity *> &entitiesToRemove) {
+  if (entitiesToRemove.empty()) {
+    return;
+  }
 
   filterEntitiesToRemove(entitiesToRemove);
   enqueueSurfacePoints(entitiesToRemove);
@@ -121,6 +124,7 @@ void Scene::filterEntitiesToRemove(std::vector<IEntity *> &entitiesToRemove) {
 void Scene::enqueueSurfacePoints(
     std::vector<IEntity *> &entitiesToRemove) const {
   const auto &points = getPoints();
+  std::vector<IEntity *> points_to_remove;
 
   for (const auto &entity : entitiesToRemove) {
     if (auto *surface = dynamic_cast<BezierSurface *>(entity)) {
@@ -132,11 +136,14 @@ void Scene::enqueueSurfacePoints(
             });
 
         if (it != points.end()) {
-          entitiesToRemove.push_back(*it);
+          points_to_remove.push_back(*it);
         }
       }
     }
   }
+
+  entitiesToRemove.insert(entitiesToRemove.end(), points_to_remove.begin(),
+                          points_to_remove.end());
 }
 
 /// i dont like this function
