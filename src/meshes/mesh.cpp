@@ -96,6 +96,8 @@ void Mesh::addSimpleVertexLayout() {
   glBindVertexArray(0);
 }
 void Mesh::addTextureLayout() {
+  glBindVertexArray(_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
@@ -104,6 +106,7 @@ void Mesh::addTextureLayout() {
   glEnableVertexAttribArray(1);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 void Mesh::initBuffers() {
