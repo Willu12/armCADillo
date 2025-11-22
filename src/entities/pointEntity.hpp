@@ -18,11 +18,9 @@ public:
   }
 
   ~PointEntity() {
-    /*
     for (const auto &subscriber : _subscribers) {
       subscriber.get().onSubscribableDestroyed(*this);
     }
-    */
   }
 
   PointEntity(PointEntity &&other) noexcept
