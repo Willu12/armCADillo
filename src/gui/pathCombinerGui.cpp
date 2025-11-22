@@ -9,9 +9,11 @@
 void PathCombinerGUI::displayGUI(Cursor *cursor) {
   ImGui::Begin("Path Combiner");
   showPathList();
+
   addPoint(cursor->getPosition());
   loadPathsGUI();
   createCombinedPaths();
+  removeSelectedPaths();
   ImGui::End();
 };
 
@@ -54,7 +56,7 @@ void PathCombinerGUI::createCombinedPaths() {
 
 void PathCombinerGUI::addPoint(const algebra::Vec3f &cursorPosition) {
   if (ImGui::Button("Add point")) {
-    pathCombiner_.addPoint(cursorPosition);
+    pathCombiner_.addPoint(cursorPosition + algebra::Vec3f{0.f, 1.5f, 0.f});
   }
 }
 
@@ -89,4 +91,13 @@ std::vector<const NamedPath *> PathCombinerGUI::getSelectedPaths() const {
     paths.push_back(pathCombiner_.millingPaths()[index].get());
   }
   return paths;
+}
+
+void PathCombinerGUI::removeSelectedPaths() {
+  if (ImGui::Button("Remove selected paths")) {
+    for (const auto &index : selectedPaths_) {
+      pathCombiner_.removePath(index);
+    }
+    selectedPaths_.clear();
+  }
 }

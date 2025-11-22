@@ -17,6 +17,7 @@ private:
   bool showSelectedPaths_ = false;
   void showPathList();
   void createCombinedPaths();
+  void removeSelectedPaths();
   // void loadPaths(std::vector<)
 
   void addPoint(const algebra::Vec3f &position);

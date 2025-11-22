@@ -16,7 +16,7 @@ void PathCombiner::addPaths(
 }
 
 void PathCombiner::addPoint(const algebra::Vec3f &point) {
-  std::string name(&"point"[millingPaths_.size()]);
+  std::string name("point" + std::to_string(millingPaths_.size()));
   std::vector points{point};
   auto path = std::make_unique<NamedPath>(points, name);
   millingPaths_.push_back(std::move(path));
