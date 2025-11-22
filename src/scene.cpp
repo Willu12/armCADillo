@@ -29,12 +29,11 @@ void Scene::addEntity(EntityType entityType, std::unique_ptr<IEntity> entity) {
 
 Camera *Scene::getCamera() { return camera_; }
 
-void Scene::removeEntities(std::vector<IEntity *> &entitiesToRemove) {
+void Scene::removeEntities(std::vector<const IEntity *> &entitiesToRemove) {
   if (entitiesToRemove.empty()) {
     return;
   }
 
-  filterEntitiesToRemove(entitiesToRemove);
   enqueueSurfacePoints(entitiesToRemove);
   for (auto it = entities_.begin(); it != entities_.end();) {
     auto &vec = it->second;
@@ -112,22 +111,13 @@ std::vector<IEntity *> Scene::getPoints() const {
   return points;
 }
 
-void Scene::filterEntitiesToRemove(std::vector<IEntity *> &entitiesToRemove) {
-  std::erase_if(entitiesToRemove, [](const IEntity *entity) {
-    if (const auto *point = dynamic_cast<const PointEntity *>(entity)) {
-      return point->surfacePoint();
-    }
-    return false;
-  });
-}
-
 void Scene::enqueueSurfacePoints(
-    std::vector<IEntity *> &entitiesToRemove) const {
+    std::vector<const IEntity *> &entitiesToRemove) const {
   const auto &points = getPoints();
   std::vector<IEntity *> points_to_remove;
 
   for (const auto &entity : entitiesToRemove) {
-    if (auto *surface = dynamic_cast<BezierSurface *>(entity)) {
+    if (auto *surface = dynamic_cast<const BezierSurface *>(entity)) {
       const auto &surface_points = surface->getPoints();
       for (const auto &surface_point : surface_points) {
         const auto it =
@@ -180,15 +170,13 @@ IEntity *Scene::contractEdge(const PointEntity &p1, const PointEntity &p2) {
   auto center_point = std::make_unique<PointEntity>(avg_pos);
 
   PointEntity *center_point_ptr = center_point.get();
+
+  rebindReferences(p1, *center_point);
+  rebindReferences(p2, *center_point);
+  deadEntities_.push_back(&p1);
+  deadEntities_.push_back(&p2);
+
   addEntity(EntityType::Point, std::move(center_point));
-
-  rebindReferences(p1, *center_point_ptr);
-  rebindReferences(p2, *center_point_ptr);
-  auto &points = entities_.at(EntityType::Point);
-  std::erase_if(points, [&p1, &p2](const auto &p) {
-    return p->getId() == p1.getId() || p->getId() == p2.getId();
-  });
-
   return center_point_ptr;
 }
 
@@ -220,6 +208,8 @@ void Scene::rebindReferences(const PointEntity &oldPoint,
       }
     }
   }
+
+  oldPoint.clearSubscribers();
 }
 
 void Scene::removeDeadEntities() {

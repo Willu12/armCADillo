@@ -36,7 +36,7 @@ public:
   const Patches &getPatches() const { return _patches; }
   const IMeshable &getMesh() const override { return *_mesh; }
   const IMeshable &getPolyMesh() const { return *_polyMesh; }
-  std::vector<std::reference_wrapper<PointEntity>> getPoints() {
+  std::vector<std::reference_wrapper<PointEntity>> getPoints() const {
     return _points;
   }
 

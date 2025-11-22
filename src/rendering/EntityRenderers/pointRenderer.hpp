@@ -3,7 +3,6 @@
 #include "camera.hpp"
 #include "shader.hpp"
 #include "vec.hpp"
-#include <memory>
 
 class PointRenderer : public IEntityRenderer {
 public:
@@ -13,19 +12,20 @@ public:
         _camera(camera), _color(color) {}
 
   void render(const std::vector<IEntity *> &entities) override {
-    if (entities.empty())
+    if (entities.empty()) {
       return;
+    }
 
     _shader.use();
     _shader.setViewMatrix(_camera.viewMatrix());
     _shader.setProjectionMatrix(_camera.getProjectionMatrix());
     _shader.setVec4f("Color", _color);
 
-    const auto &sampleMesh = entities[0]->getMesh();
-    glBindVertexArray(sampleMesh.getVAO());
+    const auto &mesh = entities.front()->getMesh();
+    glBindVertexArray(mesh.getVAO());
     GLuint mbuffer = prepareInstacedModelMatrices(entities);
 
-    glDrawElementsInstanced(GL_TRIANGLES, sampleMesh.getIndicesLength(),
+    glDrawElementsInstanced(GL_TRIANGLES, mesh.getIndicesLength(),
                             GL_UNSIGNED_INT, nullptr, entities.size());
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Unbind the buffer
     glBindVertexArray(0);

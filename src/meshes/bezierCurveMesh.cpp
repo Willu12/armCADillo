@@ -67,6 +67,8 @@ BezierMesh::BezierMesh(const std::vector<algebra::Vec3f> &vertices)
 }
 
 void BezierMesh::addSimpleVertexLayout() {
+  glBindVertexArray(_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   glEnableVertexAttribArray(0);
 
   glVertexAttribIPointer(0, 1, GL_INT, sizeof(BezierVertex), (void *)0);

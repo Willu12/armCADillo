@@ -16,7 +16,7 @@ public:
   std::vector<IEntity *> getEntites() const;
   void addEntity(EntityType entityType, std::unique_ptr<IEntity> entity);
   Camera *getCamera();
-  void removeEntities(std::vector<IEntity *> &entitiesToRemove);
+  void removeEntities(std::vector<const IEntity *> &entitiesToRemove);
   std::unordered_map<EntityType, std::vector<IEntity *>>
   getGroupedEntities() const;
   std::vector<IEntity *> getPickables() const;
@@ -30,11 +30,10 @@ private:
   Camera *camera_;
   std::unordered_map<EntityType, std::vector<std::unique_ptr<IEntity>>>
       entities_;
-  std::vector<IEntity *> deadEntities_;
+  std::vector<const IEntity *> deadEntities_;
 
-  void filterEntitiesToRemove(std::vector<IEntity *> &entitiesToRemove);
-
-  void enqueueSurfacePoints(std::vector<IEntity *> &entitiesToRemove) const;
+  void
+  enqueueSurfacePoints(std::vector<const IEntity *> &entitiesToRemove) const;
   void enqueueDeadGregoryPatches();
   IEntity *contractEdge(const PointEntity &p1, const PointEntity &p2);
 

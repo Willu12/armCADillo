@@ -104,7 +104,7 @@ void GUI::displayGUI() {
     displayEntitiesList();
     renderCursorControllerSettings();
 
-    createEnitityUI();
+    createEntityUI();
     findIntersectionUI();
 
     removeButtonUI();
@@ -263,9 +263,20 @@ void GUI::displayEntitiesList() {
 }
 
 void GUI::deleteSelectedEntities() {
-  auto old_selected_entities = getSelectedEntities();
+  std::vector<const IEntity *> dead_entities;
+  dead_entities.reserve(getSelectedEntities().size());
+  for (const auto *entity : getSelectedEntities()) {
+    if (const auto *point = dynamic_cast<const PointEntity *>(entity)) {
+      if (point->surfacePoint()) {
+        continue;
+      }
+    }
+    dead_entities.push_back(entity);
+  }
+
   clearSelectedEntities();
-  _scene->removeEntities(old_selected_entities);
+
+  _scene->removeEntities(dead_entities);
   // clearSelectedEntities();
 }
 
@@ -440,7 +451,9 @@ void GUI::contractSelectedEdge() {
   if (points.size() != 2) {
     return;
   }
-  _selectedEntities = {_scene->contractEdge(points[0], points[1])};
+  _scene->contractEdge(points[0], points[1]);
+  _selectedEntities.clear();
+  //_selectedEntities = {_scene->contractEdge(points[0], points[1])};
 }
 
 void GUI::contractEdgeUI() {
@@ -536,7 +549,7 @@ void GUI::findIntersection() {
                     std::move(intersection_curve));
 }
 
-void GUI::createEnitityUI() {
+void GUI::createEntityUI() {
   static EntityType selected_type = EntityType::Point;
   std::string preview_value = "Select...";
 

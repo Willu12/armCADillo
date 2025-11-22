@@ -105,7 +105,7 @@ private:
   void renderModelControllSettings();
   void renderCursorControllerSettings();
 
-  void createEnitityUI();
+  void createEntityUI();
   void removeButtonUI();
   void createSerializeUI();
   void createLoadSceneUI();

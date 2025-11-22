@@ -29,6 +29,8 @@ public:
     return _subscribers;
   }
 
+  void clearSubscribers() const { _subscribers.clear(); }
+
 protected:
   mutable std::vector<std::reference_wrapper<ISubscriber>> _subscribers;
 };

@@ -69,6 +69,7 @@ void App::initImgui() {
 void App::mainLoop() {
   while (!glfwWindowShouldClose(window_)) {
     glfwPollEvents();
+
     if (glfwGetWindowAttrib(window_, GLFW_ICONIFIED) != 0) {
       ImGui_ImplGlfw_Sleep(10);
       continue;

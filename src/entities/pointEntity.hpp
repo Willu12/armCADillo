@@ -18,10 +18,27 @@ public:
   }
 
   ~PointEntity() {
+    /*
     for (const auto &subscriber : _subscribers) {
       subscriber.get().onSubscribableDestroyed(*this);
     }
+    */
   }
+
+  PointEntity(PointEntity &&other) noexcept
+      : IEntity(std::move(other)), ISubscribable(std::move(other)),
+        _mesh(std::move(other._mesh)), _surfacePoint(other._surfacePoint) {}
+
+  PointEntity &operator=(PointEntity &&other) noexcept {
+    if (this != &other) {
+      IEntity::operator=(std::move(other));
+      ISubscribable::operator=(std::move(other));
+      _mesh = std::move(other._mesh);
+      _surfacePoint = other._surfacePoint;
+    }
+    return *this;
+  }
+
   bool acceptVisitor(IVisitor &visitor) override {
     bool changed = visitor.visitPoint(*this);
     if (changed) {
