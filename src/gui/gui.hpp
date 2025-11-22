@@ -15,7 +15,9 @@
 #include "jsonSerializer.hpp"
 #include "modelController.hpp"
 #include "mouse.hpp"
+#include "namedPath.hpp"
 #include "optional"
+#include "pathCombinerGui.hpp"
 #include "pathsGenerator.hpp"
 #include "pointEntity.hpp"
 #include "sceneRenderer.hpp"
@@ -74,6 +76,10 @@ public:
   }
   friend class GuiVisitor;
 
+  std::vector<const NamedPath *> selectedMillingPaths() {
+    return pathCombinerGUI_.getSelectedPaths();
+  }
+
 private:
   GLFWwindow *_window;
   Scene *_scene;
@@ -93,6 +99,7 @@ private:
   IntersectionFinder _intersectionFinder;
   EntityUtils entityUtils_;
   PathsGenerator pathsGenerator_;
+  PathCombinerGUI pathCombinerGUI_;
 
   std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime =
       std::chrono::high_resolution_clock::now();

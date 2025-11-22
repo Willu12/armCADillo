@@ -66,15 +66,22 @@ void Intersectable::combineAndConnectIntersectionTexture(
     auto d_ss = dist_squared_wrapped(curr.start, next.start);
     auto d_se = dist_squared_wrapped(curr.start, next.end);
 
-    auto min_d = std::min({d_es, d_ee, d_ss, d_se});
+    if (first_rotatable) {
+      auto min_d = std::min({d_es, d_ee, d_ss, d_se});
 
-    if (min_d == d_ee) {
-      std::swap(next.start, next.end);
-    } else if (min_d == d_ss && first_rotatable) {
-      std::swap(curr.start, curr.end);
-    } else if (min_d == d_se && first_rotatable) {
-      std::swap(curr.start, curr.end);
-      std::swap(next.start, next.end);
+      if (min_d == d_ee) {
+        std::swap(next.start, next.end);
+      } else if (min_d == d_ss) {
+        std::swap(curr.start, curr.end);
+      } else if (min_d == d_se) {
+        std::swap(curr.start, curr.end);
+        std::swap(next.start, next.end);
+      }
+    } else {
+      auto min_d = std::min({d_es, d_ee});
+      if (min_d == d_ee) {
+        std::swap(next.start, next.end);
+      }
     }
   };
 
@@ -89,7 +96,7 @@ void Intersectable::combineAndConnectIntersectionTexture(
   // auto middle_point = (curr_end_uv + next_start_uv) * 0.5f;
 
   // intersectionTexture_->drawLine({curr_end_uv, middle_point});
-  intersectionTexture_->drawLine({curr_end_uv, next_start_uv}, Color::Red());
+  intersectionTexture_->drawLine({curr_end_uv, next_start_uv});
 
   intersectionTexture_->update();
 

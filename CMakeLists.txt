@@ -4,8 +4,8 @@ project(armCADillo)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_FLAGS "-fsanitize=address,undefined -g")
-set(CMAKE_LINKER_FLAGS "-fsanitize=address,undefined")
+#set(CMAKE_CXX_FLAGS "-fsanitize=address,undefined -g")
+#set(CMAKE_LINKER_FLAGS "-fsanitize=address,undefined")
 
 add_subdirectory(external)
 
@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
  src/entities/virtualPoint.cpp
  src/gui/entityBuilders/entityBuilder.cpp
  src/gui/gui.cpp
+ src/gui/pathCombinerGui.cpp
  src/gui/visitors/GuiVisitor.cpp
  src/gui/visitors/jsonSerializer.cpp
  src/intersections/intersectionFinder.cpp
@@ -40,8 +41,12 @@ add_executable(${PROJECT_NAME}
  src/paths/GCodeSerializer.cpp
  src/paths/heightMap.cpp
  src/paths/heightMapGenerator.cpp
+ src/paths/pathCombiner.cpp
  src/paths/pathsGenerator.cpp
+ src/paths/pathReader.cpp
  src/paths/roughingPathGenerator.cpp
+ src/paths/namedPath.cpp
+ src/rendering/millingPathRenderer.cpp
  src/scene.cpp
  src/shader.cpp
  src/textures/image.cpp

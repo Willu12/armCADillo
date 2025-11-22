@@ -104,6 +104,7 @@ void App::mainLoop() {
     sceneRenderer_->renderSelectionBox(gui_->getMouse());
     sceneRenderer_->renderCursor(gui_->getCursor());
     sceneRenderer_->renderVirtualPoints(gui_->getVirtualPoints());
+    sceneRenderer_->renderMillingPaths(gui_->selectedMillingPaths());
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window_);

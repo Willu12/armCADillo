@@ -118,9 +118,9 @@ void GUI::displayGUI() {
     processControllers();
 
     renderPathGeneratorUI();
-
     ImGui::End();
   }
+  pathCombinerGUI_.displayGUI(getCursor());
 }
 
 const Mouse &GUI::getMouse() { return _mouse; }

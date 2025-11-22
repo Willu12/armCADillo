@@ -13,6 +13,8 @@
 #include "gregorySurfaceRenderer.hpp"
 #include "grid.hpp"
 #include "intersectionCurveRenderer.hpp"
+#include "millingPathRenderer.hpp"
+#include "namedPath.hpp"
 #include "pickingRenderer.hpp"
 #include "pickingTexture.hpp"
 #include "pointRenderer.hpp"
@@ -37,7 +39,7 @@ public:
       : _centerPointRenderer(*camera), _pickingRenderer(pickingTexture),
         _selectedPointsRenderer(*camera,
                                 algebra::Vec4f{0.0f, 0.9f, 0.9f, 1.0f}),
-        _camera(camera), _window(window) {
+        _camera(camera), _window(window), millingPathRenderer_(camera) {
     initEntityRenderers();
   }
 
@@ -104,6 +106,12 @@ public:
     return *_entityRenderers.at(entityType);
   }
 
+  void renderMillingPaths(const std::vector<const NamedPath *> &paths) {
+    for (const auto &path : paths) {
+      millingPathRenderer_.render(*path);
+    }
+  }
+
 private:
   std::unordered_map<EntityType, std::unique_ptr<IEntityRenderer>>
       _entityRenderers;
@@ -115,6 +123,7 @@ private:
   Camera *_camera;
   GLFWwindow *_window;
   GridRenderer gridRenderer_;
+  MillingPathRenderer millingPathRenderer_;
 
   void initEntityRenderers() {
     _entityRenderers.insert(

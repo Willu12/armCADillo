@@ -239,7 +239,7 @@ void IntersectionTexture::closeIntersectionCurve() {
   auto start_uv = uv(first_segment.start.x, first_segment.start.y);
   auto end_uv = uv(last_segment.end.x, last_segment.end.y);
 
-  drawLine({start_uv, end_uv}, Color::Red());
+  drawLine({start_uv, end_uv});
 
   update();
 }

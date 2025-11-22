@@ -3,9 +3,8 @@
 #include <fstream>
 #include <ranges>
 
-void GCodeSerializer::serializePath(
-    const MillingPath &millingPath,
-    const std::filesystem::path &filename) const {
+void GCodeSerializer::serializePath(const MillingPath &millingPath,
+                                    const std::filesystem::path &filename) {
 
   std::ofstream out(filename);
   if (!out) {
