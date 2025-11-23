@@ -210,7 +210,7 @@ IntersectionTexture::getCellType(uint32_t x, uint32_t y) const {
 }
 
 bool IntersectionTexture::isTrimmed(uint32_t x, uint32_t y) const {
-  return getCellType(x, y) == CellType::Trim;
+  return getCellType(x, y) != CellType::Keep;
 }
 
 algebra::Vec2f IntersectionTexture::uv(uint32_t x, uint32_t y) const {

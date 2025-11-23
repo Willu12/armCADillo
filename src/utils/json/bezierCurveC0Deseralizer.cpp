@@ -18,5 +18,5 @@ BezierCurveC0Deserializer::deserializeEntity(const json &j,
     bezier_curve_c0->getName() = name;
   }
   bezier_curve_c0->getId() = id;
-  return std::move(bezier_curve_c0);
+  return bezier_curve_c0;
 }

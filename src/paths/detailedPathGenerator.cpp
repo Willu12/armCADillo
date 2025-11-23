@@ -20,63 +20,6 @@ static constexpr float kFloorHeight = 0.f;
 static constexpr float kFloorHeightPath = 1.5f;
 static constexpr uint32_t kMaxIndex = std::numeric_limits<uint32_t>::max();
 
-void DetailedPathGenerator::prepare() {
-
-  /// TODO:
-  /// 1. add proper interface for specyfing on which surfaces we want
-  /// intersection.
-  ///  2. add option to combine intersection textures.
-  /// The result of this phase is that every surface of the model has proper
-  /// intersection texture and can be processed
-
-  /// for all pairs of surfaces
-  for (int i = 0; i < model_->surfaces().size(); ++i) {
-    for (int j = i + 1; j < model_->surfaces().size(); ++j) {
-
-      auto *first_surface = model_->surfaces()[i];
-      auto *second_surface = model_->surfaces()[j];
-
-      auto first_algebra_surface = first_surface->getAlgebraSurfaceC0();
-      auto second_algebra_surface = second_surface->getAlgebraSurfaceC0();
-
-      offset_surfaces_[i] = std::make_unique<algebra::NormalOffsetSurface>(
-          &first_algebra_surface, cutter_.diameter_ / 2.f);
-
-      offset_surfaces_[j] = std::make_unique<algebra::NormalOffsetSurface>(
-          &second_algebra_surface, cutter_.diameter_ / 2.f);
-
-      intersectionFinder_->setSurfaces(offset_surfaces_[i].get(),
-                                       offset_surfaces_[j].get());
-
-      auto intersection = intersectionFinder_->find(false);
-      if (!intersection) {
-        continue;
-      }
-
-      std::pair<std::array<algebra::Vec2f, 2>, std::array<algebra::Vec2f, 2>>
-          bounds(first_surface->bounds(), second_surface->bounds());
-
-      auto intersection_curve = std::make_unique<IntersectionCurve>(
-          *intersection, bounds, intersection->looped);
-
-      intersection_curve->setFirstPoint(intersection->firstPoint);
-      intersections_.push_back(intersection_curve.get());
-
-      intersection_curve->getFirstTexture().setWrapping(
-          first_surface->wrapped(0), first_surface->wrapped(1));
-      intersection_curve->getSecondTexture().setWrapping(
-          second_surface->wrapped(0), second_surface->wrapped(1));
-
-      first_surface->combineIntersectionTexture(
-          intersection_curve->getFirstTexturePtr());
-      second_surface->combineIntersectionTexture(
-          intersection_curve->getSecondTexturePtr());
-
-      scene_->addEntity(EntityType::IntersectionCurve,
-                        std::move(intersection_curve));
-    }
-  }
-}
 void DetailedPathGenerator::generate() {
   /// This section assumes that every model surface has proper intersection
   /// texture and all sections that should be trimmed are set.
@@ -84,7 +27,7 @@ void DetailedPathGenerator::generate() {
   for (auto *surface : model_->surfaces()) {
     //// set floor
     setFloorAsTrimmed(*surface);
-    auto segments = generateLineSegments(*surface, Direction::Vertical, 100);
+    auto segments = generateLineSegments(*surface);
     //  colorSegments(*surface, segments);
     auto surface_paths = generateSurfacePaths(*surface, segments);
     auto path = combineSurfacePaths(surface_paths);
@@ -117,23 +60,21 @@ void DetailedPathGenerator::setFloorAsTrimmed(
 }
 
 std::vector<std::vector<DetailedPathGenerator::Coord>>
-DetailedPathGenerator::generateLineSegments(BezierSurface &surface,
-                                            Direction direction,
-                                            uint32_t lineCount) {
+DetailedPathGenerator::generateLineSegments(BezierSurface &surface) {
   std::vector<std::vector<Coord>> lines;
-  lines.reserve(lineCount);
+  lines.reserve(lines_);
 
   const auto &tex = *surface.getIntersectionTexture();
   const auto size = tex.getSize();
   const uint32_t max_index = size.height;
-  const uint32_t step = max_index / lineCount;
+  const uint32_t step = max_index / lines_;
 
   for (uint32_t line = 0; line < max_index; line += step) {
     std::vector<Coord> segments;
 
     for (uint32_t i = 0; i < max_index; ++i) {
-      uint32_t x = (direction == Direction::Horizontal) ? i : line;
-      uint32_t y = (direction == Direction::Horizontal) ? line : i;
+      uint32_t x = (direction_ == Direction::Horizontal) ? i : line;
+      uint32_t y = (direction_ == Direction::Horizontal) ? line : i;
 
       bool curr_trim = tex.isTrimmed(x, y);
 
@@ -142,8 +83,8 @@ DetailedPathGenerator::generateLineSegments(BezierSurface &surface,
       }
 
       if (i < max_index - 1) {
-        uint32_t x_next = (direction == Direction::Horizontal) ? i + 1 : line;
-        uint32_t y_next = (direction == Direction::Horizontal) ? line : i + 1;
+        uint32_t x_next = (direction_ == Direction::Horizontal) ? i + 1 : line;
+        uint32_t y_next = (direction_ == Direction::Horizontal) ? line : i + 1;
 
         bool next_trim = tex.isTrimmed(x_next, y_next);
 

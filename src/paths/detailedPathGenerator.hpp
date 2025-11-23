@@ -25,7 +25,6 @@ public:
 
   enum class Direction : uint8_t { Vertical, Horizontal };
 
-  void prepare();
   void generate();
   void setModel(const Model *model) {
     model_ = model;
@@ -44,6 +43,9 @@ public:
   void colorSegments(BezierSurface &surface,
                      const std::vector<std::vector<Coord>> &segments);
 
+  Direction &direction() { return direction_; }
+  int &lines() { return lines_; }
+
 private:
   const Model *model_ = nullptr;
   Cutter cutter_;
@@ -52,13 +54,14 @@ private:
   std::vector<IntersectionCurve *> intersections_;
   IntersectionFinder *intersectionFinder_;
 
+  int lines_ = 200;
+  Direction direction_ = Direction::Horizontal;
+
   std::vector<std::unique_ptr<algebra::NormalOffsetSurface>> offset_surfaces_;
 
   void setFloorAsTrimmed(BezierSurface &intersectableSurface) const;
 
-  std::vector<std::vector<Coord>> generateLineSegments(BezierSurface &surface,
-                                                       Direction direction,
-                                                       uint32_t lineCount);
+  std::vector<std::vector<Coord>> generateLineSegments(BezierSurface &surface);
 
   std::vector<std::vector<algebra::Vec3f>>
   generateSurfacePaths(const BezierSurface &surface,

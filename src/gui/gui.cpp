@@ -8,6 +8,7 @@
 #include "color.hpp"
 #include "cursor.hpp"
 #include "cursorController.hpp"
+#include "detailedPathGenerator.hpp"
 #include "entitiesTypes.hpp"
 #include "entityFactory.hpp"
 #include "imgui.h"
@@ -540,9 +541,9 @@ void GUI::findIntersection() {
   intersection_curve->getSecondTexture().setWrapping(surf1->wrapped(0),
                                                      surf1->wrapped(1));
 
-  surface_0_intersection->combineAndConnectIntersectionTexture(
+  surface_0_intersection->combineIntersectionTexture(
       intersection_curve->getFirstTexturePtr());
-  surface_1_intersection->combineAndConnectIntersectionTexture(
+  surface_1_intersection->combineIntersectionTexture(
       intersection_curve->getSecondTexturePtr());
 
   _scene->addEntity(EntityType::IntersectionCurve,
@@ -580,6 +581,7 @@ void GUI::renderPathGeneratorUI() {
   if (ImGui::Button("set selected surfaces as model")) {
     pathsGenerator_.setModel(getSelectedSurfaces());
   }
+
   if (ImGui::Button("Generate Paths")) {
     pathsGenerator_.run();
   }
@@ -632,8 +634,26 @@ void GUI::renderPathGeneratorUI() {
   ////
   auto &detailed_path_generator = pathsGenerator_.getDetailedPathGenerator();
 
-  if (ImGui::Button("Prepare detailed path")) {
-    detailed_path_generator.prepare();
+  ImGui::InputInt("Lines", &detailed_path_generator.lines());
+
+  auto &direction = detailed_path_generator.direction();
+
+  static const char *direction_names[] = {"Vertical", "Horizontal"};
+
+  if (ImGui::BeginCombo("Direction",
+                        direction_names[static_cast<int>(direction)])) {
+    for (int i = 0; i < 2; i++) {
+      bool selected =
+          (direction == static_cast<DetailedPathGenerator::Direction>(i));
+
+      if (ImGui::Selectable(direction_names[i], selected)) {
+        direction = static_cast<DetailedPathGenerator::Direction>(i);
+      }
+      if (selected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
   }
 
   if (ImGui::Button("generate detail path")) {

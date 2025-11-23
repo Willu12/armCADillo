@@ -29,5 +29,5 @@ TorusDeserializer::deserializeEntity(const json &j, Scene & /*scene*/) const {
   }
 
   torus->getId() = id;
-  return std::move(torus);
+  return torus;
 }

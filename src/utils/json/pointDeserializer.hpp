@@ -24,7 +24,7 @@ public:
     }
     // auto p = std::make_unique<PointEntity>(std::move(point));
     point->setId(id);
-    return std::move(point);
+    return point;
   }
 
 private:
