@@ -88,7 +88,9 @@ DetailedPathGenerator::generateLineSegments(BezierSurface &surface) {
         }
       }
     }
-
+    if (segments.size() % 2 != 0) {
+      continue;
+    }
     lines.emplace_back(std::move(segments));
   }
 
