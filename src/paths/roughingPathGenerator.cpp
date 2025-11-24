@@ -59,7 +59,8 @@ RoughingPathGenerator::calculateRoughMillingPoints() const {
         /// cut
         auto safe_cut_height = std::max(
             min_height,
-            heightMap_->findMinimumSafeHeightForCut(global_index, *cutter_));
+            heightMap_->findMinimumSafeHeightForCut(global_index, *cutter_) +
+                radius);
 
         /// add point only if height changes
         if (current_z_points.empty() ||

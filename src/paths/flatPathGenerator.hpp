@@ -1,5 +1,6 @@
 #pragma once
 
+#include "color.hpp"
 #include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
@@ -49,5 +50,6 @@ private:
 
   /// helperFunction
   void paintBorderRed(const std::vector<uint32_t> &boundaryIndices) const;
-  void paintBorderRed(const std::vector<algebra::Vec3f> &contour) const;
+  void paintBorder(const std::vector<algebra::Vec3f> &contour,
+                   Color color) const;
 };

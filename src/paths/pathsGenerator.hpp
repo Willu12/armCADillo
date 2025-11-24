@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GCodeSerializer.hpp"
 #include "bezierSurface.hpp"
 #include "block.hpp"
 #include "detailedPathGenerator.hpp"
@@ -28,7 +27,6 @@ public:
 private:
   std::unique_ptr<Model> model_ = nullptr;
   HeightMapGenerator heightMapGenerator_;
-  GCodeSerializer gCodeSerializer_;
   Block block_ = Block::defaultBlock();
 
   std::unique_ptr<HeightMap> heightMap_ = nullptr;

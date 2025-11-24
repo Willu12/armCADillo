@@ -49,7 +49,6 @@ public:
 private:
   const Model *model_ = nullptr;
   Cutter cutter_;
-  const GCodeSerializer *gCodeSerializer_ = nullptr; // remove later
   Scene *scene_ = nullptr;
   std::vector<IntersectionCurve *> intersections_;
   IntersectionFinder *intersectionFinder_;

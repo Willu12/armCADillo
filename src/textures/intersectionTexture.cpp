@@ -24,7 +24,7 @@ IntersectionTexture::createIntersectionTextures(
   auto start_surface_0 = uvToCoord(intersection.points.front().surface0);
   auto start_surface_1 = uvToCoord(intersection.points.front().surface1);
   auto end_surface_0 = uvToCoord(intersection.points.back().surface0);
-  auto end_surface_1 = uvToCoord(intersection.points.back().surface0);
+  auto end_surface_1 = uvToCoord(intersection.points.back().surface1);
 
   Segment curve_0 = {.start = start_surface_0, .end = end_surface_0};
   Segment curve_1 = {.start = start_surface_1, .end = end_surface_1};
@@ -55,47 +55,43 @@ uint32_t IntersectionTexture::getTextureId() const {
 
 void IntersectionTexture::drawLine(
     const std::vector<algebra::Vec2f> &surfacePoints, Color color) {
-  const algebra::Vec2f u = bounds_[0];
-  const algebra::Vec2f v = bounds_[1];
 
+  const algebra::Vec2f u_bounds = bounds_[0];
+  const algebra::Vec2f v_bounds = bounds_[1];
+
+  // Helper: Convert UV to Pixel Coordinates
   auto toPixel = [&](const algebra::Vec2f &p) -> std::pair<int, int> {
-    float normX = (p[0] - u[0]) / (u[1] - u[0]);
-    float normY = (p[1] - v[0]) / (v[1] - v[0]);
-    normX = std::max(normX, 0.001f);
-    normY = std::max(normY, 0.001f);
-    int x = std::clamp(static_cast<int>(normX * kWidth), 0, kWidth - 1);
-    int y = std::clamp(static_cast<int>(normY * kHeight), 0, kHeight - 1);
+    float normX = (p[0] - u_bounds[0]) / (u_bounds[1] - u_bounds[0]);
+    float normY = (p[1] - v_bounds[0]) / (v_bounds[1] - v_bounds[0]);
+
+    // Safety clamp (0.0 to 1.0)
+    normX = std::clamp(normX, 0.0f, 1.0f);
+    normY = std::clamp(normY, 0.0f, 1.0f);
+
+    int x = std::clamp(static_cast<int>(normX * (kWidth - 1)), 0, kWidth - 1);
+    int y = std::clamp(static_cast<int>(normY * (kHeight - 1)), 0, kHeight - 1);
     return {x, y};
   };
 
-  auto drawPixel = [&](int x, int y) {
-    int ix = std::clamp(x, 0, kWidth - 1);
-    int iy = std::clamp(y, 0, kHeight - 1);
-    int index = iy * kWidth + ix;
-    canvas_.fillAtIndex(index, color);
-  };
-
-  for (size_t i = 1; i < surfacePoints.size(); ++i) {
-    auto [x0, y0] = toPixel(surfacePoints[i - 1]);
-    auto [x1, y1] = toPixel(surfacePoints[i]);
-
+  // Helper: Actual Bresenham Algorithm (extracted to reuse)
+  auto drawBresenham = [&](int x0, int y0, int x1, int y1) {
     int dx = std::abs(x1 - x0);
     int dy = std::abs(y1 - y0);
     int sx = x0 < x1 ? 1 : -1;
     int sy = y0 < y1 ? 1 : -1;
     int err = dx - dy;
 
-    if (std::max(dx, dy) > 100 && surfacePoints.size() > 2) {
-      continue;
-    }
-
     int x = x0;
     int y = y0;
     while (true) {
-      drawPixel(x, y);
-      if (x == x1 && y == y1) {
-        break;
+      // Draw pixel (bounds check built into fillAtIndex usually, but good to be
+      // safe)
+      if (x >= 0 && x < kWidth && y >= 0 && y < kHeight) {
+        canvas_.fillAtIndex(y * kWidth + x, color);
       }
+
+      if (x == x1 && y == y1)
+        break;
 
       int e2 = 2 * err;
       if (e2 > -dy) {
@@ -106,6 +102,77 @@ void IntersectionTexture::drawLine(
         err += dx;
         y += sy;
       }
+    }
+  };
+
+  for (size_t i = 1; i < surfacePoints.size(); ++i) {
+    const auto &p0 = surfacePoints[i - 1];
+    const auto &p1 = surfacePoints[i];
+
+    // Check Normalized UV distance to detect wrapping
+    // Normalize U to 0..1 range for the check
+    float u0_norm = (p0[0] - u_bounds[0]) / (u_bounds[1] - u_bounds[0]);
+    float u1_norm = (p1[0] - u_bounds[0]) / (u_bounds[1] - u_bounds[0]);
+
+    float u_diff = u1_norm - u0_norm;
+
+    // THRESHOLD: If points are more than 50% of the texture width apart,
+    // we assume they wrapped around the back.
+    if (std::abs(u_diff) > 0.5f) {
+
+      // --- WRAP DETECTED ---
+
+      // Calculate the V height where the line hits the seam.
+      // Total "logical" distance in U (accounting for wrap)
+      // If wrapping Right (0.9 -> 0.1): dist = (1-0.9) + (0.1-0) = 0.2
+      float logical_u_dist = (1.0f - std::abs(u_diff));
+
+      // Slope of the line in V per unit of logical U
+      float v_diff = p1[1] - p0[1];
+      float slope = v_diff / logical_u_dist; // Check div/0 if needed
+
+      // Calculate V at the boundary
+      // Distance from P0 to its closest edge
+      float dist_to_edge = (u_diff > 0) ? u0_norm : (1.0f - u0_norm);
+
+      // Calculate intersection point Y value
+      // Note: We need to normalize this delta math based on bounds if bounds
+      // aren't 0-1 But assuming v_diff is in world space, this works:
+      float boundary_v =
+          p0[1] +
+          (slope * dist_to_edge *
+           (1.0f / (u_bounds[1] - u_bounds[0]))); // Scaling slope if needed
+
+      // Simplified V-interp (Linear interpolation is usually fine for dense
+      // points)
+      float mid_v = (p0[1] + p1[1]) * 0.5f;
+
+      // 1. Draw from P0 to Edge
+      auto px0 = toPixel(p0);
+      // If u_diff > 0 (0.1 -> 0.9), p0 is Left(0.1), closest edge is Left(0.0)
+      // If u_diff < 0 (0.9 -> 0.1), p0 is Right(0.9), closest edge is
+      // Right(1.0)
+
+      int edge_x_1 = (u_diff < 0) ? (kWidth - 1) : 0;
+      int edge_x_2 = (u_diff < 0) ? 0 : (kWidth - 1);
+
+      auto edge_px_1 =
+          toPixel({(u_diff < 0 ? u_bounds[1] : u_bounds[0]), mid_v});
+      auto edge_px_2 =
+          toPixel({(u_diff < 0 ? u_bounds[0] : u_bounds[1]), mid_v});
+
+      // Draw First Segment (Start -> Edge)
+      drawBresenham(px0.first, px0.second, edge_x_1, edge_px_1.second);
+
+      // Draw Second Segment (Opposite Edge -> End)
+      auto px1 = toPixel(p1);
+      drawBresenham(edge_x_2, edge_px_2.second, px1.first, px1.second);
+
+    } else {
+      // --- NORMAL CASE (No Wrapping) ---
+      auto [x0, y0] = toPixel(p0);
+      auto [x1, y1] = toPixel(p1);
+      drawBresenham(x0, y0, x1, y1);
     }
   }
 }
@@ -125,6 +192,10 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
     auto color = canvas_.colorAtIndex(y * kWidth + x);
     return color == Color::Green();
   };
+
+  if (isGreen(x, y)) {
+    return;
+  }
 
   std::queue<std::pair<uint32_t, uint32_t>> q;
   q.emplace(x, y);
@@ -147,19 +218,20 @@ void IntersectionTexture::floodFill(uint32_t x, uint32_t y, bool transparent) {
       int nx = x + dx[d];
       int ny = y + dy[d];
 
-      if (wrapU_) {
-        if (nx < 0)
-          nx += kWidth;
-        if (nx >= static_cast<int>(kWidth))
-          nx -= kWidth;
-      }
-      if (wrapV_) {
-        if (ny < 0)
-          ny += kHeight;
-        if (ny >= static_cast<int>(kHeight))
-          ny -= kHeight;
-      }
-
+      /*
+          if (wrapU_) {
+            if (nx < 0)
+              nx += kWidth;
+            if (nx >= static_cast<int>(kWidth))
+              nx -= kWidth;
+          }
+          if (wrapV_) {
+            if (ny < 0)
+              ny += kHeight;
+            if (ny >= static_cast<int>(kHeight))
+              ny -= kHeight;
+          }
+    */
       if (nx < 0 || nx >= static_cast<int>(kWidth) || ny < 0 ||
           ny >= static_cast<int>(kHeight)) {
         continue;

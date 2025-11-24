@@ -1,4 +1,5 @@
 #include "flatPathGenerator.hpp"
+#include "color.hpp"
 #include "cutter.hpp"
 #include "heightMap.hpp"
 #include "millingPath.hpp"
@@ -28,7 +29,9 @@ MillingPath FlatPathGenerator::generate() {
 
   auto boundary_indices = findBoundaryIndices();
   contourPoints_ = findCutterPositionsFromBoundary(boundary_indices);
+  paintBorder(contourPoints_, Color::Green());
   removeSelfIntersections();
+  paintBorder(contourPoints_, Color::Red());
   contourPoints_ =
       algebra::RDP::reducePoints(contourPoints_, kEpsilon, algebra::Plane::XZ);
   auto segments = generateSegments();
@@ -205,15 +208,16 @@ void FlatPathGenerator::paintBorderRed(
   heightMap_->texture_->fill(heightMap_->textureData_);
 }
 
-void FlatPathGenerator::paintBorderRed(
-    const std::vector<algebra::Vec3f> &contour) const {
+void FlatPathGenerator::paintBorder(const std::vector<algebra::Vec3f> &contour,
+                                    Color color) const {
 
   for (const auto &point : contour) {
     auto index = heightMap_->posToIndex(point);
 
-    heightMap_->textureData_[4 * index] = 255;
-    heightMap_->textureData_[4 * index + 1] = 0;
-    heightMap_->textureData_[4 * index + 2] = 0;
+    heightMap_->textureData_[4 * index] = color.r;
+    heightMap_->textureData_[4 * index + 1] = color.g;
+    heightMap_->textureData_[4 * index + 2] = color.b;
+    heightMap_->textureData_[4 * index + 3] = color.a;
   }
   /// last to blue
   auto index = heightMap_->posToIndex(contour.back());
@@ -414,16 +418,13 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
         end_contour_index = best_segment->startContourIndex_;
       }
 
-      if (start_contour_index > end_contour_index) {
-        std::swap(start_contour_index, end_contour_index);
-      }
-
       if (start_contour_index != kMaxIndex && end_contour_index != kMaxIndex) {
         /// ensure proper order
+        uint32_t current_index = start_contour_index;
+        while (current_index != end_contour_index) {
 
-        for (uint32_t contour_index = start_contour_index;
-             contour_index < end_contour_index; ++contour_index) {
-          path.emplace_back(contourPoints_[contour_index]);
+          path.emplace_back(contourPoints_[current_index]);
+          current_index = (current_index + 1) % contourPoints_.size();
         }
 
       } else if (start_contour_index != kMaxIndex &&

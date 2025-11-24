@@ -1,7 +1,5 @@
 #include "detailedPathGenerator.hpp"
 #include "bezierSurface.hpp"
-#include "entitiesTypes.hpp"
-#include "intersectionCurve.hpp"
 #include "intersectionTexture.hpp"
 #include "millingPath.hpp"
 #include "normalOffsetSurface.hpp"
@@ -11,29 +9,26 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
-#include <memory>
 #include <stdexcept>
 #include <sys/types.h>
 #include <vector>
 
 static constexpr float kFloorHeight = 0.f;
 static constexpr float kFloorHeightPath = 1.5f;
-static constexpr uint32_t kMaxIndex = std::numeric_limits<uint32_t>::max();
 
 void DetailedPathGenerator::generate() {
   /// This section assumes that every model surface has proper intersection
   /// texture and all sections that should be trimmed are set.
 
   for (auto *surface : model_->surfaces()) {
-    //// set floor
     setFloorAsTrimmed(*surface);
+
     auto segments = generateLineSegments(*surface);
-    //  colorSegments(*surface, segments);
     auto surface_paths = generateSurfacePaths(*surface, segments);
     auto path = combineSurfacePaths(surface_paths);
 
     auto milling_path = MillingPath{path, cutter_};
-    gCodeSerializer_->serializePath(milling_path, surface->getName() + ".k08");
+    GCodeSerializer::serializePath(milling_path, surface->getName() + ".k08");
   }
 }
 
