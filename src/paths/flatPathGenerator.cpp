@@ -419,14 +419,27 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
       }
 
       if (start_contour_index != kMaxIndex && end_contour_index != kMaxIndex) {
-        /// ensure proper order
         uint32_t current_index = start_contour_index;
-        while (current_index != end_contour_index) {
+        auto contour_size = contourPoints_.size();
 
-          path.emplace_back(contourPoints_[current_index]);
-          current_index = (current_index + 1) % contourPoints_.size();
+        size_t forward_dist =
+            (end_contour_index >= start_contour_index)
+                ? (end_contour_index - start_contour_index)
+                : (end_contour_index + contour_size - start_contour_index);
+        size_t backward_dist = contour_size - forward_dist;
+
+        if (forward_dist <= backward_dist) {
+          while (current_index != end_contour_index) {
+            path.emplace_back(contourPoints_[current_index]);
+            current_index = (current_index + 1) % contour_size;
+          }
+        } else {
+          while (current_index != end_contour_index) {
+            path.emplace_back(contourPoints_[current_index]);
+            current_index =
+                (current_index == 0) ? contour_size - 1 : current_index - 1;
+          }
         }
-
       } else if (start_contour_index != kMaxIndex &&
                  end_contour_index == kMaxIndex) {
         auto closest_contour_it = std::ranges::min_element(
@@ -436,15 +449,29 @@ std::vector<std::vector<algebra::Vec3f>> FlatPathGenerator::generatePaths(
               algebra::Vec2f pb{b.x(), b.z()};
               return (first_point - pa).length() < (first_point - pb).length();
             });
-        int closest_contour_index = static_cast<int>(
+        end_contour_index = static_cast<int>(
             std::distance(contourPoints_.begin(), closest_contour_it));
 
         /// go alongisde contour until you can safely exit
-        auto contour_index = start_contour_index;
+        auto contour_size = contourPoints_.size();
+        auto current_index = start_contour_index;
+        size_t forward_dist =
+            (end_contour_index >= start_contour_index)
+                ? (end_contour_index - start_contour_index)
+                : (end_contour_index + contour_size - start_contour_index);
+        size_t backward_dist = contour_size - forward_dist;
 
-        while (contour_index != closest_contour_index) {
-          path.emplace_back(contourPoints_[contour_index]);
-          contour_index = (contour_index + 1) % contourPoints_.size();
+        if (forward_dist <= backward_dist) {
+          while (current_index != end_contour_index) {
+            path.emplace_back(contourPoints_[current_index]);
+            current_index = (current_index + 1) % contour_size;
+          }
+        } else {
+          while (current_index != end_contour_index) {
+            path.emplace_back(contourPoints_[current_index]);
+            current_index =
+                (current_index == 0) ? contour_size - 1 : current_index - 1;
+          }
         }
       }
 
@@ -516,6 +543,8 @@ MillingPath FlatPathGenerator::combineLocalPaths(
     const std::vector<std::vector<algebra::Vec3f>> &localPaths) const {
   std::vector<algebra::Vec3f> global_path;
 
+  const auto &contour_path = generateContourPath();
+
   for (const auto &path : localPaths) {
     auto first_point = path.front();
     auto last_point = path.back();
@@ -525,5 +554,13 @@ MillingPath FlatPathGenerator::combineLocalPaths(
     global_path.emplace_back(last_point.x(), kSafeHeight, last_point.z());
   }
 
+  global_path.insert(global_path.end(), contour_path.begin(),
+                     contour_path.end());
+
   return MillingPath(global_path, *cutter_);
+}
+
+const std::vector<algebra::Vec3f> &
+FlatPathGenerator::generateContourPath() const {
+  return contourPoints_;
 }

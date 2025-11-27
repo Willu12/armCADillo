@@ -45,6 +45,8 @@ private:
   std::vector<std::vector<algebra::Vec3f>> generatePaths(
       std::vector<std::list<FlatPathGenerator::Segment>> &segments) const;
 
+  const std::vector<algebra::Vec3f> &generateContourPath() const;
+
   MillingPath combineLocalPaths(
       const std::vector<std::vector<algebra::Vec3f>> &localPaths) const;
 
