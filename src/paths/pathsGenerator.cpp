@@ -17,21 +17,22 @@ void PathsGenerator::setScene(Scene *scene) {
 }
 
 void PathsGenerator::run() {
+
   heightMap_ = std::make_unique<HeightMap>(
       heightMapGenerator_.generateHeightMap(*model_, block_));
   heightMap_->updateTexture();
-
-  // ------ Roughing Path ---------------------------
-  Cutter roughing_cutter{
-      .type_ = Cutter::Type::Ball,
-      .diameter_ = 1.6f,
-      .height_ = 2.f * 1.6f,
-  };
-  roughingPathGenerator_.setHeightMap(heightMap_.get());
-  roughingPathGenerator_.setCutter(&roughing_cutter);
-  auto roughing_path = roughingPathGenerator_.generate();
-  GCodeSerializer::serializePath(roughing_path, "1.k16");
-
+  /*
+      // ------ Roughing Path ---------------------------
+      Cutter roughing_cutter{
+          .type_ = Cutter::Type::Ball,
+          .diameter_ = 1.6f,
+          .height_ = 2.f * 1.6f,
+      };
+      roughingPathGenerator_.setHeightMap(heightMap_.get());
+      roughingPathGenerator_.setCutter(&roughing_cutter);
+      auto roughing_path = roughingPathGenerator_.generate();
+      GCodeSerializer::serializePath(roughing_path, "1.k16");
+      */
   // ------ Flat Path ---------------------------
   /*
   Cutter flat_cutter{
@@ -53,5 +54,6 @@ void PathsGenerator::run() {
   };
   detailedPathGenerator_.setModel(model_.get());
   detailedPathGenerator_.setCutter(detailed_cutter);
+  detailedPathGenerator_.setHeightMap(heightMap_.get());
   // detailedPathGenerator_.generate();
 }

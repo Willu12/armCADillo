@@ -62,5 +62,7 @@ private:
   std::pair<uint32_t, uint32_t>
   indexFromGlobalIndex(uint32_t globalIndex) const;
   uint32_t posToIndex(const algebra::Vec3f &position) const;
+  float findMinimumSafeHeightForCut(algebra::Vec3f point,
+                                    const Cutter &cutter) const;
   void updateTexture();
 };

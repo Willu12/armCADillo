@@ -50,6 +50,49 @@ float HeightMap::findMinimumSafeHeightForCut(uint32_t index,
   return max_height;
 }
 
+float HeightMap::findMinimumSafeHeightForCut(algebra::Vec3f point,
+                                             const Cutter &cutter) const {
+  if (cutter.type_ == Cutter::Type::Flat) {
+    throw std::runtime_error("Cutter for roughing should never be flat!");
+  }
+
+  auto center_position = point;
+  auto index = posToIndex(point);
+  auto x_index = index % divisions_.x_;
+  auto z_index = index / divisions_.x_;
+
+  auto cutter_radius_px = static_cast<int32_t>(
+      (cutter.diameter_ / 2.f) * static_cast<float>(pixelCmRatio().first));
+
+  auto max_height = std::numeric_limits<float>::lowest();
+
+  float r_squared = cutter.diameter_ * cutter.diameter_ / 4.f;
+  ///  create bounding box
+  for (int32_t x_cut = -cutter_radius_px; x_cut < cutter_radius_px; ++x_cut) {
+    for (int32_t z_cut = -cutter_radius_px; z_cut < cutter_radius_px; ++z_cut) {
+      if (x_index + x_cut < 0 || z_cut + z_index < 0 ||
+          x_index + x_cut >= divisions_.x_ ||
+          z_index + z_cut >= divisions_.z_) {
+        continue;
+      }
+
+      auto position = indexToPos(globalIndex(x_index + x_cut, z_index + z_cut));
+      float x_diff_sq = std::pow(position.x() - center_position.x(), 2.f);
+      float z_diff_sq = std::pow(position.z() - center_position.z(), 2.f);
+
+      /// check if its inside the circle
+      if (x_diff_sq + z_diff_sq > r_squared) {
+        continue;
+      }
+
+      float cut_height = position.y() - cutter.diameter_ / 2.f +
+                         std::sqrt(r_squared - x_diff_sq - z_diff_sq);
+      max_height = std::max(cut_height, max_height);
+    }
+  }
+  return max_height;
+}
+
 std::pair<uint32_t, uint32_t> HeightMap::pixelCmRatio() const {
   auto x_ratio = static_cast<float>(divisions_.x_) / block_->dimensions_.x_;
   auto z_ratio = static_cast<float>(divisions_.z_) / block_->dimensions_.z_;
@@ -77,7 +120,7 @@ algebra::Vec3f HeightMap::indexToPos(uint32_t index) const {
 
   const auto x = world_position(block_->dimensions_.x_, x_index, divisions_.x_);
   const auto z = world_position(block_->dimensions_.z_, z_index, divisions_.z_);
-  const auto y = data_[index];
+  const auto y = data_[index] + 1.5f;
 
   return algebra::Vec3f(x, y, z);
 }

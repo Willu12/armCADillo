@@ -660,6 +660,21 @@ void GUI::renderPathGeneratorUI() {
     detailed_path_generator.generate();
   }
 
+  if (ImGui::Button("intersection path")) {
+    const auto &selected_entities = getSelectedEntities();
+    std::vector<IntersectionCurve *> selected_intersections;
+    for (auto *entity : selected_entities) {
+      if (auto *intersection_curve =
+              dynamic_cast<IntersectionCurve *>(entity)) {
+        selected_intersections.push_back(intersection_curve);
+      }
+    }
+
+    for (const auto *inter_curve : selected_intersections) {
+      detailed_path_generator.generatePathForIntersectionCurve(*inter_curve);
+    }
+  }
+
   ImGui::End();
 }
 

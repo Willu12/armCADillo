@@ -72,8 +72,8 @@ public:
                 Color color = Color::Green());
 
 private:
-  static int constexpr kWidth = 800;
-  static int constexpr kHeight = 800;
+  static int constexpr kWidth = 1500;
+  static int constexpr kHeight = 1500;
   bool wrapU_ = false;
   bool wrapV_ = false;
   std::unique_ptr<Texture> texture_;

@@ -6,9 +6,11 @@ void NamedPath::createMesh() {
   std::vector<uint32_t> indices;
 
   for (const auto &[i, p] : points_ | std::views::enumerate) {
-    p.y() = p.y();
     for (int j = 0; j < 3; ++j) {
       vertices[i * 3 + j] = p[j];
+      if (j == 1) {
+        vertices[i * 3 + j] -= 1.5f;
+      }
     }
   }
 

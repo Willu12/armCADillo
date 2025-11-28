@@ -188,10 +188,10 @@ bool GuiVisitor::visitIntersectionCurve(IntersectionCurve &intersectionCurve) {
                                   bool show_texture,
                                   IntersectionTexture &texture) {
     if (show_texture) {
-      ImGui::SetNextWindowSize(ImVec2(800, 800), ImGuiCond_Always);
+      ImGui::SetNextWindowSize(ImVec2(1500, 1500), ImGuiCond_Always);
       ImGui::Begin(window_name.c_str(), nullptr, ImGuiWindowFlags_NoResize);
 
-      ImVec2 image_size(800, 800);
+      ImVec2 image_size(1500, 1500);
       ImVec2 image_pos = ImGui::GetCursorScreenPos();
       ImGui::Image(static_cast<ImTextureID>(
                        static_cast<intptr_t>(texture.getTextureId())),
@@ -413,10 +413,10 @@ void GuiVisitor::renderTextureWindow(const std::string &windowName,
                                      bool showTexture,
                                      IntersectionTexture &texture) {
   if (showTexture) {
-    ImGui::SetNextWindowSize(ImVec2(800, 800), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(1500, 1500), ImGuiCond_Always);
     ImGui::Begin(windowName.c_str(), nullptr, ImGuiWindowFlags_NoResize);
 
-    ImVec2 image_size(800, 800);
+    ImVec2 image_size(1500, 1500);
     ImVec2 image_pos = ImGui::GetCursorScreenPos();
     ImGui::Image(
         static_cast<ImTextureID>(static_cast<intptr_t>(texture.getTextureId())),
