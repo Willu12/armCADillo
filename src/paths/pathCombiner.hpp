@@ -4,6 +4,7 @@
 #include "millingPath.hpp"
 #include "namedPath.hpp"
 #include "vec.hpp"
+#include <cstdint>
 #include <filesystem>
 
 class PathCombiner {
@@ -12,11 +13,16 @@ public:
   void addPoint(const algebra::Vec3f &point);
 
   MillingPath createCombinedPath(const std::vector<uint32_t> &pathIndices);
+  void saveSelectedPath(uint32_t index) const;
+  void combinePaths(const std::vector<uint32_t> &pathIndices,
+                    const std::string &name);
   void removePath(uint32_t pathIndex);
 
   const std::vector<std::unique_ptr<NamedPath>> &millingPaths() const {
     return millingPaths_;
   }
+
+  void renamePath(uint32_t index, const std::string &name);
 
 private:
   std::vector<std::unique_ptr<NamedPath>> millingPaths_;

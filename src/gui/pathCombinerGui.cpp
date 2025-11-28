@@ -50,7 +50,7 @@ void PathCombinerGUI::showPathList() {
 
 void PathCombinerGUI::createCombinedPaths() {
   if (ImGui::Button("Create combined path")) {
-    pathCombiner_.createCombinedPath(selectedPaths_);
+    pathCombiner_.combinePaths(selectedPaths_, name_);
   }
 }
 
@@ -100,4 +100,17 @@ void PathCombinerGUI::removeSelectedPaths() {
     }
     selectedPaths_.clear();
   }
+}
+
+void PathCombinerGUI::saveSelectedPath() {
+  for (const auto &index : selectedPaths_) {
+    pathCombiner_.saveSelectedPath(index);
+  }
+  selectedPaths_.clear();
+}
+void PathCombinerGUI::renamePath() {
+  for (const auto &index : selectedPaths_) {
+    pathCombiner_.renamePath(index, name_);
+  }
+  selectedPaths_.clear();
 }

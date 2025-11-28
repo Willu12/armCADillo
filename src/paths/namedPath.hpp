@@ -14,6 +14,7 @@ public:
 
   const Mesh &mesh() const { return *mesh_; }
   const std::string &name() const { return name_; }
+  std::string &name() { return name_; }
 
   const std::vector<algebra::Vec3f> &points() const { return points_; }
   std::vector<algebra::Vec3f> &points() { return points_; }

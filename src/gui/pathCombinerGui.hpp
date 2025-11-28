@@ -14,10 +14,13 @@ public:
 private:
   PathCombiner pathCombiner_;
   std::vector<uint32_t> selectedPaths_;
+  std::string name_;
   bool showSelectedPaths_ = false;
   void showPathList();
   void createCombinedPaths();
   void removeSelectedPaths();
+  void saveSelectedPath();
+  void renamePath();
   // void loadPaths(std::vector<)
 
   void addPoint(const algebra::Vec3f &position);
