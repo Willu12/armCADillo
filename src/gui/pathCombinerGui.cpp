@@ -1,6 +1,7 @@
 #include "pathCombinerGui.hpp"
 #include "cursor.hpp"
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "namedPath.hpp"
 #include "nfd.hpp"
 #include "vec.hpp"
@@ -14,6 +15,10 @@ void PathCombinerGUI::displayGUI(Cursor *cursor) {
   loadPathsGUI();
   createCombinedPaths();
   removeSelectedPaths();
+  renamePath();
+  saveSelectedPath();
+  reduceSelectedPaths();
+  showNameBox();
   ImGui::End();
 };
 
@@ -103,14 +108,29 @@ void PathCombinerGUI::removeSelectedPaths() {
 }
 
 void PathCombinerGUI::saveSelectedPath() {
-  for (const auto &index : selectedPaths_) {
-    pathCombiner_.saveSelectedPath(index);
+  if (ImGui::Button("Save path")) {
+
+    for (const auto &index : selectedPaths_) {
+      pathCombiner_.saveSelectedPath(index);
+    }
+    selectedPaths_.clear();
   }
-  selectedPaths_.clear();
 }
 void PathCombinerGUI::renamePath() {
-  for (const auto &index : selectedPaths_) {
-    pathCombiner_.renamePath(index, name_);
+  if (ImGui::Button("Rename path")) {
+    for (const auto &index : selectedPaths_) {
+      pathCombiner_.renamePath(index, name_);
+    }
+    selectedPaths_.clear();
   }
-  selectedPaths_.clear();
 }
+void PathCombinerGUI::reduceSelectedPaths() {
+  if (ImGui::Button("Reduce path")) {
+    for (const auto &index : selectedPaths_) {
+      pathCombiner_.reducePath(index);
+    }
+    selectedPaths_.clear();
+  }
+}
+
+void PathCombinerGUI::showNameBox() { ImGui::InputText("Name: ", &name_); }

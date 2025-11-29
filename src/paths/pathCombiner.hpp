@@ -24,6 +24,8 @@ public:
 
   void renamePath(uint32_t index, const std::string &name);
 
+  void reducePath(uint32_t index);
+
 private:
   std::vector<std::unique_ptr<NamedPath>> millingPaths_;
 };

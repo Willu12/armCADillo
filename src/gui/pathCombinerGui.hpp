@@ -21,6 +21,8 @@ private:
   void removeSelectedPaths();
   void saveSelectedPath();
   void renamePath();
+  void reduceSelectedPaths();
+  void showNameBox();
   // void loadPaths(std::vector<)
 
   void addPoint(const algebra::Vec3f &position);

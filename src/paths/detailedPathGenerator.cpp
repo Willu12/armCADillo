@@ -215,6 +215,15 @@ DetailedPathGenerator::generateSurfacePaths(
       if (reverse) {
         std::swap(start, end);
       }
+
+      auto last_end = path.back();
+      auto next_point =
+          offset_surface.value(intersection_texture.uv(start.x, start.y));
+      next_point.y() += 1.5f - cutter_.radius();
+      if ((last_end - next_point).length() > 0.5f) {
+        break;
+      }
+
       /// TODO:
       /// Maybe go along the intersection curve till x/y are proper.
       {
@@ -298,7 +307,7 @@ DetailedPathGenerator::generateLinePoints(const BezierSurface &surface,
 
   algebra::Plane plane =
       start.x == end.x ? algebra::Plane::YZ : algebra::Plane::XZ;
-  return algebra::RDP::reducePoints(points, 10e-5, plane);
+  return points; // algebra::RDP::reducePoints(points, 10e-5, plane);
 }
 
 std::vector<algebra::Vec3f> DetailedPathGenerator::combineSurfacePaths(
@@ -339,7 +348,7 @@ void DetailedPathGenerator::generatePathForIntersectionCurve(
   }
 
   std::ranges::sort(milling_points,
-                    [](const auto &a, const auto &b) { return a.x() > b.x(); });
+                    [](const auto &a, const auto &b) { return a.z() > b.z(); });
 
   auto milling_path = MillingPath{milling_points, cutter_};
   GCodeSerializer::serializePath(milling_path,
@@ -516,8 +525,11 @@ void DetailedPathGenerator::fixIntersectionLine(
     auto index = heightMap_->posToIndex(point);
     auto normal = heightMap_->normalAtIndex(index);
     auto safe_height = heightMap_->findMinimumSafeHeightForCut(point, cutter_);
-    const float kGougeTolerance = 0.01f;
+    const float kGougeTolerance = 0.05f;
 
+    if (std::isnan(safe_height)) {
+      return;
+    }
     if (point.y() >= safe_height - 1.5f - kGougeTolerance) {
       return;
     }
