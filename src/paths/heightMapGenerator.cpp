@@ -8,7 +8,7 @@
 #include <sstream>
 
 static constexpr float kBaseHeight = 1.5f;
-static constexpr uint32_t kDivisions = 12000;
+static constexpr uint32_t kDivisions = 4000;
 static constexpr uint32_t kBaseDivisions = 1500;
 
 HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
@@ -17,12 +17,12 @@ HeightMap HeightMapGenerator::generateHeightMap(const Model &model,
                        kBaseHeight, &block);
 
   for (const auto *surface : model.surfaces()) {
-    //   processSurface(*surface, height_map);
+    processSurface(*surface, height_map);
   }
 
-  // height_map.saveToFile();
-  generateFromFiles("../../resources/maps/height_map.txt",
-                    "../../resources/maps/normal_map.txt", height_map);
+  height_map.saveToFile();
+  // generateFromFiles("../../resources/maps/height_map.txt",
+  //                   "../../resources/maps/normal_map.txt", height_map);
   return height_map;
 }
 
@@ -39,22 +39,15 @@ void HeightMapGenerator::processSurface(const BezierSurface &surface,
 
       auto surface_point = surface.value({u, v});
 
-      if (surface_point.y() < 0.f) {
-        continue;
-      }
+      //  if (surface_point.y() < 0.f) {
+      //    continue;
+      //  }
 
       auto height_map_index = heightMap.posToIndex(surface_point);
       if (surface_point.y() + kBaseHeight > heightMap.at(height_map_index)) {
-        heightMap.at(height_map_index) = surface_point.y() + kBaseHeight;
-
-        // here we may need to change normal orientation
-        if (const auto *surfaceC0 =
-                dynamic_cast<const BezierSurfaceC0 *>(&surface)) {
-          heightMap.normalAtIndex(height_map_index) =
-              1.f * surface.normal({u, v});
-        } else {
-          heightMap.normalAtIndex(height_map_index) = surface.normal({u, v});
-        }
+        heightMap.at(height_map_index) =
+            std::max(kBaseHeight, surface_point.y() + kBaseHeight);
+        heightMap.normalAtIndex(height_map_index) = surface.normal({u, v});
       }
     }
   }

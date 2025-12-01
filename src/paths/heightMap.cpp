@@ -120,7 +120,7 @@ algebra::Vec3f HeightMap::indexToPos(uint32_t index) const {
 
   const auto x = world_position(block_->dimensions_.x_, x_index, divisions_.x_);
   const auto z = world_position(block_->dimensions_.z_, z_index, divisions_.z_);
-  const auto y = data_[index] + 1.5f;
+  const auto y = data_[index]; // + 1.5f;
 
   return algebra::Vec3f(x, y, z);
 }
